@@ -1,0 +1,6 @@
+Func ( GetInput )
+Escape @memory["input"] = STDIN.get.chomp
+End
+Func ( Print )
+Escape puts @memory[@memory["ARG1"][0]][0]
+End
