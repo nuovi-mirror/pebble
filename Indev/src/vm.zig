@@ -5,6 +5,7 @@ const build = @import("build_options");
 const tests = @import("tests");
 const docs = @import("docs");
 const mem = @import("allocator");
+const limits = @import("limits");
 const print = std.debug.print;
 const exit = std.process.exit;
 
@@ -51,7 +52,6 @@ pub fn main() !void { // the VM
     _ = args.next(); // skip arg0, program name
     first_arg = args.next();
     second_arg = args.next();
-
 
     if (first_arg) |arg| { // handle version thing
         if (std.mem.eql(u8, arg, "version")) {
@@ -199,6 +199,14 @@ fn tokenize(line: []const u8) ![][]const u8 {
 
 fn interpret(list: [][]const u8) !void {
     const allocator = mem.alloc();
+    
+    if (limits.inst_curr > limits.inst_max) {
+        print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
+        exit(1);
+    }
+
+    limits.inst_curr += 1;
+
     if (recording) {
         if (std.mem.eql(u8, list[0], "End")) {
             try state.code.append(allocator, try copyInstruction(list));
@@ -211,6 +219,13 @@ fn interpret(list: [][]const u8) !void {
     }
 
     if (std.mem.eql(u8, list[0], "New")) { // New
+        if (limits.inst_new_curr > limits.inst_new_max) {
+            print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
+            exit(1);
+        }
+
+        limits.inst_new_curr += 1;
+
         const newData = try evaluate(list[2]); // do math
         var newList = try allocator.alloc([]const u8, list.len);
         @memcpy(newList, list);
@@ -235,27 +250,64 @@ fn interpret(list: [][]const u8) !void {
     }
 
     if (std.mem.eql(u8, list[0], "Escape")) { // Escape
+        if (limits.inst_escape_curr > limits.inst_escape_max) {
+            print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
+            exit(1);
+        }
+
+        limits.inst_escape_curr += 1;
+
         const escape = escapes.escapesTable.get(list[1]) orelse return error.UnknownEscape;
         try escape();
     }
 
     if (std.mem.eql(u8, list[0], "Func")) { // Start recording functions
+        if (limits.inst_func_curr > limits.inst_func_max) {
+            print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
+            exit(1);
+        }
+
+        limits.inst_func_curr += 1;
+
+
         recording = true;
         try state.code.append(allocator, try copyInstruction(list));
         try state.codeTable.put(list[1], state.code.items.len);        
     }
 
     if (std.mem.eql(u8, list[0], "Call")) { // Call a recorded function
+        if (limits.inst_call_curr > limits.inst_call_max) {
+            print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
+            exit(1);
+        }
+
+        limits.inst_call_curr += 1;
+
         try callFunc(list);
     }
     
     if (std.mem.eql(u8, list[0], "If")) { // Start doing Ifs (If funcToExec "condition")
+        if (limits.inst_func_curr > limits.inst_func_max) {
+            print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
+            exit(1);
+        }
+
+        limits.inst_func_curr += 1;
+
         if (std.mem.eql(u8, try evaluate(list[2]), "0")) {
             try callFunc(list);
         }
     }
 
     if (std.mem.eql(u8, list[0], "Return")) { // thing to exit from Func
+        if (limits.inst_return_curr > limits.inst_return_max) {
+            print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
+            exit(1);
+        }
+
+        limits.inst_return_curr += 1;
+
+
         return error.Return;
     }
 } 

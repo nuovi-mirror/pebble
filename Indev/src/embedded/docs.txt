@@ -1,17 +1,17 @@
 Pebble Lang/VM Documentation
-Alpha Version 3 InDev, ZIg 0.15.2
+Alpha Version 3 InDev, Zig 0.15.2
 
 Pebble is an ultralight virtual machine and programming language
 with the goal of being small, lightweight, and easy to embed into 
 a larger project where larger scripting languages, such as Lua, are
-too large, but where saftey is still needed.
+too large, but where safety is still needed.
 
 Pebble is designed to be simple at the VM / interpreter layer. Due
-to this, it has no types or compiler, is written entirly in Zig and its own language, 
+to this, it has no types or compiler, is written entirely in Zig and its own language, 
 and compiles down to one single binary that includes embedded documentation, a 
 test suite, virtual machine, interpreter, version information, and standard
-libary in less than 100kb compiled. It's only dependencies are a Zig compiler
-and Zig standard libary at compile-time and a POSIX libc and dynamic loader
+library in less than 100kb compiled. It's only dependencies are a Zig compiler
+and Zig standard library at compile-time and a POSIX libc and dynamic loader
 at runtime (tested on OpenBSD 7.9 AMD64).
 
 
@@ -30,7 +30,7 @@ This should output a single binary at the root of the source dir named vm.
 
 
 The VM is keyword-based, meaning there are a few small keywords used to
-perform functions. These functions are constiored to be the bare minimum 
+perform functions. These functions are conspired to be the bare minimum 
 needed to have a working language. The rest of functions are provided by a
 Zig standard library.
 
@@ -42,32 +42,36 @@ End - stop recording a function
 If - execute a function if the condition is true
 Return - return from a function early
 Call - call a recorded function
-Escape - call a libary function
+Escape - call a library function
 
 Syntax for these keywords includes
 
-New (varname) (payload) - Assiagn a variable of the name varname with the
-	data payload of payload. This keyword allows for the full suite of expressions.
+	New (varname) (payload) - Assign a variable of the name varname with the
+		data payload of payload. This keyword allows for the full suite of expressions.
 
-Func (funcname) - Begins recording instructions into the code tables until the
-	End keyword is called to allow the function to be executed using the Call
-	keyword at any point after it is defined.
+	Func (funcname) - Begins recording instructions into the code tables until the
+		End keyword is called to allow the function to be executed using the Call
+		keyword at any point after it is defined.
 
-End - Ends recording of a function, allowing it to be called by the Call keyword.
+	End - Ends recording of a function, allowing it to be called by the Call keyword.
 
-If (funcname) (condition) - Executes function funcname only if the result of
-	condition is 0. Since this language is typeless, 0 represents true and 1 
-	represents false. This keyword supports the full suite of expressions.
+	If (funcname) (condition) - Executes function funcname only if the result of
+		condition is 0. Since this language is type-less, 0 represents true and 1 
+		represents false. This keyword supports the full suite of expressions.
 
-Call (funcname) - Begin executing a stored function under the name funcname
-	immediatly unconditionally.
+	Call (funcname) - Begin executing a stored function under the name funcname
+		immediately unconditionally.
 
-Escape (sequence) - Run a libary function compiled into the VM binary.
+	Escape (sequence) - Run a library function compiled into the VM binary.
 
 
 Some keywords allow the payload to be an expression. Expressions are resolved
 before the operation and the data is simply substituted into the instruction after
 it is resolved.
+
+Each keyword has a value assigned at compile-time via src/limits.zig which defines how many
+times that instruction is allowed to be executed. If that limit is exceeded, then the VM
+simply kills itself.
 
 Standard expression for this syntax includes
 	Quoting rules
@@ -99,7 +103,7 @@ Standard expression for this syntax includes
 	String operations
 		S++ - Merge the two strings into one, left string first
 		?= - Return 0 if the two strings are equal, else return 1
-		-?= - Return 0 if the substring on the left is found in the right string, else reutn 1
+		-?= - Return 0 if the substring on the left is found in the right string, else return 1
 		s?= - Return 0 if the string on the right starts with the substring on the left, else return 1
 		e?= - Return 0 if the string on the right ends with the substring on the left, else return 1
 
@@ -110,7 +114,7 @@ Arguments
 
 The Standard Library
 	For simplicity, the standard library (everything referenced by zig/libs/libs.zig) is simply compiled straight
-	into the main VM binary. This allows zero runtime dependencies for the VM after compile-time. To add a libary,
+	into the main VM binary. This allows zero runtime dependencies for the VM after compile-time. To add a library,
 	create a .zig file in libs/zig/ performing the operation, add that file to src/libs/libs.zig and then add it
 	to src/escapes.zig. To remove one, simply comment out the line adding it in src/escapes.zig.
 
@@ -178,7 +182,7 @@ Examples
         New e "ab s++ cd" # stores "abcd"
         New f "e s++ cd" # stores "abcdcd"
 
-	# loop made from primitves
+	# loop made from primitives
         Func count # start recording to func count
         New ARG1 'counter' # set ARG1 to true literal counter
         Escape Print # print
@@ -186,6 +190,6 @@ Examples
         If count "counter > 0" # run function count if expression counter > 0 = 0 (true)
         End # stop recording function
         New counter '10' # set counter to true literal 10
-        Call count # begin executing funcion count
+        Call count # begin executing function count
 
 
