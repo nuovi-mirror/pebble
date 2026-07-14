@@ -12,6 +12,7 @@ pub const escapesTable = std.StaticStringMap(escapeFn).initComptime(.{
     .{ "Fread", libs.Fread.run }, // fs
     .{ "Fwrite", libs.Fwrite.run }, // fs
     .{ "Fbwrite", libs.Fbwrite.run }, // fs
+    .{ "ListDir", libs.ListDir.run }, // fs
 
     .{ "StrLen", libs.StrLen.run }, // str
     .{ "StrSplitNumL", libs.StrSplitNumL.run }, // str

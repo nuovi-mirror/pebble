@@ -128,6 +128,10 @@ The Standard Library
 		Fread (POSIX) - Takes one variable, ARG1, as an indirect. Reads the data in the variable referenced by the
 			indirect as a file name. Reads the data in the file into the variable fileData.
 
+		ListDir (POSIX) - Takes one variable, ARG1, as an indirect. Reads the contents of the directory name held
+			in the variable referenced by the indirect and saves it to the variable dirContents, formatted
+			as a string full of dir entries separated by newlines with one newline at the end.
+
 	Misc
 		Random - Generates a random number and stores it into the variable random. NOT CRYPTOGRAPHIC
 		Time (POSIX) - Grabs the current time and formats it all fancy.
