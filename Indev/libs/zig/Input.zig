@@ -1,4 +1,5 @@
 const std = @import("std");
+const allocator = std.heap.page_allocator;
 const vm = @import("state");
 
 pub fn run() !void {
@@ -8,5 +9,6 @@ pub fn run() !void {
     const stdin = &stdin_reader.interface;
     
     const input = try stdin.takeDelimiterExclusive('\n');
-    try vm.data.put("input", input);
+    const copy = try allocator.dupe(u8, input);
+    try vm.data.put("input", copy);
 }
