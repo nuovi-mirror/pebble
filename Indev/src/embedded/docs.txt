@@ -144,6 +144,17 @@ The Standard Library
 			substring in the variable referenced by ARG1 after entry N in the variable referenced by ARG2.
 			The substring is placed into the variable strRight.
 
+	Proc (POSIX)
+		SpawnProc (POSIX) - Takes on arg, ARG1, as an indirect to the command and arguments of the process to run. 
+			Spawns a POSIX process using the data in said variable referenced by said indirect and returns
+			the PID of the new process in the variable pid.
+
+		WaitPid (POSIX) - Takes one arg, ARG1, as an indirect to the variable holding the POSIX PID of the
+			process to wait for. Waits for said process to complete execution and will return variables
+			killedBySig with the signal type it was killed by and otherTermination as true if it was 
+			killed, or exitCode as the exit code of the process and otherTermination as false if it was
+			not killed.
+
 Examples
 
 	New msg 'Hello, World!' # define a var named msg holding true literal Hello, World!
