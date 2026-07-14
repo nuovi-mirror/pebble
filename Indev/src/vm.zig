@@ -14,10 +14,39 @@ var first_arg: ?[]const u8 = null;
 var second_arg: ?[]const u8 = null;
 
 pub fn main() !void { // the VM
+    // init allocator
     mem.init();
     defer mem.deinit();
     const allocator = mem.alloc();
 
+    // init tables
+    state.data = std.StringHashMap([]const u8).init(allocator);
+    state.code = .empty;
+    state.codeTable = std.StringHashMap(usize).init(allocator);
+
+    defer state.data.deinit();
+    defer state.code.deinit(allocator);
+    defer state.codeTable.deinit();
+
+    // argument stuff
+    const Args = try std.process.argsAlloc(allocator);
+//    defer std.process.argsFree(std.heap.page_allocator, Args);
+
+    const ArgsNum = try std.fmt.allocPrint(allocator, "{d}", .{Args.len});
+
+    try state.data.put("VMARGC", ArgsNum);
+
+    for (Args, 0..) |Arg, i| {
+        const name = try std.fmt.allocPrint(
+            allocator,
+            "VMARG{d}",
+            .{i},
+        );
+
+        try state.data.put(name, Arg);
+    }
+
+    // compatability shim
     var args = std.process.args();
     _ = args.next(); // skip arg0, program name
     first_arg = args.next();
@@ -39,14 +68,6 @@ pub fn main() !void { // the VM
             exit(0);
         }
     }
-
-    state.data = std.StringHashMap([]const u8).init(allocator);
-    state.code = .empty;
-    state.codeTable = std.StringHashMap(usize).init(allocator);
-
-    defer state.data.deinit();
-    defer state.code.deinit(allocator);
-    defer state.codeTable.deinit();
 
     if (first_arg) |arg| { // handle tests
         if (std.mem.eql(u8, arg, "test")) {

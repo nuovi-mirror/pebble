@@ -1,15 +1,18 @@
 const std = @import("std");
 
-var arena: std.heap.ArenaAllocator = undefined;
+var arena: ?std.heap.ArenaAllocator = null;
 
 pub fn init() void {
     arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
 }
 
 pub fn deinit() void {
-    arena.deinit();
+    if (arena) |*a| {
+        a.deinit();
+        arena = null;
+    }
 }
 
 pub fn alloc() std.mem.Allocator {
-    return arena.allocator();
+    return arena.?.allocator();
 }

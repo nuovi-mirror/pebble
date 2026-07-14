@@ -103,6 +103,11 @@ Standard expression for this syntax includes
 		s?= - Return 0 if the string on the right starts with the substring on the left, else return 1
 		e?= - Return 0 if the string on the right ends with the substring on the left, else return 1
 
+Arguments
+	The VM provides variables VMARGC as the number of arguments provided and VMARGn as the data given as said
+	argument. VMARG0 will be the name of the VM binary and should always be present, meaning VMARGC should always
+	be at least 1.
+
 The Standard Library
 	For simplicity, the standard library (everything referenced by zig/libs/libs.zig) is simply compiled straight
 	into the main VM binary. This allows zero runtime dependencies for the VM after compile-time. To add a libary,
