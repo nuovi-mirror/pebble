@@ -160,7 +160,10 @@ The Standard Library
 	Proc (POSIX)
 		SpawnProc (POSIX) - Takes on arg, ARG1, as an indirect to the command and arguments of the process to run. 
 			Spawns a POSIX process using the data in said variable referenced by said indirect and returns
-			the PID of the new process in the variable pid.
+			the PID of the new process in the variable pid. This treats the indirect address as an array-like
+			structure - one string separated by spaces, the first being the command and the ones after it being
+			the arguments of the command. Items in said array-like structure will be treated as indirects unless
+			they do not match a variable name.
 
 		WaitPid (POSIX) - Takes one arg, ARG1, as an indirect to the variable holding the POSIX PID of the
 			process to wait for. Waits for said process to complete execution and will return variables

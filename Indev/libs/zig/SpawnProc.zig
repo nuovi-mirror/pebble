@@ -11,7 +11,8 @@ pub fn run() !void {
 
     var split = std.mem.splitScalar(u8, procArgs, ' ');
     while (split.next()) |arg| {
-        try argv.append(arg);
+        const expanded = vm.data.get(arg) orelse arg;
+        try argv.append(expanded);
     }
 
     var child = std.process.Child.init(
