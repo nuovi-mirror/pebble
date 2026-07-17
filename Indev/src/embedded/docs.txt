@@ -109,7 +109,7 @@ Standard expression for this syntax includes
 
 Arguments
 	The VM provides variables VMARGC as the number of arguments provided and VMARGn as the data given as said
-	argument. VMARG0 will be the name of the VM binary and should always be present, meaning VMARGC should always
+	argument. VMARG1 will be the name of the VM binary and should always be present, meaning VMARGC should always
 	be at least 1.
 
 The Standard Library
@@ -123,6 +123,7 @@ The Standard Library
 	I/O
 		Print - Takes one variable, ARG1, as an Indirect. Prints the data in said variable referenced by the
 			indirect.
+		PrintLn - Same as Print, but there will not be a trailing newline character.
 
 		Input (POSIX) - Gets input from stdin and returns it in the variable input.
 
@@ -170,6 +171,8 @@ The Standard Library
 			killedBySig with the signal type it was killed by and otherTermination as true if it was 
 			killed, or exitCode as the exit code of the process and otherTermination as false if it was
 			not killed.
+
+		Exit (POSIX) - Kills the VM process.
 
 Examples
 

@@ -4,6 +4,7 @@ const libs = @import("libs");
 pub const escapeFn = *const fn () anyerror!void;
 pub const escapesTable = std.StaticStringMap(escapeFn).initComptime(.{
     .{ "Print", libs.Print.run }, // io
+    .{ "PrintLn", libs.PrintLn.run }, // io
     .{ "Input", libs.Input.run }, // io
 
     .{ "Random", libs.Random.run }, // misc
@@ -20,4 +21,5 @@ pub const escapesTable = std.StaticStringMap(escapeFn).initComptime(.{
 
     .{ "SpawnProc", libs.SpawnProc.run }, // proc
     .{ "WaitPid", libs.WaitPid.run }, // proc
+    .{ "Exit", libs.Exit.run }, // proc
 });
