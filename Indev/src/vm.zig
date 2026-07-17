@@ -6,6 +6,7 @@ const tests = @import("tests");
 const docs = @import("docs");
 const mem = @import("allocator");
 const limits = @import("limits");
+const version = @import("version");
 const print = std.debug.print;
 const exit = std.process.exit;
 
@@ -55,16 +56,7 @@ pub fn main() !void { // the VM
 
     if (first_arg) |arg| { // handle version thing
         if (std.mem.eql(u8, arg, "version")) {
-            print("Pebble - A VM language that is both small and safe.\n", .{});
-            print("VM: Class 1 (array-storing bytecode machine)\n", .{});
-            print("Class: Interpreter\n", .{});
-            print("Version: InDev Alpha 3\n", .{});
-            print("Lang: Zig 0.15.2\n", .{});
-            print("Supported Features: New, Escape, Func, Return, End, If, Call\n", .{});
-            print("Supported mathmatical expressions: +, -, /, *, ==, <, >, !=\n", .{});
-            print("Supported string expressions: s++, ?=, e?=, s?=, -?=\n", .{});
-            print("Operations accepting expressions: New, If\n", .{});
-            
+            print("{s}\n", .{version.full});
             exit(0);
         }
     }
@@ -88,7 +80,7 @@ pub fn main() !void { // the VM
     try run(fileData);
 }
 
-fn run(fileData: []const u8) !void {
+pub fn run(fileData: []const u8) !void {
     const allocator = mem.alloc();
     var lines = std.mem.splitScalar(u8, fileData, '\n');
 

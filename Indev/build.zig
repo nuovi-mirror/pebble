@@ -51,6 +51,13 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    const version = b.createModule(.{
+        .root_source_file = b.path("src/version.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+
+
     const exe = b.addExecutable(.{
         .name = "vm",
         .root_module = b.createModule(.{
@@ -75,10 +82,9 @@ pub fn build(b: *std.Build) void {
     exe.root_module.addImport("docs", docs);
     exe.root_module.addImport("allocator", allocator);
     exe.root_module.addImport("limits", limits);
+    exe.root_module.addImport("version", version);
     
     libs.addImport("state", state);
-
-    docs.addImport("allocator", allocator);
 
     escapes.addImport("libs", libs);
     
