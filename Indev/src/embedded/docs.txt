@@ -1,5 +1,4 @@
 Pebble Lang/VM Documentation
-Alpha Version 3 InDev, Zig 0.15.2
 
 Pebble is an ultralight virtual machine and programming language
 with the goal of being small, lightweight, and easy to embed into 
