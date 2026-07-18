@@ -142,6 +142,11 @@ The Standard Library
 			in the variable referenced by the indirect and saves it to the variable dirContents, formatted
 			as a string full of dir entries separated by newlines with one newline at the end.
 
+		Gcwd (POSIX) - Gets the current working directory and saves it to variable cwd.
+
+		Chcwd (POSIX) - Takes one variable, ARG1, as an indirect. Reads the data in the variable referenced by the
+			indirect and changes the working directory to that new directory.
+
 	Misc
 		Random - Generates a random number and stores it into the variable random. NOT CRYPTOGRAPHIC
 		Time (POSIX) - Grabs the current time and formats it all fancy.

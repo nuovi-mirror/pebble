@@ -11,6 +11,8 @@ pub const Fread = @import("Fread.zig"); // fs - POSIX
 pub const Fwrite = @import("Fwrite.zig"); // fs - POSIX 
 pub const Fbwrite = @import("Fbwrite.zig"); // fs - POSIX
 pub const ListDir = @import("ListDir.zig"); // fs - POSIX
+pub const Gcwd = @import("Gcwd.zig"); // fs - POSIX
+pub const Chcwd = @import("Chcwd.zig"); // fs - POSIX
 
 pub const StrLen = @import("StrLen.zig"); // str
 pub const StrSplitNumL = @import("StrSplitNumL.zig"); // str
