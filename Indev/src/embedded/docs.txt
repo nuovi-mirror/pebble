@@ -28,6 +28,11 @@ This should output a single binary at the root of the source dir named vm.
 ./vm test - runs the test suite, which is also written in Pebble.
 ./vm psh - run the builtin shell, which is also written in Pebble.
 
+The shell, psh (Pebble SHell), includes a few builtin commands in the
+standard release. A version of this shell without builtins can be found
+at tools/psh.pebble. The builtins include cd, pwd, echo, ls, and exit.
+To view all builtins, read the source code of tools/psh+builtins.pebble.
+After all, it is written in pebble!
 
 The VM is keyword-based, meaning there are a few small keywords used to
 perform functions. These functions are conspired to be the bare minimum 
