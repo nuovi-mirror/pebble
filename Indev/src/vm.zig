@@ -7,6 +7,7 @@ const docs = @import("docs");
 const mem = @import("allocator");
 const limits = @import("limits");
 const version = @import("version");
+const psh = @import("psh");
 const print = std.debug.print;
 const exit = std.process.exit;
 
@@ -74,6 +75,14 @@ pub fn main() !void { // the VM
             exit(0);
         }
     }
+    
+    if (first_arg) |arg| { // handle shell
+        if (std.mem.eql(u8, arg, "psh")) {
+            try run(psh.psh);
+            exit(0);
+        }
+    }
+
 
     const filename = first_arg orelse { return; };
     const fileData = try readFile(filename);

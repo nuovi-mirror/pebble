@@ -26,6 +26,7 @@ This should output a single binary at the root of the source dir named vm.
 ./vm version - reads version info
 ./vm (filename) - runs a script written in Pebble
 ./vm test - runs the test suite, which is also written in Pebble.
+./vm psh - run the builtin shell, which is also written in Pebble.
 
 
 The VM is keyword-based, meaning there are a few small keywords used to
@@ -161,6 +162,10 @@ The Standard Library
 		StrSplitNumR - Takes two variables, ARG1 and ARG2, as indirects. Returns the contents of the
 			substring in the variable referenced by ARG1 after entry N in the variable referenced by ARG2.
 			The substring is placed into the variable strRight.
+
+		StrFind - Takes two variables, ARG1 and ARG1, as indirects. Searches through the string at ARG1 to find
+			the char at ARG2 and returns a number as the entry this char is in. Returns this into variable
+			entry. Please make sure the substring is present before performing this op, or else it might stall.
 
 	Proc (POSIX)
 		SpawnProc (POSIX) - Takes on arg, ARG1, as an indirect to the command and arguments of the process to run. 

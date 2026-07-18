@@ -1,0 +1,88 @@
+#!/usr/bin/pebble
+
+New prompt '> '
+
+Func getArg
+New separator ' '
+# grabs an argument from a string
+# data = payload to give it
+New ARG1 'data'
+New ARG2 'separator'
+Escape StrFind
+New ARG2 'entry'
+Escape StrSplitNumR
+Escape StrSplitNumL
+New data strRight # modifies data to remove the arg
+New arg strLeft # returns arg as the arugment
+End
+
+Func loop
+New ARG1 'prompt'
+Escape PrintLn
+Escape Input
+New command input
+
+If exit "command ?= exit"
+If cd "command -?= cd"
+If echo "command -?= echo"
+If pwd "command -?= pwd"
+If ls "command -?= ls"
+
+New ARG1 'command'
+Escape SpawnProc
+New ARG1 'pid'
+Escape WaitPid
+
+Call loop
+End
+
+Func exit
+New ARG1 'msg'
+New msg 'Goodbye!'
+Escape Print
+Escape Exit
+Call loop
+End
+
+Func cd
+Escape Print
+New ARG1 'input'
+New num '3'
+New ARG2 'num'
+Escape StrSplitNumR
+New ARG1 'strRight'
+Escape Chcwd
+Call loop
+End
+
+Func echo
+New data input
+Call getArg # data now contains the args
+New ARG1 'data'
+Escape Print
+Call loop
+End
+
+Func pwd
+Escape Gcwd
+New ARG1 'cwd'
+Escape Print
+Call loop
+End
+
+Func ls
+New data input
+Call getArg 
+New ARG1 'data'
+If _ls "data ?=  "
+Escape ListDir
+New ARG1 'dirContents'
+Escape Print
+Call loop
+End
+
+Func _ls
+New data '.'
+End
+
+Call loop
