@@ -1,6 +1,4 @@
-Tbdlang
-
-Tbdlang is a small and simple virtual machine language
+Pebble is a small and simple virtual machine language
 written in Zig.
 
 The language is designed to be small, simple, reliable and safe, 
@@ -9,3 +7,5 @@ dynamic loader, including a VM, compiler, interpreter, test suite,
 embedded documentation and version info, all in 60kb.
 
 Please keep in mind this is an alpha release.
+
+Product of The Nuovi Orizzonti Company
