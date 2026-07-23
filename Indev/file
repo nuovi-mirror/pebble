@@ -1,0 +1,6 @@
+fn func ( a b ) x {
+x = `a + b
+}
+
+call func ( 12 24 )
+call print ( x )

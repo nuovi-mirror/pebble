@@ -429,8 +429,8 @@ fn evaluate(line: []const u8) ![]const u8 { // WARNING - This WILL fail silently
     }
 
 
-    const left = std.fmt.parseInt(i64, left_str, 10) catch return line;
-    const right = std.fmt.parseInt(i64, right_str, 10) catch return line;
+    const left = std.fmt.parseInt(i32, left_str, 10) catch return line;
+    const right = std.fmt.parseInt(i32, right_str, 10) catch return line;
 
     if (std.mem.eql(u8, op, "+")) {
         return try std.fmt.allocPrint(
