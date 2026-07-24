@@ -9,7 +9,7 @@ const limits = @import("limits");
 const version = @import("version");
 const psh = @import("psh");
 const print = std.debug.print;
-const exit = std.process.exit;
+//const exit = std.process.exit;
 
 var recording: bool = false;
 
@@ -77,28 +77,28 @@ pub fn main() !void { // the VM
     if (first_arg) |arg| { // handle version thing
         if (std.mem.eql(u8, arg, "version")) {
             print("{s}\n", .{version.full});
-            exit(0);
+            //exit(0);
         }
     }
 
     if (first_arg) |arg| { // handle tests
         if (std.mem.eql(u8, arg, "test")) {
             try run(tests.tests);
-            exit(0);
+            //exit(0);
         }
     }
 
     if (first_arg) |arg| { // handle docs
         if (std.mem.eql(u8, arg, "docs")) {
             print("{s}", .{docs.read()});
-            exit(0);
+            //exit(0);
         }
     }
     
     if (first_arg) |arg| { // handle shell
         if (std.mem.eql(u8, arg, "psh")) {
             try run(psh.psh);
-            exit(0);
+            //exit(0);
         }
     }
 
@@ -222,7 +222,7 @@ fn interpret(list: [][]const u8) !void {
     
     if (limits.inst_curr > limits.inst_max) {
         print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
-        exit(1);
+        //exit(1);
     }
 
     limits.inst_curr += 1;
@@ -241,7 +241,7 @@ fn interpret(list: [][]const u8) !void {
     if (std.mem.eql(u8, list[0], "New")) { // New
         if (limits.inst_new_curr > limits.inst_new_max) {
             print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
-            exit(1);
+            //exit(1);
         }
 
         limits.inst_new_curr += 1;
@@ -272,7 +272,7 @@ fn interpret(list: [][]const u8) !void {
     if (std.mem.eql(u8, list[0], "Escape")) { // Escape
         if (limits.inst_escape_curr > limits.inst_escape_max) {
             print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
-            exit(1);
+            //exit(1);
         }
 
         limits.inst_escape_curr += 1;
@@ -284,7 +284,7 @@ fn interpret(list: [][]const u8) !void {
     if (std.mem.eql(u8, list[0], "Func")) { // Start recording functions
         if (limits.inst_func_curr > limits.inst_func_max) {
             print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
-            exit(1);
+            //exit(1);
         }
 
         limits.inst_func_curr += 1;
@@ -298,7 +298,7 @@ fn interpret(list: [][]const u8) !void {
     if (std.mem.eql(u8, list[0], "Call")) { // Call a recorded function
         if (limits.inst_call_curr > limits.inst_call_max) {
             print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
-            exit(1);
+            //exit(1);
         }
 
         limits.inst_call_curr += 1;
@@ -309,7 +309,7 @@ fn interpret(list: [][]const u8) !void {
     if (std.mem.eql(u8, list[0], "If")) { // Start doing Ifs (If funcToExec "condition")
         if (limits.inst_func_curr > limits.inst_func_max) {
             print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
-            exit(1);
+            //exit(1);
         }
 
         limits.inst_func_curr += 1;
@@ -322,7 +322,7 @@ fn interpret(list: [][]const u8) !void {
     if (std.mem.eql(u8, list[0], "Return")) { // thing to exit from Func
         if (limits.inst_return_curr > limits.inst_return_max) {
             print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
-            exit(1);
+            //exit(1);
         }
 
         limits.inst_return_curr += 1;
