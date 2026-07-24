@@ -1,0 +1,39 @@
+#!/usr/bin/pebble
+
+New prompt '> '
+
+Func loop
+New ARG1 'prompt'
+Escape PrintLn
+Escape Input
+New command input
+
+If exit "command ?= exit"
+If cd "command -?= cd"
+
+New ARG1 'command'
+Escape SpawnProc
+New ARG1 'pid'
+Escape WaitPid
+
+Call loop
+End
+
+Func exit
+New ARG1 'msg'
+New msg 'Goodbye!'
+Escape Print
+Escape Exit
+End
+
+Func cd
+Escape Print
+New ARG1 'input'
+New num '3'
+New ARG2 'num'
+Escape StrSplitNumR
+New ARG1 'strRight'
+Escape Chcwd
+End
+
+Call loop
