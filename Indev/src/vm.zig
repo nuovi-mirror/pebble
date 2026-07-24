@@ -16,6 +16,20 @@ var recording: bool = false;
 var first_arg: ?[]const u8 = null;
 var second_arg: ?[]const u8 = null;
 
+// for windows compat
+fn getArgs(allocator: std.mem.Allocator) ![][]const u8 {
+    var args = try std.process.argsWithAllocator(allocator);
+    defer args.deinit();
+
+    var list: std.ArrayList([]const u8) = .empty;
+
+    while (args.next()) |arg| {
+        try list.append(allocator, arg);
+    }
+
+    return try list.toOwnedSlice(allocator);
+}
+
 pub fn main() !void { // the VM
     // init allocator
     mem.init();
@@ -32,8 +46,12 @@ pub fn main() !void { // the VM
     defer state.codeTable.deinit();
 
     // argument stuff
-    const Args = try std.process.argsAlloc(allocator);
+//    const Args = try std.process.argsWithAllocator(allocator); // for windows compat
+    const Args = try getArgs(allocator); // for windows compat
+//    const Args = try std.process.argsAlloc(allocator); // old
 //    defer std.process.argsFree(std.heap.page_allocator, Args);
+
+    
 
     const ArgsNum = try std.fmt.allocPrint(allocator, "{d}", .{Args.len});
 
@@ -50,10 +68,11 @@ pub fn main() !void { // the VM
     }
 
     // compatability shim
-    var args = std.process.args();
-    _ = args.next(); // skip arg0, program name
-    first_arg = args.next();
-    second_arg = args.next();
+    if (Args.len > 1)
+        first_arg = Args[1];
+
+    if (Args.len > 2)
+        second_arg = Args[2];
 
     if (first_arg) |arg| { // handle version thing
         if (std.mem.eql(u8, arg, "version")) {

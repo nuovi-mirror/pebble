@@ -1,0 +1,3 @@
+To get this to run on Windows (tested on ReactOS, NT 5.2), comment out everything related
+to POSIX in files libs/zig/libs.zig, src/escapes.zig and src/tests.zig. A premade version of
+these can be found in the windows/ dir.
