@@ -1,5 +1,0 @@
-#!/usr/bin/pebble
-
-Escape Gcwd
-New ARG1 'cwd'
-Escape Print

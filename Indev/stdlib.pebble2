@@ -1,4 +1,0 @@
-fn Print ( data ) data {
-. New ARG1 'data'
-. Escape Print
-}
