@@ -1,0 +1,8 @@
+A bit of work has been done to get Pebble working on Windows. Currently the only barrier is
+a lot of the standard library is currently dependent on POSIX behavior. To see what items are
+dependent on POSIX behavior, read libs/zig/libs.zig. Simply comment out those items in that
+file then also comment them out in src/escapes.zig and comment out the areas testing the
+behavior in the test suite source code at src/tests.zig (optional).
+
+Old NT support has been dropped. The requirements are Windows 10+. This has not been tested
+as of this date; the compatability is only theoretical. 
