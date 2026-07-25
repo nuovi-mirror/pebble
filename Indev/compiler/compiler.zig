@@ -182,9 +182,15 @@ pub fn main() !void {
                 output = try std.fmt.allocPrint(
                     allocator,
                     "New {s} \"{s}\"",
-                    .{ tokens.items[0], rest }
+                    .{ tokens.items[0], rest },
                 );
-            }
+            } else
+                // true literal
+                output = try std.fmt.allocPrint(
+                    allocator,
+                    "New {s} '{s}'",
+                    .{ tokens.items[0], rest },
+                );
         } else if (std.mem.eql(u8, tokens.items[0], ".")) {
             const rest = try std.mem.join(
                 allocator, 

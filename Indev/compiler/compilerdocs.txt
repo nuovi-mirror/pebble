@@ -12,9 +12,11 @@ Varable syntax
 	
 	Current operations support mathematical expressions documented by the VM.
 	Syntax with modifer of the char '`' mark an expression, known as a literal
-	in Pebble.
+	in Pebble. Syntax with the modifier of char '!' mark a literal, known as a
+	true literal in Pebble.
 
 	eg. x = `1 + 2
+	    x = !3
 
 Function syntax
 	fn funcname ( funcargs ) funcreturnvar {
