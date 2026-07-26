@@ -613,5 +613,8 @@ fn debugDump(ir: [][]const u8) void {
         });
     }
 
+    print("ESCAPES:\n", .{});
+    escapes.dump();
+
     print("\n======== VM DEBUG ========\n", .{});
 }
