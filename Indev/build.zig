@@ -10,7 +10,7 @@ pub fn build(b: *std.Build) void {
     const options = b.addOptions();
 
     const libs = b.createModule(.{
-        .root_source_file = b.path("libs/zig/libs.zig"),
+        .root_source_file = b.path("libs/posix/libs.zig"), // change this to match your OS / ISA
         .target = target,
         .optimize = optimize,
     });

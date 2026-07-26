@@ -218,6 +218,16 @@ fn tokenize(line: []const u8) ![][]const u8 {
     return try tokens.toOwnedSlice(allocator);
 }
 
+fn findEscape(name: []const u8) ?escapes.Escape {
+    for (escapes.table) |escape| {
+        if (std.mem.eql(u8, escape.name, name)) {
+            return escape;
+        }
+    }
+
+    return null;
+}
+
 fn interpret(list: [][]const u8) !void {
     const allocator = mem.alloc();
     
@@ -278,8 +288,9 @@ fn interpret(list: [][]const u8) !void {
 
         limits.inst_escape_curr += 1;
 
-        const escape = escapes.escapesTable.get(list[1]) orelse return error.UnknownEscape;
-        try escape();
+
+        const escape = findEscape(list[1]) orelse return error.UnknownEscape;
+        try escape.run();
     }
 
     if (std.mem.eql(u8, list[0], "Func")) { // Start recording functions
