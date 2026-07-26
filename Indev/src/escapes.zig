@@ -1,7 +1,8 @@
 const std = @import("std");
 const libs = @import("libs");
 
-pub const escapeFn = *const fn () anyerror!void; // no idea what this is used for
+pub const escapeFn = *const fn () anyerror!void;
+
 pub const Escape = struct {
     name: []const u8,
     run: escapeFn,
@@ -20,9 +21,14 @@ fn count(comptime T: type) usize {
     inline for (@typeInfo(T).@"struct".decls) |decl| {
         const Child = @field(T, decl.name);
 
-        if (@hasDecl(Child, "is_escape")) {
+        // Any module with run() is an escape
+        if (@hasDecl(Child, "run")) {
             total += 1;
-        } else if (isNamespace(@TypeOf(Child))) {
+            continue;
+        }
+
+        // Otherwise recurse into namespaces
+        if (isNamespace(Child)) {
             total += count(Child);
         }
     }
@@ -39,22 +45,28 @@ fn fill(
     inline for (@typeInfo(T).@"struct".decls) |decl| {
         const Child = @field(T, decl.name);
 
-        const name = if (prefix.len == 0)
-            decl.name
-        else
-            std.fmt.comptimePrint("{s}.{s}", .{
-                prefix,
-                decl.name,
-            });
+        const name =
+            if (prefix.len == 0)
+                decl.name
+            else
+                std.fmt.comptimePrint("{s}.{s}", .{
+                    prefix,
+                    decl.name,
+                });
 
-        if (@hasDecl(Child, "is_escape")) {
+        // Leaf: escape implementation
+        if (@hasDecl(Child, "run")) {
             entries[index.*] = .{
                 .name = name,
                 .run = Child.run,
             };
 
             index.* += 1;
-        } else if (isNamespace(@TypeOf(Child))) {
+            continue;
+        }
+
+        // Branch: namespace
+        if (isNamespace(Child)) {
             fill(name, Child, entries, index);
         }
     }
@@ -77,4 +89,10 @@ pub fn get(name: []const u8) ?Escape {
     }
 
     return null;
+}
+
+pub fn dump() void {
+    for (table) |escape| {
+        std.debug.print("{s}\n", .{escape.name});
+    }
 }
