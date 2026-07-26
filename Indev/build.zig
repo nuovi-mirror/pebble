@@ -63,6 +63,11 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    const platform = b.createModule(.{
+        .root_source_file = b.path("platform/posix.zig"), // replace this path with your OS / ISA
+        .target = target,
+        .optimize = optimize,
+    });
 
     const exe = b.addExecutable(.{
         .name = "vm",
@@ -90,7 +95,8 @@ pub fn build(b: *std.Build) void {
     exe.root_module.addImport("limits", limits);
     exe.root_module.addImport("version", version);
     exe.root_module.addImport("psh", psh);
-    
+    exe.root_module.addImport("platform", platform);
+
     libs.addImport("state", state);
 
     escapes.addImport("libs", libs);

@@ -8,8 +8,9 @@ const mem = @import("allocator");
 const limits = @import("limits");
 const version = @import("version");
 const psh = @import("psh");
-const print = std.debug.print;
-const exit = std.process.exit;
+const platform = @import("platform");
+const print = platform.print;
+const exit = platform.exit;
 
 var recording: bool = false;
 
