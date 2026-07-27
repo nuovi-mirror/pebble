@@ -6,4 +6,4 @@ curr = `curr + 1
 curr = !1
 call run ( 20 )
 ARG1 = !curr
-. Escape Print
+. Escape std.io.print

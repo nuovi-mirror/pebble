@@ -73,6 +73,8 @@ fn fill(
 }
 
 pub const table = blk: {
+    @setEvalBranchQuota(1_000_000);
+
     var result: [count(libs)]Escape = undefined;
     var index: usize = 0;
 

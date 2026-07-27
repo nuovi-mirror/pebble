@@ -118,7 +118,7 @@ pub fn run(fileData: []const u8) !void {
         const IR = try tokenize(line);
         if (IR.len == 0) continue; // skip newlines and comments and such
         defer allocator.free(IR);
-        if (build.VMDEBUG) debugDump(IR); // debug dump
+        if (build.VMDEBUG) try debugDump(IR); // debug dump
         try interpret(IR);
     }
 
@@ -573,7 +573,10 @@ fn copyInstruction(list: [][]const u8) ![][]const u8 {
     return copy;
 }
 
-fn debugDump(ir: [][]const u8) void {
+fn debugDump(ir: [][]const u8) !void {
+    const capacity = mem.queryCapacity();
+    const allocator = mem.alloc();
+
     print("\n======== VM DEBUG ========\n", .{});
     print("Instruction: ", .{});
     for (ir) |part| {
@@ -615,6 +618,14 @@ fn debugDump(ir: [][]const u8) void {
 
     print("ESCAPES:\n", .{});
     escapes.dump();
+
+    const cstring = try std.fmt.allocPrint(
+        allocator,
+        "{}",
+        .{capacity / 1024 / 1024},
+    );
+
+    print("MEM: {s}MB\n", .{cstring});
 
     print("\n======== VM DEBUG ========\n", .{});
 }

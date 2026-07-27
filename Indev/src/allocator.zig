@@ -1,9 +1,14 @@
 const std = @import("std");
 
-var arena: ?std.heap.ArenaAllocator = null;
+var arena: ?std.heap.ArenaAllocator = null;    
+var debug = std.heap.DebugAllocator(.{}){};
 
 pub fn init() void {
-    arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    arena = std.heap.ArenaAllocator.init(debug.allocator());
+}
+
+pub fn queryCapacity() usize {
+    return arena.?.queryCapacity();
 }
 
 pub fn deinit() void {
