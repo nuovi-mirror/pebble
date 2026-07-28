@@ -367,17 +367,72 @@ fn callFunc(list: [][]const u8) anyerror!void {
     recording = recording_old;
 }
 
+fn isOperator(op: []const u8) bool {
+    return std.mem.eql(u8, op, "s++") or
+        std.mem.eql(u8, op, "?=") or
+        std.mem.eql(u8, op, "s?=") or
+        std.mem.eql(u8, op, "e?=") or
+        std.mem.eql(u8, op, "-?=") or
+        std.mem.eql(u8, op, "+") or
+        std.mem.eql(u8, op, "-") or
+        std.mem.eql(u8, op, "*") or
+        std.mem.eql(u8, op, "/") or
+        std.mem.eql(u8, op, "==") or
+        std.mem.eql(u8, op, "!=") or
+        std.mem.eql(u8, op, ">") or
+        std.mem.eql(u8, op, "<");
+}
+
+
+fn resolveVariables(line: []const u8) ![]const u8 {
+    const allocator = mem.alloc();
+
+    var output: std.ArrayList(u8) = .empty;
+    defer output.deinit(allocator);
+
+    var parts = std.mem.splitScalar(u8, line, ' ');
+    var first = true;
+
+    while (parts.next()) |part| {
+        if (!first) {
+            try output.append(allocator, ' ');
+        }
+
+        first = false;
+
+        if (state.data.get(part)) |data| {
+            try output.appendSlice(allocator, data);
+        } else {
+            try output.appendSlice(allocator, part);
+        }
+    }
+
+    return try output.toOwnedSlice(allocator);
+}
+
+
 fn evaluate(line: []const u8) ![]const u8 {
     const allocator = mem.alloc();
+
     var parts = std.mem.splitScalar(u8, line, ' ');
+
     var result = parts.next() orelse return line;
 
-    while (parts.next()) |op| {
-        const right_raw = parts.next() orelse return result;
+    var op = parts.next() orelse {
+        return try resolveVariables(line);
+    };
+
+    // Not an expression, just resolve variables
+    if (!isOperator(op)) {
+        return try resolveVariables(line);
+    }
+
+    while (true) {
+        const right_raw = parts.next() orelse break;
+
         var left = result;
         var right = right_raw;
 
-        // Resolve variables
         if (state.data.get(left)) |data| {
             left = data;
         }
@@ -386,135 +441,52 @@ fn evaluate(line: []const u8) ![]const u8 {
             right = data;
         }
 
-
-        // String operations
         if (std.mem.eql(u8, op, "s++")) {
             result = try std.fmt.allocPrint(
                 allocator,
                 "{s}{s}",
                 .{ left, right },
             );
-            continue;
+        } else if (std.mem.eql(u8, op, "?=")) {
+            result = if (std.mem.eql(u8, left, right)) "0" else "1";
+        } else if (std.mem.eql(u8, op, "s?=")) {
+            result = if (std.mem.startsWith(u8, left, right)) "0" else "1";
+        } else if (std.mem.eql(u8, op, "e?=")) {
+            result = if (std.mem.endsWith(u8, left, right)) "0" else "1";
+        } else if (std.mem.eql(u8, op, "-?=")) {
+            result = if (std.mem.indexOf(u8, left, right) != null) "0" else "1";
+        } else {
+            const left_num = std.fmt.parseFloat(f32, left) catch return try resolveVariables(line);
+            const right_num = std.fmt.parseFloat(f32, right) catch return try resolveVariables(line);
+
+            if (std.mem.eql(u8, op, "+")) {
+                result = try std.fmt.allocPrint(allocator, "{}", .{left_num + right_num});
+            } else if (std.mem.eql(u8, op, "-")) {
+                result = try std.fmt.allocPrint(allocator, "{}", .{left_num - right_num});
+            } else if (std.mem.eql(u8, op, "*")) {
+                result = try std.fmt.allocPrint(allocator, "{}", .{left_num * right_num});
+            } else if (std.mem.eql(u8, op, "/")) {
+                result = try std.fmt.allocPrint(allocator, "{}", .{left_num / right_num});
+            } else if (std.mem.eql(u8, op, "==")) {
+                result = if (left_num == right_num) "0" else "1";
+            } else if (std.mem.eql(u8, op, "!=")) {
+                result = if (left_num != right_num) "0" else "1";
+            } else if (std.mem.eql(u8, op, ">")) {
+                result = if (left_num > right_num) "0" else "1";
+            } else if (std.mem.eql(u8, op, "<")) {
+                result = if (left_num < right_num) "0" else "1";
+            } else {
+                return try resolveVariables(line);
+            }
         }
 
-        if (std.mem.eql(u8, op, "?=")) {
-            result = if (std.mem.eql(u8, left, right))
-                "0"
-            else
-                "1";
+        op = parts.next() orelse break;
 
-            continue;
+        if (!isOperator(op)) {
+            break;
         }
-
-        if (std.mem.eql(u8, op, "s?=")) {
-            result = if (std.mem.startsWith(u8, left, right))
-                "0"
-            else
-                "1";
-
-            continue;
-        }
-
-        if (std.mem.eql(u8, op, "e?=")) {
-            result = if (std.mem.endsWith(u8, left, right))
-                "0"
-            else
-                "1";
-
-            continue;
-        }
-
-        if (std.mem.eql(u8, op, "-?=")) {
-            result = if (std.mem.indexOf(u8, left, right) != null)
-                "0"
-            else
-                "1";
-
-            continue;
-        }
-
-
-        // Numeric operations
-        const left_num = std.fmt.parseFloat(f32, left) catch return result;
-        const right_num = std.fmt.parseFloat(f32, right) catch return result;
-
-        if (std.mem.eql(u8, op, "+")) {
-            result = try std.fmt.allocPrint(
-                allocator,
-                "{}",
-                .{left_num + right_num},
-            );
-            continue;
-        }
-
-        if (std.mem.eql(u8, op, "-")) {
-            result = try std.fmt.allocPrint(
-                allocator,
-                "{}",
-                .{left_num - right_num},
-            );
-            continue;
-        }
-
-        if (std.mem.eql(u8, op, "*")) {
-            result = try std.fmt.allocPrint(
-                allocator,
-                "{}",
-                .{left_num * right_num},
-            );
-            continue;
-        }
-
-        if (std.mem.eql(u8, op, "/")) {
-            result = try std.fmt.allocPrint(
-                allocator,
-                "{}",
-                .{left_num / right_num},
-            );
-            continue;
-        }
-
-
-        // Comparisons
-        if (std.mem.eql(u8, op, "==")) {
-            result = if (left_num == right_num)
-                "0"
-            else
-                "1";
-
-            continue;
-        }
-
-        if (std.mem.eql(u8, op, "!=")) {
-            result = if (left_num != right_num)
-                "0"
-            else
-                "1";
-
-            continue;
-        }
-
-        if (std.mem.eql(u8, op, ">")) {
-            result = if (left_num > right_num)
-                "0"
-            else
-                "1";
-
-            continue;
-        }
-
-        if (std.mem.eql(u8, op, "<")) {
-            result = if (left_num < right_num)
-                "0"
-            else
-                "1";
-
-            continue;
-        }
-
-        // Unknown operator
-        return result;
     }
+
     return result;
 }
 
