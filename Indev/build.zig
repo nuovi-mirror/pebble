@@ -10,7 +10,10 @@ pub fn build(b: *std.Build) void {
     const options = b.addOptions();
 
     const libs = b.createModule(.{
-        .root_source_file = b.path("libs/posix/libs.zig"), // change this to match your OS / ISA
+        .root_source_file = b.path(switch (target.result.os.tag) {
+            .windows => "libs/win32/libs.zig",
+            else => "libs/posix/libs.zig",
+        }),
         .target = target,
         .optimize = optimize,
     });
@@ -64,7 +67,10 @@ pub fn build(b: *std.Build) void {
     });
 
     const platform = b.createModule(.{
-        .root_source_file = b.path("platform/posix.zig"), // replace this path with your OS / ISA
+        .root_source_file = b.path(switch (target.result.os.tag) {
+           .windows => "platform/win32.zig",
+           else => "platform/posix.zig", // assume Windows if not POSIX
+        }),
         .target = target,
         .optimize = optimize,
     });
