@@ -367,229 +367,155 @@ fn callFunc(list: [][]const u8) anyerror!void {
     recording = recording_old;
 }
 
-
-
-fn evaluate(line: []const u8) ![]const u8 { // WARNING - This WILL fail silently
+fn evaluate(line: []const u8) ![]const u8 {
     const allocator = mem.alloc();
     var parts = std.mem.splitScalar(u8, line, ' ');
-    var left_str = parts.next() orelse return line;
-    const op = parts.next() orelse return line;
-    var right_str = parts.next() orelse return line;  
+    var result = parts.next() orelse return line;
 
-    const left_str_data = state.data.get(left_str);
-    const right_str_data = state.data.get(right_str);
+    while (parts.next()) |op| {
+        const right_raw = parts.next() orelse return result;
+        var left = result;
+        var right = right_raw;
 
-    if (left_str_data) |data| {
-        left_str = data;
-    }
-
-    if (right_str_data) |data| {
-        right_str = data;
-    }
-   
-    if (std.mem.eql(u8, op, "s++")) {
-        return try std.fmt.allocPrint(
-            allocator, 
-            "{s}{s}",
-            .{ left_str, right_str },
-        );
-    }
-
-    if (std.mem.eql(u8, op, "?=")) {
-        var result: []const u8 = undefined;
-
-        if (std.mem.eql(u8, left_str, right_str)) {
-            result = "0";
-        } else {
-            result = "1";
+        // Resolve variables
+        if (state.data.get(left)) |data| {
+            left = data;
         }
 
-        return try std.fmt.allocPrint(
-            allocator,
-            "{s}",
-            .{result},
-        );
-    }
-
-    if (std.mem.eql(u8, op, "s?=")) {
-        var result: []const u8 = undefined;
-
-        if (std.mem.startsWith(u8, left_str, right_str)) {
-            result = "0";
-        } else {
-            result = "1";
+        if (state.data.get(right)) |data| {
+            right = data;
         }
 
-        return try std.fmt.allocPrint(
-            allocator,
-            "{s}",
-            .{result},
-        );
-    }
 
-    if (std.mem.eql(u8, op, "e?=")) {
-        var result: []const u8 = undefined;
-
-        if (std.mem.endsWith(u8, left_str, right_str)) {
-            result = "0";
-        } else {
-            result = "1";
+        // String operations
+        if (std.mem.eql(u8, op, "s++")) {
+            result = try std.fmt.allocPrint(
+                allocator,
+                "{s}{s}",
+                .{ left, right },
+            );
+            continue;
         }
 
-        return try std.fmt.allocPrint(
-            allocator,
-            "{s}",
-            .{result},
-        );
-    }
+        if (std.mem.eql(u8, op, "?=")) {
+            result = if (std.mem.eql(u8, left, right))
+                "0"
+            else
+                "1";
 
-    if (std.mem.eql(u8, op, "-?=")) {
-        var result: []const u8 = undefined;
-
-        if (std.mem.indexOf(u8, left_str, right_str) != null) {
-            result = "0";
-        } else {
-            result = "1";
+            continue;
         }
 
-        return try std.fmt.allocPrint(
-            allocator,
-            "{s}",
-            .{result},
-        );
-    }
+        if (std.mem.eql(u8, op, "s?=")) {
+            result = if (std.mem.startsWith(u8, left, right))
+                "0"
+            else
+                "1";
 
-
-//    var left: ??? = undefined;
-//    var right: ??? = undefined;
-
-//    if (std.fmt.parseInt(i32, left_str, 10)) |i| {
-//        left = i;
-//    } else |_| {
-//        if (std.fmt.parseFloat(f32, left_str)) |f| {
-//            left = f;
-//        } else {
-//            return;
-//        }
-//    }
-    
-//    if (std.fmt.parseInt(i32, left_str, 10)) |i| {
-//        left = i;
-//    } else |_| {
-//        if (std.fmt.parseFloat(f32, left_str)) |f| {
-//            left = f;
-//        } else {
-//            return;
-//        }
-//    }
-
-
-
-//    const right = std.fmt.parseInt(i32, right_str, 10) catch return line;
-//    const left = std.fmt.parseInt(i32, left_str, 10) catch return line;
-
-    const right = std.fmt.parseFloat(f32, right_str) catch return line; 
-    const left = std.fmt.parseFloat(f32, left_str) catch return line;
-
-
-
-    if (std.mem.eql(u8, op, "+")) {
-        return try std.fmt.allocPrint(
-            allocator,
-            "{}",
-            .{left + right},
-        );
-    }
-
-    if (std.mem.eql(u8, op, "-")) {
-        return try std.fmt.allocPrint(
-            allocator,
-            "{}",
-            .{left - right},
-        );
-    }
-
-    if (std.mem.eql(u8, op, "*")) {
-        return try std.fmt.allocPrint(
-            allocator,
-            "{}",
-            .{left * right},
-        );
-    }
-
-    if (std.mem.eql(u8, op, "/")) {
-        return try std.fmt.allocPrint(
-            allocator,
-            "{}",
-            .{@divTrunc(left, right)},
-        );
-    }
-
-    if (std.mem.eql(u8, op, "==")) {
-        var result: []const u8 = undefined;
-
-        if (left == right) {
-            result = "0";
-        } else {
-            result = "1";
+            continue;
         }
 
-        return try std.fmt.allocPrint(
-            allocator,
-            "{s}",
-            .{result},
-        );
-    }
+        if (std.mem.eql(u8, op, "e?=")) {
+            result = if (std.mem.endsWith(u8, left, right))
+                "0"
+            else
+                "1";
 
-    if (std.mem.eql(u8, op, "!=")) {
-        var result: []const u8 = undefined;
-
-        if (left != right) {
-            result = "0";
-        } else {
-            result = "1";
+            continue;
         }
 
-        return try std.fmt.allocPrint(
-            allocator,
-            "{s}",
-            .{result},
-        );
-    }
+        if (std.mem.eql(u8, op, "-?=")) {
+            result = if (std.mem.indexOf(u8, left, right) != null)
+                "0"
+            else
+                "1";
 
-    if (std.mem.eql(u8, op, ">")) {
-        var result: []const u8 = undefined;
-
-        if (left > right) {
-            result = "0";
-        } else {
-            result = "1";
+            continue;
         }
 
-        return try std.fmt.allocPrint(
-            allocator,
-            "{s}",
-            .{result},
-        );
-    }
 
-    if (std.mem.eql(u8, op, "<")) {
-        var result: []const u8 = undefined;
+        // Numeric operations
+        const left_num = std.fmt.parseFloat(f32, left) catch return result;
+        const right_num = std.fmt.parseFloat(f32, right) catch return result;
 
-        if (left < right) {
-            result = "0";
-        } else {
-            result = "1";
+        if (std.mem.eql(u8, op, "+")) {
+            result = try std.fmt.allocPrint(
+                allocator,
+                "{}",
+                .{left_num + right_num},
+            );
+            continue;
         }
 
-        return try std.fmt.allocPrint(
-            allocator,
-            "{s}",
-            .{result},
-        );
-    }
+        if (std.mem.eql(u8, op, "-")) {
+            result = try std.fmt.allocPrint(
+                allocator,
+                "{}",
+                .{left_num - right_num},
+            );
+            continue;
+        }
 
-    return line;
+        if (std.mem.eql(u8, op, "*")) {
+            result = try std.fmt.allocPrint(
+                allocator,
+                "{}",
+                .{left_num * right_num},
+            );
+            continue;
+        }
+
+        if (std.mem.eql(u8, op, "/")) {
+            result = try std.fmt.allocPrint(
+                allocator,
+                "{}",
+                .{left_num / right_num},
+            );
+            continue;
+        }
+
+
+        // Comparisons
+        if (std.mem.eql(u8, op, "==")) {
+            result = if (left_num == right_num)
+                "0"
+            else
+                "1";
+
+            continue;
+        }
+
+        if (std.mem.eql(u8, op, "!=")) {
+            result = if (left_num != right_num)
+                "0"
+            else
+                "1";
+
+            continue;
+        }
+
+        if (std.mem.eql(u8, op, ">")) {
+            result = if (left_num > right_num)
+                "0"
+            else
+                "1";
+
+            continue;
+        }
+
+        if (std.mem.eql(u8, op, "<")) {
+            result = if (left_num < right_num)
+                "0"
+            else
+                "1";
+
+            continue;
+        }
+
+        // Unknown operator
+        return result;
+    }
+    return result;
 }
 
 fn copyInstruction(list: [][]const u8) ![][]const u8 {
