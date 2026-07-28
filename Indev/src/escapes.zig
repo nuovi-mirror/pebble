@@ -1,5 +1,7 @@
 const std = @import("std");
 const libs = @import("libs");
+const platform = @import("platform");
+const print = platform.print;
 
 pub const escapeFn = *const fn () anyerror!void;
 
@@ -95,6 +97,6 @@ pub fn get(name: []const u8) ?Escape {
 
 pub fn dump() void {
     for (table) |escape| {
-        std.debug.print("{s}\n", .{escape.name});
+        print("{s}\n", .{escape.name});
     }
 }

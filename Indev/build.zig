@@ -100,7 +100,8 @@ pub fn build(b: *std.Build) void {
     libs.addImport("state", state);
 
     escapes.addImport("libs", libs);
-    
+    escapes.addImport("platform", platform);
+
     options.addOption(bool, "VMDEBUG", optimize == .Debug);
 
     exe.root_module.addOptions("build_options", options);
