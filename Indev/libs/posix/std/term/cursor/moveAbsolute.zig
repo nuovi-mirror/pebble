@@ -12,8 +12,8 @@ pub fn run() !void {
     var writer = std.fs.File.stdout().writer(&buf);
     const stdout = &writer.interface;
 
-    const rx = try std.fmt.parseInt(u8, x, 10);
-    const ry = try std.fmt.parseInt(u8, y, 10);
-    try stdout.print("\x1b[{d};{c}H", .{ rx, ry });
+    const rx = try std.fmt.parseInt(u8, x, 10) - 1;
+    const ry = try std.fmt.parseInt(u8, y, 10) - 1;
+    try stdout.print("\x1b[{d};{d}H", .{ ry, rx });
     try stdout.flush();
 }
