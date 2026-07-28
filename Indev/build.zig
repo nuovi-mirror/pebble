@@ -86,6 +86,13 @@ pub fn build(b: *std.Build) void {
         },
     });
 
+    options.addOption(bool, "VMDEBUG", optimize == .Debug);
+
+    const build_options = options.createModule();
+
+    allocator.addImport("build_options", build_options);
+    exe.root_module.addImport("build_options", build_options);
+
     exe.root_module.addImport("libs", libs);
     exe.root_module.addImport("state", state);
     exe.root_module.addImport("escapes", escapes);
@@ -101,10 +108,6 @@ pub fn build(b: *std.Build) void {
 
     escapes.addImport("libs", libs);
     escapes.addImport("platform", platform);
-
-    options.addOption(bool, "VMDEBUG", optimize == .Debug);
-
-    exe.root_module.addOptions("build_options", options);
 
     b.getInstallStep().dependOn(&install.step);
 }

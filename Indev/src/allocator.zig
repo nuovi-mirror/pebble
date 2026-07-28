@@ -1,14 +1,23 @@
 const std = @import("std");
+const build = @import("build_options");
 
-var arena: ?std.heap.ArenaAllocator = null;    
+var arena: ?std.heap.ArenaAllocator = null;
 var debug = std.heap.DebugAllocator(.{}){};
 
 pub fn init() void {
-    arena = std.heap.ArenaAllocator.init(debug.allocator());
+    if (build.VMDEBUG) {
+        arena = std.heap.ArenaAllocator.init(debug.allocator());
+    } else { 
+        arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    }
 }
 
 pub fn queryCapacity() usize {
-    return arena.?.queryCapacity();
+    if (build.VMDEBUG) {
+        return arena.?.queryCapacity();
+    } else {
+        return 0;
+    }
 }
 
 pub fn deinit() void {
