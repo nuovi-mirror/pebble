@@ -1,0 +1,71 @@
+#!/usr/bin/pebble
+
+New b.1 '######################'
+New b.2 '# e.1.1 # e.1.2 # e.1.3 # e.1.4 # e.1.5 #'
+New b.3 '# e.2.1 # e.2.2 # e.2.3 # e.2.4 # e.2.5 #'
+New b.4 '# e.3.1 # e.3.2 # e.3.3 # e.3.4 # e.3.5 #'
+New b.5 '# e.4.1 # e.4.2 # e.4.3 # e.4.4 # e.4.5 #'
+New b.6 '# e.5.1 # e.5.2 # e.5.3 # e.5.4 # e.5.5 #'
+New b.7 '######################'
+
+Func drawBoard
+
+Escape std.term.screen.clear
+
+New x '0'
+New y '0'
+New ARG1 'x'
+New ARG2 'y'
+Escape std.term.cursor.moveAbsolute
+
+New ARG1 'r.1'
+Escape std.io.print
+
+New ARG1 'r.2'
+Escape std.io.print
+
+New ARG1 'r.3'
+Escape std.io.print
+
+New ARG1 'r.4'
+Escape std.io.print
+
+New ARG1 'r.5'
+Escape std.io.print
+
+New ARG1 'r.6'
+Escape std.io.print
+
+New ARG1 'r.7'
+Escape std.io.print
+
+End
+
+Func updateState
+
+# dummy for now
+New e.1.1 '*'
+End
+
+Func updateBoard
+
+New r.1 {b.1}
+New r.2 {b.2}
+New r.3 {b.3}
+New r.4 {b.4}
+New r.5 {b.5}
+New r.6 {b.6}
+New r.7 {b.7}
+
+End
+
+Func main
+# main loop
+
+Call updateState
+Call updateBoard
+Call drawBoard
+
+End
+
+Call main

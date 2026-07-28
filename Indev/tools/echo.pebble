@@ -8,9 +8,9 @@ Func printArg
 New CURRARG "VMARG s++ counter"
 New counter "counter + 1"
 New ARG1 CURRARG
-Escape PrintLn
+Escape std.io.printLn
 New ARG1 'spacer'
-Escape PrintLn
+Escape std.io.printLn
 End
 
 Func loop
@@ -19,4 +19,4 @@ If loop "counter < VMARGC"
 End
 
 Call loop
-Escape Print
+Escape std.io.print

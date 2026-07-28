@@ -1,5 +1,5 @@
 #!/usr/bin/pebble
 
-Escape Gcwd
+Escape std.fs.dir.get
 New ARG1 'cwd'
-Escape Print
+Escape std.io.print

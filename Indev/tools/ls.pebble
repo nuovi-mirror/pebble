@@ -6,9 +6,9 @@ Func ls
 New data VMARG2 
 New ARG1 'data'
 If _ls "data ?=  "
-Escape ListDir
+Escape std.fs.dir.list
 New ARG1 'dirContents'
-Escape Print
+Escape std.io.print
 End
 
 Func _ls

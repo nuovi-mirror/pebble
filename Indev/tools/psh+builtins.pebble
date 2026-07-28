@@ -8,18 +8,18 @@ New separator ' '
 # data = payload to give it
 New ARG1 'data'
 New ARG2 'separator'
-Escape StrFind
+Escape std.str.find
 New ARG2 'entry'
-Escape StrSplitNumR
-Escape StrSplitNumL
+Escape std.str.split.num.right
+Escape std.str.split.num.left
 New data strRight # modifies data to remove the arg
 New arg strLeft # returns arg as the arugment
 End
 
 Func loop
 New ARG1 'prompt'
-Escape PrintLn
-Escape Input
+Escape std.io.printLn
+Escape std.io.input
 New command input
 
 If exit "command ?= exit"
@@ -29,9 +29,9 @@ If pwd "command -?= pwd"
 If ls "command -?= ls"
 
 New ARG1 'command'
-Escape SpawnProc
+Escape std.proc.spawn
 New ARG1 'pid'
-Escape WaitPid
+Escape std.proc.wait
 
 Call loop
 End
@@ -39,19 +39,19 @@ End
 Func exit
 New ARG1 'msg'
 New msg 'Goodbye!'
-Escape Print
-Escape Exit
+Escape std.io.print
+Escape std.proc.exit
 Call loop
 End
 
 Func cd
-Escape Print
+#Escape std.io.print
 New ARG1 'input'
 New num '3'
 New ARG2 'num'
-Escape StrSplitNumR
+Escape std.str.split.num.right
 New ARG1 'strRight'
-Escape Chcwd
+Escape std.fs.dir.change
 Call loop
 End
 
@@ -59,14 +59,14 @@ Func echo
 New data input
 Call getArg # data now contains the args
 New ARG1 'data'
-Escape Print
+Escape std.io.print
 Call loop
 End
 
 Func pwd
-Escape Gcwd
+Escape std.fs.dir.get
 New ARG1 'cwd'
-Escape Print
+Escape std.io.print
 Call loop
 End
 
@@ -75,9 +75,9 @@ New data input
 Call getArg 
 New ARG1 'data'
 If _ls "data ?=  "
-Escape ListDir
+Escape std.fs.dir.list
 New ARG1 'dirContents'
-Escape Print
+Escape std.io.print
 Call loop
 End
 
