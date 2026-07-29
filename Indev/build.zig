@@ -111,6 +111,7 @@ pub fn build(b: *std.Build) void {
     exe.root_module.addImport("platform", platform);
 
     libs.addImport("state", state);
+    libs.addImport("allocator", allocator);
 
     escapes.addImport("libs", libs);
     escapes.addImport("platform", platform);
