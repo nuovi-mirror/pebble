@@ -1,6 +1,5 @@
 const std = @import("std");
 const vm = @import("state");
-const allocator = std.heap.page_allocator; // just use the OS allocator for now
 
 pub fn run() !void {
     const indirect = vm.data.get("ARG1") orelse return;

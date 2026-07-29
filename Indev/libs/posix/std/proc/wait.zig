@@ -1,7 +1,6 @@
 const std = @import("std");
 const vm = @import("state");
-
-const allocator = std.heap.page_allocator;
+const mem = @import("allocator");
 
 pub fn run() !void {
     const indirect = vm.data.get("ARG1") orelse return error.VariableNotFound;
@@ -18,7 +17,7 @@ pub fn run() !void {
         const code = (status >> 8) & 0xff;
 
         const exitCodeAsString = try std.fmt.allocPrint(
-            allocator,
+            mem.alloc(),
             "{}",
             .{code},
         );
@@ -31,7 +30,7 @@ pub fn run() !void {
         const sig = status & 0x7f;
 
         const sigAsString = try std.fmt.allocPrint(
-            allocator,
+            mem.alloc(),
             "{}",
             .{sig},
         );

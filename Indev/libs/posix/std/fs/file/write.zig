@@ -1,6 +1,6 @@
 const std = @import("std");
 const vm = @import("state");
-const allocator = std.heap.page_allocator; // just use the OS allocator for now
+const mem = @import("allocator");
 
 pub fn run() !void {
     const indirect = vm.data.get("ARG1") orelse return;
@@ -13,34 +13,33 @@ pub fn run() !void {
     defer file.close();
 
     const data = try parseEscapes(fileData);
-    defer allocator.free(data);
 
     try file.writeAll(data);
 }
 
 fn parseEscapes(input: []const u8) ![]u8 {
     var output = std.ArrayList(u8){};
-    defer output.deinit(allocator);
+    defer output.deinit(mem.alloc());
     var i: usize = 0;
 
     while (i < input.len) {
         if (input[i] == '\\' and i + 1 < input.len) {
             switch (input[i]) {
-                'n' => try output.append(allocator, '\n'),
-                't' => try output.append(allocator, '\t'),
-                'r' => try output.append(allocator, '\r'),
-                '\\' => try output.append(allocator, '\\'),
+                'n' => try output.append(mem.alloc(), '\n'),
+                't' => try output.append(mem.alloc(), '\t'),
+                'r' => try output.append(mem.alloc(), '\r'),
+                '\\' => try output.append(mem.alloc(), '\\'),
                 else => {
-                    try output.append(allocator, '\\');
-                    try output.append(allocator, input[i]);
+                    try output.append(mem.alloc(), '\\');
+                    try output.append(mem.alloc(), input[i]);
                 },
             }
         } else {
-            try output.append(allocator, input[i]);
+            try output.append(mem.alloc(), input[i]);
         }
 
         i += 1;
     }
 
-    return output.toOwnedSlice(allocator);
+    return output.toOwnedSlice(mem.alloc());
 }

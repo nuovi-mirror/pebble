@@ -1,6 +1,6 @@
 const std = @import("std");
 const vm = @import("state");
-const allocator = std.heap.page_allocator; // just use the OS allocator for now
+const mem = @import("allocator");
 
 pub fn run() !void {
     const indirect = vm.data.get("ARG1") orelse return;
@@ -12,14 +12,14 @@ pub fn run() !void {
     var iterator = dir.iterate();
 
     var list: std.ArrayList(u8) = .empty;
-    defer list.deinit(allocator);
+    defer list.deinit(mem.alloc());
 
     while (try iterator.next()) |entry| {
-        try list.appendSlice(allocator, entry.name);
-        try list.append(allocator, '\n');
+        try list.appendSlice(mem.alloc(), entry.name);
+        try list.append(mem.alloc(), '\n');
     }
 
-    const result = try list.toOwnedSlice(allocator);
+    const result = try list.toOwnedSlice(mem.alloc());
 
     try vm.data.put("dirContents", result);
 }

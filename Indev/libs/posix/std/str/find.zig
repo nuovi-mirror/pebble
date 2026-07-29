@@ -1,6 +1,6 @@
 const std = @import("std");
-const allocator = std.heap.page_allocator;
 const vm = @import("state");
+const mem = @import("allocator");
 
 pub fn run() !void {
     const indirect = vm.data.get("ARG1") orelse return;
@@ -19,6 +19,6 @@ pub fn run() !void {
         counter += 1;
     }
 
-    const itemAsString = try std.fmt.allocPrint(allocator, "{d}", .{counter});
+    const itemAsString = try std.fmt.allocPrint(mem.alloc(), "{d}", .{counter});
     try vm.data.put("entry", itemAsString);
 }

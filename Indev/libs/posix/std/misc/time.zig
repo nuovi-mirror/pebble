@@ -1,7 +1,7 @@
 const std = @import("std");
-const allocator = std.heap.page_allocator;
 const vm = @import("state");
 const c = @cImport({@cInclude("time.h");}); // This code needs a POSIX libc
+const mem = @import("allocator");
 
 pub fn run() !void {
     var now: c.time_t = c.time(null);
@@ -17,6 +17,6 @@ pub fn run() !void {
         &tm,
     );
 
-    const copy = try allocator.dupe(u8, buf[0..len]);
+    const copy = try mem.alloc().dupe(u8, buf[0..len]);
     try vm.data.put("time", copy);
 }

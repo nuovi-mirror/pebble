@@ -1,12 +1,12 @@
 const std = @import("std");
 const vm = @import("state");
-const allocator = std.heap.page_allocator; // just use the OS allocator for now
+const mem = @import("allocator");
 
 pub fn run() !void {
     const indirect = vm.data.get("ARG1") orelse return error.VariableNotFound;
     const procArgs = vm.data.get(indirect) orelse return error.VariableNotFound;
    
-    var argv = std.array_list.Managed([]const u8).init(allocator); 
+    var argv = std.array_list.Managed([]const u8).init(mem.alloc()); 
     defer argv.deinit();
 
     var split = std.mem.splitScalar(u8, procArgs, ' ');
@@ -17,7 +17,7 @@ pub fn run() !void {
 
     var child = std.process.Child.init(
         argv.items,
-        allocator,
+        mem.alloc(),
     );
 
     try child.spawn();
@@ -25,7 +25,7 @@ pub fn run() !void {
     const pid = child.id;
 
     const pidAsString = try std.fmt.allocPrint(
-        allocator,
+        mem.alloc(),
         "{}",
         .{pid},
     );
