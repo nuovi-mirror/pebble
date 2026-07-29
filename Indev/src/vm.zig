@@ -17,6 +17,14 @@ var recording: bool = false;
 var first_arg: ?[]const u8 = null;
 var second_arg: ?[]const u8 = null;
 
+
+// stack-related
+const Frame = struct {
+        pc: usize,
+};
+
+var callStack: std.ArrayList(Frame) = .empty;
+
 // for windows compat
 fn getArgs(allocator: std.mem.Allocator) ![][]const u8 {
     var args = try std.process.argsWithAllocator(allocator);
@@ -45,6 +53,9 @@ pub fn main() !void { // the VM
     defer state.data.deinit();
     defer state.code.deinit(allocator);
     defer state.codeTable.deinit();
+
+    // init stack
+    callStack = .empty;
 
     // argument stuff
 //    const Args = try std.process.argsWithAllocator(allocator); // for windows compat
@@ -301,33 +312,44 @@ fn interpret(list: [][]const u8) !void {
 
         limits.inst_func_curr += 1;
 
-
         recording = true;
+
+        // function starts AFTER this instruction
+        try state.codeTable.put(list[1], state.code.items.len + 1);
+
         try state.code.append(allocator, try copyInstruction(list));
-        try state.codeTable.put(list[1], state.code.items.len);        
     }
 
-    if (std.mem.eql(u8, list[0], "Call")) { // Call a recorded function
-        if (limits.inst_call_curr > limits.inst_call_max) {
-            print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
-            exit(1);
-        }
+    if (std.mem.eql(u8, list[0], "Call")) {
+        const start = state.codeTable.get(list[1])
+            orelse return error.UnknownFunction;
 
-        limits.inst_call_curr += 1;
+        try callStack.append(allocator, .{
+            .pc = start,
+        });
 
-        try callFunc(list);
-    }
-    
-    if (std.mem.eql(u8, list[0], "If")) { // Start doing Ifs (If funcToExec "condition")
+        return try callFunc();
+    }  
+ 
+    if (std.mem.eql(u8, list[0], "If")) { 
+        // Start doing Ifs (If funcToExec "condition")
         if (limits.inst_func_curr > limits.inst_func_max) {
             print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
             exit(1);
         }
 
-        limits.inst_func_curr += 1;
+        limits.inst_if_curr += 1;
 
         if (std.mem.eql(u8, try evaluate(list[2]), "0")) {
-            try callFunc(list);
+            const start = state.codeTable.get(list[1])
+                orelse return error.UnknownFunction;
+            
+            callStack.items[callStack.items.len - 1].pc = start - 1;    
+//            try callStack.append(allocator, .{
+//                .pc = start,
+//            });
+
+            return;
         }
     }
 
@@ -344,27 +366,34 @@ fn interpret(list: [][]const u8) !void {
     }
 } 
 
-fn callFunc(list: [][]const u8) anyerror!void {
-    const recording_old = recording;
-    recording = false;
+fn callFunc() anyerror!void {
+    while (callStack.items.len > 0) {
+        const current = callStack.items.len - 1;
 
-    const start = state.codeTable.get(list[1]) orelse return error.UnknownFunction;
-    var pc = start;
+        if (callStack.items[current].pc >= state.code.items.len) {
+            return error.InvalidPC;
+        }
 
-    while (true) {
-        const instruction = state.code.items[pc];
+        const instruction = state.code.items[callStack.items[current].pc];
 
-        if (std.mem.eql(u8, instruction[0], "End")) break;
+        if (std.mem.eql(u8, instruction[0], "End")) {
+            _ = callStack.pop();
+            continue;
+        }
 
         interpret(instruction) catch |err| {
             if (err == error.Return) {
-                break;
+                _ = callStack.pop();
+                continue;
             }
+
             return err;
         };
-        pc += 1;
+
+        if (callStack.items.len > 0) {
+            callStack.items[callStack.items.len - 1].pc += 1;
+        }
     }
-    recording = recording_old;
 }
 
 fn isOperator(op: []const u8) bool {
@@ -554,6 +583,7 @@ fn debugDump(ir: [][]const u8) !void {
     );
 
     print("MEM: {s}MB\n", .{cstring});
+    print("STACK: {}\n", .{callStack.items.len});
 
     print("\n======== VM DEBUG ========\n", .{});
 }
