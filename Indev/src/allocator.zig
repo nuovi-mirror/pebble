@@ -11,7 +11,7 @@ pub fn init() void {
         arena = std.heap.ArenaAllocator.init(std.heap.c_allocator);
     }
 
-    _ = arena.?.allocator().alloc(u8, 1024 * 1024 * 32) catch {};
+    _ = arena.?.allocator().alloc(u8, 1024 * 1024 * 4) catch {};
 }
 
 pub fn queryCapacity() usize {

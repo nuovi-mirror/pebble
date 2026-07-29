@@ -6,7 +6,7 @@ pub fn build(b: *std.Build) void {
         std.builtin.OptimizeMode,
         "optimize",
         "Optimization mode",
-    ) orelse .ReleaseSafe;
+    ) orelse .ReleaseFast;
     const options = b.addOptions();
 
     const libs = b.createModule(.{

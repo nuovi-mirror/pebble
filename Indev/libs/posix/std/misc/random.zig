@@ -2,21 +2,21 @@ const std = @import("std");
 const vm = @import("state");
 const mem = @import("allocator");
 
-fn xorshift(state: u32) u32 {
+fn xorshift(state: u16) u16 {
     var x = state;
-    x ^= x << 13;
-    x ^= x >> 17;
-    x ^= x << 5;
+    x ^= x << 7;
+    x ^= x >> 9;
+    x ^= x << 8;
     return x;
 }
 
 pub fn run() !void {
-    var seed: u32 = undefined;
+    var seed: u16 = undefined;
 
     if (vm.data.get("random.last")) |last| {
-        seed = try std.fmt.parseInt(u32, last, 10);
+        seed = try std.fmt.parseInt(u16, last, 10);
     } else {
-        seed = std.crypto.random.int(u32);
+        try std.posix.getrandom(std.mem.asBytes(&seed));
     }
 
     const next = xorshift(seed);
