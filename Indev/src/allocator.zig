@@ -8,8 +8,10 @@ pub fn init() void {
     if (build.VMDEBUG) {
         arena = std.heap.ArenaAllocator.init(debug.allocator());
     } else { 
-        arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+        arena = std.heap.ArenaAllocator.init(std.heap.c_allocator);
     }
+
+    _ = arena.?.allocator().alloc(u8, 1024 * 524288) catch {};
 }
 
 pub fn queryCapacity() usize {
