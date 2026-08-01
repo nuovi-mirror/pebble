@@ -1,0 +1,22 @@
+# audio test
+
+New file '/home/van/sound'
+New __Escape_std.fs.file.read_ARG0 'file'
+Escape std.fs.file.read
+
+New __Escape_audio.play_ARG0 '__Escape_std.fs.file.read_RET0'
+
+Escape audio.init
+Escape audio.play
+
+#New time '1000'
+#New __Escape_std.misc.sleep_ARG0 'time'
+#Escape std.misc.sleep
+
+Escape audio.deinit
+
+New time '1000'
+New __Escape_std.misc.sleep_ARG0 'time'
+Escape std.misc.sleep
+
+

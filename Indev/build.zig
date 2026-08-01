@@ -12,6 +12,16 @@ pub fn build(b: *std.Build) void {
     const libs = b.createModule(.{
         .root_source_file = b.path(switch (target.result.os.tag) {
             .windows => "libs/win32/libs.zig",
+            .openbsd => "libs/OpenBSD/libs.zig",
+            else => "libs/posix/libs.zig",
+        }),
+        .target = target,
+        .optimize = optimize,
+    });
+
+    const libs_general = b.createModule(.{
+        .root_source_file = b.path(switch (target.result.os.tag) {
+            .windows => "libs/win32/libs.zig",
             else => "libs/posix/libs.zig",
         }),
         .target = target,
@@ -112,9 +122,16 @@ pub fn build(b: *std.Build) void {
 
     libs.addImport("state", state);
     libs.addImport("allocator", allocator);
+    libs.addImport("general", libs_general);
 
+    libs_general.addImport("state", state);
+    libs_general.addImport("allocator", allocator);
+    
     escapes.addImport("libs", libs);
     escapes.addImport("platform", platform);
+
+    if (target.result.os.tag == .openbsd)
+        exe.linkSystemLibrary("sndio");
 
     b.getInstallStep().dependOn(&install.step);
 }
