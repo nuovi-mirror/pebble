@@ -3,9 +3,14 @@ const platform = @import("platform");
 
 const stdlib =
     \\. # rock stdlib
-    \\fn print ( value ) value
-    \\. New __Return_std.io.print_ARG0 'value'
+    \\fn print ( value ) data {
+    \\. New __Func_print_data {__Func_print_value}
+    \\. New __Escape_std.io.print_ARG0 '__Func_print_data'
     \\. Escape std.io.print
+    \\}
+    \\fn getInput ( ) input  {
+    \\. Escape std.io.input
+    \\. New __Func_getInput_input __Escape_std.io.input_RET0
     \\}
     \\. # end rock stdlib
     \\
