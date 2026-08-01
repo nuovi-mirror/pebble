@@ -208,7 +208,7 @@ fn run() !?Error {
             output = try std.fmt.allocPrint(
                 allocator,
                 "New __Func_{s}_{s} {s}\n",
-                .{ tokens.items[1], funcname, tokens.items[1] },
+                .{ funcname, tokens.items[1], tokens.items[1] },
             );
     } else if (std.mem.eql(u8, tokens.items[1], "=")) {
         const omit = tokens.items[2][0];
