@@ -129,8 +129,16 @@ pub fn run(fileData: []const u8) !void {
         const IR = try tokenize(line);
         if (IR.len == 0) continue; // skip newlines and comments and such
         defer allocator.free(IR);
-        if (build.VMDEBUG) try debugDump(IR); // debug dump
-        try interpret(IR);
+        
+        if (build.VMDEBUG) {
+            try debugDump(IR); // debug dump
+            platform.print("Press the Enter key to run said instruction.", .{});
+            _ = platform.input();
+            platform.print("Running said instruction.", .{});
+            try interpret(IR);
+        } else {
+            try interpret(IR);
+        }
     }
 
 //    defer allocator.free(fileData);

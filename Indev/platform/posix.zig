@@ -8,3 +8,15 @@ pub fn print(comptime fmt: []const u8, args: anytype) void {
     print_writer.interface.print(fmt, args) catch {};
     print_writer.interface.flush() catch {};
 }
+
+pub fn input() []const u8 {
+    var input_buffer: [1024]u8 = undefined;
+    var input_reader = std.fs.File.stdin().reader(&input_buffer);
+            
+    const stdin = &input_reader.interface;
+    return stdin.takeDelimiterExclusive('\n') catch |err| switch (err) {
+        error.EndOfStream => "",
+        error.ReadFailed => "",
+        error.StreamTooLong => "",
+    };
+}
