@@ -2,10 +2,12 @@ const std = @import("std");
 const vm = @import("state");
 
 pub fn run() !void {
-    const indirect = vm.data.get("ARG1") orelse return;
+    const indirect = vm.data.get("__Escape_std.term.cursor.moveAbsolute_ARG0") 
+        orelse return;
     const x = vm.data.get(indirect) orelse return;
 
-    const indirect2 = vm.data.get("ARG2") orelse return;
+    const indirect2 = vm.data.get("__Escape_std.term.cursor.moveAbsolute_ARG1") 
+        orelse return;
     const y = vm.data.get(indirect2) orelse return;
 
     var buf: [1024]u8 = undefined;

@@ -329,6 +329,7 @@ fn interpret(list: [][]const u8) !void {
         });
 
         return try callFunc();
+//        return;
     }  
  
     if (std.mem.eql(u8, list[0], "If")) { 
@@ -367,7 +368,9 @@ fn interpret(list: [][]const u8) !void {
 } 
 
 fn callFunc() anyerror!void {
-    while (callStack.items.len > 0) {
+    const base = callStack.items.len - 1;
+
+    while (callStack.items.len > base) {
         const current = callStack.items.len - 1;
 
         if (callStack.items[current].pc >= state.code.items.len) {
@@ -390,7 +393,7 @@ fn callFunc() anyerror!void {
             return err;
         };
 
-        if (callStack.items.len > 0) {
+        if (callStack.items.len > base) {
             callStack.items[callStack.items.len - 1].pc += 1;
         }
     }

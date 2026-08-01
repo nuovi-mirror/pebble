@@ -1,43 +1,43 @@
 
 New 1.1 ' (**)/'
-New 1.2 '<)  )'
-New 1.3 ' /  \'
+New 1.2 '<)  ) '
+New 1.3 ' /  \ '
 
-New 2.1 '\(**)'
+New 2.1 '\(**) '
 New 2.2 ' (  )>'
-New 2.3 ' /  \'
+New 2.3 ' /  \ '
 
 New time '500' # 500ms
 
 Func reset
 Escape std.term.screen.clear
-New x '0'
-New y '0'
-New ARG1 'x'
-New ARG2 'y'
+New x '1'
+New y '1'
+New __Escape_std.term.cursor.moveAbsolute_ARG0 'x'
+New __Escape_std.term.cursor.moveAbsolute_ARG1 'y'
 Escape std.term.cursor.moveAbsolute
 End
 
 Func p1
-New ARG1 '1.1'
+New __Escape_std.io.print_ARG0 '1.1'
 Escape std.io.print
-New ARG1 '1.2'
+New __Escape_std.io.print_ARG0 '1.2'
 Escape std.io.print
-New ARG1 '1.3'
+New __Escape_std.io.print_ARG0 '1.3'
 Escape std.io.print
 End
 
 Func p2
-New ARG1 '2.1'
+New __Escape_std.io.print_ARG0 '2.1'
 Escape std.io.print
-New ARG1 '2.2'
+New __Escape_std.io.print_ARG0 '2.2'
 Escape std.io.print
-New ARG1 '2.3'
+New __Escape_std.io.print_ARG0 '2.3'
 Escape std.io.print
 End
 
 Func sleep
-New ARG1 'time'
+New __Escape_std.misc.sleep_ARG0 'time'
 Escape std.misc.sleep
 End
 

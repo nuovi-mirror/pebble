@@ -13,7 +13,7 @@ fn xorshift(state: u16) u16 {
 pub fn run() !void {
     var seed: u16 = undefined;
 
-    if (vm.data.get("random.last")) |last| {
+    if (vm.data.get("__Escape_std.misc.random_last")) |last| {
         seed = try std.fmt.parseInt(u16, last, 10);
     } else {
         try std.posix.getrandom(std.mem.asBytes(&seed));
@@ -27,6 +27,6 @@ pub fn run() !void {
         .{next},
     );
 
-    try vm.data.put("random.last", str);
-    try vm.data.put("random", str);
+    try vm.data.put("__Escape_std.misc.random_last", str);
+    try vm.data.put("__Escape_std.misc.random_RET0", str);
 }

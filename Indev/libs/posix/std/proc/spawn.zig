@@ -3,7 +3,9 @@ const vm = @import("state");
 const mem = @import("allocator");
 
 pub fn run() !void {
-    const indirect = vm.data.get("ARG1") orelse return error.VariableNotFound;
+    const indirect = vm.data.get("__Escape_std.proc.spawn_ARG0") 
+        orelse return error.VariableNotFound;
+    
     const procArgs = vm.data.get(indirect) orelse return error.VariableNotFound;
    
     var argv = std.array_list.Managed([]const u8).init(mem.alloc()); 
@@ -30,5 +32,5 @@ pub fn run() !void {
         .{pid},
     );
 
-    try vm.data.put("pid", pidAsString);
+    try vm.data.put("__Escape_std.proc.spawn_RET0", pidAsString);
 }

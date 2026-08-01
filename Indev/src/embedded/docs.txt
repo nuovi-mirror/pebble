@@ -1,215 +1,265 @@
-Pebble Lang/VM Documentation
+Pebble Virtual Machine documentation
 
-Pebble is an ultralight virtual machine and programming language
-with the goal of being small, lightweight, and easy to embed into 
-a larger project where larger scripting languages, such as Lua, are
-too large, but where safety is still needed.
+Developed by vantheman
+Product of The Nuovi Orizzonti Company
 
-Pebble is designed to be simple at the VM / interpreter layer. Due
-to this, it has no types or compiler, is written entirely in Zig and its own language, 
-and compiles down to one single binary that includes embedded documentation, a 
-test suite, virtual machine, interpreter, version information, and standard
-library in less than 100kb compiled. It's only dependencies are a Zig compiler
-and Zig standard library at compile-time and a POSIX libc and dynamic loader
-at runtime (tested on OpenBSD 7.9 AMD64).
+Pebble is a dead-simple virtual machine designed for environments where a full
+runtime would be too large but proper scripting and automation is still important.
+Pebble attempts to balance speed and size, while keeping safety and isolation
+the number one priority. Pebble is comparable in speed to Ruby 4.0.5 using native
+C extensions, usually beating it in most benchmarks by around 5x to 14x. Pebble is
+designed to be fully host-safe. A Pebble script should directly never crash, never 
+corrupt memory, and never damage the host in any way. This is designed as part of 
+the core architecture and philosophy of the Pebble virtual machine: never allow code 
+running against the virtual machine to corrupt the host.
+
+Pebble uses a CISC-like variable-oriented bytecode language also named Pebble (the
+Pebble language), which is interpreted inside of Pebble, which is the virtual
+machine (both the bytecode language and virtual machine are named Pebble). There
+is a simple textual bytecode representation designed to compile down 1:1 (or close
+to). This is designed as a compiler target and a stable ABI (this has remained
+stable and compatible in syntax since Alpha version 2). Since the bytecode language
+is already fairly high-level, compilers targeting the Pebble language are generally
+pretty simple (eg, no advanced expression handling, no variable handling internally,
+no complex optimization passes, and so on). All of the optimization is designed to
+be handled internally inside of the Pebble virtual machine itself.
+
+Pebble is explicity not a stack machine. Pebble bytecode acts on variables directly
+in the same way a register machine would. Pebble has the ability to express full
+conceptual operations as single instructions, following the CISC philosiphy, while
+taking it one step further, allowing expression of entire language concepts.
+Eg. a compiler may be able to express 'x = a + b / 14 * 3' as a single 
+instruction. The virtual machine handles loading, storing, variable resolution,
+and so on, all internally, completly transparent to the user and / or compiler.
+
+The Pebble virtual machine is intended to not expose types to the user in any way.
+The user should have no idea what type their variable is being stored as, size
+constraints of said type and / or variable, and so on. All of this is handled by the
+Pebble VM. Types are simply an implementation detail of the virtual machine itself.
+
+The Pebble VM allows for native single-instruction operations involving things like
+loading a variable, performing a complex mathematical expression involving multiple
+operations, variable look-ups, floating-point operations, and so on, and a store.
+This is part of the Pebble VM's attempt to be CISC-like both internally and as
+to the user. This allows for major optimizations inside of the Pebble VM itself and
+for the bytecode language to be viable as a standalone high-level programming
+language in itself.
+
+The Pebble virtual machine is designed to be lightweight and efficient. The Pebble
+virtual machine should only need a few megabytes of memory to run the majority of
+programs and benchmarks, as well as only needing a 32bit or 64bit x86 or arm CPU.
+The Pebble virtual machine is single-thredded and entirly 32bit internally, allowing
+it to run on even the oldest of hardware, while still allowing high-performance
+operations on larger data types through library calls.
+
+Pebble isolates all libraries through the Escape function. The Escape function will
+scan through the list of library functions compiled into the virtual machine binary
+and run said library function. Libraries generally are written in native Zig and
+only have access to the virtual machines variable tables.
+
+The textual bytecode language known as Pebble exposes a few keywords as primitives.
+These keywords are designed to provide the basic functionality any virtual machine
+or programming language should require. These keywords include
+
+	- New -
+		Perform stated operation and store result to a variable.
+
+	- Func -
+		Begin recording instructions to the function tables.
+
+	- Call -
+		Begin executing a recorded block from the function tables. Return
+		to the caller (pc.old + 1) after the end of the operation.
+
+	- If -
+		Jump to an instruction in the function tables if the expression
+		results in a return of 0. Return to the caller (pc.old + 1) after
+		the operation.
+
+	- End -
+		Stop recording instructions to the function tables.
+
+	- Return -
+		Return early to the caller (pc.old + 1) from a recorded function.
+
+	- Escape -
+		Perform a library call.
+
+The language uses a simple expression syntax using the following
+
+	" " - Expression 
+		Resolve the expression inside of the markings and return the 
+		result. Resolve variables to their value, then parse the
+		remaining data as an expression.
+
+	' ' - Literal
+		Return the data as a literal. Do not parse in any way.
+
+	{ } - Indirect expression
+		Attempt to chase a pointer / reference and resolve the expression
+		held there. Return the result.
+
+	    - Copy
+		Copy the data in said variable. Do not resolve as an expression.
+
+Supported operations for expressions include
+
+	+ 
+		Add the values together and return the result.
+
+	- 
+		Subtract the right value from the left value and return the result.
+
+	/ 
+		Divide the right value from the left value and return the result.
+
+	*
+		Multiply the two values and return the result.
+
+	< 
+		Compare the right to the left. Return 0 if the right is greater than
+		the left.
+
+	>
+		Compare the right to the left. Return 0 if the right is less than the
+		left.
+
+	==
+		Compare the right to the left. Return 0 if the right is equal to the
+		left.
+
+	!=
+		Compare the right to the left. Return 0 if the right is not equal to
+		the left.
+
+	?=
+		Compare the right to the left as strings. Return 0 if the right is
+		equal to the left.
+
+	s++
+		Merge the right and left strings into one string.
+
+	-?=
+		Search for the right substring in the left string. Return 0 if the
+		substring is found.
+
+	e?=
+		Search for the right substring in the ending of the left string.
+		Return 0 if the substring is found.
+
+	s?=
+		Search for the right substring in the start of the left substring.
+		Return 0 if the substring is found.
+
+The New instruction takes two arguments inline, one to represent the variable to
+save the result of the second as. The second should be an expression.
+The If instruction takes two arguments inline, one to represent the name of the
+function to jump to if the condition as an expression in the second has a result
+of zero. In this language, zero represents true.
+The Call instruction takes one argument inline, as to represent the name of the
+function to begin executing.
+The End instruction takes no arguments and simply marks the interpreter to stop
+recording instructions and end a function. 
+Return takes no arguments and simply marks the interpreter to return to the caller
+of the function.
+Escape takes one argument inline as to represent the name of the library function
+to call.
+
+The libraries of the virtual machine are compiled into the virtual machine. This 
+means they are built into the virtual machine binary, not held to externally or
+linked against dynamically. Once the virtual machine is compiled, libraries cannot
+be added or removed.
 
 
-The VM embeds a few programs into itself, such as the main runner,
-the documentation reader, the version tool, and the test suite. These can be
-accessed by
-
-> zig build
-
-This should output a single binary at the root of the source dir named vm. 
-
-./vm docs - reads the documentation 
-./vm version - reads version info
-./vm (filename) - runs a script written in Pebble
-./vm test - runs the test suite, which is also written in Pebble.
-./vm psh - run the builtin shell, which is also written in Pebble.
-
-The shell, psh (Pebble SHell), includes a few builtin commands in the
-standard release. A version of this shell without builtins can be found
-at tools/psh.pebble. The builtins include cd, pwd, echo, ls, and exit.
-To view all builtins, read the source code of tools/psh+builtins.pebble.
-After all, it is written in pebble!
-
-The VM is keyword-based, meaning there are a few small keywords used to
-perform functions. These functions are conspired to be the bare minimum 
-needed to have a working language. The rest of functions are provided by a
-Zig standard library.
-
-VM keywords include
-
-New - create / modify a variable
-Func - start recording a function
-End - stop recording a function
-If - execute a function if the condition is true
-Return - return from a function early
-Call - call a recorded function
-Escape - call a library function
-
-Syntax for these keywords includes
-
-	New (varname) (payload) - Assign a variable of the name varname with the
-		data payload of payload. This keyword allows for the full suite of expressions.
-
-	Func (funcname) - Begins recording instructions into the code tables until the
-		End keyword is called to allow the function to be executed using the Call
-		keyword at any point after it is defined.
-
-	End - Ends recording of a function, allowing it to be called by the Call keyword.
-
-	If (funcname) (condition) - Executes function funcname only if the result of
-		condition is 0. Since this language is type-less, 0 represents true and 1 
-		represents false. This keyword supports the full suite of expressions.
-
-	Call (funcname) - Begin executing a stored function under the name funcname
-		immediately unconditionally.
-
-	Escape (sequence) - Run a library function compiled into the VM binary.
-
-
-Some keywords allow the payload to be an expression. Expressions are resolved
-before the operation and the data is simply substituted into the instruction after
-it is resolved.
-
-Each keyword has a value assigned at compile-time via src/limits.zig which defines how many
-times that instruction is allowed to be executed. If that limit is exceeded, then the VM
-simply kills itself.
-
-Standard expression for this syntax includes
-	Quoting rules
-		" " = Literal - Perform an expression and return the result. Substitute 
-				keywords that are not proper expression syntax with a 
-				variable. Look up said variable and replace it with the
-				data in said variable, then perform the operation.
-
-		' ' = True Literal - Do not attempt to evaluate the data in any way.
-
-		{ } = Forced Literal - Treat the quoted data as an indirect. Assume that
-				is the name of a variable holding an expression and evaluate
-				said expression as a Literal.
-
-		No marking = Indirect - Replace the section with the data in said variable.
-
-	Mathematical operations
-		+ = Add the left and right
-		- = Subtract right from the left
-		/ = Divide the left from the right
-		* = Multiply the left by the right
-
-	Comparison operations
-		> - Return 0 if the left is greater than the right, else return 1
-		< - Return 0 if the right is greater than the left, else return 1
-		== - Return 0 if the right is equal to the left, else return 1
-		!= - Return 0 if the right is not equal to the left, else return 1
-
-	String operations
-		S++ - Merge the two strings into one, left string first
-		?= - Return 0 if the two strings are equal, else return 1
-		-?= - Return 0 if the substring on the left is found in the right string, else return 1
-		s?= - Return 0 if the string on the right starts with the substring on the left, else return 1
-		e?= - Return 0 if the string on the right ends with the substring on the left, else return 1
-
-Arguments
-	The VM provides variables VMARGC as the number of arguments provided and VMARGn as the data given as said
-	argument. VMARG1 will be the name of the VM binary and should always be present, meaning VMARGC should always
-	be at least 1.
-
-The Standard Library
-	For simplicity, the standard library (everything referenced by zig/libs/libs.zig) is simply compiled straight
-	into the main VM binary. This allows zero runtime dependencies for the VM after compile-time. To add a library,
-	create a .zig file in libs/zig/ performing the operation, add that file to src/libs/libs.zig and then add it
-	to src/escapes.zig. To remove one, simply comment out the line adding it in src/escapes.zig.
 
 
 
-	I/O
-		Print - Takes one variable, ARG1, as an Indirect. Prints the data in said variable referenced by the
-			indirect.
-		PrintLn - Same as Print, but there will not be a trailing newline character.
+Navigating the source tree
+	The sourc code tree of Pebble is designed to be simple and readable. From
+	the root of your tree, you should be able to see a few directories. These
+	should include
 
-		Input (POSIX) - Gets input from stdin and returns it in the variable input.
+		src/ - VM source code
+		libs/ - library source code
+		platform/ - platform-dependent VM code
+		tools/ - tools and tests for the VM
+		compiler/ - the experimental compiler frontend 
 
-	Fs
-		Fwrite (POSIX) - Takes two variables, ARG1 and ARG2 as indirects. Writes the data in the variable 
-			referenced by the indirect in ARG1 to the name of the file name in the variable mentioned by ARG2.
+	In src, there should be a few files, including
+		vm.zig - main VM code
+		state.zig - VM state
+		limits.zig - instruction limit definitions
+		docs.zig - docs import code
+		allocator.zig - shared allocators
+		tests.zig - tests import program
+		escapes.zig - code for defining the escapes table
+		version.zig - code defining version metadata
 
-		Fbwrite (POSIX) - Takes two variables, ARG1 and ARG2 as indirects. Writes the data in the variable 
-			referenced by the indirect in ARG1 to the name of the file name in the variable mentioned 
-			by ARG2. Does not format the data in any way.
+		There should also be a directory named embedded/, which should
+		hold unrelated items which are embedded into the VM binary, which
+		are also not source code (eg. documentation, source code programs, 
+		so on).
 
-		Fread (POSIX) - Takes one variable, ARG1, as an indirect. Reads the data in the variable referenced by the
-			indirect as a file name. Reads the data in the file into the variable fileData.
+	In libs, the default should contain just the standard library. The libraries
+	are broken down by the operating system they are expected to support. This
+	is generally just dirs libs/posix/ and libs/win32/.
 
-		ListDir (POSIX) - Takes one variable, ARG1, as an indirect. Reads the contents of the directory name held
-			in the variable referenced by the indirect and saves it to the variable dirContents, formatted
-			as a string full of dir entries separated by newlines with one newline at the end.
+	There should be one folder per object, each with its own libs.zig file 
+	importing all libraries included into that folder. Final objetcs which
+	contain the library code should be identified by having a function inside
+	named run which is defined to the public. 
 
-		Gcwd (POSIX) - Gets the current working directory and saves it to variable cwd.
+	To remove a library, simply go to the object's folder and comment out the 
+	line importing it in libs.zig. Eg. if i wanted to remove filesystem
+	libraries out of the standard library for a posix target, I would edit
+	
+		libs/posix/std/libs.zig
+	
+	and comment out
 
-		Chcwd (POSIX) - Takes one variable, ARG1, as an indirect. Reads the data in the variable referenced by the
-			indirect and changes the working directory to that new directory.
+		const fs = @import("fs/libs.zig");
 
-	Misc
-		Random - Generates a random number and stores it into the variable random. NOT CRYPTOGRAPHIC
-		Time (POSIX) - Grabs the current time and formats it all fancy.
+	This was done to make the ability to add and remove libraries from the final
+	build easy. This allows the maintainer of the system to easily remove
+	libraries they do not wish to allow the users to use.
 
-	Str
-		StrLen - Takes one variable, ARG1, as an indirect. Gets the length of the string in the variable
-			referenced by said indirect and places it into the variable len.
 
-		StrSplitNumL - Takes two variables, ARG1 and ARG2, as indirects. Returns the contents of the
-			substring in the variable referenced by ARG1 before entry N in the variable referenced by ARG2.
-			The substring is placed into the variable strLeft.
+Calling conventions
+	Function
+		Functions follow the convention of accepting arguments in the
+		variables 
 
-		StrSplitNumR - Takes two variables, ARG1 and ARG2, as indirects. Returns the contents of the
-			substring in the variable referenced by ARG1 after entry N in the variable referenced by ARG2.
-			The substring is placed into the variable strRight.
+			__Func_(funcname)_ARG(argnum)
 
-		StrFind - Takes two variables, ARG1 and ARG1, as indirects. Searches through the string at ARG1 to find
-			the char at ARG2 and returns a number as the entry this char is in. Returns this into variable
-			entry. Please make sure the substring is present before performing this op, or else it might stall.
+		Functions follow the convention of returning values in the 
+		variables
 
-	Proc (POSIX)
-		SpawnProc (POSIX) - Takes on arg, ARG1, as an indirect to the command and arguments of the process to run. 
-			Spawns a POSIX process using the data in said variable referenced by said indirect and returns
-			the PID of the new process in the variable pid. This treats the indirect address as an array-like
-			structure - one string separated by spaces, the first being the command and the ones after it being
-			the arguments of the command. Items in said array-like structure will be treated as indirects unless
-			they do not match a variable name.
+			__Func_(funcname)_RET(retnum)
 
-		WaitPid (POSIX) - Takes one arg, ARG1, as an indirect to the variable holding the POSIX PID of the
-			process to wait for. Waits for said process to complete execution and will return variables
-			killedBySig with the signal type it was killed by and otherTermination as true if it was 
-			killed, or exitCode as the exit code of the process and otherTermination as false if it was
-			not killed.
+		Functions follow the convention of using internal variables
 
-		Exit (POSIX) - Kills the VM process.
+			__Func_(funcname)_(varname)
 
-Examples
+		Functions should only be allowed to use variables if they
+		being in __Func_(funcname)_ - this is done to not clobber 
+		global state.
 
-	New msg 'Hello, World!' # define a var named msg holding true literal Hello, World!
-	New ARG1 'msg' # define a var named ARG1 holding true literal msg
-	Escape Print # call the escape sequence Print 
+	Escapes
+		Escapes follow the convention of accepting arguments in the
+		variables
 
-	# since these are literals, they are evaluated then stored
-	New a "ab -?= cd" # stores 0 if true
-        New b "ab e?= cd" # stores 0 if true
-        New c "ab s?= cd" # stores 0 if true
-        New d "ab ?= cd" # stores 0 if true
-        New e "ab s++ cd" # stores "abcd"
-        New f "e s++ cd" # stores "abcdcd"
+			__Escape_(escapename)_ARG(agrnum)
 
-	# loop made from primitives
-        Func count # start recording to func count
-        New ARG1 'counter' # set ARG1 to true literal counter
-        Escape Print # print
-        New counter "counter - 1" # set counter to literal counter - 1
-        If count "counter > 0" # run function count if expression counter > 0 = 0 (true)
-        End # stop recording function
-        New counter '10' # set counter to true literal 10
-        Call count # begin executing function count
+		Escapes follow the convention of returning values in the
+		variables
+
+			__Escape_(escapename)_RET(retnumber)
+
+		Escapes should only be allowed to use variables if they
+		begin in __Escape_(escapename)_ - this is done to not clobber
+		global state.
+
+
+
 
 

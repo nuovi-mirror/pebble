@@ -3,10 +3,10 @@ const vm = @import("state");
 const mem = @import("allocator");
 
 pub fn run() !void {
-    const indirect = vm.data.get("ARG1") orelse return;
+    const indirect = vm.data.get("__Escape_std.str.find_ARG0") orelse return;
     const str = vm.data.get(indirect) orelse return;
 
-    const indirect2 = vm.data.get("ARG2") orelse return;
+    const indirect2 = vm.data.get("__Escape_std.str.find_ARG1") orelse return;
     const target = vm.data.get(indirect2) orelse return;
 
     var counter: usize = 0;
@@ -20,5 +20,5 @@ pub fn run() !void {
     }
 
     const itemAsString = try std.fmt.allocPrint(mem.alloc(), "{d}", .{counter});
-    try vm.data.put("entry", itemAsString);
+    try vm.data.put("__Escape_std.srt.find_RET0", itemAsString);
 }

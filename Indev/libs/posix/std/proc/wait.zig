@@ -3,7 +3,9 @@ const vm = @import("state");
 const mem = @import("allocator");
 
 pub fn run() !void {
-    const indirect = vm.data.get("ARG1") orelse return error.VariableNotFound;
+    const indirect = vm.data.get("__Escape_std.proc.wait_ARG0") 
+        orelse return error.VariableNotFound;
+    
     const pid = vm.data.get(indirect) orelse return error.VariableNotFound;
 
     const realPid = try std.fmt.parseInt(std.posix.pid_t, pid, 10);
@@ -22,8 +24,8 @@ pub fn run() !void {
             .{code},
         );
 
-        try vm.data.put("exitCode", exitCodeAsString);
-        try vm.data.put("otherTermination", "1");
+        try vm.data.put("__Escape_std.proc.wait_RET0", exitCodeAsString);
+        try vm.data.put("__Escape_std.proc.wait_RET2", "1");
 
     } else {
         // Signal termination
@@ -35,7 +37,7 @@ pub fn run() !void {
             .{sig},
         );
 
-        try vm.data.put("killedBySig", sigAsString);
-        try vm.data.put("otherTermination", "0");
+        try vm.data.put("__Escape_std.proc.wait_RET1", sigAsString);
+        try vm.data.put("__Escape_std.proc.wait_RET2", "0");
     }
 }

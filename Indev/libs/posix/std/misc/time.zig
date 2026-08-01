@@ -18,5 +18,5 @@ pub fn run() !void {
     );
 
     const copy = try mem.alloc().dupe(u8, buf[0..len]);
-    try vm.data.put("time", copy);
+    try vm.data.put("__Escape_std.misc.time_RET0", copy);
 }

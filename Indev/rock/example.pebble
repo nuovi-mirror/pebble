@@ -1,0 +1,23 @@
+# rock stdlib #  --- INJECTED ---
+Func __Func_print
+New __Func_print_value __Func_print_ARG0
+New __Return_std.io.print_ARG0 'value' #  --- INJECTED ---
+Escape std.io.print #  --- INJECTED ---
+New __Func_print_RET0 __Func_print_value
+End
+# end rock stdlib #  --- INJECTED ---
+Func __Func_func
+New __Func_func_a __Func_func_ARG0
+New __Func_func_b __Func_func_ARG1
+New __Func_func_x "__Func_func_a + __Func_func_b"
+New __Func_func_y '__Func_func_1'
+New __Func_func_z __Func_func_y
+New __Func_func_RET0 __Func_func_x
+End
+New w '1'
+New __Func_func_ARG0 '12'
+New __Func_func_ARG1 '24'
+Call __Func_func
+New x __Func_func_RET0
+New __Func_print_ARG0 'x'
+Call __Func_print

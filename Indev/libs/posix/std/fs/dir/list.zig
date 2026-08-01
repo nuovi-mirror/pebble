@@ -3,7 +3,7 @@ const vm = @import("state");
 const mem = @import("allocator");
 
 pub fn run() !void {
-    const indirect = vm.data.get("ARG1") orelse return;
+    const indirect = vm.data.get("__Escape_std.io.fs.dir.list_ARG1") orelse return;
     const dirName = vm.data.get(indirect) orelse return;
     
     var dir = try std.fs.cwd().openDir(dirName, .{ .iterate = true });
@@ -21,5 +21,5 @@ pub fn run() !void {
 
     const result = try list.toOwnedSlice(mem.alloc());
 
-    try vm.data.put("dirContents", result);
+    try vm.data.put("__Escape_std.io.fs.dir.get_RE0", result);
 }

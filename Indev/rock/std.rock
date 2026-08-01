@@ -1,0 +1,4 @@
+fn print ( var ) var {
+. New __Escape_std.io.print_ARG0 '__Func_print_var'
+. Escape std.io.print
+} 

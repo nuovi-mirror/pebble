@@ -1,0 +1,37 @@
+// the '/' character represents a comment
+// if the comment character is the first
+// character of a line, the line is a
+// comment. comments can only be on the
+// first line.
+
+// define a function taking two arguemnts
+// argument one should be a and argument
+// two should be b
+// the function should return the result of
+// x
+fn func ( a b ) x {
+
+// function body
+
+// store the result of the expression as x
+x = `a + b
+
+// store the literal as y
+y = !1
+
+// store a copy of y as z
+z = @y
+
+// end the function
+}
+
+w = !1
+
+// copy the result of the function 
+// return to the variable x
+x = :func ( 12 24 )
+
+// call function with the variable as the first argument
+// print is part of the standard library, injected into
+// the source code of every program
+call print ( x )

@@ -3,7 +3,7 @@ const vm = @import("state");
 const mem = @import("allocator");
 
 pub fn run() !void {
-    const indirect = vm.data.get("ARG1") orelse return;
+    const indirect = vm.data.get("__Escape_std.fs.file.read_ARG0") orelse return;
     const fileRead = vm.data.get(indirect) orelse return;
 
     const data = try std.fs.cwd().readFileAlloc(
@@ -12,5 +12,5 @@ pub fn run() !void {
         512 * 1024 * 1024,
     );
 
-    try vm.data.put("fileData", data);
+    try vm.data.put("__Escape_std.fs.file.read_RET0", data);
 }

@@ -4,11 +4,14 @@ New data '1 2 3'
 New separator ' '
 
 Func loop
-New ARG1 'data'
-New ARG2 'separator'
+New __Escape_std.str.find_ARG0 'data'
+New __Escape_std.str.find_ARG1 'separator'
 Escape std.str.find
-New ARG2 'entry'
+New __Escape_std.str.split.num.right_ARG0 'data'
+New __Escape_std.str.split.num.right_ARG1 '__Escape_std.str.find_RET0'
+New __Escape_std.str.split.num.left_ARG0 'data'
+New __Escape_std.str.split.num.left_ARG1 '__Escape_std.str.find_RET0'
 Escape std.str.split.num.right
 Escape std.str.split.num.left
-New data strRight
-New arg strLeft
+New data __Escape_std.str.split.num.right_RET0
+New arg __Escape_std.str.split.num.left_RET0

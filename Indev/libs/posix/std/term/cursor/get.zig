@@ -47,8 +47,8 @@ pub fn run() !void {
 
     x_str = x_str[0 .. x_str.len - 1]; // remove trailing R
 
-    try vm.data.put("cursor.x", x_str);
-    try vm.data.put("cursor.y", y_str);
+    try vm.data.put("__Escape_std.term.cursor.get_RET0", x_str);
+    try vm.data.put("__Escape_std.term.cursor.get_RET1", y_str);
 
     // leave raw mode
     try std.posix.tcsetattr(

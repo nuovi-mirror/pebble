@@ -3,10 +3,10 @@ const vm = @import("state");
 const mem = @import("allocator");
 
 pub fn run() !void {
-    const indirect = vm.data.get("ARG1") orelse return;
+    const indirect = vm.data.get("__Escape_std.fs.file.write_ARG0") orelse return;
     const fileData = vm.data.get(indirect) orelse return;
 
-    const indirect2 = vm.data.get("ARG2") orelse return;
+    const indirect2 = vm.data.get("__Escape_std.fs.file.write_ARG1") orelse return;
     const fileName = vm.data.get(indirect2) orelse return;
     
     const file = try std.fs.cwd().createFile(fileName, .{});
