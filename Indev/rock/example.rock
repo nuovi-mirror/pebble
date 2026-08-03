@@ -22,6 +22,20 @@ y = !1
 // store a copy of y as z
 z = @y
 
+// functions cannot use variables outside of their
+// scope. Instead, the import and export instructions
+// are used to allow them to.
+// Keep in mind this is done by the compiler.
+
+//export x
+// function var x is now global x (copied)
+
+//import x
+// copy globar var x to local var x
+
+// however, those are commented out for this program 
+// since they are not needed.
+
 // end the function
 }
 

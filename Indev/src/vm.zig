@@ -17,6 +17,40 @@ var recording: bool = false;
 var first_arg: ?[]const u8 = null;
 var second_arg: ?[]const u8 = null;
 
+// evaluator related
+const EvalError = error{NotNumeric} || std.mem.Allocator.Error;
+
+pub const Op = enum {
+    concat, str_eq, str_starts, str_ends, str_contains,
+    add, sub, mul, div,
+    num_eq, num_ne, gt, lt,
+};
+
+const op_kind = std.StaticStringMap(Op).initComptime(.{
+    .{ "s++", .concat },
+    .{ "?=", .str_eq },
+    .{ "s?=", .str_starts },
+    .{ "e?=", .str_ends },
+    .{ "-?=", .str_contains },
+    .{ "+", .add },
+    .{ "-", .sub },
+    .{ "*", .mul },
+    .{ "/", .div },
+    .{ "==", .num_eq },
+    .{ "!=", .num_ne },
+    .{ ">", .gt },
+    .{ "<", .lt },
+});
+
+// Highest precedence first. Each tier is fully collapsed before moving
+// to the next tier that ordering is the entire precedence mechanism.
+const tiers = [_][]const []const u8{
+    &.{ "*", "/" },
+    &.{ "+", "-", "s++" },
+    &.{ "?=", "s?=", "e?=", "-?=", "==", "!=", ">", "<" },
+};
+
+
 
 // stack-related
 const Frame = struct {
@@ -451,84 +485,84 @@ fn resolveVariables(line: []const u8) ![]const u8 {
 }
 
 
-fn evaluate(line: []const u8) ![]const u8 {
-    const allocator = mem.alloc();
-
-    var parts = std.mem.splitScalar(u8, line, ' ');
-
-    var result = parts.next() orelse return line;
-
-    var op = parts.next() orelse {
-        return try resolveVariables(line);
-    };
-
-    // Not an expression, just resolve variables
-    if (!isOperator(op)) {
-        return try resolveVariables(line);
-    }
-
-    while (true) {
-        const right_raw = parts.next() orelse break;
-
-        var left = result;
-        var right = right_raw;
-
-        if (state.data.get(left)) |data| {
-            left = data;
-        }
-
-        if (state.data.get(right)) |data| {
-            right = data;
-        }
-
-        if (std.mem.eql(u8, op, "s++")) {
-            result = try std.fmt.allocPrint(
-                allocator,
-                "{s}{s}",
-                .{ left, right },
-            );
-        } else if (std.mem.eql(u8, op, "?=")) {
-            result = if (std.mem.eql(u8, left, right)) "0" else "1";
-        } else if (std.mem.eql(u8, op, "s?=")) {
-            result = if (std.mem.startsWith(u8, left, right)) "0" else "1";
-        } else if (std.mem.eql(u8, op, "e?=")) {
-            result = if (std.mem.endsWith(u8, left, right)) "0" else "1";
-        } else if (std.mem.eql(u8, op, "-?=")) {
-            result = if (std.mem.indexOf(u8, left, right) != null) "0" else "1";
-        } else {
-            const left_num = std.fmt.parseFloat(f32, left) catch return try resolveVariables(line);
-            const right_num = std.fmt.parseFloat(f32, right) catch return try resolveVariables(line);
-
-            if (std.mem.eql(u8, op, "+")) {
-                result = try std.fmt.allocPrint(allocator, "{}", .{left_num + right_num});
-            } else if (std.mem.eql(u8, op, "-")) {
-                result = try std.fmt.allocPrint(allocator, "{}", .{left_num - right_num});
-            } else if (std.mem.eql(u8, op, "*")) {
-                result = try std.fmt.allocPrint(allocator, "{}", .{left_num * right_num});
-            } else if (std.mem.eql(u8, op, "/")) {
-                result = try std.fmt.allocPrint(allocator, "{}", .{left_num / right_num});
-            } else if (std.mem.eql(u8, op, "==")) {
-                result = if (left_num == right_num) "0" else "1";
-            } else if (std.mem.eql(u8, op, "!=")) {
-                result = if (left_num != right_num) "0" else "1";
-            } else if (std.mem.eql(u8, op, ">")) {
-                result = if (left_num > right_num) "0" else "1";
-            } else if (std.mem.eql(u8, op, "<")) {
-                result = if (left_num < right_num) "0" else "1";
-            } else {
-                return try resolveVariables(line);
-            }
-        }
-
-        op = parts.next() orelse break;
-
-        if (!isOperator(op)) {
-            break;
-        }
-    }
-
-    return result;
-}
+//fn evaluate(line: []const u8) ![]const u8 {
+//    const allocator = mem.alloc();
+//
+//    var parts = std.mem.splitScalar(u8, line, ' ');
+//
+//    var result = parts.next() orelse return line;
+//
+//    var op = parts.next() orelse {
+//        return try resolveVariables(line);
+//    };
+//
+//    // Not an expression, just resolve variables
+//    if (!isOperator(op)) {
+//        return try resolveVariables(line);
+//    }
+//
+//    while (true) {
+//        const right_raw = parts.next() orelse break;
+//
+//        var left = result;
+//        var right = right_raw;
+//
+//        if (state.data.get(left)) |data| {
+//            left = data;
+//        }
+//
+//        if (state.data.get(right)) |data| {
+//            right = data;
+//        }
+//
+//        if (std.mem.eql(u8, op, "s++")) {
+//            result = try std.fmt.allocPrint(
+//                allocator,
+//                "{s}{s}",
+//                .{ left, right },
+//           );
+//        } else if (std.mem.eql(u8, op, "?=")) {
+//           result = if (std.mem.eql(u8, left, right)) "0" else "1";
+//        } else if (std.mem.eql(u8, op, "s?=")) {
+//            result = if (std.mem.startsWith(u8, left, right)) "0" else "1";
+//        } else if (std.mem.eql(u8, op, "e?=")) {
+//           result = if (std.mem.endsWith(u8, left, right)) "0" else "1";
+//        } else if (std.mem.eql(u8, op, "-?=")) {
+//            result = if (std.mem.indexOf(u8, left, right) != null) "0" else "1";
+//        } else {
+//            const left_num = std.fmt.parseFloat(f32, left) catch return try resolveVariables(line);
+//            const right_num = std.fmt.parseFloat(f32, right) catch return try resolveVariables(line);
+//
+//            if (std.mem.eql(u8, op, "+")) {
+//                result = try std.fmt.allocPrint(allocator, "{}", .{left_num + right_num});
+//            } else if (std.mem.eql(u8, op, "-")) {
+//                result = try std.fmt.allocPrint(allocator, "{}", .{left_num - right_num});
+//            } else if (std.mem.eql(u8, op, "*")) {
+//                result = try std.fmt.allocPrint(allocator, "{}", .{left_num * right_num});
+//            } else if (std.mem.eql(u8, op, "/")) {
+//                result = try std.fmt.allocPrint(allocator, "{}", .{left_num / right_num});
+//            } else if (std.mem.eql(u8, op, "==")) {
+//                result = if (left_num == right_num) "0" else "1";
+//            } else if (std.mem.eql(u8, op, "!=")) {
+//                result = if (left_num != right_num) "0" else "1";
+//            } else if (std.mem.eql(u8, op, ">")) {
+//                result = if (left_num > right_num) "0" else "1";
+//            } else if (std.mem.eql(u8, op, "<")) {
+//                result = if (left_num < right_num) "0" else "1";
+//            } else {
+//                return try resolveVariables(line);
+//            }
+//        }
+//
+//        op = parts.next() orelse break;
+//
+//        if (!isOperator(op)) {
+//            break;
+//        }
+//    }
+//
+//    return result;
+//}
 
 fn copyInstruction(list: [][]const u8) ![][]const u8 {
     const allocator = mem.alloc();
@@ -597,4 +631,91 @@ fn debugDump(ir: [][]const u8) !void {
     print("STACK: {}\n", .{callStack.items.len});
 
     print("\n======== VM DEBUG ========\n", .{});
+}
+
+fn inTier(tier: []const []const u8, tok: []const u8) bool {
+    for (tier) |t| {
+        if (std.mem.eql(u8, t, tok)) return true;
+    }
+    return false;
+}
+
+fn resolveOne(tok: []const u8) []const u8 {
+    return state.data.get(tok) orelse tok;
+}
+
+fn applyOp(op: Op, left: []const u8, right: []const u8) EvalError![]const u8 {
+    const allocator = mem.alloc();
+    return switch (op) {
+        .concat => try std.fmt.allocPrint(allocator, "{s}{s}", .{ left, right }),
+        .str_eq => if (std.mem.eql(u8, left, right)) "0" else "1",
+        .str_starts => if (std.mem.startsWith(u8, left, right)) "0" else "1",
+        .str_ends => if (std.mem.endsWith(u8, left, right)) "0" else "1",
+        .str_contains => if (std.mem.indexOf(u8, left, right) != null) "0" else "1",
+        else => {
+            const left_num = std.fmt.parseFloat(f32, left) catch return error.NotNumeric;
+            const right_num = std.fmt.parseFloat(f32, right) catch return error.NotNumeric;
+            return switch (op) {
+                .add => try std.fmt.allocPrint(allocator, "{d}", .{left_num + right_num}),
+                .sub => try std.fmt.allocPrint(allocator, "{d}", .{left_num - right_num}),
+                .mul => try std.fmt.allocPrint(allocator, "{d}", .{left_num * right_num}),
+                .div => try std.fmt.allocPrint(allocator, "{d}", .{left_num / right_num}),
+                .num_eq => if (left_num == right_num) "0" else "1",
+                .num_ne => if (left_num != right_num) "0" else "1",
+                .gt => if (left_num > right_num) "0" else "1",
+                .lt => if (left_num < right_num) "0" else "1",
+                else => unreachable,
+            };
+        },
+    };
+}
+
+// One left-to-right pass over `tokens`, collapsing only the operators
+// in `tier`. Anything not in this tier is copied straight through —
+// a later pass will see it.
+fn reducePass(
+    tier: []const []const u8,
+    tokens: []const []const u8,
+) EvalError![]const []const u8 {
+    const allocator = mem.alloc();
+    var out: std.ArrayList([]const u8) = .empty;
+    var i: usize = 0;
+    while (i < tokens.len) {
+        const is_reducible_op = i > 0 and i + 1 < tokens.len and
+            isOperator(tokens[i]) and inTier(tier, tokens[i]);
+        if (is_reducible_op) {
+            const left = resolveOne(out.pop().?);
+            const right = resolveOne(tokens[i + 1]);
+            const op = op_kind.get(tokens[i]).?;
+            const result = try applyOp(op, left, right);
+            try out.append(allocator, result);
+            i += 2;
+        } else {
+            try out.append(allocator, tokens[i]);
+            i += 1;
+        }
+    }
+    return try out.toOwnedSlice(allocator);
+}
+
+pub fn evaluate(line: []const u8) ![]const u8 {
+    const allocator = mem.alloc();
+
+    var token_list: std.ArrayList([]const u8) = .empty;
+    var it = std.mem.splitScalar(u8, line, ' ');
+    while (it.next()) |t| try token_list.append(allocator, t);
+
+    if (token_list.items.len < 3 or !isOperator(token_list.items[1])) {
+        return resolveVariables(line);
+    }
+
+    var current: []const []const u8 = token_list.items;
+    for (tiers) |tier| {
+        current = reducePass(tier, current) catch {
+            return resolveVariables(line);
+        };
+    }
+
+    if (current.len != 1) return resolveVariables(line);
+    return allocator.dupe(u8, current[0]);
 }
