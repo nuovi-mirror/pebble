@@ -8,4 +8,4 @@ embedded documentation and version info, all in 60kb.
 
 Please keep in mind this is an alpha release.
 
-Product of The Nuovi Orizzonti Company
+Product of <a href="http://thenuoviorizzonticompany.org">The Nuovi Orizzonti Company</a>
