@@ -1,50 +1,215 @@
-Varable syntax
-	varname = modifier operation
+Rock General Documentation
 
-	eg. x = 12
-	
-	Current operations support mathematical expressions documented by the VM.
-	Syntax with modifer of the char '`' mark an expression, known as a literal
-	in Pebble. Syntax with the modifier of char '!' mark a literal, known as a
-	true literal in Pebble.
-
-	eg. x = `1 + 2
-	    x = !3
-
-Function syntax
-	fn funcname ( funcargs ) funcreturnvar {
-	funcbody
-	}
-
-	eg.
-
-	fn foo ( bar baz ) bal {
-	bal = `bar + baz
-	}
-
-	this creates a function names foo taking args bar and baz and returning the
-	variable bal.
-
-	Functions can be called with syntax
-	call funcname ( funcargs )
-
-	eg. call foo ( 1 2 ) 
-	calls function foo with arguments 1 as 1 and 2 as 2. With the defined 
-	function foo, this will return the value 3 (AKA 1 + 2, or arg1 + arg2, or 
-	bar + baz - however you wish to phrase it).
-
-	Functions can return early with syntax
-	return value
-
-	where value is the value to be returned.
-
-Escape syntax
-	. op
-
-	eg. . New x '3'
-
-	this will simply inject Pebble code straight into the output instead of 
-	treating it as a compiler expression.
-
-
+By vantheman
 Product of The Nuovi Orizzonti Company
+
+
+Rock is a general-purpose high-level programming designed as a reference
+implimentation on how a compiler can convey higher-level concepts using the Pebble
+textual bytecode language. 
+
+The Rock compiler, known as rockc or Rock, is designed to be relativly simple. The
+Rock compiler is a single-pass compiler which holds little state, compiling straight
+down to Pebble textual bytecode with no multi-pass parser, AST or internal IR. It
+does not attempt to compute in any way, and simply maps syntax. This is consitored
+the idiomatic way for a compiler producing Pebble code, as the Pebble virtual
+machine is designed to handle all optimization internally.
+
+The Rock language
+	The Rock language is what is to be used as input source code into the Rock
+	compiler. The Rock language is designed to be simple and readable without
+	being keyword heavy.
+
+	Functions
+		Functions are defined by the fn keyword. The name of the function
+		should then be placed immediatly after with a space before it,
+		followed by another space, the '(' character followed immediatly
+		by another space, the arguments the function should take (can be
+		none) with one space at the end of each argument or one space
+		after the '(' character if no args are specified, followed by
+		the ')' character, another space, the name of the variable the
+		function should return, another space, and finally the '{' 
+		character followed by a newline character. This should result 
+		onto something along the lines of
+
+			fn foo ( bar baz ) qux {
+
+		This also means a function without arguments as input should be
+
+			fn foo ( ) bar {
+
+		Note the return variable is always required. The return variable
+		is only computed at the end of the function, which is marked by
+		the '}' character followed immediatly by a newline character.
+
+		This pattern will map down closley to a function statement, as
+		displayed in the Pebble documentation. The Rock compiler follows the
+		idiomatic Pebble calling convention, meaning variables defined inside
+		of a function are supplimented to begin with 
+		'__Func_<funcname>_<varname>'. To match with this, the Rock compiler
+		also has compiler-generated functions start with the '__Func_'
+		characters for logical conststency. This is applied globally to the
+		language.
+
+		As a simplifcation rule, functions cannot access variables outside
+		of their scope. This allows the compiler to not need to store a 
+		variable table and simply leave all variable computation to the
+		Pebble virtual machine. Global variables to be used inside of a 
+		function should be imported using the import keyword, which should
+		be followed immediatly by a space character, which should then
+		be followed by the name of the variable to import and a newline
+		character. Variables can be exported using the export keyword using
+		the same syntax, simply replacing the import keyword with the
+		keyword export. These keywords simply create the global and local
+		copies associated with the opposite. Eg, this would mean 
+
+			import x
+
+		would create the variable
+
+			__Func_<funcname>_x
+
+		to have the same data as the global variable x, while
+
+			export x
+
+		would create the global variable equal to the local variable of
+
+			__Func_<funcname>_x
+
+		Keep in mind the variables are copied to the opposite ends
+		immediatly as the line is placed, and said variables are simply
+		copies of the opposite instead of pointers.
+
+
+		Function returns follow the Pebble calling and returning 
+		convention of using variables 
+
+			__Func_<funcname>_RET<n> 
+
+		as well as variables
+		
+			__Func_<funcname>_ARG<n> 
+
+		to return and send variables, 
+		respectivly. Whenever a function body is ended using the
+		'}' character followed immediatly by a newline, then this is
+		assumed to be the end of a function. At this time is when the
+		return value(s) are calculated, unlike arguments, which are
+		calculated at the beginning of the function's definition.
+
+		The characters / lines in between the 
+
+			'fn <funcname> ( <funcargs .. > ) <funcret> {'
+		and the 
+
+			'}'
+
+		statements is consitored to be the function's body, which is
+		the code to be executed when calling the function. As stated,
+		all variables defined and used inside of the function body shall
+		be replaced with the scoped variants of said variables, except for
+		the import and export keywords.
+
+		Functions expect the type to be a literal, meaning the data should
+		be copied to the arguments and returns. 
+
+		The call statement is used to call a function. The function is
+		executed immediatly and the results of the function is ignored.
+		The call keyword uses the syntax of 'call', followed immediatly
+		by a space, the name of the function to call, another space, 
+		the '(' character, another space, the arguments
+		to call the function using, with arguments passed as literals, 
+		each argument with a space immediatly after it, and finally one
+		more ')' character. If no arguments are given, there must be a 
+		single space between the '(' and ')' characters. Examples may be
+
+			call foo ( bar baz )
+
+		or giving it no arguments,
+
+			call foo
+
+		Please note, if a function expects a certain number of arguments
+		and fewer arguments than that are provided, this will cause an
+		unknown variable exception at runtime, but should cause undefined
+		behavior (generally no harm) if too many are given. And again, 
+		this depends on the version / implimentation of Pebble, but this
+		is the way the reference does it, as well as most modern
+		implimentations, so this way should be consitored canonical.
+
+	Variables
+		Variables can be defined by simply typing the name of the variable
+		to define, followed by a space, followed by the '=' character, 
+		followed by another space, finally followed by the expression to
+		resolve the variable as. This can be written as
+
+			<varname> = <statement>
+
+		and an example of such might be
+
+			x = `1 + 2
+
+		Statements use the first character to reference how to interpret
+		the data. The first character is known as the modifier character.
+		Modifier characters inclde the '`' character to resolve an
+		expression, the '!' character to reference a literal, and the
+		'@' character to represent copying a value. Assuming the language
+		allows the '/' and '//' characters to be comments, which the
+		Rock compiler does, an example may look like
+
+			x = !1 
+			// x = literal 1
+
+			y = @x
+			// y = a copy of x, so in this case, literal 1
+
+			z = `x + y
+			// z = the result of 'x + y'
+
+		The exact ordering of operation resolution generally depends on the
+		version and / or implimentation of the Pebble virtual machine Rock
+		is being ran against, however more modern implimentations tend to
+		resolve variables first, then later resolving the expression with
+		the data of said variables substituted into the slots of the
+		variables. In that case, the statement from before
+
+			z = `x + y
+
+		would be equal to 2, since x both x and y are resolved to literal 1.
+		Please note that the '@' marker is NOT a pointer, but is a literal
+		copy expression. y is not a pointer to x, but instead a copy of
+		the data in x. The resolution order of this depends on the version /
+		implimentation of the Pebble virtual machine the compiled Rock 
+		code is running against, however more modern implimentations tend
+		to resolve it immediatly, instead of the first time it is used. This
+		means that if I were to perform the operation
+
+			y = @x
+			x = `1 + 2
+
+		this would return a runtime error, since the variable y is defined
+		to be a copy of the current data in x, although x has not been 
+		initalized. Again, all of this is dependent on the implimentation /
+		version of the Pebble virtual machine, however more modern
+		implimentations tend to lead this way, as well as the reference
+		implimentation also having this behavior, hence this behavior is
+		consitored canonical and safe to depend on. This behavior has
+		been stable since the backing concepts to make these expressions
+		possible were implimented into Pebble around Alpha version 2.
+
+		Please note these markers do not apply uniformly. These only apply
+		to the variable definition syntax, and other concepts, such as
+		functions, will generally only take one type.
+
+		Newer versions of the Rock language (such as this one) also allow
+		for the marker of ':', meaning to set it equal to the first return
+		value of the function. The function is evaluated immediatly and
+		the return value is copied to the variable immediatly after
+		executing the function.
+
+		This marker uses the same syntax of the call keyword, however it
+		simply omits the call phrase. An example may be
+
+			foo = :bar ( bax qax )
+

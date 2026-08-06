@@ -3,12 +3,12 @@ Pebble Virtual Machine documentation
 Developed by vantheman
 Product of The Nuovi Orizzonti Company
 
+
 Pebble is a dead-simple virtual machine designed for environments where a full
 runtime would be too large but proper scripting and automation is still important.
 Pebble attempts to balance speed and size, while keeping safety and isolation
-the number one priority. Pebble is comparable in speed to Ruby 4.0.5 using native
-C extensions, usually beating it in most benchmarks by around 5x to 14x. Pebble is
-designed to be fully host-safe. A Pebble script should directly never crash, never 
+the number one priority. Pebble is designed to be fully host-safe. A Pebble script 
+should directly never crash, never 
 corrupt memory, and never damage the host in any way. This is designed as part of 
 the core architecture and philosophy of the Pebble virtual machine: never allow code 
 running against the virtual machine to corrupt the host.
@@ -229,16 +229,16 @@ Calling conventions
 		Functions follow the convention of accepting arguments in the
 		variables 
 
-			__Func_(funcname)_ARG(argnum)
+			__Func_<funcname>_ARG<n>
 
 		Functions follow the convention of returning values in the 
 		variables
 
-			__Func_(funcname)_RET(retnum)
+			__Func_<funcname>_RET<n>
 
 		Functions follow the convention of using internal variables
 
-			__Func_(funcname)_(varname)
+			__Func_<funcname>_<varname>
 
 		Functions should only be allowed to use variables if they
 		being in __Func_(funcname)_ - this is done to not clobber 
@@ -248,18 +248,130 @@ Calling conventions
 		Escapes follow the convention of accepting arguments in the
 		variables
 
-			__Escape_(escapename)_ARG(agrnum)
+			__Escape_<escapename>_ARG<n>
 
 		Escapes follow the convention of returning values in the
 		variables
 
-			__Escape_(escapename)_RET(retnumber)
+			__Escape_<escapename>_RET<n>
 
 		Escapes should only be allowed to use variables if they
 		begin in __Escape_(escapename)_ - this is done to not clobber
 		global state.
 
+		Escapes should only use internal variables with the naming of
+
+			__Escape_<escapename>_<varname>
 
 
 
+The Standard Library
+	The Pebble standard library includes functions consitored to be basic
+	to system function. For most use cases, the majority of these libraries
+	will not be needed and including them may become a security vulnerability.
+	To combat this, the developers of Pebble has made it incredibly easy
+	to remove libraries in groups or by single libraries. This is explained
+	in the Escapes sections.
+
+	- std - The Pebble Standard Library
+	  - io - Basic input and output libraries
+	    - print - Basic character output
+	    - printLn - Basic raw character output
+	    - input - Basic blocking input
+	  - misc - miscelanious
+	    - random - Simple seeded non-cryptographic random u16 generation
+	    - time - Get the time (%a %b %e %H:%M:%S %Z %Y)
+	    - sleep - Blocking wait
+	  - fs - Filesystem operations
+	    - dir - Directory operations
+	      - change - Change current working directory
+	      - get - Get current working directory
+	      - list - List directories
+	    - file - File operations
+	      - read - Read file (raw)
+	      - write - Write file
+	      - writeBinary - Write file (raw)
+	  - proc - Process libraries
+	    - spawn - Spawn a process
+	    - wait - Blocking wait for a process to complete or stop
+	    - exit - Exit the current process
+	  - str - Advanced string manipulation library
+	    - find - Search for a string
+	    - len - Get the length of a string
+	    - splt - String splitting
+	      - num - Offset-based string splitting
+	        - left - Grab left half from offset
+		- right - Grab right half from offset
+	  - term - Terminal manipulation libraries
+	    - color - Terminal color library
+	      - basic - Basic terminal colors
+	        - back - Set background color
+		- fore - Set foreground color
+		- reset - Reset color to default
+	    - cursor - Cursor manipulation library
+	      - get - Get cursor position
+	      - moveAbsolute - Move cursor to an absolute position
+	      - moveRelative - Move cursor relative to the current position
+	    - screen - Screen manipulation
+	      - clear - Clear the screen
+	      - clearLine - Clear screen to line
+	      - clearToEnd - Clear to end
+	      - clearToEndOfLine - Clear to the end of the line
+
+	There are currently some platform-dependent libraries outside of the
+	standard. These include
+
+		- audio - Basic audio library
+		  - play - Play audio
+		  - init - Init audio device
+		  - deinit - De init audio device
+
+		This library is availabe on OpenBSD.
+
+
+	It is standard for libraries to not simply take literal values as their arguments,
+	but to instead take the argument as a reference or pointer. This means they should
+	be passed the name of a variable as a literal. This literal should contain the name
+	of a valid variable which holds the data payload as a literal. Essentially, do not
+	give it a literal value, but instead give it a variable which references another
+	variable as a pointer.
+
+	eg.
+
+		New __Escape_std.io.print_ARG0 'Hello, World!'
+
+	would not be proper. However,
+
+		New msg 'Hello, World!'
+		New __Escape_std.io.print_ARG0 'msg'
+
+	would be.
+
+	This choice was made in version Alpha 2 as an optimization to make code calling the
+	same library function a lot not have to copy data around in such a way. This way
+	was chosen to be a bit more readable for handwritten Pebble code (which was popular
+	during the development of Alpha 2, as Rock did not exist.)
+
+
+
+	std.io.print and std.io.printLn takes one argument to be the data to print.
+	std.io.input takes zero arguments and blocks until input is given, returning
+		it into the first return variable.
+	std.misc.time takes zero arguments and gets the time and date and returns it into 
+		the first return variable.
+	std.misc.sleep takes one argument to be the time in ms to sleep for. 
+	std.misc.random takes zero arguments and will generate a random unsigned 32bit number
+		and return it into the first return variable.
+	std.fs.dir.change takes one argument of the directory to enter. This should be a relative
+		path and is generally operating system-dependent (eg. path handling).
+	std.fs.dir.get takes zero arguments and returns the current working directory in the first
+		return variable.
+	std.fs.dir.list takes one argument to be the directory to list and returns the name of each
+		subdirectory in the directory listed with a newline at the end of the name with one
+		final newline after the payload in the first return variable.
+	std.fs.file.read takes one argument to be the name of the file to read and returns the
+		data (binary, ASCII if applicable) in the first return variable.
+	std.fs.file.write and std.fs.file.writeBinary takes one argument to be the message to write 
+		with the second to be the name of the file to write it to. std.fs.file.writeBinary 
+		is safe for writting binary data.
 
