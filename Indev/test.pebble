@@ -5,7 +5,7 @@ Func {calculation}
 New a '1'
 New c '2'
 New msg a
-New __Escape_std.io.print_ARG0 <msg>
+New __Escape_std.io.print_ARG0 'a'
 Escape std.io.print
 End
 Call {calculation}
