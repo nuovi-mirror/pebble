@@ -14,8 +14,24 @@ const exit = platform.exit;
 
 var recording: bool = false;
 
-var first_arg: ?[]const u8 = null;
-var second_arg: ?[]const u8 = null;
+var first_arg: ?str = null;
+var second_arg: ?str = null;
+
+// types
+const word = state.word;
+const hword = state.hword;
+const byte = state.byte;
+const sword = state.sword;
+const shword = state.shword;
+const sbyte = state.sbyte;
+const spf = state.spf;
+const float = state.float;
+const str = state.str;
+const wstr = state.wstr;
+const dstr = state.dstr;
+const mstr = state.mstr;
+const wmstr = state.wmstr;
+const dmstr = state.dmstr;
 
 // evaluator related
 const EvalError = error{NotNumeric} || std.mem.Allocator.Error;
@@ -44,7 +60,7 @@ const op_kind = std.StaticStringMap(Op).initComptime(.{
 
 // Highest precedence first. Each tier is fully collapsed before moving
 // to the next tier that ordering is the entire precedence mechanism.
-const tiers = [_][]const []const u8{
+const tiers = [_]wstr{
     &.{ "*", "/" },
     &.{ "+", "-", "s++" },
     &.{ "?=", "s?=", "e?=", "-?=", "==", "!=", ">", "<" },
@@ -54,17 +70,17 @@ const tiers = [_][]const []const u8{
 
 // stack-related
 const Frame = struct {
-        pc: usize,
+        pc: word,
 };
 
 var callStack: std.ArrayList(Frame) = .empty;
 
 // for windows compat
-fn getArgs(allocator: std.mem.Allocator) ![][]const u8 {
+fn getArgs(allocator: std.mem.Allocator) !dstr {
     var args = try std.process.argsWithAllocator(allocator);
     defer args.deinit();
 
-    var list: std.ArrayList([]const u8) = .empty;
+    var list: std.ArrayList(str) = .empty;
 
     while (args.next()) |arg| {
         try list.append(allocator, arg);
@@ -80,9 +96,9 @@ pub fn main() !void { // the VM
     const allocator = mem.alloc();
 
     // init tables
-    state.data = std.StringHashMap([]const u8).init(allocator);
+    state.data = std.StringHashMap(str).init(allocator);
     state.code = .empty;
-    state.codeTable = std.StringHashMap(usize).init(allocator);
+    state.codeTable = std.StringHashMap(word).init(allocator);
 
     defer state.data.deinit();
     defer state.code.deinit(allocator);
@@ -121,28 +137,28 @@ pub fn main() !void { // the VM
         second_arg = Args[2];
 
     if (first_arg) |arg| { // handle version thing
-        if (std.mem.eql(u8, arg, "version")) {
+        if (std.mem.eql(byte, arg, "version")) {
             print("{s}\n", .{version.full});
             exit(0);
         }
     }
 
     if (first_arg) |arg| { // handle tests
-        if (std.mem.eql(u8, arg, "test")) {
+        if (std.mem.eql(byte, arg, "test")) {
             try run(tests.tests);
             exit(0);
         }
     }
 
     if (first_arg) |arg| { // handle docs
-        if (std.mem.eql(u8, arg, "docs")) {
+        if (std.mem.eql(byte, arg, "docs")) {
             print("{s}", .{docs.read()});
             exit(0);
         }
     }
     
     if (first_arg) |arg| { // handle shell
-        if (std.mem.eql(u8, arg, "psh")) {
+        if (std.mem.eql(byte, arg, "psh")) {
             try run(psh.psh);
             exit(0);
         }
@@ -154,9 +170,9 @@ pub fn main() !void { // the VM
     try run(fileData);
 }
 
-pub fn run(fileData: []const u8) !void {
+pub fn run(fileData: str) !void {
     const allocator = mem.alloc();
-    var lines = std.mem.splitScalar(u8, fileData, '\n');
+    var lines = std.mem.splitScalar(byte, fileData, '\n');
 
     while (lines.next()) |line| {
         if (line.len == 0) continue;
@@ -179,7 +195,7 @@ pub fn run(fileData: []const u8) !void {
 }
 
 // read a file
-fn readFile(fileName: []const u8) ![]u8 {
+fn readFile(fileName: str) !mstr {
     const allocator = mem.alloc();
     return try std.fs.cwd().readFileAlloc(
         allocator,
@@ -188,12 +204,12 @@ fn readFile(fileName: []const u8) ![]u8 {
     );
 }
 
-fn tokenize(line: []const u8) ![][]const u8 {
+fn tokenize(line: str) !dstr {
     const allocator = mem.alloc(); 
-    var tokens: std.ArrayList([]const u8) = .empty;
+    var tokens: std.ArrayList(str) = .empty;
     errdefer tokens.deinit(allocator);
 
-    var i: usize = 0;
+    var i: word = 0;
 
     while (i < line.len) {
         while (i < line.len and std.ascii.isWhitespace(line[i])) { // skip whitespace
@@ -205,6 +221,29 @@ fn tokenize(line: []const u8) ![][]const u8 {
         if (line[i] == '#') { // comment
             i += 1;
             break;
+        }
+ 
+        if (line[i] == '/') { // comment
+            i += 1;
+            break;
+        }
+
+        if (line[i] == '<') { // pointer
+            i += 1;
+            const start = i;
+
+            while (i < line.len and line[i] != '>') {
+                i += 1;
+            }
+
+            if (i >= line.len)
+                return error.UnterminatedString;
+
+            try tokens.append(allocator, line[start..i]);
+            try tokens.append(allocator, "/////"); // append "/////" if it was a pointer
+
+            i += 1; // skip closing quote
+            continue;
         }
 
         if (line[i] == '"') { // quoted string
@@ -267,13 +306,15 @@ fn tokenize(line: []const u8) ![][]const u8 {
             i += 1;
         }
         try tokens.append(allocator, line[start..i]);
+        try tokens.append(allocator, "/"); // append "/" if it was unquoted
     }
     return try tokens.toOwnedSlice(allocator);
 }
 
-fn findEscape(name: []const u8) ?escapes.Escape {
+
+fn findEscape(name: str) ?escapes.Escape {
     for (escapes.table) |escape| {
-        if (std.mem.eql(u8, escape.name, name)) {
+        if (std.mem.eql(byte, escape.name, name)) {
             return escape;
         }
     }
@@ -281,7 +322,7 @@ fn findEscape(name: []const u8) ?escapes.Escape {
     return null;
 }
 
-fn interpret(list: [][]const u8) !void {
+fn interpret(list: dstr) !void {
     const allocator = mem.alloc();
     
     if (limits.inst_curr > limits.inst_max) {
@@ -292,7 +333,7 @@ fn interpret(list: [][]const u8) !void {
     limits.inst_curr += 1;
 
     if (recording) {
-        if (std.mem.eql(u8, list[0], "End")) {
+        if (std.mem.eql(byte, list[0], "End")) {
             try state.code.append(allocator, try copyInstruction(list));
             recording = false;
             return;
@@ -302,68 +343,127 @@ fn interpret(list: [][]const u8) !void {
         }
     }
 
-    if (std.mem.eql(u8, list[0], "New")) { // New
+    if (std.mem.eql(byte, list[0], "New")) { // New
         if (limits.inst_new_curr > limits.inst_new_max) {
             print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
             exit(1);
         }
 
         limits.inst_new_curr += 1;
+        var dest: str = undefined;
 
-        const newData = try evaluate(list[2]); // do math
-        var newList = try allocator.alloc([]const u8, list.len);
-        @memcpy(newList, list);
-        defer allocator.free(newList);
-        newList[2] = newData;
+        // arguments shall come immediatly after the data payloads
+        // for this, it shall be
+        // 0 = instr, 1 = instraddr, 2 = dest, 3 = destaddr, 4 = data, 5 = dataaddr
 
-        if (list.len > 3) {
-            if (std.mem.eql(u8, list[3], "///")) { // true literal
-                try state.data.put(list[1], list[2]);
-            } else if (std.mem.eql(u8, list[3], "////")) { // force eval
-                const indirect = state.data.get(list[2]) orelse return error.UnknownVariable;
-                const data = try evaluate(indirect);
-                try state.data.put(list[1], data);
-            } else if (std.mem.eql(u8, list[3], "//")) { // literal
-                try state.data.put(newList[1], newList[2]);
-            }
-            
-        } else { // indirect
+        // first argument
+        if (std.mem.eql(byte, list[3], "///")) { // literal
+            dest = try evaluate(list[2]);
+        } else if (std.mem.eql(byte, list[3], "////")) { // forced eval
             const indirect = state.data.get(list[2]) orelse return error.UnknownVariable;
-            try state.data.put(list[1], indirect);
+            dest = try evaluate(indirect);
+        } else if (std.mem.eql(byte, list[3], "/")) { // true literal
+            dest = list[2];
+        } else if (std.mem.eql(byte, list[3], "/////")) { // pointer
+            const indirect = state.data.get(list[2]) orelse return error.UnknownVariable;
+            dest = indirect;
+        } else {
+            return error.UnknownAddressingMode;
+        } // does not support copy
+
+
+        // second argument
+        if (std.mem.eql(byte, list[5], "//")) { // literal
+            try state.data.put(dest, try evaluate(list[4]));
+        } else if (std.mem.eql(byte, list[5], "////")) { // forced eval
+            const indirect = state.data.get(list[4]) orelse return error.UnknownVariable;
+            const data = try evaluate(indirect);
+            try state.data.put(dest, data);
+        } else if (std.mem.eql(byte, list[5], "///")) { // true literal
+            try state.data.put(dest, list[4]);
+        } else if (std.mem.eql(byte, list[5], "/")) { // copy
+            const indirect = state.data.get(list[4]) orelse return error.UnknownVariable;
+            try state.data.put(dest, indirect);
+        } else if (std.mem.eql(byte, list[5], "/////")) { // pointer
+            const indirect = state.data.get(list[4]) orelse return error.UnknownVariable;
+            try state.data.put(dest, indirect);
+        } else {
+            return error.UnknownAddressingMode;
         }
     }
 
-    if (std.mem.eql(u8, list[0], "Escape")) { // Escape
+    if (std.mem.eql(byte, list[0], "Escape")) { // Escape
         if (limits.inst_escape_curr > limits.inst_escape_max) {
             print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
             exit(1);
         }
 
         limits.inst_escape_curr += 1;
+        var escapename: str = undefined;
 
+        if (std.mem.eql(byte, list[3], "/")) { // true literal
+            escapename = list[2];
+        } else if (std.mem.eql(byte, list[3], "///")) { // literal
+            escapename = try evaluate(list[2]);
+        } else if (std.mem.eql(byte, list[3], "////")) { // forced eval
+            const indirect = state.data.get(list[2]) orelse return error.UnknownVariable;
+            escapename = try evaluate(indirect);
+        } else if (std.mem.eql(byte, list[3], "/////")) { // pointer
+            escapename = state.data.get(list[2]) orelse return error.UnknownVariable;
+        } else { // do not support copy
+            return error.InvalidAddressingMode;
+        }
 
-        const escape = findEscape(list[1]) orelse return error.UnknownEscape;
+        const escape = findEscape(escapename) orelse return error.UnknownEscape;
         try escape.run();
     }
 
-    if (std.mem.eql(u8, list[0], "Func")) { // Start recording functions
+    if (std.mem.eql(byte, list[0], "Func")) { // Start recording functions
         if (limits.inst_func_curr > limits.inst_func_max) {
             print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
             exit(1);
         }
 
         limits.inst_func_curr += 1;
-
         recording = true;
+        var funcname: str = undefined;
 
-        // function starts AFTER this instruction
-        try state.codeTable.put(list[1], state.code.items.len + 1);
+        if (std.mem.eql(byte, list[3], "//")) { // literal
+            funcname = try evaluate(list[2]);
+        } else if (std.mem.eql(byte, list[3], "////"))  { // forced eval
+            const indirect = state.data.get(list[2]) orelse return error.UnknownVariable;
+            funcname = try evaluate(indirect);
+        } else if (std.mem.eql(byte, list[3], "/")) { // true literal
+            funcname = list[2];
+        } else if (std.mem.eql(byte, list[3], "/////")) { // pointer
+            const indirect = state.data.get(list[2]) orelse return error.UnknownVariable;
+            funcname = indirect;
+        } else { // do not support copy
+            return error.InvalidAddressingMode;
+        }
 
+        try state.codeTable.put(funcname, @intCast(state.code.items.len + 1));
         try state.code.append(allocator, try copyInstruction(list));
     }
 
-    if (std.mem.eql(u8, list[0], "Call")) {
-        const start = state.codeTable.get(list[1])
+    if (std.mem.eql(byte, list[0], "Call")) {
+        var funcname: str = undefined;
+
+        if (std.mem.eql(byte, list[3], "//")) { // literal
+            funcname = try evaluate(list[2]);
+        } else if (std.mem.eql(byte, list[3], "////")) { // forced eval
+            const indirect = state.data.get(list[2]) orelse return error.UnknownVariable;
+            funcname = try evaluate(indirect);
+        } else if (std.mem.eql(byte, list[3], "/")) { // true literal
+            funcname = list[2];
+        } else if (std.mem.eql(byte, list[3], "/////")) { // pointer
+            const indirect = state.data.get(list[2]) orelse return error.UnknownVariable;
+            funcname = indirect;
+        } else { // do not support copy
+            return error.UnknownAddressingMode;
+        } 
+
+        const start = state.codeTable.get(funcname)
             orelse return error.UnknownFunction;
 
         try callStack.append(allocator, .{
@@ -371,10 +471,9 @@ fn interpret(list: [][]const u8) !void {
         });
 
         return try callFunc();
-//        return;
     }  
  
-    if (std.mem.eql(u8, list[0], "If")) { 
+    if (std.mem.eql(byte, list[0], "If")) { 
         // Start doing Ifs (If funcToExec "condition")
         if (limits.inst_func_curr > limits.inst_func_max) {
             print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
@@ -382,21 +481,61 @@ fn interpret(list: [][]const u8) !void {
         }
 
         limits.inst_if_curr += 1;
+        var result: bool = false;
+        var funcname: str = undefined;
 
-        if (std.mem.eql(u8, try evaluate(list[2]), "0")) {
-            const start = state.codeTable.get(list[1])
-                orelse return error.UnknownFunction;
-            
-            callStack.items[callStack.items.len - 1].pc = start - 1;    
-//            try callStack.append(allocator, .{
-//                .pc = start,
-//            });
-
-            return;
+        // first operand
+        if (std.mem.eql(byte, list[3], "/")) { // literal
+            funcname = list[2];
+        } else if (std.mem.eql(byte, list[3], "///")) { // true literal
+            funcname = try evaluate(list[2]);
+        } else if (std.mem.eql(byte, list[3], "////")) { // forced eval
+            const indirect = state.data.get(list[2]) orelse return error.UnknownVariable;
+            funcname = try evaluate(indirect);
+        } else if (std.mem.eql(byte, list[3], "/////")) { // pointer
+            const indirect = state.data.get(list[2]) orelse return error.UnknownVariable;
+            funcname = indirect;
+        } else { // do not support copy
+            return error.UnknownAddressingMode;
         }
+
+        // second operand
+        if (std.mem.eql(byte, list[5], "//")) { // literal
+            if (std.mem.eql(byte, try evaluate(list[4]), "0"))
+                result = true;
+        } else if (std.mem.eql(byte, list[5], "///")) { // true literal
+            if (std.mem.eql(byte, list[4], "0"))
+                result = true;
+        } else if (std.mem.eql(byte, list[5], "////")) { // forced eval
+            const indirect = state.data.get(list[4]) orelse return error.UnknownVariable;
+            if (std.mem.eql(byte, try evaluate(indirect), "0"))
+                result = true;
+        } else if (std.mem.eql(byte, list[5], "/////")) { // pointer
+            const indirect = state.data.get(list[4]) orelse return error.UnknownVariable;
+            if (std.mem.eql(byte, indirect, "0"))
+                result = true;
+        } else { // do not support copy
+            return error.UnknownAddressingMode;
+        }
+
+
+        const start = state.codeTable.get(funcname)
+            orelse return error.UnknownFunction;
+
+        // new code actually doing shit correctly
+        try callStack.append(allocator, .{
+            .pc = start,
+        });
+
+        if (result)
+            return try callFunc();
+
+        // old code that used to jump
+//        callStack.items[callStack.items.len - 1].pc = start - 1;    
+//        return;
     }
 
-    if (std.mem.eql(u8, list[0], "Return")) { // thing to exit from Func
+    if (std.mem.eql(byte, list[0], "Return")) { // thing to exit from Func
         if (limits.inst_return_curr > limits.inst_return_max) {
             print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
             exit(1);
@@ -421,7 +560,7 @@ fn callFunc() anyerror!void {
 
         const instruction = state.code.items[callStack.items[current].pc];
 
-        if (std.mem.eql(u8, instruction[0], "End")) {
+        if (std.mem.eql(byte, instruction[0], "End")) {
             _ = callStack.pop();
             continue;
         }
@@ -441,30 +580,30 @@ fn callFunc() anyerror!void {
     }
 }
 
-fn isOperator(op: []const u8) bool {
-    return std.mem.eql(u8, op, "s++") or
-        std.mem.eql(u8, op, "?=") or
-        std.mem.eql(u8, op, "s?=") or
-        std.mem.eql(u8, op, "e?=") or
-        std.mem.eql(u8, op, "-?=") or
-        std.mem.eql(u8, op, "+") or
-        std.mem.eql(u8, op, "-") or
-        std.mem.eql(u8, op, "*") or
-        std.mem.eql(u8, op, "/") or
-        std.mem.eql(u8, op, "==") or
-        std.mem.eql(u8, op, "!=") or
-        std.mem.eql(u8, op, ">") or
-        std.mem.eql(u8, op, "<");
+fn isOperator(op: str) bool {
+    return std.mem.eql(byte, op, "s++") or
+        std.mem.eql(byte, op, "?=") or
+        std.mem.eql(byte, op, "s?=") or
+        std.mem.eql(byte, op, "e?=") or
+        std.mem.eql(byte, op, "-?=") or
+        std.mem.eql(byte, op, "+") or
+        std.mem.eql(byte, op, "-") or
+        std.mem.eql(byte, op, "*") or
+        std.mem.eql(byte, op, "/") or
+        std.mem.eql(byte, op, "==") or
+        std.mem.eql(byte, op, "!=") or
+        std.mem.eql(byte, op, ">") or
+        std.mem.eql(byte, op, "<");
 }
 
 
-fn resolveVariables(line: []const u8) ![]const u8 {
+fn resolveVariables(line: str) !str {
     const allocator = mem.alloc();
 
-    var output: std.ArrayList(u8) = .empty;
+    var output: std.ArrayList(byte) = .empty;
     defer output.deinit(allocator);
 
-    var parts = std.mem.splitScalar(u8, line, ' ');
+    var parts = std.mem.splitScalar(byte, line, ' ');
     var first = true;
 
     while (parts.next()) |part| {
@@ -484,98 +623,18 @@ fn resolveVariables(line: []const u8) ![]const u8 {
     return try output.toOwnedSlice(allocator);
 }
 
-
-//fn evaluate(line: []const u8) ![]const u8 {
-//    const allocator = mem.alloc();
-//
-//    var parts = std.mem.splitScalar(u8, line, ' ');
-//
-//    var result = parts.next() orelse return line;
-//
-//    var op = parts.next() orelse {
-//        return try resolveVariables(line);
-//    };
-//
-//    // Not an expression, just resolve variables
-//    if (!isOperator(op)) {
-//        return try resolveVariables(line);
-//    }
-//
-//    while (true) {
-//        const right_raw = parts.next() orelse break;
-//
-//        var left = result;
-//        var right = right_raw;
-//
-//        if (state.data.get(left)) |data| {
-//            left = data;
-//        }
-//
-//        if (state.data.get(right)) |data| {
-//            right = data;
-//        }
-//
-//        if (std.mem.eql(u8, op, "s++")) {
-//            result = try std.fmt.allocPrint(
-//                allocator,
-//                "{s}{s}",
-//                .{ left, right },
-//           );
-//        } else if (std.mem.eql(u8, op, "?=")) {
-//           result = if (std.mem.eql(u8, left, right)) "0" else "1";
-//        } else if (std.mem.eql(u8, op, "s?=")) {
-//            result = if (std.mem.startsWith(u8, left, right)) "0" else "1";
-//        } else if (std.mem.eql(u8, op, "e?=")) {
-//           result = if (std.mem.endsWith(u8, left, right)) "0" else "1";
-//        } else if (std.mem.eql(u8, op, "-?=")) {
-//            result = if (std.mem.indexOf(u8, left, right) != null) "0" else "1";
-//        } else {
-//            const left_num = std.fmt.parseFloat(f32, left) catch return try resolveVariables(line);
-//            const right_num = std.fmt.parseFloat(f32, right) catch return try resolveVariables(line);
-//
-//            if (std.mem.eql(u8, op, "+")) {
-//                result = try std.fmt.allocPrint(allocator, "{}", .{left_num + right_num});
-//            } else if (std.mem.eql(u8, op, "-")) {
-//                result = try std.fmt.allocPrint(allocator, "{}", .{left_num - right_num});
-//            } else if (std.mem.eql(u8, op, "*")) {
-//                result = try std.fmt.allocPrint(allocator, "{}", .{left_num * right_num});
-//            } else if (std.mem.eql(u8, op, "/")) {
-//                result = try std.fmt.allocPrint(allocator, "{}", .{left_num / right_num});
-//            } else if (std.mem.eql(u8, op, "==")) {
-//                result = if (left_num == right_num) "0" else "1";
-//            } else if (std.mem.eql(u8, op, "!=")) {
-//                result = if (left_num != right_num) "0" else "1";
-//            } else if (std.mem.eql(u8, op, ">")) {
-//                result = if (left_num > right_num) "0" else "1";
-//            } else if (std.mem.eql(u8, op, "<")) {
-//                result = if (left_num < right_num) "0" else "1";
-//            } else {
-//                return try resolveVariables(line);
-//            }
-//        }
-//
-//        op = parts.next() orelse break;
-//
-//        if (!isOperator(op)) {
-//            break;
-//        }
-//    }
-//
-//    return result;
-//}
-
-fn copyInstruction(list: [][]const u8) ![][]const u8 {
+fn copyInstruction(list: dstr) !dstr {
     const allocator = mem.alloc();
-    var copy = try allocator.alloc([]const u8, list.len);
+    var copy = try allocator.alloc(str, list.len);
 
     for (list, 0..) |token, i| {
-        copy[i] = try allocator.dupe(u8, token);
+        copy[i] = try allocator.dupe(byte, token);
     }
 
     return copy;
 }
 
-fn debugDump(ir: [][]const u8) !void {
+fn debugDump(ir: dstr) !void {
     const capacity = mem.queryCapacity();
     const allocator = mem.alloc();
 
@@ -633,28 +692,28 @@ fn debugDump(ir: [][]const u8) !void {
     print("\n======== VM DEBUG ========\n", .{});
 }
 
-fn inTier(tier: []const []const u8, tok: []const u8) bool {
+fn inTier(tier: wstr, tok: str) bool {
     for (tier) |t| {
-        if (std.mem.eql(u8, t, tok)) return true;
+        if (std.mem.eql(byte, t, tok)) return true;
     }
     return false;
 }
 
-fn resolveOne(tok: []const u8) []const u8 {
+fn resolveOne(tok: str) str {
     return state.data.get(tok) orelse tok;
 }
 
-fn applyOp(op: Op, left: []const u8, right: []const u8) EvalError![]const u8 {
+fn applyOp(op: Op, left: str, right: str) EvalError!str {
     const allocator = mem.alloc();
     return switch (op) {
         .concat => try std.fmt.allocPrint(allocator, "{s}{s}", .{ left, right }),
-        .str_eq => if (std.mem.eql(u8, left, right)) "0" else "1",
-        .str_starts => if (std.mem.startsWith(u8, left, right)) "0" else "1",
-        .str_ends => if (std.mem.endsWith(u8, left, right)) "0" else "1",
-        .str_contains => if (std.mem.indexOf(u8, left, right) != null) "0" else "1",
+        .str_eq => if (std.mem.eql(byte, left, right)) "0" else "1",
+        .str_starts => if (std.mem.startsWith(byte, left, right)) "0" else "1",
+        .str_ends => if (std.mem.endsWith(byte, left, right)) "0" else "1",
+        .str_contains => if (std.mem.indexOf(byte, left, right) != null) "0" else "1",
         else => {
-            const left_num = std.fmt.parseFloat(f32, left) catch return error.NotNumeric;
-            const right_num = std.fmt.parseFloat(f32, right) catch return error.NotNumeric;
+            const left_num = std.fmt.parseFloat(float, left) catch return error.NotNumeric;
+            const right_num = std.fmt.parseFloat(float, right) catch return error.NotNumeric;
             return switch (op) {
                 .add => try std.fmt.allocPrint(allocator, "{d}", .{left_num + right_num}),
                 .sub => try std.fmt.allocPrint(allocator, "{d}", .{left_num - right_num}),
@@ -674,12 +733,12 @@ fn applyOp(op: Op, left: []const u8, right: []const u8) EvalError![]const u8 {
 // in `tier`. Anything not in this tier is copied straight through —
 // a later pass will see it.
 fn reducePass(
-    tier: []const []const u8,
-    tokens: []const []const u8,
-) EvalError![]const []const u8 {
+    tier: wstr,
+    tokens: wstr,
+) EvalError!wstr {
     const allocator = mem.alloc();
-    var out: std.ArrayList([]const u8) = .empty;
-    var i: usize = 0;
+    var out: std.ArrayList(str) = .empty;
+    var i: word = 0;
     while (i < tokens.len) {
         const is_reducible_op = i > 0 and i + 1 < tokens.len and
             isOperator(tokens[i]) and inTier(tier, tokens[i]);
@@ -698,18 +757,18 @@ fn reducePass(
     return try out.toOwnedSlice(allocator);
 }
 
-pub fn evaluate(line: []const u8) ![]const u8 {
+pub fn evaluate(line: str) !str {
     const allocator = mem.alloc();
 
-    var token_list: std.ArrayList([]const u8) = .empty;
-    var it = std.mem.splitScalar(u8, line, ' ');
+    var token_list: std.ArrayList(str) = .empty;
+    var it = std.mem.splitScalar(byte, line, ' ');
     while (it.next()) |t| try token_list.append(allocator, t);
 
     if (token_list.items.len < 3 or !isOperator(token_list.items[1])) {
         return resolveVariables(line);
     }
 
-    var current: []const []const u8 = token_list.items;
+    var current: wstr = token_list.items;
     for (tiers) |tier| {
         current = reducePass(tier, current) catch {
             return resolveVariables(line);
@@ -717,5 +776,5 @@ pub fn evaluate(line: []const u8) ![]const u8 {
     }
 
     if (current.len != 1) return resolveVariables(line);
-    return allocator.dupe(u8, current[0]);
+    return allocator.dupe(byte, current[0]);
 }

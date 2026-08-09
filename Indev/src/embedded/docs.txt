@@ -1,377 +1,93 @@
-Pebble Virtual Machine documentation
-
-Developed by vantheman
+Pebble Virtual Machine Systems Programmer's Handbook
+By vantheman
 Product of The Nuovi Orizzonti Company
 
+The Pebble Virtual Machine is the first attempt at creating an implementation of the Expressive Instruction Set
+Computing Architecture, also known as EISC. Pebble is a small interpreted virtual machine implementing what
+should be considered a canonical example of what an EISC ISA should look like.
 
-Pebble is a dead-simple virtual machine designed for environments where a full
-runtime would be too large but proper scripting and automation is still important.
-Pebble attempts to balance speed and size, while keeping safety and isolation
-the number one priority. Pebble is designed to be fully host-safe. A Pebble script 
-should directly never crash, never 
-corrupt memory, and never damage the host in any way. This is designed as part of 
-the core architecture and philosophy of the Pebble virtual machine: never allow code 
-running against the virtual machine to corrupt the host.
+The EISC architecture is designed around the idea that operands should carry more than payloads, and that
+addressing modes should be a modifier of the payload itself, potentially changing the entire instruction's
+behavior, how the data is interpreted, and so on. However, what makes EISC different from CISC, is in the
+EISC architecture, addressing modes are fully instruction-dependent, as well as each operand of an
+instruction containing it's own addressing mode. 
 
-Pebble uses a CISC-like variable-oriented bytecode language also named Pebble (the
-Pebble language), which is interpreted inside of Pebble, which is the virtual
-machine (both the bytecode language and virtual machine are named Pebble). There
-is a simple textual bytecode representation designed to compile down 1:1 (or close
-to). This is designed as a compiler target and a stable ABI (this has remained
-stable and compatible in syntax since Alpha version 2). Since the bytecode language
-is already fairly high-level, compilers targeting the Pebble language are generally
-pretty simple (eg, no advanced expression handling, no variable handling internally,
-no complex optimization passes, and so on). All of the optimization is designed to
-be handled internally inside of the Pebble virtual machine itself.
+In EISC, every addressing mode should have the ability to express an entire language construct. An example
+constructed roughly from the Pebble ISA may be along the lines of
 
-Pebble is explicity not a stack machine. Pebble bytecode acts on variables directly
-in the same way a register machine would. Pebble has the ability to express full
-conceptual operations as single instructions, following the CISC philosiphy, while
-taking it one step further, allowing expression of entire language concepts.
-Eg. a compiler may be able to express 'x = a + b / 14 * 3' as a single 
-instruction. The virtual machine handles loading, storing, variable resolution,
-and so on, all internally, completly transparent to the user and / or compiler.
+	STORE, 0, 0, 1 2, 8
 
-The Pebble virtual machine is intended to not expose types to the user in any way.
-The user should have no idea what type their variable is being stored as, size
-constraints of said type and / or variable, and so on. All of this is handled by the
-Pebble VM. Types are simply an implementation detail of the virtual machine itself.
+In this, you have the instruction, being STORE. STORE takes a destination and a value, each with their own
+addressing mode. However, the addressing modes themselves have the ability to express language concepts,
+so in this case, addressing mode 0 for the first operand of STORE could mean to reference it as a pointer,
+and the addressing mode of the payload may mean to resolve it as a mathematical addition statement. In this
+case, say if store point 0 held some representation of store point 1, then the destination would not simply
+be 0, but 0 would be used as a pointer referencing store point 1. Now if we look at the addressing mode for
+operand 2, addressing mode 8 may mean to resolve as an addition statement. So this instruction may resolve
+to storing the literal '3', being the result of the expression '1 2' using the addressing mode stating to
+resolve it as an expression, to the location '1', which location '0' held some representation of and was
+used as a pointer. However, since the addressing in itself should be uniformly applied, there is nothing
+limiting the first operand of STORE from only being a pointer or a literal. For this example, addressing
+mode 0 could mean to address as a pointer, then to resolve the expression held there. So if location 0
+held say some representation of location 1, which then held the expression of say the addition of 1 and 2,
+then this would resolve to storing the literal '3' to the store point of '3'. However, since addressing is
+fully instruction-dependent, those addressing modes may mean something completely different for a different
+instruction.
 
-The Pebble VM allows for native single-instruction operations involving things like
-loading a variable, performing a complex mathematical expression involving multiple
-operations, variable look-ups, floating-point operations, and so on, and a store.
-This is part of the Pebble VM's attempt to be CISC-like both internally and as
-to the user. This allows for major optimizations inside of the Pebble VM itself and
-for the bytecode language to be viable as a standalone high-level programming
-language in itself.
+The main advantage of this is that it makes compilers targetting the language incredibly easy, as well as
+a theoretical JIT compiler for the language itself much more optimal. Since high-level schematics are
+kept in the bytecode language, the JIT does not have to worry about trying to re-construct them from lower
+level primitives, allowing much more room for optimization inside of the virtual machine itself. However, 
+this moves a lot of the complexity from the compiler into the virtual machine, which may not be such a bad
+thing depending on how you look at it. However, the biggest advantage is that the machine is expressive and
+uniform at the lowest level. Well, since Pebble is in itself a virtual machine, this is not the lowest level,
+as it runs on some form of hardware with it's own ISA lower than this, but this is the lowest level that will
+be discussed in this documentation. (well, besides for the compatability-related sections)
 
-The Pebble virtual machine is designed to be lightweight and efficient. The Pebble
-virtual machine should only need a few megabytes of memory to run the majority of
-programs and benchmarks, as well as only needing a 32bit or 64bit x86 or arm CPU.
-The Pebble virtual machine is single-thredded and entirly 32bit internally, allowing
-it to run on even the oldest of hardware, while still allowing high-performance
-operations on larger data types through library calls.
+Pebble impliments an EISC ISA to be known as Pebble. Pebble is both the ISA and virtual machine. This means
+that the Pebble textual bytecode language (the ISA) is executed inside of / by the Pebble virtual machine.
+The Pebble textual bytecode language is not like most tradtional ISAs, instead implimenting higher level
+language concepts into the bytecode itself. As stated above, this improves the potential room for optimzation.
 
-Pebble isolates all libraries through the Escape function. The Escape function will
-scan through the list of library functions compiled into the virtual machine binary
-and run said library function. Libraries generally are written in native Zig and
-only have access to the virtual machines variable tables.
+The Pebble textual bytecode language maps up and down 1:1 to the internal Pebble bytecode language, which shall
+not be discussed here, as that is treated simply as an implimentation detal. Pebble textual bytecode is not
+stack-based or register-based, instead acting on named variables. There is a theoretical infinite number of
+named variables, and the payloads of these variables do not have types exposed to the user. Said variables are
+also of arbitrary size, whos size can be modified at any point in both directions, and can be modified at any
+point.
 
-The textual bytecode language known as Pebble exposes a few keywords as primitives.
-These keywords are designed to provide the basic functionality any virtual machine
-or programming language should require. These keywords include
+The Pebble textual bytecode language is highly uniform and keyword-based. There are seven keywords with a few
+addressing modes per keyword. As the EISC, Pebble's instructions have their own independent resolver with
+each instruction having it's own instruction-dependent addressing modes.
 
-	- New -
-		Perform stated operation and store result to a variable.
+These keywords include the New keyword, which assiagns a variable as the result of.. well something. It is 
+generally described as more of an abstract 'do thing with data' concept. The syntax shall be the keyword
+name, followed by a space, the destination, followed by another space, followed by the data payload and
+a newline character. The destination payload supports syntax of <> to represent a pointer, which is a
+variable which holds the name of another variable, "" to represent an expression, which has the variables
+in the expression substituted to their values in-place and the result passed to the expression parser, {}
+to represent a pointer, which the reference of said pointer should then be evaluated, '' to represent a
+literal, or 'do not do anything with this data', and no markings to simply represent copying the data over.
+An example of this could be
 
-	- Func -
-		Begin recording instructions to the function tables.
-
-	- Call -
-		Begin executing a recorded block from the function tables. Return
-		to the caller (pc.old + 1) after the end of the operation.
-
-	- If -
-		Jump to an instruction in the function tables if the expression
-		results in a return of 0. Return to the caller (pc.old + 1) after
-		the operation.
-
-	- End -
-		Stop recording instructions to the function tables.
-
-	- Return -
-		Return early to the caller (pc.old + 1) from a recorded function.
-
-	- Escape -
-		Perform a library call.
-
-The language uses a simple expression syntax using the following
-
-	" " - Expression 
-		Resolve the expression inside of the markings and return the 
-		result. Resolve variables to their value, then parse the
-		remaining data as an expression.
-
-	' ' - Literal
-		Return the data as a literal. Do not parse in any way.
-
-	{ } - Indirect expression
-		Attempt to chase a pointer / reference and resolve the expression
-		held there. Return the result.
-
-	    - Copy
-		Copy the data in said variable. Do not resolve as an expression.
-
-Supported operations for expressions include
-
-	+ 
-		Add the values together and return the result.
-
-	- 
-		Subtract the right value from the left value and return the result.
-
-	/ 
-		Divide the right value from the left value and return the result.
-
-	*
-		Multiply the two values and return the result.
-
-	< 
-		Compare the right to the left. Return 0 if the right is greater than
-		the left.
-
-	>
-		Compare the right to the left. Return 0 if the right is less than the
-		left.
-
-	==
-		Compare the right to the left. Return 0 if the right is equal to the
-		left.
-
-	!=
-		Compare the right to the left. Return 0 if the right is not equal to
-		the left.
-
-	?=
-		Compare the right to the left as strings. Return 0 if the right is
-		equal to the left.
-
-	s++
-		Merge the right and left strings into one string.
-
-	-?=
-		Search for the right substring in the left string. Return 0 if the
-		substring is found.
-
-	e?=
-		Search for the right substring in the ending of the left string.
-		Return 0 if the substring is found.
-
-	s?=
-		Search for the right substring in the start of the left substring.
-		Return 0 if the substring is found.
-
-The New instruction takes two arguments inline, one to represent the variable to
-save the result of the second as. The second should be an expression.
-The If instruction takes two arguments inline, one to represent the name of the
-function to jump to if the condition as an expression in the second has a result
-of zero. In this language, zero represents true.
-The Call instruction takes one argument inline, as to represent the name of the
-function to begin executing.
-The End instruction takes no arguments and simply marks the interpreter to stop
-recording instructions and end a function. 
-Return takes no arguments and simply marks the interpreter to return to the caller
-of the function.
-Escape takes one argument inline as to represent the name of the library function
-to call.
-
-The libraries of the virtual machine are compiled into the virtual machine. This 
-means they are built into the virtual machine binary, not held to externally or
-linked against dynamically. Once the virtual machine is compiled, libraries cannot
-be added or removed.
-
-
-
-
-
-Navigating the source tree
-	The sourc code tree of Pebble is designed to be simple and readable. From
-	the root of your tree, you should be able to see a few directories. These
-	should include
-
-		src/ - VM source code
-		libs/ - library source code
-		platform/ - platform-dependent VM code
-		tools/ - tools and tests for the VM
-		compiler/ - the experimental compiler frontend 
-
-	In src, there should be a few files, including
-		vm.zig - main VM code
-		state.zig - VM state
-		limits.zig - instruction limit definitions
-		docs.zig - docs import code
-		allocator.zig - shared allocators
-		tests.zig - tests import program
-		escapes.zig - code for defining the escapes table
-		version.zig - code defining version metadata
-
-		There should also be a directory named embedded/, which should
-		hold unrelated items which are embedded into the VM binary, which
-		are also not source code (eg. documentation, source code programs, 
-		so on).
-
-	In libs, the default should contain just the standard library. The libraries
-	are broken down by the operating system they are expected to support. This
-	is generally just dirs libs/posix/ and libs/win32/.
-
-	There should be one folder per object, each with its own libs.zig file 
-	importing all libraries included into that folder. Final objetcs which
-	contain the library code should be identified by having a function inside
-	named run which is defined to the public. 
-
-	To remove a library, simply go to the object's folder and comment out the 
-	line importing it in libs.zig. Eg. if i wanted to remove filesystem
-	libraries out of the standard library for a posix target, I would edit
+	New a '1' // a = 1
+	New b a // b = copy of a (so 1)
+	New a '1 + 2' // a now = literal string '1 + 2'
+	New c {a} // c = result of a as an expression (so 3)
+	New d <c> // d = pointer to c (so 'c') 
 	
-		libs/posix/std/libs.zig
-	
-	and comment out
+However, addressing modes can also be applied to the destination payload itself
 
-		const fs = @import("fs/libs.zig");
-
-	This was done to make the ability to add and remove libraries from the final
-	build easy. This allows the maintainer of the system to easily remove
-	libraries they do not wish to allow the users to use.
-
-
-Calling conventions
-	Function
-		Functions follow the convention of accepting arguments in the
-		variables 
-
-			__Func_<funcname>_ARG<n>
-
-		Functions follow the convention of returning values in the 
-		variables
-
-			__Func_<funcname>_RET<n>
-
-		Functions follow the convention of using internal variables
-
-			__Func_<funcname>_<varname>
-
-		Functions should only be allowed to use variables if they
-		being in __Func_(funcname)_ - this is done to not clobber 
-		global state.
-
-	Escapes
-		Escapes follow the convention of accepting arguments in the
-		variables
-
-			__Escape_<escapename>_ARG<n>
-
-		Escapes follow the convention of returning values in the
-		variables
-
-			__Escape_<escapename>_RET<n>
-
-		Escapes should only be allowed to use variables if they
-		begin in __Escape_(escapename)_ - this is done to not clobber
-		global state.
-
-		Escapes should only use internal variables with the naming of
-
-			__Escape_<escapename>_<varname>
-
-
-
-The Standard Library
-	The Pebble standard library includes functions consitored to be basic
-	to system function. For most use cases, the majority of these libraries
-	will not be needed and including them may become a security vulnerability.
-	To combat this, the developers of Pebble has made it incredibly easy
-	to remove libraries in groups or by single libraries. This is explained
-	in the Escapes sections.
-
-	- std - The Pebble Standard Library
-	  - io - Basic input and output libraries
-	    - print - Basic character output
-	    - printLn - Basic raw character output
-	    - input - Basic blocking input
-	  - misc - miscelanious
-	    - random - Simple seeded non-cryptographic random u16 generation
-	    - time - Get the time (%a %b %e %H:%M:%S %Z %Y)
-	    - sleep - Blocking wait
-	  - fs - Filesystem operations
-	    - dir - Directory operations
-	      - change - Change current working directory
-	      - get - Get current working directory
-	      - list - List directories
-	    - file - File operations
-	      - read - Read file (raw)
-	      - write - Write file
-	      - writeBinary - Write file (raw)
-	  - proc - Process libraries
-	    - spawn - Spawn a process
-	    - wait - Blocking wait for a process to complete or stop
-	    - exit - Exit the current process
-	  - str - Advanced string manipulation library
-	    - find - Search for a string
-	    - len - Get the length of a string
-	    - splt - String splitting
-	      - num - Offset-based string splitting
-	        - left - Grab left half from offset
-		- right - Grab right half from offset
-	  - term - Terminal manipulation libraries
-	    - color - Terminal color library
-	      - basic - Basic terminal colors
-	        - back - Set background color
-		- fore - Set foreground color
-		- reset - Reset color to default
-	    - cursor - Cursor manipulation library
-	      - get - Get cursor position
-	      - moveAbsolute - Move cursor to an absolute position
-	      - moveRelative - Move cursor relative to the current position
-	    - screen - Screen manipulation
-	      - clear - Clear the screen
-	      - clearLine - Clear screen to line
-	      - clearToEnd - Clear to end
-	      - clearToEndOfLine - Clear to the end of the line
-
-	There are currently some platform-dependent libraries outside of the
-	standard. These include
-
-		- audio - Basic audio library
-		  - play - Play audio
-		  - init - Init audio device
-		  - deinit - De init audio device
-
-		This library is availabe on OpenBSD.
-
-
-	It is standard for libraries to not simply take literal values as their arguments,
-	but to instead take the argument as a reference or pointer. This means they should
-	be passed the name of a variable as a literal. This literal should contain the name
-	of a valid variable which holds the data payload as a literal. Essentially, do not
-	give it a literal value, but instead give it a variable which references another
-	variable as a pointer.
-
-	eg.
-
-		New __Escape_std.io.print_ARG0 'Hello, World!'
-
-	would not be proper. However,
-
-		New msg 'Hello, World!'
-		New __Escape_std.io.print_ARG0 'msg'
-
-	would be.
-
-	This choice was made in version Alpha 2 as an optimization to make code calling the
-	same library function a lot not have to copy data around in such a way. This way
-	was chosen to be a bit more readable for handwritten Pebble code (which was popular
-	during the development of Alpha 2, as Rock did not exist.)
-
-
-
-	std.io.print and std.io.printLn takes one argument to be the data to print.
-	std.io.input takes zero arguments and blocks until input is given, returning
-		it into the first return variable.
-	std.misc.time takes zero arguments and gets the time and date and returns it into 
-		the first return variable.
-	std.misc.sleep takes one argument to be the time in ms to sleep for. 
-	std.misc.random takes zero arguments and will generate a random unsigned 32bit number
-		and return it into the first return variable.
-	std.fs.dir.change takes one argument of the directory to enter. This should be a relative
-		path and is generally operating system-dependent (eg. path handling).
-	std.fs.dir.get takes zero arguments and returns the current working directory in the first
-		return variable.
-	std.fs.dir.list takes one argument to be the directory to list and returns the name of each
-		subdirectory in the directory listed with a newline at the end of the name with one
-		final newline after the payload in the first return variable.
-	std.fs.file.read takes one argument to be the name of the file to read and returns the
-		data (binary, ASCII if applicable) in the first return variable.
-	std.fs.file.write and std.fs.file.writeBinary takes one argument to be the message to write 
-		with the second to be the name of the file to write it to. std.fs.file.writeBinary 
-		is safe for writting binary data.
+	New e '8' // e = 8 - in the destination, no quotation means a literal, unline
+		  // in the data payload, where it means a copy of. Copying is not
+		  // supported for destination payloads, and well copy is specific to
+		  // the data payload of New, as it would not make sense anywhere else
+		  // really. I mean think about it - the destination is a copy of another
+		  // variable? does not make much sense.
+	New f 'e' // f = 'e' - however this would have the same effect if it were
+		  // New f <e>, as New does not distinguish between a literal containing
+		  // a variable name and a pointer, as do most instructions.
+	New <f> '2' // f as a pointer now = 2, and since 'f' contains 'e', e = 2.
+	New calc 'a s++ b' // store literal 'a s++ b'. The 's++' operator here means concat.
+	New {calc} '3' // variable 'ab' (result of 'a s++ b') now = 3
 
