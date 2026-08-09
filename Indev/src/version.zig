@@ -1,5 +1,6 @@
 const std = @import("std");
 const escapes = @import("escapes");
+const state = @import("state");
 
 pub const full = std.fmt.comptimePrint(
     \\{s} - {s}.
@@ -12,19 +13,26 @@ pub const full = std.fmt.comptimePrint(
     \\Supported comparison operations: {s}
     \\Supported string expressions: {s}
     \\Operations accepting expressions: {s}
-    , .{ name, msg, owner, vmclass, vmexpl, version, lang, langver, features, math, compare, str, opsack }
+    \\Supported addressing modes: {s}
+    \\Operations supporting addressing: {s}
+    , .{ name, msg, owner, vmclass, vmexpl, version, lang, langver, features, math, compare, strops, 
+        opsack, addr, opaddr }
     );
 
-const name: []const u8 = "Pebble";
-const msg: []const u8 = "A VM Language that is both small and secure";
-const owner: []const u8 = "Product of The Nuovi Orizzonti Company";
-const vmclass: []const u8 = "Class 1";
-const vmexpl: []const u8 = "Array-storing bytecode machine";
-const version: []const u8 = "InDev 2026-08-8 1";
-const lang: []const u8 = "Zig";
-const langver: []const u8 = "0.15.2";
-const features: []const u8 = "New, Escape, Func, Return, End, If, Call";
-const math: []const u8 = "+, -, /, *, ";
-const compare: []const u8 = "==, <, >, !=";
-const str: []const u8 = "s++, ?=, e?=, s?=, -?=";
-const opsack: []const u8 = "New, If";
+const str = state.str;
+
+const name: str = "Pebble";
+const msg: str = "A VM Language that is both small and secure";
+const owner: str = "Product of The Nuovi Orizzonti Company";
+const vmclass: str = "Class 1";
+const vmexpl: str = "Array-storing bytecode machine";
+const version: str = "InDev 2026-08-8 1";
+const lang: str = "Zig";
+const langver: str = "0.15.2";
+const features: str = "New, Escape, Func, Return, End, If, Call";
+const math: str = "+, -, /, *, ";
+const compare: str = "==, <, >, !=";
+const strops: str = "s++, ?=, e?=, s?=, -?=";
+const opsack: str = "New, Escape, Func, If, Call";
+const addr: str = " , {}, <>, '', \"\"";
+const opaddr: str = "New, Escape, Func, If, Call";

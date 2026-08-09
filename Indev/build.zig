@@ -129,6 +129,8 @@ pub fn build(b: *std.Build) void {
     
     escapes.addImport("libs", libs);
     escapes.addImport("platform", platform);
+    
+    version.addImport("state", state);
 
     if (target.result.os.tag == .openbsd)
         exe.linkSystemLibrary("sndio");
