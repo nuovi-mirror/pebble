@@ -385,7 +385,7 @@ fn interpret(list: dstr) !void {
             const indirect = state.data.get(list[4]) orelse return error.UnknownVariable;
             try state.data.put(dest, indirect);
         } else if (std.mem.eql(byte, list[5], "/////")) { // pointer
-            const indirect = state.data.get(list[4]) orelse return error.UnknownVariable;
+            _ = state.data.get(list[4]) orelse return error.UnknownVariable;
             try state.data.put(dest, list[4]); // just place the name of the variable in
         } else {
             return error.UnknownAddressingMode;
