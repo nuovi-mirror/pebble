@@ -91,3 +91,7 @@ However, addressing modes can also be applied to the destination payload itself
 	New calc 'a s++ b' // store literal 'a s++ b'. The 's++' operator here means concat.
 	New {calc} '3' // variable 'ab' (result of 'a s++ b') now = 3
 
+The syntax for the destination payload of the New keyword is generally consitored to be the common case,
+so for all future instructions specified here, the syntax for the destination payload of the New
+instruction should be consitored the default and should be assumed to be the syntax unless specified
+otherwise.
