@@ -7,7 +7,7 @@ var debug = std.heap.DebugAllocator(.{}){};
 pub fn init() void {
     if (build.VMDEBUG) {
         arena = std.heap.ArenaAllocator.init(debug.allocator());
-    } else { 
+    } else {
         arena = std.heap.ArenaAllocator.init(std.heap.c_allocator);
     }
 

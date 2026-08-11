@@ -37,9 +37,19 @@ const dmstr = state.dmstr;
 const EvalError = error{NotNumeric} || std.mem.Allocator.Error;
 
 pub const Op = enum {
-    concat, str_eq, str_starts, str_ends, str_contains,
-    add, sub, mul, div,
-    num_eq, num_ne, gt, lt,
+    concat,
+    str_eq,
+    str_starts,
+    str_ends,
+    str_contains,
+    add,
+    sub,
+    mul,
+    div,
+    num_eq,
+    num_ne,
+    gt,
+    lt,
 };
 
 const op_kind = std.StaticStringMap(Op).initComptime(.{
@@ -66,11 +76,9 @@ const tiers = [_]wstr{
     &.{ "?=", "s?=", "e?=", "-?=", "==", "!=", ">", "<" },
 };
 
-
-
 // stack-related
 const Frame = struct {
-        pc: word,
+    pc: word,
 };
 
 var callStack: std.ArrayList(Frame) = .empty;
@@ -108,12 +116,10 @@ pub fn main() !void { // the VM
     callStack = .empty;
 
     // argument stuff
-//    const Args = try std.process.argsWithAllocator(allocator); // for windows compat
+    //    const Args = try std.process.argsWithAllocator(allocator); // for windows compat
     const Args = try getArgs(allocator); // for windows compat
-//    const Args = try std.process.argsAlloc(allocator); // old
-//    defer std.process.argsFree(std.heap.page_allocator, Args);
-
-    
+    //    const Args = try std.process.argsAlloc(allocator); // old
+    //    defer std.process.argsFree(std.heap.page_allocator, Args);
 
     const ArgsNum = try std.fmt.allocPrint(allocator, "{d}", .{Args.len});
 
@@ -156,7 +162,7 @@ pub fn main() !void { // the VM
             exit(0);
         }
     }
-    
+
     if (first_arg) |arg| { // handle shell
         if (std.mem.eql(byte, arg, "psh")) {
             try run(psh.psh);
@@ -164,8 +170,9 @@ pub fn main() !void { // the VM
         }
     }
 
-
-    const filename = first_arg orelse { return; };
+    const filename = first_arg orelse {
+        return;
+    };
     const fileData = try readFile(filename);
     try run(fileData);
 }
@@ -179,7 +186,7 @@ pub fn run(fileData: str) !void {
         const IR = try tokenize(line);
         if (IR.len == 0) continue; // skip newlines and comments and such
         defer allocator.free(IR);
-        
+
         if (build.VMDEBUG) {
             try debugDump(IR); // debug dump
             platform.print("Press the Enter key to run said instruction.", .{});
@@ -191,7 +198,7 @@ pub fn run(fileData: str) !void {
         }
     }
 
-//    defer allocator.free(fileData);
+    //    defer allocator.free(fileData);
 }
 
 // read a file
@@ -205,7 +212,7 @@ fn readFile(fileName: str) !mstr {
 }
 
 fn tokenize(line: str) !dstr {
-    const allocator = mem.alloc(); 
+    const allocator = mem.alloc();
     var tokens: std.ArrayList(str) = .empty;
     errdefer tokens.deinit(allocator);
 
@@ -222,7 +229,7 @@ fn tokenize(line: str) !dstr {
             i += 1;
             break;
         }
- 
+
         if (line[i] == '/') { // comment
             i += 1;
             break;
@@ -302,7 +309,8 @@ fn tokenize(line: str) !dstr {
         // Normal token
         const start = i;
         while (i < line.len and
-               !std.ascii.isWhitespace(line[i])) {
+            !std.ascii.isWhitespace(line[i]))
+        {
             i += 1;
         }
         try tokens.append(allocator, line[start..i]);
@@ -310,7 +318,6 @@ fn tokenize(line: str) !dstr {
     }
     return try tokens.toOwnedSlice(allocator);
 }
-
 
 fn findEscape(name: str) ?escapes.Escape {
     for (escapes.table) |escape| {
@@ -324,7 +331,7 @@ fn findEscape(name: str) ?escapes.Escape {
 
 fn interpret(list: dstr) !void {
     const allocator = mem.alloc();
-    
+
     if (limits.inst_curr > limits.inst_max) {
         print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
         exit(1);
@@ -370,7 +377,6 @@ fn interpret(list: dstr) !void {
         } else {
             return error.UnknownAddressingMode;
         } // does not support copy
-
 
         // second argument
         if (std.mem.eql(byte, list[5], "//")) { // literal
@@ -430,7 +436,7 @@ fn interpret(list: dstr) !void {
 
         if (std.mem.eql(byte, list[3], "//")) { // literal
             funcname = try evaluate(list[2]);
-        } else if (std.mem.eql(byte, list[3], "////"))  { // forced eval
+        } else if (std.mem.eql(byte, list[3], "////")) { // forced eval
             const indirect = state.data.get(list[2]) orelse return error.UnknownVariable;
             funcname = try evaluate(indirect);
         } else if (std.mem.eql(byte, list[3], "/")) { // true literal
@@ -461,19 +467,18 @@ fn interpret(list: dstr) !void {
             funcname = indirect;
         } else { // do not support copy
             return error.UnknownAddressingMode;
-        } 
+        }
 
-        const start = state.codeTable.get(funcname)
-            orelse return error.UnknownFunction;
+        const start = state.codeTable.get(funcname) orelse return error.UnknownFunction;
 
         try callStack.append(allocator, .{
             .pc = start,
         });
 
         return try callFunc();
-    }  
- 
-    if (std.mem.eql(byte, list[0], "If")) { 
+    }
+
+    if (std.mem.eql(byte, list[0], "If")) {
         // Start doing Ifs (If funcToExec "condition")
         if (limits.inst_func_curr > limits.inst_func_max) {
             print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
@@ -518,9 +523,7 @@ fn interpret(list: dstr) !void {
             return error.UnknownAddressingMode;
         }
 
-
-        const start = state.codeTable.get(funcname)
-            orelse return error.UnknownFunction;
+        const start = state.codeTable.get(funcname) orelse return error.UnknownFunction;
 
         // new code actually doing shit correctly
         try callStack.append(allocator, .{
@@ -531,8 +534,8 @@ fn interpret(list: dstr) !void {
             return try callFunc();
 
         // old code that used to jump
-//        callStack.items[callStack.items.len - 1].pc = start - 1;    
-//        return;
+        //        callStack.items[callStack.items.len - 1].pc = start - 1;
+        //        return;
     }
 
     if (std.mem.eql(byte, list[0], "Return")) { // thing to exit from Func
@@ -543,10 +546,9 @@ fn interpret(list: dstr) !void {
 
         limits.inst_return_curr += 1;
 
-
         return error.Return;
     }
-} 
+}
 
 fn callFunc() anyerror!void {
     const base = callStack.items.len - 1;
@@ -595,7 +597,6 @@ fn isOperator(op: str) bool {
         std.mem.eql(byte, op, ">") or
         std.mem.eql(byte, op, "<");
 }
-
 
 fn resolveVariables(line: str) !str {
     const allocator = mem.alloc();
@@ -657,7 +658,6 @@ fn debugDump(ir: dstr) !void {
     }
 
     print("Recording: {}\n", .{recording});
-
 
     print("CODE TABLE:\n", .{});
     var code_iter = state.codeTable.iterator();

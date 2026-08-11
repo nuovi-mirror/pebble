@@ -2,8 +2,9 @@
 # keep in mind this test suite depends on
 # std.io.print and std.io.printLn
 
-New ARG1 'msg' # set arg for printing
 New msg 'Pebble VM test suite' # set msg to be printed
+New __Escape_std.io.print_ARG0 <msg> # set arg for printing
+New __Escape_std.io.printLn_ARG0 <msg> # set arg for printing
 Escape std.io.print # print
 
 New msg ' - Starting VM test suite'
@@ -87,5 +88,5 @@ New msg ' - - - - The time of day should be printed: '
 Escape std.io.printLn
 
 Escape std.misc.time
-New msg time
+New msg __Escape_std.misc.time_RET0
 Escape std.io.print

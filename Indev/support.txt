@@ -15,6 +15,7 @@ addressed by a numerical value -
 3: DragonFlyBSD AMD64 6.4-RELEASE: BLOCK
 4: ReactOS i386 NT 5.2: BLOCK
 5: FreeBSD AMD64 15.0: RUN
+6: PureDarwin AMD64 17.4: RUN
 
 
 NOTES:
@@ -28,3 +29,4 @@ NOTES:
 4: Zig's Standard Library expects newer APIs
 5: Due to issues with FreeBSD's LIBC linking in Zig 0.15.2, the standard
    library cannot be built.
+6: Due to obvious limitations, self-hosting was not attempted.
