@@ -16,16 +16,12 @@ Escape std.io.print
 
 New msg ' - - - chars 3333 should be printed: '
 Escape std.io.printLn
-
 New msg "1 + 2"
 Escape std.io.printLn
-
 New msg "4 - 1"
 Escape std.io.printLn
-
 New msg "1 * 3"
 Escape std.io.printLn
-
 New msg "6 / 2"
 Escape std.io.print
 
@@ -35,26 +31,54 @@ Escape std.io.print
 
 New msg ' - - - chars 1111 should be printed: '
 Escape std.io.printLn
-
 New msg "5 == 4"
 Escape std.io.printLn
-
 New msg "5 != 5"
 Escape std.io.printLn
-
 New msg "5 < 1"
 Escape std.io.printLn
-
 New msg "1 > 5"
 Escape std.io.print
 
-New msg ' - -  Testing string ops'
+New msg ' - - - chars 0000 should be printed: '
+Escape std.io.printLn
+New msg "5 == 5"
+Escape std.io.printLn
+New msg "5 > 4"
+Escape std.io.printLn
+New msg "5 < 6"
+Escape std.io.printLn
+New msg "5 != 4"
 Escape std.io.print
 
-New msg ' - - - chars abcd abcd abcd should be printed: '
-Escape std.io.printLn
+New msg ' - - Testing string ops'
+Escape std.io.print
 
-New msg "ab s++ cd "
+New msg ' - - - chars abcd should be printed: '
+Escape std.io.printLn
+New msg "ab s++ cd"
+Escape std.io.print
+
+New msg ' - - - chars 1111 should be printed: '
+Escape std.io.printLn
+New msg "a -?= b"
+Escape std.io.printLn
+New msg "a ?= b"
+Escape std.io.printLn
+New msg "a s?= b"
+Escape std.io.printLn
+New msg "a e?= b"
+Escape std.io.print
+
+New msg ' - - - chars 0000 should be printed: '
+Escape std.io.printLn
+New msg "a -?= a"
+Escape std.io.printLn
+New msg "a e?= a"
+Escape std.io.printLn
+New msg "a s?= a"
+Escape std.io.printLn
+New msg "a ?= a"
 Escape std.io.print
 
 New msg ' - Starting std test'
@@ -68,14 +92,28 @@ Escape std.io.print
 
 New msg ' - - - - char e should be printed with a newline at the end'
 Escape std.io.print
-
 New msg ' - - - - - e'
 Escape std.io.print
 
+New msg ' - - - Starting std.io.printLn test'
+Escape std.io.print
 New msg ' - - - - char e should be printed with no newline: '
 Escape std.io.printLn
-
 New msg 'e'
+Escape std.io.print
+
+New msg ' - - - Starting std.io.input test'
+Escape std.io.print
+New msg ' - - - - The input characters should be printed'
+Escape std.io.print
+New msg ' - - - - Please press any keys followed by the Return key'
+Escape std.io.print
+New msg ' - - - - : '
+Escape std.io.printLn
+Escape std.io.input
+New msg ' - - - - You pressed characters: '
+Escape std.io.printLn
+New msg __Escape_std.io.input_RET0
 Escape std.io.print
 
 New msg ' - - Starting std.misc test'
@@ -86,7 +124,22 @@ Escape std.io.print
 
 New msg ' - - - - The time of day should be printed: '
 Escape std.io.printLn
-
 Escape std.misc.time
 New msg __Escape_std.misc.time_RET0
 Escape std.io.print
+
+New msg ' - - - Starting std.misc.random test'
+Escape std.io.print
+New msg ' - - - - A random number should be printed: '
+Escape std.io.printLn
+Escape std.misc.random
+New msg __Escape_std.misc.random_RET0
+Escape std.io.print
+
+New msg ' - - - Starting std.misc.sleep test'
+Escape std.io.print
+New msg ' - - - - The system should sleep for 2000 ms (2 seconds)'
+Escape std.io.print
+New time '2000'
+New __Escape_std.misc.sleep_ARG0 <time>
+Escape std.misc.sleep

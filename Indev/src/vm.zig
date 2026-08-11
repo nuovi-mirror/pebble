@@ -156,6 +156,13 @@ pub fn main() !void { // the VM
         }
     }
 
+    if (first_arg) |arg| { // handle dancing
+        if (std.mem.eql(byte, arg, "dance")) {
+            try run(tests.dance);
+            exit(0);
+        }
+    }
+
     if (first_arg) |arg| { // handle docs
         if (std.mem.eql(byte, arg, "docs")) {
             print("{s}", .{docs.read()});

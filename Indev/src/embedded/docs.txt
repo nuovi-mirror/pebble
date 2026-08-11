@@ -70,28 +70,72 @@ to represent a pointer, which the reference of said pointer should then be evalu
 literal, or 'do not do anything with this data', and no markings to simply represent copying the data over.
 An example of this could be
 
-	New a '1' // a = 1
-	New b a // b = copy of a (so 1)
-	New a '1 + 2' // a now = literal string '1 + 2'
-	New c {a} // c = result of a as an expression (so 3)
-	New d <c> // d = pointer to c (so 'c') 
+	New a '1' 	// a = 1
+	New b a 	// b = copy of a (so 1)
+	New a '1 + 2' 	// a now = literal string '1 + 2'
+	New c {a} 	// c = result of a as an expression (so 3)
+	New d <c> 	// d = pointer to c (so 'c') 
 	
 However, addressing modes can also be applied to the destination payload itself
 
-	New e '8' // e = 8 - in the destination, no quotation means a literal, unline
-		  // in the data payload, where it means a copy of. Copying is not
-		  // supported for destination payloads, and well copy is specific to
-		  // the data payload of New, as it would not make sense anywhere else
-		  // really. I mean think about it - the destination is a copy of another
-		  // variable? does not make much sense.
-	New f 'e' // f = 'e' - however this would have the same effect if it were
-		  // New f <e>, as New does not distinguish between a literal containing
-		  // a variable name and a pointer, as do most instructions.
-	New <f> '2' // f as a pointer now = 2, and since 'f' contains 'e', e = 2.
-	New calc 'a s++ b' // store literal 'a s++ b'. The 's++' operator here means concat.
-	New {calc} '3' // variable 'ab' (result of 'a s++ b') now = 3
+	New e '8' 		// e = 8 - in the destination, no quotation means a literal, unline
+		  		// in the data payload, where it means a copy of. Copying is not
+		  		// supported for destination payloads, and well copy is specific to
+		 		// the data payload of New, as it would not make sense anywhere else
+		  		// really. I mean think about it - the destination is a copy of another
+		  		// variable? does not make much sense.
+	New f 'e' 		// f = 'e' - however this would have the same effect if it were
+		  		// New f <e>, as New does not distinguish between a literal containing
+		  		// a variable name and a pointer, as do most instructions.
+	New <f> '2' 		// f as a pointer now = 2, and since 'f' contains 'e', e = 2.
+	New calc 'a s++ b'	// store literal 'a s++ b'. The 's++' operator here means concat.
+	New {calc} '3' 		// variable 'ab' (result of 'a s++ b') now = 3
 
 The syntax for the destination payload of the New keyword is generally consitored to be the common case,
 so for all future instructions specified here, the syntax for the destination payload of the New
 instruction should be consitored the default and should be assumed to be the syntax unless specified
 otherwise.
+
+The Func keyword begins definition of a function. Every line of text until the End keyword will become
+associated internally with the name of the function assiagned to the name of the function resolved
+from the addressing mode. This function can later be called using the Call keyword, taking one
+argument with the resolved name of the function to call after the addressing mode, and the If keyword,
+which will call the function resolved from the addressing mode involving the first argument, if the
+condition in the second argument resolved from the addressing mode results in 0. The second argument
+differs from the standard, instead supporting the addressing schematics of the second argument of
+the New instruction. Examples of the three may be
+
+	New x 'y'	// sets variable 'x' to equal 'y'
+	Func <x>	// create a function with the name 'y' (the result of the pointer to 'x')
+	New z "2 + 1"	// create a variable named z with the result of '2 + 1', so '3'.
+	End		// end the function definition
+	Call <x>	// call the function with the name of 'y' (the result of the pointer to 'x')
+	If <x> "1 < 2"	// call the function 'y' (result of hte pointer to 'x') if '1 < 2' is true
+			// in this language, '0' is used as true, and all comparison statements return
+			// '0' if true and '1' if false.
+
+The Return keyword is used to return a function early. This will simply immediatly return to the caller
+(old_pc + 1), just as If and Call, once it is seen and there is a function being ran.
+
+The Escape keyword is used as the Pebble Foreign Function Interface (FFI). The Escape keyword should
+simply take one argument, being the name of the host function to call resolved from the addressing
+mode. Host functions are written in native Zig and compiled into the virtual machine itself. Once
+the binary is compiled, host functions cannot be added or removed. Host functions only have access
+to the virtual machine internal viarbale table (as in they can read and write to variables created
+by the virtual machine and code running on it), but nothing more. Escape sequences (the host
+functions) should follow the standard naming convention. Escape sequences should take arguments
+using variables named by '__Escape_<name>_ARG<argnum>', where <name> is the name of the Escape
+sequence being called and <argnum> is the argument number. Escapes should return into the
+variables __Escape_<name>_RET<retnum>, where retnum is the return variable number, and should
+only use internal variables __Escape_<name>_<varname>, where <varname> is the name of the
+variable the Escape sequence wishes to define. This matches the convention used for
+compiler-generated functions. This convention matches the Escape sequence naming convention, but
+'Escape' should be replaced by 'Func' and other logical substitutions.
+
+Escape sequences include
+
+	std. - The standard library
+	  - io. - Basic input / output
+	    - print - Print character stream with a newline at the end
+	    - printLn - Print character stream without a newline at the end
+	  - term. - Terminal manipulation libraries
