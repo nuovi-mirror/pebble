@@ -1,0 +1,30 @@
+TESTED
+
+PASS = success: support for Pebble, it's STD, Rock, and it's STD 
+RUN = success, but cannot self host
+PART = partial success: support for Pebble and Rock, but no libraries
+BROKEN = passes or partial support, but does not match canonical behavior
+BLOCK = failed: some error preventing compiling involving a dependency
+FAIL = failed: some error preventing compiling in the code itself
+
+ - Please note there is no tier system, this is simply so they may be
+addressed by a numerical value -
+
+1: OpenBSD AMD64 7.9: PASS
+2: Linux ARM64 6.18 GLIBC: PASS
+3: DragonFlyBSD AMD64 6.4-RELEASE: BLOCK
+4: ReactOS i386 NT 5.2: BLOCK
+5: FreeBSD AMD64 15.0: RUN
+
+
+NOTES:
+
+1: OpenBSD is the canonical platform: expected to always work. Builds
+   which do not work on OpenBSD shall be rejected, and builds on
+   platforms which are not OpenBSD that behave differently from OpenBSD
+   builds shall be marked invalid and rejected.
+2: Linux & GLIBC is close enough to POSIX, so the POSIX STD can be used.
+3: Appears to be related to Zig's Standard Library
+4: Zig's Standard Library expects newer APIs
+5: Due to issues with FreeBSD's LIBC linking in Zig 0.15.2, the standard
+   library cannot be built.
