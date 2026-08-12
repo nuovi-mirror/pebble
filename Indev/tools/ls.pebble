@@ -10,7 +10,8 @@ New argcount "VMARGC - 1"
 New arg "VMARG s++ argcount" // merge strings to get the final argument
 New data {arg} // grab the var
 New __Escape_std.fs.dir.list_ARG0 <data>
-//If _ls "data ?=  "
+If _ls "argcount == 0"
+If _ls "argcount == 1"
 Escape std.fs.dir.list
 New __Escape_std.io.print_ARG0 <__Escape_std.fs.dir.list_RET0>
 Escape std.io.print
