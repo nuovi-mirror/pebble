@@ -1,9 +1,0 @@
-fn run ( num ) num {
-curr = `curr + 1
-. If run "curr < num"
-}
-
-curr = !1
-call run ( 20 )
-ARG1 = !curr
-. Escape std.io.print
