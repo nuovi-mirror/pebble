@@ -48,4 +48,11 @@ x = :func ( 12 24 )
 // call function with the variable as the first argument
 // print is part of the standard library, injected into
 // the source code of every program
-call print ( x )
+call std.io.print ( x )
+
+// if statements follow simular syntax to the fn keyword
+// if ( <expr> ) { <body> }
+if ( 6 > 5 ) {
+msg = !greater than 5
+call std.io.print ( msg )
+}
