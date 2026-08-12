@@ -20,5 +20,5 @@ pub fn run() !void {
     }
 
     const itemAsString = try std.fmt.allocPrint(mem.alloc(), "{d}", .{counter});
-    try vm.data.put("__Escape_std.srt.find_RET0", itemAsString);
+    try vm.data.put("__Escape_std.str.find_RET0", itemAsString);
 }

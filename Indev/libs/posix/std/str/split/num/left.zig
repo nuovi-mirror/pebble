@@ -6,7 +6,7 @@ pub fn run() !void {
         orelse return;
     const str = vm.data.get(indirect) orelse return;
 
-    const indirect2 = vm.data.get("__Escape_std.str.split.num.left_ARG0") 
+    const indirect2 = vm.data.get("__Escape_std.str.split.num.left_ARG1") 
         orelse return;
     
     const strNum = vm.data.get(indirect2) orelse return;

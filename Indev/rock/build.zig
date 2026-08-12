@@ -26,6 +26,12 @@ pub fn build(b: *std.Build) void {
         }),
     });
 
+    const state = b.createModule(.{
+        .root_source_file = b.path("../src/state.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+
     const install = b.addInstallArtifact(exe, .{
         .dest_dir = .{
             .override = .{
@@ -35,5 +41,6 @@ pub fn build(b: *std.Build) void {
     });
 
     exe.root_module.addImport("platform", platform);
+    exe.root_module.addImport("state", state);
     b.getInstallStep().dependOn(&install.step);
 }
