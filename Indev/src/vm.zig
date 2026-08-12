@@ -496,6 +496,9 @@ fn interpret(list: dstr) !void {
         var result: bool = false;
         var funcname: str = undefined;
 
+        // if addr func addr data addr
+        // 0  1    2    3    4    5
+
         // first operand
         if (std.mem.eql(byte, list[3], "/")) { // literal
             funcname = list[2];
@@ -532,13 +535,13 @@ fn interpret(list: dstr) !void {
 
         const start = state.codeTable.get(funcname) orelse return error.UnknownFunction;
 
-        // new code actually doing shit correctly
-        try callStack.append(allocator, .{
-            .pc = start,
-        });
+        if (result) {
+            try callStack.append(allocator, .{
+                .pc = start,
+            });
 
-        if (result)
             return try callFunc();
+        }
 
         // old code that used to jump
         //        callStack.items[callStack.items.len - 1].pc = start - 1;

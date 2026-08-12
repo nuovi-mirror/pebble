@@ -4,13 +4,13 @@
 
 fn std.io.print ( value ) data {
 . New __Func_std.io.print_data {__Func_std.io.print_value}
-. New __Escape_std.io.print_ARG0 '__Func_std.io.print_data'
+. New __Escape_std.io.print_ARG0 <__Func_std.io.print_data>
 . Escape std.io.print
 }
 
 fn std.io.printLn ( value ) data {
 . New __Func_std.io.printLn_data {__Func_std.io.printLn_value}
-. New __Escape_std.io.print_ARG0 '__Func_std.io.printLn_data'
+. New __Escape_std.io.print_ARG0 <__Func_std.io.printLn_data>
 . Escape std.io.printLn
 }
 
@@ -26,4 +26,21 @@ fn std.misc.random ( ) random {
 . New __Func_std.misc.random_random __Escape_std.misc.random_RET0
 }
 
+// fs
+
+// dir
+
+fn std.fs.dir.list ( dir ) data {
+. New __Func_std.fs.dir.list_dirname {__Func_std.fs.dir.list_dir}
+. New __Escape_std.fs.dir.list_ARG0 <__Func_std.fs.dir.list_dirname>
+. Escape std.fs.dir.list
+. New __Func_std.fs.dir.list_data __Escape_std.fs.dir.list_RET0
+}
+
+// others
+fn rock.getargs.last ( ) args {
+. New __Func_rock.getargs.last_num "VMARGC - 1"
+. New __Func_rock.getargs.last_argname {VMARG s++ __Func_rock.getargs.last_num}
+. New __Func_rock.getargs.last_args {__FUnc_rock.getargs.last_argname}
+}
 . # end rock stdlib          
