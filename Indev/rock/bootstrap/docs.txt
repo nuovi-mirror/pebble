@@ -1,4 +1,0 @@
-This is a simple rockc compiler written in Zig. The codebase is an unmaintainable mess of spaghetti, but it
-works. This is intended to be used only to build the rockc compiler written in Rock, then simply thrown
-away. This is not intended to be used as a real rockc compiler. Do not attempt to 'fix' this compiler by
-cleaning up the codebase, adding features, or anything. DO NOT TOUCH THIS
