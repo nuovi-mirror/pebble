@@ -1,0 +1,29 @@
+. # rock stdlib
+
+// io
+
+fn std.io.print ( value ) data {
+. New __Func_std.io.print_data {__Func_std.io.print_value}
+. New __Escape_std.io.print_ARG0 '__Func_std.io.print_data'
+. Escape std.io.print
+}
+
+fn std.io.printLn ( value ) data {
+. New __Func_std.io.printLn_data {__Func_std.io.printLn_value}
+. New __Escape_std.io.print_ARG0 '__Func_std.io.printLn_data'
+. Escape std.io.printLn
+}
+
+fn std.io.input ( ) input  {
+. Escape std.io.input
+. New __Func_std.io.input_input __Escape_std.io.input_RET0
+}
+
+// misc
+
+fn std.misc.random ( ) random {
+. Escape std.misc.random
+. New __Func_std.misc.random_random __Escape_std.misc.random_RET0
+}
+
+. # end rock stdlib          
