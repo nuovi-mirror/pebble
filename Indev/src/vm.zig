@@ -788,3 +788,4 @@ pub fn evaluate(line: str) !str {
     if (current.len != 1) return resolveVariables(line);
     return allocator.dupe(byte, current[0]);
 }
+
