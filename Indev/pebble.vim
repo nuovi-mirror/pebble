@@ -11,7 +11,7 @@ syntax match pebbleComment '/.*$'
 syntax match pebbleShebang '^#!.*$'
 
 # Keywords
-syntax keyword pebbleKeyword Func New End If Escape
+syntax keyword pebbleKeyword Call Return Func New End If Escape
 
 # Function name after Func
 syntax match pebbleFunction '\h\w*' contained

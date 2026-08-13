@@ -7,7 +7,7 @@ const docs = @import("docs");
 const mem = @import("allocator");
 const limits = @import("limits");
 const version = @import("version");
-const psh = @import("psh");
+const psh = @embedFile("psh");
 const platform = @import("platform");
 const print = platform.print;
 const exit = platform.exit;
@@ -172,7 +172,7 @@ pub fn main() !void { // the VM
 
     if (first_arg) |arg| { // handle shell
         if (std.mem.eql(byte, arg, "psh")) {
-            try run(psh.psh);
+            try run(psh);
             exit(0);
         }
     }
@@ -379,7 +379,7 @@ fn interpret(list: dstr) !void {
         } else if (std.mem.eql(byte, list[3], "/")) { // true literal
             dest = list[2];
         } else if (std.mem.eql(byte, list[3], "/////")) { // pointer
-            const indirect = state.data.get(list[2]) orelse return error.UnknownVariable;
+            const indirect = state.data.get(list[2]) orelse return error.InvalidPointer;
             dest = indirect;
         } else {
             return error.UnknownAddressingMode;
@@ -398,7 +398,7 @@ fn interpret(list: dstr) !void {
             const indirect = state.data.get(list[4]) orelse return error.UnknownVariable;
             try state.data.put(dest, indirect);
         } else if (std.mem.eql(byte, list[5], "/////")) { // pointer
-            _ = state.data.get(list[4]) orelse return error.UnknownVariable;
+            _ = state.data.get(list[4]) orelse return error.InvalidPointer;
             try state.data.put(dest, list[4]); // just place the name of the variable in
         } else {
             return error.UnknownAddressingMode;
@@ -422,7 +422,7 @@ fn interpret(list: dstr) !void {
             const indirect = state.data.get(list[2]) orelse return error.UnknownVariable;
             escapename = try evaluate(indirect);
         } else if (std.mem.eql(byte, list[3], "/////")) { // pointer
-            escapename = state.data.get(list[2]) orelse return error.UnknownVariable;
+            escapename = state.data.get(list[2]) orelse return error.InvalidPointer;
         } else { // do not support copy
             return error.InvalidAddressingMode;
         }
@@ -449,7 +449,7 @@ fn interpret(list: dstr) !void {
         } else if (std.mem.eql(byte, list[3], "/")) { // true literal
             funcname = list[2];
         } else if (std.mem.eql(byte, list[3], "/////")) { // pointer
-            const indirect = state.data.get(list[2]) orelse return error.UnknownVariable;
+            const indirect = state.data.get(list[2]) orelse return error.InvalidPointer;
             funcname = indirect;
         } else { // do not support copy
             return error.InvalidAddressingMode;
@@ -470,7 +470,7 @@ fn interpret(list: dstr) !void {
         } else if (std.mem.eql(byte, list[3], "/")) { // true literal
             funcname = list[2];
         } else if (std.mem.eql(byte, list[3], "/////")) { // pointer
-            const indirect = state.data.get(list[2]) orelse return error.UnknownVariable;
+            const indirect = state.data.get(list[2]) orelse return error.InvalidPointer;
             funcname = indirect;
         } else { // do not support copy
             return error.UnknownAddressingMode;
@@ -508,7 +508,7 @@ fn interpret(list: dstr) !void {
             const indirect = state.data.get(list[2]) orelse return error.UnknownVariable;
             funcname = try evaluate(indirect);
         } else if (std.mem.eql(byte, list[3], "/////")) { // pointer
-            const indirect = state.data.get(list[2]) orelse return error.UnknownVariable;
+            const indirect = state.data.get(list[2]) orelse return error.InvaidPointer;
             funcname = indirect;
         } else { // do not support copy
             return error.UnknownAddressingMode;
@@ -526,7 +526,7 @@ fn interpret(list: dstr) !void {
             if (std.mem.eql(byte, try evaluate(indirect), "0"))
                 result = true;
         } else if (std.mem.eql(byte, list[5], "/////")) { // pointer
-            const indirect = state.data.get(list[4]) orelse return error.UnknownVariable;
+            const indirect = state.data.get(list[4]) orelse return error.InvalidPointer;
             if (std.mem.eql(byte, indirect, "0"))
                 result = true;
         } else { // do not support copy

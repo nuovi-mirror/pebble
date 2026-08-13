@@ -3,15 +3,19 @@
 New data '1 2 3'
 New separator ' '
 
-Func loop
-New __Escape_std.str.find_ARG0 'data'
-New __Escape_std.str.find_ARG1 'separator'
+New __Escape_std.str.find_ARG0 <data>
+New __Escape_std.str.find_ARG1 <separator>
 Escape std.str.find
-New __Escape_std.str.split.num.right_ARG0 'data'
-New __Escape_std.str.split.num.right_ARG1 '__Escape_std.str.find_RET0'
-New __Escape_std.str.split.num.left_ARG0 'data'
-New __Escape_std.str.split.num.left_ARG1 '__Escape_std.str.find_RET0'
+New __Escape_std.str.split.num.right_ARG0 <data>
+New __Escape_std.str.split.num.right_ARG1 <__Escape_std.str.find_RET0>
+New __Escape_std.str.split.num.left_ARG0 <data>
+New __Escape_std.str.split.num.left_ARG1 <__Escape_std.str.find_RET0>
 Escape std.str.split.num.right
 Escape std.str.split.num.left
-New data __Escape_std.str.split.num.right_RET0
+New newdata __Escape_std.str.split.num.right_RET0
 New arg __Escape_std.str.split.num.left_RET0
+
+New __Escape_std.io.print_ARG0 <newdata>
+Escape std.io.print
+New __Escape_std.io.print_ARG0 <arg>
+Escape std.io.print

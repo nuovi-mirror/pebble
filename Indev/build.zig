@@ -72,7 +72,7 @@ pub fn build(b: *std.Build) void {
     });
 
     const psh = b.createModule(.{
-        .root_source_file = b.path("tools/psh.zig"),
+        .root_source_file = b.path("src/embedded/psh.pebble"),
         .target = target,
         .optimize = optimize,
     });

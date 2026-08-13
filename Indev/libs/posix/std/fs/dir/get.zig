@@ -9,5 +9,5 @@ pub fn run() !void {
     const cwd = try std.posix.getcwd(&buffer);
     const result = try allocator.dupe(u8, cwd);
 
-    try vm.data.put("__Escape_std.fs.dir.change_RET0", result);
+    try vm.data.put("__Escape_std.fs.dir.get_RET0", result);
 }
