@@ -8,4 +8,9 @@ embedded documentation and version info, all in 60kb.
 
 Please keep in mind this is an alpha release.
 
+UPDATE: Due to unfortunate circumstances, Pebble and the EISC project
+may be delayed or cancelled. The SparkOsphere project may be cancelled outright
+in itself as well. Thank you for taking the time to read this. I hope your
+day may be as wonderful as mine.
+
 Product of <a href="http://thenuoviorizzonticompany.org">The Nuovi Orizzonti Company</a>
