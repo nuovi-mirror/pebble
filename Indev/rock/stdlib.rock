@@ -1,5 +1,16 @@
 . # rock stdlib
 
+// yes, this is messy
+// this is a wrapper
+// to allow Rock to 
+// interface with
+// Pebble which then
+// interfaces with
+// Escape sequences
+// do not try to fix
+// this code
+// never touch this
+
 // io
 
 fn std.io.print ( value ) data {
@@ -17,6 +28,29 @@ fn std.io.printLn ( value ) data {
 fn std.io.input ( ) input  {
 . Escape std.io.input
 . New __Func_std.io.input_input __Escape_std.io.input_RET0
+}
+
+// proc
+
+fn std.proc.spawnBlocking ( proc ) {
+. New __Func_std.proc.spawnBlocking_procc {__Func_std.proc.spawnBlocking_proc}
+. New __Escape_std.proc.spawn_ARG0 <__Func_std.proc.spawnBlocking_procc>
+. Escape std.proc.spawn
+. New __Escape_std.proc.wait_ARG0 <__Escape_std.proc.spawn_RET0>
+. Escape std.proc.wait
+}
+
+fn std.proc.spawn ( proc ) pid {
+. New __Func_std.proc.spawn_procc {__Func_std.proc.spawn_proc}
+. New __Escape_std.proc.spawn_ARG0 <__Func_std.proc.spawn_procc>
+. Escape std.proc.spawn
+. New __Func_std.proc.spawn_pid __Escape_std.proc.spawn_RET0
+}
+
+fn std.proc.wait ( pid ) {
+. New __Func_std.proc.wait_pidd {__Func_std.proc.wait_pid}
+. New __Escape_std.proc.wait_ARG0 <__Func_std.proc.wait_ppid>
+. Escape std.proc.wait
 }
 
 // misc

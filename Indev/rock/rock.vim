@@ -5,7 +5,7 @@ if exists('b:current_syntax')
 endif
 
 # Keywords
-syntax keyword rockKeyword fn if call import export
+syntax keyword rockKeyword . fn if call import export
 
 # Function names
 syntax match rockFunction '\h\w*\%(\.\h\w*\)*' contained

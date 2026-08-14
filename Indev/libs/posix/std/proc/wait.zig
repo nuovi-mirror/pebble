@@ -14,6 +14,8 @@ pub fn run() !void {
 
     const status = result.status;
 
+    // return -0 if does not appl
+
     if ((status & 0x7f) == 0) {
         // Normal exit
         const code = (status >> 8) & 0xff;
@@ -25,6 +27,7 @@ pub fn run() !void {
         );
 
         try vm.data.put("__Escape_std.proc.wait_RET0", exitCodeAsString);
+        try vm.data.put("__Escape_std.proc.wait_RET1", "-0");
         try vm.data.put("__Escape_std.proc.wait_RET2", "1");
 
     } else {
@@ -37,6 +40,7 @@ pub fn run() !void {
             .{sig},
         );
 
+        try vm.data.put("__Escape_std.proc.wait_RET0", "-0");
         try vm.data.put("__Escape_std.proc.wait_RET1", sigAsString);
         try vm.data.put("__Escape_std.proc.wait_RET2", "0");
     }
