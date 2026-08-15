@@ -24,10 +24,10 @@ Escape std.io.input
 New command __Escape_std.io.input_RET0
 
 If exit "command ?= exit"
-If cd "command -?= cd"
-If echo "command -?= echo"
-If pwd "command -?= pwd"
-If ls "command -?= ls"
+If cd "command s?= cd"
+If echo "command s?= echo"
+If pwd "command s?= pwd"
+If ls "command s?= ls"
 If clear "command ?= clear"
 
 New __Escape_std.proc.spawn_ARG0 <command>
