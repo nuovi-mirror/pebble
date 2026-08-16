@@ -134,8 +134,18 @@ compiler-generated functions. This convention matches the Escape sequence naming
 
 Escape sequences include
 
-	std. - The standard library
-	  - io. - Basic input / output
-	    - print - Print character stream with a newline at the end
-	    - printLn - Print character stream without a newline at the end
-	  - term. - Terminal manipulation libraries
+	std. 			- The standard library
+	  - io. 		  - Basic input / output
+	    - print 		    - Print character stream with a newline at the end
+	    - printLn 		    - Print character stream without a newline at the end
+	    - input		    - Blocking input grabbing
+	  - term. 		  - Terminal manipulation libraries
+	    - cursor. 		    - Cursor manipulation libraries
+	      - moveAbsolute 	      - Move the cursor to an absolute position
+	      - moveRelative 	      - Move the cursor to a relative position
+	      - get 		      - Grab current cursor position
+	    - color.		    - Terminal color manipulation libraries
+	      - basic.		      - Terminal basic color manipulation libraries
+	        - back		        - Set the basic background color of the terminal
+		- fore			- Set the basic foreground color of the terminal
+		- reset			- Reset the basic terminal color to the default

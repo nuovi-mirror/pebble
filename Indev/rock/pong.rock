@@ -1,0 +1,102 @@
+
+// stuff
+
+// max num of loops
+max = !10
+count = !0
+
+// ball
+
+// x
+ball.x = !0
+// y
+ball.y = !0
+// x velocity
+ball.v.x = !10
+// y velocity
+ball.v.y = !10
+// direction
+// 0 for left, 1 for right
+ball.d = !0
+
+// paddle
+
+// 0
+
+// x
+paddle.0.x = !0
+// y
+paddle.0.y = !0
+// x velocity
+paddle.0.v.x = !10
+// y velocity
+paddle.0.v.y = !10
+
+
+// loop
+fn loop ( ) thing {
+// dummy return
+thing = !0 
+
+// import shit
+import ball.x
+import ball.y
+import ball.v.x
+import ball.v.y
+import ball.d
+import count
+
+if ( ball.d == 0 ) {
+ball.x = `ball.x + ball.v.x
+ball.y = `ball.y + ball.v.y
+}
+
+if ( ball.d == 1 ) {
+ball.x = `ball.x - ball.v.x
+ball.y = `ball.y - ball.v.y
+}
+
+// pong colision
+
+//if ( ball.x == paddle.0.x ) {
+//if ( ball.y == paddle.0.y ) {
+//if ( ball.d == 0 ) {
+//ball.d = !1
+//}
+//if ( ball.d == 1 ) {
+//ball.d = !0
+//}
+//}
+//}
+
+//if ( ball.x == paddle.1.x ) {
+//if ( ball.y == paddle.1.y ) {
+//if ( ball.d == 0 ) {
+//ball.d = !1
+//}
+//if ( ball.d == 1 ) {
+//ball.d = !0
+//}
+//}
+//}
+
+//call std.misc.sleep ( 100 ) // sleep 100ms
+call std.io.print ( ball.x ) // print x
+call std.io.print ( ball.y ) // print y
+
+// export shit
+export ball.x
+export ball.y
+export ball.v.x
+export ball.v.y
+export ball.d
+export count
+
+count = `count + 1
+if ( count > max ) {
+call loop
+}
+
+}
+
+call loop
