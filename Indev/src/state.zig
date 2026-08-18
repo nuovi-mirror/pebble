@@ -17,6 +17,14 @@ pub const shword = if (build.native)
     if (@bitSizeOf(isize) == 64) i32 
     else i16 else i16; // signed half word
 
+pub const quword = if (build.native)
+    if (@bitSizeOf(usize) == 64) u16
+    else u8 else u8 // quarter word
+
+pub const squword = if (build.native)
+    if (@bitSizeOf(isize) == 64) i16
+    else i8 else i8 // signed quarter word
+
 pub const dword = if (build.double) u64; // double word
 pub const sdword = if (build.double) i64; // signed double word
 pub const dpf = if (build.double) f64; // double precision float
