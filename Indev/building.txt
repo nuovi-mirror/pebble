@@ -1,0 +1,3 @@
+Option -Doptimize=Debug enables the VM debugger.
+Option -Dnative changes standard widths to be the architecture size (word, sword, float)
+Option -Ddouble enables 64-bit values (dword, sdword, dpf)

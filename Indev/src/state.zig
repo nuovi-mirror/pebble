@@ -1,17 +1,29 @@
 const std = @import("std");
+const build = @import("build_options");
 
 pub var data: std.StringHashMap(str) = undefined; // define data region
 pub var codeTable: std.StringHashMap(word) = undefined; // define func ptr region
 pub var code: std.ArrayList(dstr) = undefined; // define func region
 
-pub const word = u32; // word
-pub const hword = u16; // half word
-pub const byte = u8; // byte
-pub const sword = i32; // signed word
-pub const shword = i16; // signed half word
-pub const sbyte = i8; // signed byte
+pub const word = if (build.native) usize else u32; // host size unless
+pub const sword = if (build.native) isize else i32; // host size unless
+pub const float = if (build.native) f64 else f32; // host size unless
+
+pub const hword = if (build.native) 
+    if (@bitSizeOf(usize) == 64) u32 
+    else u16 else u16; // half word
+
+pub const shword = if (build.native) 
+    if (@bitSizeOf(isize) == 64) i32 
+    else i16 else i16; // signed half word
+
+pub const dword = if (build.double) u64; // double word
+pub const sdword = if (build.double) i64; // signed double word
+pub const dpf = if (build.double) f64; // double precision float
+
 pub const spf = f32; // single precision floating point
-pub const float = spf; // default floating point value
+pub const byte = u8; // byte
+pub const sbyte = i8; // signed byte
 pub const str = []const u8; // string
 pub const wstr = []const []const u8; // wrapped string
 pub const dstr = [][]const u8; // double string

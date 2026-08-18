@@ -5,7 +5,7 @@ var arena: ?std.heap.ArenaAllocator = null;
 var debug = std.heap.DebugAllocator(.{}){};
 
 pub fn init() void {
-    if (build.VMDEBUG) {
+    if (build.debug) {
         arena = std.heap.ArenaAllocator.init(debug.allocator());
     } else {
         arena = std.heap.ArenaAllocator.init(std.heap.c_allocator);
@@ -15,7 +15,7 @@ pub fn init() void {
 }
 
 pub fn queryCapacity() usize {
-    if (build.VMDEBUG) {
+    if (build.debug) {
         return arena.?.queryCapacity();
     } else {
         return 0;

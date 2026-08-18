@@ -195,7 +195,7 @@ pub fn run(fileData: str) !void {
 
         defer allocator.free(IR);
 
-        if (build.VMDEBUG) { // debug dump
+        if (build.debug) { // debug dump
             try debugDump(IR);
             platform.print(
                 "Press the Enter key to run said instruction.",

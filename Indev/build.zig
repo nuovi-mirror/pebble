@@ -7,7 +7,18 @@ pub fn build(b: *std.Build) void {
         "optimize",
         "Optimization mode",
     ) orelse .ReleaseFast;
-    const options = b.addOptions();
+
+    const double = b.option(
+        bool,
+        "double",
+        "Allow 64-bit width types",
+    ) orelse false;
+
+    const native = b.option(
+        bool,
+        "native",
+        "Set VM width to host width",
+    ) orelse false;
 
     const libs = b.createModule(.{
         .root_source_file = b.path(switch (target.result.os.tag) {
@@ -103,13 +114,18 @@ pub fn build(b: *std.Build) void {
         },
     });
 
-    options.addOption(bool, "VMDEBUG", optimize == .Debug);
+    const vmoptions = b.addOptions();
+    vmoptions.addOption(bool, "native", native);
+    vmoptions.addOption(bool, "double", double);
+    vmoptions.addOption(bool, "debug", optimize == .Debug);
 
-    const build_options = options.createModule();
+    const build_options = vmoptions.createModule();
 
     allocator.addImport("build_options", build_options);
-    exe.root_module.addImport("build_options", build_options);
 
+    state.addImport("build_options", build_options);
+
+    exe.root_module.addImport("build_options", build_options);
     exe.root_module.addImport("libs", libs);
     exe.root_module.addImport("state", state);
     exe.root_module.addImport("escapes", escapes);
@@ -132,6 +148,7 @@ pub fn build(b: *std.Build) void {
     escapes.addImport("platform", platform);
     
     version.addImport("state", state);
+    version.addImport("build_options", build_options);
 
     if (target.result.os.tag == .openbsd)
         exe.linkSystemLibrary("sndio");
