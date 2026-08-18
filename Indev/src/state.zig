@@ -29,6 +29,11 @@ pub const dword = if (build.double) u64; // double word
 pub const sdword = if (build.double) i64; // signed double word
 pub const dpf = if (build.double) f64; // double precision float
 
+pub const fword = u32; // fixed word
+pub const sfword = i32; // signed fixed word
+pub const hfword = u16; // half fixed word
+pub const shfword = i16; // signed half fixed word
+
 pub const spf = f32; // single precision floating point
 pub const byte = u8; // byte
 pub const sbyte = i8; // signed byte
