@@ -81,6 +81,7 @@ const Frame = struct {
 };
 
 var callStack: std.ArrayList(Frame) = .empty;
+var funcname: str = undefined;
 
 // for windows compat
 fn getArgs(allocator: std.mem.Allocator) !dstr {
@@ -516,7 +517,7 @@ fn interpret(list: dstr) !void {
 
         limits.inst_func_curr += 1;
 
-        var funcname: str = undefined;
+//        var funcname: str = undefined;
 
         if (std.mem.eql(byte, list[3], "//")) { // literal
             funcname = try evaluate(list[2]);
@@ -568,37 +569,53 @@ fn interpret(list: dstr) !void {
     }
 
     if (std.mem.eql(byte, list[0], "Call")) {
-        var funcname: str = undefined;
+        var curr_funcname: str = undefined;
 
         if (std.mem.eql(byte, list[3], "//")) { // literal
-            funcname = try evaluate(list[2]);
+            curr_funcname = try evaluate(list[2]);
         } else if (std.mem.eql(byte, list[3], "////")) { // forced eval
             const indirect =
                 state.data.get(list[2]) orelse
                 return error.UnknownVariable;
 
-            funcname = try evaluate(indirect);
+            curr_funcname = try evaluate(indirect);
         } else if (std.mem.eql(byte, list[3], "/")) { // true literal
-            funcname = list[2];
+            curr_funcname = list[2];
         } else if (std.mem.eql(byte, list[3], "/////")) { // pointer
             const indirect =
                 state.data.get(list[2]) orelse
                 return error.InvalidPointer;
 
-            funcname = indirect;
+            curr_funcname = indirect;
         } else {
             return error.UnknownAddressingMode;
         }
 
         const start =
-            state.codeTable.get(funcname) orelse
+            state.codeTable.get(curr_funcname) orelse
             return error.UnknownFunction;
 
-        try callStack.append(allocator, .{
-            .pc = start,
-        });
+        if (std.mem.eql(byte, funcname, curr_funcname)) {
+            if (recording) {
+                // jump
+                callStack.items[callStack.items.len - 1].pc = start;
+                return;
+            } else {
+                // call function
+                try callStack.append(allocator, .{
+                    .pc = start,
+                });
 
-        return try callFunc();
+                return try callFunc();
+            }
+        } else {
+            // call function
+            try callStack.append(allocator, .{
+                .pc = start,
+            });
+
+            return try callFunc();
+        }
     }
 
     if (std.mem.eql(byte, list[0], "If")) {
@@ -610,24 +627,25 @@ fn interpret(list: dstr) !void {
         limits.inst_if_curr += 1;
 
         var result: bool = false;
-        var funcname: str = undefined;
+//        var funcname: str = undefined;
+        var curr_funcname: str = undefined;
 
         if (std.mem.eql(byte, list[3], "/")) { // true literal
-            funcname = list[2];
+            curr_funcname = list[2];
         } else if (std.mem.eql(byte, list[3], "///")) { // literal
-            funcname = try evaluate(list[2]);
+            curr_funcname = try evaluate(list[2]);
         } else if (std.mem.eql(byte, list[3], "////")) { // forced eval
             const indirect =
                 state.data.get(list[2]) orelse
                 return error.UnknownVariable;
 
-            funcname = try evaluate(indirect);
+            curr_funcname = try evaluate(indirect);
         } else if (std.mem.eql(byte, list[3], "/////")) { // pointer
             const indirect =
                 state.data.get(list[2]) orelse
                 return error.InvaidPointer;
 
-            funcname = indirect;
+            curr_funcname = indirect;
         } else {
             return error.UnknownAddressingMode;
         }
@@ -661,11 +679,27 @@ fn interpret(list: dstr) !void {
             return error.UnknownFunction;
 
         if (result) {
-            try callStack.append(allocator, .{
-                .pc = start,
-            });
+            if (std.mem.eql(byte, funcname, curr_funcname)) {
+                if (recording) {
+                    // jump
+                    callStack.items[callStack.items.len - 1].pc = start;
+                    return;
+                } else {
+                    // call function
+                    try callStack.append(allocator, .{
+                        .pc = start,
+                    });
 
-            return try callFunc();
+                    return try callFunc();
+                }
+            } else {
+                // call function
+                try callStack.append(allocator, .{
+                    .pc = start,
+                });
+
+                return try callFunc();
+            }
         }
     }
 
