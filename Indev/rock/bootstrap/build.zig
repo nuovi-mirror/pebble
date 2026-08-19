@@ -18,7 +18,7 @@ pub fn build(b: *std.Build) void {
     });
 
     const exe = b.addExecutable(.{
-        .name = "rockc-bootstrap",
+        .name = "bootstrap",
         .root_module = b.createModule(.{
             .root_source_file = b.path("rockc.zig"),
             .target = target,

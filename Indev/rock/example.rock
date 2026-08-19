@@ -11,32 +11,32 @@
 // x
 fn func ( a b ) x {
 
-// function body
+	// function body
 
-// store the result of the expression as x
-x = `a + b
+	// store the result of the expression as x
+	x = `a + b
 
-// store the literal as y
-y = !1
+	// store the literal as y
+	y = !1
 
-// store a copy of y as z
-z = @y
+	// store a copy of y as z
+	z = @y
 
-// functions cannot use variables outside of their
-// scope. Instead, the import and export instructions
-// are used to allow them to.
-// Keep in mind this is done by the compiler.
+	// functions cannot use variables outside of their
+	// scope. Instead, the import and export instructions
+	// are used to allow them to.
+	// Keep in mind this is done by the compiler.
 
-//export x
-// function var x is now global x (copied)
+	//export x
+	// function var x is now global x (copied)
 
-//import x
-// copy globar var x to local var x
+	//import x
+	// copy globar var x to local var x
 
-// however, those are commented out for this program 
-// since they are not needed.
+	// however, those are commented out for this program 
+	// since they are not needed.
 
-// end the function
+	// end the function
 }
 
 w = !1
@@ -53,6 +53,6 @@ call std.io.print ( x )
 // if statements follow simular syntax to the fn keyword
 // if ( <expr> ) { <body> }
 if ( 6 > 5 ) {
-msg = !greater than 5
-call std.io.print ( msg )
+	msg = !greater than 5
+	call std.io.print ( msg )
 }

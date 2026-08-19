@@ -1,0 +1,32 @@
+// takes current health and incoming damage,
+// returns new health (clamped at 0)
+fn apply_damage ( hp dmg ) result {
+new_hp = `hp - dmg
+export new_hp
+
+if ( new_hp < 0 ) {
+import new_hp
+new_hp = !0
+}
+
+result = @new_hp
+}
+
+// checks if health has hit zero
+fn is_dead ( hp ) result {
+result = `hp == 0
+}
+
+hp = !100
+dmg = !135
+
+hp = :apply_damage ( hp dmg )
+call std.io.print ( hp )
+
+dead = :is_dead ( hp )
+if ( dead == 0 ) {
+msg = !unit died
+call std.io.print ( msg )
+}
+
+// just a demo

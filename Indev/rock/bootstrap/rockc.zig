@@ -11,45 +11,128 @@ const Error = struct {
 
 const ErrorKind = enum {
     InvalidSyntax,
-    UsageError
+    UsageError,
 };
+
+fn tokenizeWhitespace(
+    allocator: std.mem.Allocator, 
+    line: []const u8,
+) !std.ArrayList([]const u8) {
+    var tokens: std.ArrayList([]const u8) = .empty;
+
+    var start: usize = 0;
+    var i: usize = 0;
+
+    while (i < line.len) {
+        const c = line[i];
+
+        if (c == ' ' or c == '\t' or c == '\r') {
+            if (start < i) {
+                try tokens.append(
+                    allocator,
+                    line[start..i],
+                );
+            }
+
+            i += 1;
+
+            while (i < line.len and
+                (line[i] == ' ' or
+                    line[i] == '\t' or
+                    line[i] == '\r'))
+            {
+                i += 1;
+            }
+
+            start = i;
+            continue;
+        }
+
+        i += 1;
+    }
+
+    if (start < line.len) {
+        try tokens.append(
+            allocator,
+            line[start..],
+        );
+    }
+
+    return tokens;
+}
 
 fn unwindExpression(
     allocator: std.mem.Allocator,
     expr: []const u8,
     funcname: []const u8,
 ) ![]const u8 {
-    var tokens = std.mem.splitScalar(u8, expr, ' ');
-    var output: std.ArrayList(u8) = .empty;
-    var first = true;
+    var tokens = try tokenizeWhitespace(
+        allocator,
+        expr,
+    );
+    defer tokens.deinit(allocator);
 
-    while (tokens.next()) |token| {
-        if (!first)
+    var output: std.ArrayList(u8) = .empty;
+    var first_token = true;
+
+    for (tokens.items) |token| {
+        if (!first_token)
             try output.append(allocator, ' ');
 
-        first = false;
+        first_token = false;
 
         if (std.mem.eql(u8, token, "+") or
             std.mem.eql(u8, token, "-") or
             std.mem.eql(u8, token, "*") or
-            std.mem.eql(u8, token, "/"))
+            std.mem.eql(u8, token, "/") or
+            std.mem.eql(u8, token, "==") or
+            std.mem.eql(u8, token, "!=") or
+            std.mem.eql(u8, token, ">") or
+            std.mem.eql(u8, token, "<") or
+            std.mem.eql(u8, token, "e?=") or
+            std.mem.eql(u8, token, "s?=") or
+            std.mem.eql(u8, token, "?=") or
+            std.mem.eql(u8, token, "s++") or
+            std.mem.eql(u8, token, "-?="))
         {
-            try output.appendSlice(allocator, token);
-        } else if (std.fmt.parseInt(i64, token, 10) catch null != null) {
-            try output.appendSlice(allocator, token);
+            try output.appendSlice(
+                allocator,
+                token,
+            );
+        } else if (std.fmt.parseInt(
+            i64,
+            token,
+            10,
+        ) catch null != null) {
+            try output.appendSlice(
+                allocator,
+                token,
+            );
         } else {
             const varname = try std.fmt.allocPrint(
                 allocator,
                 "__Func_{s}_{s}",
-                .{ funcname, token },
+                .{
+                    funcname,
+                    token,
+                },
             );
 
-            try output.appendSlice(allocator, varname);
+            try output.appendSlice(
+                allocator,
+                varname,
+            );
         }
     }
 
     return output.toOwnedSlice(allocator);
 }
+
+const IfBlock = struct {
+    funcname: []const u8,
+    condition: []const u8,
+    buffer: std.ArrayList(u8),
+};
 
 pub fn main() !void {
     if (try run()) |err| {
@@ -61,6 +144,7 @@ pub fn main() !void {
                 err.message orelse "No message was given.",
             },
         );
+
         return;
     }
 }
@@ -72,7 +156,6 @@ fn run() !?Error {
 
     var _args = std.process.args();
     _ = _args.next();
-
     const first_arg = _args.next() orelse return Error{
         .kind = .UsageError,
         .line = 0,
@@ -84,7 +167,6 @@ fn run() !?Error {
         first_arg,
         1024 * 1024 * 512,
     );
-    defer allocator.free(data);
 
     const code = try std.mem.concat(
         allocator,
@@ -92,25 +174,28 @@ fn run() !?Error {
         &.{ stdlib, data },
     );
 
-    var lines = std.mem.splitScalar(u8, code, '\n');
+    var lines = std.mem.splitScalar(
+        u8,
+        code,
+        '\n',
+    );
 
     var output: []const u8 = undefined;
-
     var funcname: []const u8 = undefined;
     var recording: bool = false;
-
     var pending: []const u8 = undefined;
-
     const stdlib_line_count = std.mem.count(u8, stdlib, "\n");
     var line_num: isize = -@as(isize, @intCast(stdlib_line_count));
-
-    // if state
-    var in_if: bool = false;
-    var if_funcname: []const u8 = undefined;
-    var if_condition: []const u8 = undefined;
     var if_counter: usize = 0;
-    var if_buffer: std.ArrayList(u8) = .empty;
-    defer if_buffer.deinit(allocator);
+    var if_stack: std.ArrayList(IfBlock) = .empty;
+
+    defer {
+        for (if_stack.items) |*block| {
+            block.buffer.deinit(allocator);
+        }
+
+        if_stack.deinit(allocator);
+    }
 
     while (lines.next()) |line| {
         line_num += 1;
@@ -118,16 +203,12 @@ fn run() !?Error {
         if (line.len == 0)
             continue;
 
-        var inside: bool = false;
+        var tokens = try tokenizeWhitespace(
+            allocator,
+            line,
+        );
 
-        var tokens: std.ArrayList([]const u8) = .empty;
         defer tokens.deinit(allocator);
-
-        var tokensAsString = std.mem.splitScalar(u8, line, ' ');
-
-        while (tokensAsString.next()) |tokenAsString| {
-            try tokens.append(allocator, tokenAsString);
-        }
 
         if (tokens.items.len == 0)
             continue;
@@ -138,9 +219,8 @@ fn run() !?Error {
         if (tokens.items[0][0] == '/')
             continue;
 
-        //
-        // IF
-        //
+        var inside: bool = false;
+
         if (std.mem.eql(u8, tokens.items[0], "if")) {
             if (tokens.items.len < 5 or
                 !std.mem.eql(u8, tokens.items[1], "(") or
@@ -158,15 +238,7 @@ fn run() !?Error {
                 };
             }
 
-            if (in_if) {
-                return Error{
-                    .kind = .InvalidSyntax,
-                    .line = line_num,
-                    .message = "Nested if statements are not supported yet.",
-                };
-            }
-
-            if_funcname = try std.fmt.allocPrint(
+            const new_funcname = try std.fmt.allocPrint(
                 allocator,
                 "__RockIf_{d}",
                 .{if_counter},
@@ -174,64 +246,109 @@ fn run() !?Error {
 
             if_counter += 1;
 
-            if_condition = try std.mem.join(
+            const condition = try std.mem.join(
                 allocator,
                 " ",
                 tokens.items[2 .. tokens.items.len - 2],
             );
 
-            in_if = true;
-            if_buffer.clearRetainingCapacity();
+            try if_stack.append(
+                allocator,
+                .{
+                    .funcname = new_funcname,
+                    .condition = condition,
+                    .buffer = .empty,
+                },
+            );
 
             continue;
         }
 
-        //
-        // END OF BLOCK
-        //
         if (std.mem.eql(u8, tokens.items[0], "}")) {
-            if (in_if) {
+            if (if_stack.items.len > 0) {
+                var completed = if_stack.pop().?;
+                const scoped_name = completed.funcname;
+
                 output = try std.fmt.allocPrint(
                     allocator,
                     "Func {s}\n{s}End\nIf {s} \"{s}\"\n",
                     .{
-                        if_funcname,
-                        if_buffer.items,
-                        if_funcname,
-                        if_condition,
+                        scoped_name,
+                        completed.buffer.items,
+                        scoped_name,
+                        completed.condition,
                     },
                 );
 
-                in_if = false;
-            } else {
+                completed.buffer.deinit(allocator);
+
+                if (if_stack.items.len > 0) {
+                    try if_stack.items[
+                        if_stack.items.len - 1
+                    ].buffer.appendSlice(
+                        allocator,
+                        output,
+                    );
+                } else {
+                    var out = std.mem.splitScalar(
+                        u8,
+                        output,
+                        '\n',
+                    );
+
+                    while (out.next()) |outline| {
+                        if (outline.len == 0)
+                            continue;
+
+                        platform.print(
+                            "{s}\n",
+                            .{outline},
+                        );
+                    }
+                }
+
+                continue;
+            }
+
+            if (recording) {
                 output = try std.fmt.allocPrint(
                     allocator,
                     "New __Func_{s}_RET0 __Func_{s}_{s}\nEnd\n",
-                    .{ funcname, funcname, pending },
+                    .{
+                        funcname,
+                        funcname,
+                        pending,
+                    },
                 );
 
                 recording = false;
-            }
 
-            if (in_if) {
-                try if_buffer.appendSlice(allocator, output);
-            } else {
-                var out = std.mem.splitScalar(u8, output, '\n');
+                var out = std.mem.splitScalar(
+                    u8,
+                    output,
+                    '\n',
+                );
 
                 while (out.next()) |outline| {
                     if (outline.len == 0)
                         continue;
 
-                    platform.print("{s}\n", .{outline});
+                    platform.print(
+                        "{s}\n",
+                        .{outline},
+                    );
                 }
+
+                continue;
             }
 
-            continue;
+            return Error{
+                .kind = .InvalidSyntax,
+                .line = line_num,
+                .message = "Unexpected '}'.",
+            };
         }
 
-        //
-        // FUNCTION
-        //
         if (std.mem.eql(u8, tokens.items[0], "fn")) {
             if (tokens.items.len < 5)
                 return Error{
@@ -253,13 +370,18 @@ fn run() !?Error {
                 if (std.mem.eql(u8, token, "(")) {
                     inside = true;
                     continue;
-                } else if (std.mem.eql(u8, token, ")")) {
+                }
+
+                if (std.mem.eql(u8, token, ")")) {
                     inside = false;
                     break;
                 }
 
                 if (inside)
-                    try args.append(allocator, token);
+                    try args.append(
+                        allocator,
+                        token,
+                    );
             }
 
             var buffer: std.ArrayList(u8) = .empty;
@@ -269,10 +391,18 @@ fn run() !?Error {
                 const arguments = try std.fmt.allocPrint(
                     allocator,
                     "New __Func_{s}_{s} __Func_{s}_ARG{d}\n",
-                    .{ tokens.items[1], arg, tokens.items[1], z },
+                    .{
+                        tokens.items[1],
+                        arg,
+                        tokens.items[1],
+                        z,
+                    },
                 );
 
-                try buffer.appendSlice(allocator, arguments);
+                try buffer.appendSlice(
+                    allocator,
+                    arguments,
+                );
             }
 
             var return_value: []const u8 = "none";
@@ -291,40 +421,118 @@ fn run() !?Error {
             output = try std.fmt.allocPrint(
                 allocator,
                 "Func __Func_{s}\n{s}\n",
-                .{ tokens.items[1], buffer.items },
+                .{
+                    tokens.items[1],
+                    buffer.items,
+                },
             );
 
-        //
-        // EXPORT
-        //
-        } else if (std.mem.eql(u8, tokens.items[0], "export")) {
+            var out = std.mem.splitScalar(u8, output, '\n');
+
+            while (out.next()) |outline| {
+                if (outline.len == 0)
+                    continue;
+
+                platform.print(
+                    "{s}\n",
+                    .{outline},
+                );
+            }
+
+            continue;
+        }
+
+        if (std.mem.eql(u8, tokens.items[0], "export")) {
+            if (tokens.items.len != 2)
+                return Error{
+                    .kind = .InvalidSyntax,
+                    .line = line_num,
+                    .message = "Export expects exactly one variable.",
+                };
+
             output = try std.fmt.allocPrint(
                 allocator,
                 "New {s} __Func_{s}_{s}\n",
-                .{ tokens.items[1], funcname, tokens.items[1] },
+                .{
+                    tokens.items[1],
+                    funcname,
+                    tokens.items[1],
+                },
             );
 
-        //
-        // IMPORT
-        //
-        } else if (std.mem.eql(u8, tokens.items[0], "import")) {
+            if (if_stack.items.len > 0) {
+                try if_stack.items[
+                    if_stack.items.len - 1
+                ].buffer.appendSlice(
+                    allocator,
+                    output,
+                );
+            } else {
+                platform.print(
+                    "{s}",
+                    .{output},
+                );
+            }
+
+            continue;
+        }
+
+        if (std.mem.eql(u8, tokens.items[0], "import")) {
+            if (tokens.items.len != 2)
+                return Error{
+                    .kind = .InvalidSyntax,
+                    .line = line_num,
+                    .message = "Import expects exactly one variable.",
+                };
+
             output = try std.fmt.allocPrint(
                 allocator,
                 "New __Func_{s}_{s} {s}\n",
-                .{ funcname, tokens.items[1], tokens.items[1] },
+                .{
+                    funcname,
+                    tokens.items[1],
+                    tokens.items[1],
+                },
             );
 
-        //
-        // ASSIGNMENT
-        //
-        } else if (tokens.items.len > 1 and
-            std.mem.eql(u8, tokens.items[1], "="))
-        {
+            if (if_stack.items.len > 0) {
+                try if_stack.items[
+                    if_stack.items.len - 1
+                ].buffer.appendSlice(
+                    allocator,
+                    output,
+                );
+            } else {
+                platform.print(
+                    "{s}",
+                    .{output},
+                );
+            }
+
+            continue;
+        }
+
+        if (tokens.items.len > 1 and
+            std.mem.eql(u8, tokens.items[1], "=")) {
+            if (tokens.items.len < 3)
+                return Error{
+                    .kind = .InvalidSyntax,
+                    .line = line_num,
+                    .message = "Assignment is missing a value.",
+                };
+
+            if (tokens.items[2].len == 0)
+                return Error{
+                    .kind = .InvalidSyntax,
+                    .line = line_num,
+                    .message = "Assignment is missing a value.",
+                };
+
             const omit = tokens.items[2][0];
-            const first = tokens.items[2][1..];
+            const value_start = tokens.items[2][1..];
 
             var value_tokens = tokens.items[2..];
-            value_tokens[0] = first;
+            value_tokens[0] = value_start;
 
             const rest = try std.mem.join(
                 allocator,
@@ -343,62 +551,117 @@ fn run() !?Error {
                     output = try std.fmt.allocPrint(
                         allocator,
                         "New __Func_{s}_{s} \"{s}\"\n",
-                        .{ funcname, tokens.items[0], unwinded },
+                        .{
+                            funcname,
+                            tokens.items[0],
+                            unwinded,
+                        },
                     );
                 } else if (omit == '!') {
                     output = try std.fmt.allocPrint(
                         allocator,
                         "New __Func_{s}_{s} '{s}'\n",
-                        .{ funcname, tokens.items[0], rest },
+                        .{
+                            funcname,
+                            tokens.items[0],
+                            rest,
+                        },
                     );
                 } else if (omit == '@') {
                     output = try std.fmt.allocPrint(
                         allocator,
                         "New __Func_{s}_{s} __Func_{s}_{s}\n",
-                        .{ funcname, tokens.items[0], funcname, rest },
+                        .{
+                            funcname,
+                            tokens.items[0],
+                            funcname,
+                            rest,
+                        },
                     );
                 } else if (omit == ':') {
-                    var args: std.ArrayList([]const u8) = .empty;
-                    defer args.deinit(allocator);
+                    var call_args: std.ArrayList([]const u8) = .empty;
+                    defer call_args.deinit(allocator);
+                    var arg_start: usize = 0;
 
-                    var buffer: std.ArrayList(u8) = .empty;
-                    defer buffer.deinit(allocator);
-
-                    var temp: bool = false;
-
-                    for (tokens.items) |token| {
-                        if (std.mem.eql(u8, token, "(")) {
-                            temp = true;
+                    for (value_tokens, 0..) |token, i| {
+                        if (i == 0)
                             continue;
-                        } else if (std.mem.eql(u8, token, ")")) {
-                            temp = false;
-                            break;
+
+                        if (std.mem.eql(u8, token, "(")) {
+                            arg_start = i + 1;
+                            continue;
                         }
 
-                        if (temp)
-                            try args.append(allocator, token);
+                        if (std.mem.eql(u8, token, ")"))
+                            break;
                     }
 
-                    for (args.items, 0..) |arg, num| {
-                        const thing = try std.fmt.allocPrint(
+                    if (arg_start == 0)
+                        return Error{
+                            .kind = .InvalidSyntax,
+                            .line = line_num,
+                            .message =
+                                \\Function calls use:
+                                \\result = :function ( arg1 arg2 )
+                            ,
+                        };
+
+                    for (value_tokens[arg_start..]) |arg| {
+                        if (std.mem.eql(u8, arg, ")"))
+                            break;
+
+                        try call_args.append(
+                            allocator,
+                            arg,
+                        );
+                    }
+
+                    output = try std.fmt.allocPrint(
+                        allocator,
+                        "",
+                        .{},
+                    );
+
+                    for (call_args.items, 0..) |arg, num| {
+                        const argument = try std.fmt.allocPrint(
                             allocator,
                             "New __Func_{s}_ARG{d} __Func_{s}_{s}\n",
-                            .{ tokens.items[2], num, funcname, arg },
+                            .{
+                                value_start,
+                                num,
+                                funcname,
+                                arg,
+                            },
                         );
 
-                        try buffer.appendSlice(allocator, thing);
+                        output = try std.fmt.allocPrint(
+                            allocator,
+                            "{s}{s}",
+                            .{
+                                output,
+                                argument,
+                            },
+                        );
                     }
 
-                    const ret = try std.fmt.allocPrint(
+                    const call = try std.fmt.allocPrint(
                         allocator,
-                        "New __Func_{s}_{s} __Func_{s}_RET0\n",
-                        .{ funcname, tokens.items[0], tokens.items[2] },
+                        "Call __Func_{s}\nNew __Func_{s}_{s} __Func_{s}_RET0\n",
+                        .{
+                            value_start,
+                            funcname,
+                            tokens.items[0],
+                            value_start,
+                        },
                     );
 
                     output = try std.fmt.allocPrint(
                         allocator,
-                        "{s}Call __Func_{s}\n{s}\n",
-                        .{ buffer.items, tokens.items[2], ret },
+                        "{s}{s}",
+                        .{
+                            output,
+                            call,
+                        },
                     );
                 } else {
                     return Error{
@@ -408,11 +671,9 @@ fn run() !?Error {
                             \\Expression type is invalid.
                             \\Supported types include
                             \\! for literals,
-                            \\` for expressions, and
-                            \\@ for copying values.
-                            \\The expression type marker should be the first
-                            \\character of the expression, eg.
-                            \\x = !5
+                            \\` for expressions,
+                            \\@ for copying values, and
+                            \\: for function calls.
                         ,
                     };
                 }
@@ -421,62 +682,111 @@ fn run() !?Error {
                     output = try std.fmt.allocPrint(
                         allocator,
                         "New {s} \"{s}\"\n",
-                        .{ tokens.items[0], rest },
+                        .{
+                            tokens.items[0],
+                            rest,
+                        },
                     );
                 } else if (omit == '!') {
                     output = try std.fmt.allocPrint(
                         allocator,
                         "New {s} '{s}'\n",
-                        .{ tokens.items[0], rest },
+                        .{
+                            tokens.items[0],
+                            rest,
+                        },
                     );
                 } else if (omit == '@') {
                     output = try std.fmt.allocPrint(
                         allocator,
                         "New {s} {s}\n",
-                        .{ tokens.items[0], rest },
+                        .{
+                            tokens.items[0],
+                            rest,
+                        },
                     );
                 } else if (omit == ':') {
-                    var args: std.ArrayList([]const u8) = .empty;
-                    defer args.deinit(allocator);
+                    var call_args: std.ArrayList([]const u8) = .empty;
+                    defer call_args.deinit(allocator);
+                    var arg_start: usize = 0;
 
-                    var buffer: std.ArrayList(u8) = .empty;
-                    defer buffer.deinit(allocator);
-
-                    var temp: bool = false;
-
-                    for (tokens.items) |token| {
-                        if (std.mem.eql(u8, token, "(")) {
-                            temp = true;
+                    for (value_tokens, 0..) |token, i| {
+                        if (i == 0)
                             continue;
-                        } else if (std.mem.eql(u8, token, ")")) {
-                            temp = false;
-                            break;
+
+                        if (std.mem.eql(u8, token, "(")) {
+                            arg_start = i + 1;
+                            continue;
                         }
 
-                        if (temp)
-                            try args.append(allocator, token);
+                        if (std.mem.eql(u8, token, ")"))
+                            break;
                     }
 
-                    for (args.items, 0..) |arg, num| {
-                        const thing = try std.fmt.allocPrint(
+                    if (arg_start == 0)
+                        return Error{
+                            .kind = .InvalidSyntax,
+                            .line = line_num,
+                            .message =
+                                \\Function calls use:
+                                \\result = :function ( arg1 arg2 )
+                            ,
+                        };
+
+                    for (value_tokens[arg_start..]) |arg| {
+                        if (std.mem.eql(u8, arg, ")"))
+                            break;
+
+                        try call_args.append(
                             allocator,
-                            "New __Func_{s}_ARG{d} '{s}'\n",
-                            .{ tokens.items[2], num, arg },
+                            arg,
+                        );
+                    }
+
+                    output = try std.fmt.allocPrint(
+                        allocator,
+                        "",
+                        .{},
+                    );
+
+                    for (call_args.items, 0..) |arg, num| {
+                        const argument = try std.fmt.allocPrint(
+                            allocator,
+                            "New __Func_{s}_ARG{d} {s}\n",
+                            .{
+                                value_start,
+                                num,
+                                arg,
+                            },
                         );
 
-                        try buffer.appendSlice(allocator, thing);
+                        output = try std.fmt.allocPrint(
+                            allocator,
+                            "{s}{s}",
+                            .{
+                                output,
+                                argument,
+                            },
+                        );
                     }
 
-                    const ret = try std.fmt.allocPrint(
+                    const call = try std.fmt.allocPrint(
                         allocator,
-                        "New {s} __Func_{s}_RET0\n",
-                        .{ tokens.items[0], tokens.items[2] },
+                        "Call __Func_{s}\nNew {s} __Func_{s}_RET0\n",
+                        .{
+                            value_start,
+                            tokens.items[0],
+                            value_start,
+                        },
                     );
 
                     output = try std.fmt.allocPrint(
                         allocator,
-                        "{s}Call __Func_{s}\n{s}\n",
-                        .{ buffer.items, tokens.items[2], ret },
+                        "{s}{s}",
+                        .{
+                            output,
+                            call,
+                        },
                     );
                 } else {
                     return Error{
@@ -484,34 +794,38 @@ fn run() !?Error {
                         .line = line_num,
                         .message =
                             \\Expression type is invalid.
+                            \\Supported types include
+                            \\! for literals,
+                            \\` for expressions,
+                            \\@ for copying values, and
+                            \\: for function calls.
                         ,
                     };
                 }
             }
-
-        //
-        // CALL
-        //
         } else if (std.mem.eql(u8, tokens.items[0], "call")) {
             var args: std.ArrayList([]const u8) = .empty;
             defer args.deinit(allocator);
-
             var buffer: std.ArrayList(u8) = .empty;
             defer buffer.deinit(allocator);
-
             var temp: bool = false;
 
             for (tokens.items) |token| {
                 if (std.mem.eql(u8, token, "(")) {
                     temp = true;
                     continue;
-                } else if (std.mem.eql(u8, token, ")")) {
+                }
+
+                if (std.mem.eql(u8, token, ")")) {
                     temp = false;
                     break;
                 }
 
                 if (temp)
-                    try args.append(allocator, token);
+                    try args.append(
+                        allocator,
+                        token,
+                    );
             }
 
             for (args.items, 0..) |arg, num| {
@@ -519,27 +833,38 @@ fn run() !?Error {
                     try std.fmt.allocPrint(
                         allocator,
                         "New __Func_{s}_ARG{d} __Func_{s}_{s}\n",
-                        .{ tokens.items[1], num, funcname, arg },
+                        .{
+                            tokens.items[1],
+                            num,
+                            funcname,
+                            arg,
+                        },
                     )
                 else
                     try std.fmt.allocPrint(
                         allocator,
                         "New __Func_{s}_ARG{d} '{s}'\n",
-                        .{ tokens.items[1], num, arg },
+                        .{
+                            tokens.items[1],
+                            num,
+                            arg,
+                        },
                     );
 
-                try buffer.appendSlice(allocator, thing);
+                try buffer.appendSlice(
+                    allocator,
+                    thing,
+                );
             }
 
             output = try std.fmt.allocPrint(
                 allocator,
                 "{s}Call __Func_{s}\n",
-                .{ buffer.items, tokens.items[1] },
+                .{
+                    buffer.items,
+                    tokens.items[1],
+                },
             );
-
-        //
-        // RAW INJECTION
-        //
         } else if (std.mem.eql(u8, tokens.items[0], ".")) {
             const rest = try std.mem.join(
                 allocator,
@@ -552,17 +877,17 @@ fn run() !?Error {
                 "{s} # --- INJECTED ---",
                 .{rest},
             );
-
         } else {
             continue;
         }
 
-        //
-        // If we're currently recording an if body, store the generated
-        // Pebble instructions instead of emitting them immediately.
-        //
-        if (in_if) {
-            try if_buffer.appendSlice(allocator, output);
+        if (if_stack.items.len > 0) {
+            try if_stack.items[
+                if_stack.items.len - 1
+            ].buffer.appendSlice(
+                allocator,
+                output,
+            );
         } else {
             var out = std.mem.splitScalar(u8, output, '\n');
 
@@ -570,9 +895,28 @@ fn run() !?Error {
                 if (outline.len == 0)
                     continue;
 
-                platform.print("{s}\n", .{outline});
+                platform.print(
+                    "{s}\n",
+                    .{outline},
+                );
             }
         }
+    }
+
+    if (if_stack.items.len != 0) {
+        return Error{
+            .kind = .InvalidSyntax,
+            .line = line_num,
+            .message = "Unclosed if statement.",
+        };
+    }
+
+    if (recording) {
+        return Error{
+            .kind = .InvalidSyntax,
+            .line = line_num,
+            .message = "Unclosed function.",
+        };
     }
 
     return null;
