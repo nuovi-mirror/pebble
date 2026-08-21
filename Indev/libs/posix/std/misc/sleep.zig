@@ -27,6 +27,6 @@ pub fn run() !void {
         .tv_nsec = @intCast((timei % 1000) * 1_000_000),
     };
 
-    std.debug.print("s: {}, ns: {}", .{ ts.tv_sec, ts.tv_nsec });
+    //std.debug.print("s: {}, ns: {}", .{ ts.tv_sec, ts.tv_nsec });
     _ = nanosleep(&ts, null);
 }
