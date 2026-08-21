@@ -124,6 +124,7 @@ pub fn build(b: *std.Build) void {
     allocator.addImport("build_options", build_options);
 
     state.addImport("build_options", build_options);
+    state.addImport("allocator", allocator);
 
     exe.root_module.addImport("build_options", build_options);
     exe.root_module.addImport("libs", libs);

@@ -19,4 +19,7 @@ pub var inst_if_curr: u32 = 0;
 pub const inst_return_max: u32 = 4294967295;
 pub var inst_return_curr: u32 = 0;
 
+pub const call_depth_max: u32 = 4294967295;
+pub var call_depth_curr: u32 = 0;
+
 // change those to something sane at release
