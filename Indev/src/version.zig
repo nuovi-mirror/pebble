@@ -7,7 +7,6 @@ const build = @import("build_options");
 pub const full = std.fmt.comptimePrint(
     \\{s} - {s}.
     \\{s}.
-    \\VM: {s} ({s})
     \\Version: {s}
     \\Target: {s} ({s}) {s} ({s}) ({s}) (doubles: {}) (native size: {})
     \\Lang: {s} {s}
@@ -18,7 +17,7 @@ pub const full = std.fmt.comptimePrint(
     \\Supported string expressions: {s}
     \\Operations accepting expressions: {s}
     \\Operations supporting addressing: {s}
-    , .{ name, msg, owner, vmclass, vmexpl, version, os, abi, arch, cpu, opti, 
+    , .{ name, msg, owner, version, os, abi, arch, cpu, opti, 
         build.double, build.native,
         lang, langver, 
         features, addr, math, compare, strops, 
@@ -30,9 +29,7 @@ const str = state.str;
 const name: str = "Pebble";
 const msg: str = "A VM Language that is both small and secure";
 const owner: str = "Product of The Nuovi Orizzonti Company";
-const vmclass: str = "Class 1";
-const vmexpl: str = "String-storing bytecode machine";
-const version: str = "InDev 2026-08-18 1";
+const version: str = "InDev 2026-08-20";
 const lang: str = "Zig";
 const langver: str = "0.15.2";
 const features: str = "New, Escape, Func, Return, End, If, Call";
