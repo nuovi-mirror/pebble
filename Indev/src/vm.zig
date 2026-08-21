@@ -48,6 +48,7 @@ const AddrMode = state.AddrMode;
 const ExprOperand = state.ExprOperand;
 const Op = state.Op;
 
+// evaluator-related
 const EvalError = error{NotNumeric} || std.mem.Allocator.Error;
 
 const op_kind = std.StaticStringMap(Op).initComptime(.{
@@ -146,9 +147,9 @@ pub fn main() !void {
     defer state.code.deinit(allocator);
     defer state.codeTable.deinit();
 
-    callStack = .empty;
-    recording = false;
-    recording_depth = 0;
+    callStack = .empty; // initalize stack
+    recording = false; // initalize recording
+    recording_depth = 0; // initalize recording depth
 
     const Args = try getArgs(allocator);
 
@@ -205,6 +206,9 @@ pub fn main() !void {
 }
 
 pub fn run(fileData: str) !void { // use this to run a full program
+    // hand this function a full program formatted as
+    // Pebble textual bytecode to start execution
+    // this does not handle the driver loop itself
     var lines = std.mem.splitScalar(byte, fileData, '\n');
 
     while (lines.next()) |line| {
@@ -213,8 +217,8 @@ pub fn run(fileData: str) !void { // use this to run a full program
         const IR = try tokenize(line); // attempt to tokenize it
         if (IR.len == 0) continue; // skip if failed
 
-        const instr = try compileInstruction(mem.persistent(), IR); // attempt to compile it
-
+        const instr = try compileInstruction(mem.persistent(), IR); // attempt to compile the tokenized
+                                                                    // instruction data
         if (build.debug) { // handle debugger
             try debugDump(instr);
             platform.print("Press the Enter key to run said instruction.", .{});
@@ -222,7 +226,7 @@ pub fn run(fileData: str) !void { // use this to run a full program
             platform.print("Running said instruction.", .{});
         }
 
-        try interpret(instr); // interpret the bytecode
+        try interpret(instr); // interpret the compiled bytecode
         if (callStack.items.len > 0) try drive(); // run the main driver
     }
 }
@@ -242,6 +246,12 @@ fn tokenize(line: str) !dstr { // helper for tokenizing source textual bytecode
     var i: word = 0;
 
     errdefer tokens.deinit(allocator);
+
+    // all this really does is format to a simple IR
+    // really just parse addressing modes and separate
+    // newliens - formatted as the opcode, followed by
+    // a reserve, followed by each operand with its 
+    // addressing mode ,eg. [foo, RESERVE, bar, addr, baz, addr]
 
     while (i < line.len) {
         while (i < line.len and std.ascii.isWhitespace(line[i])) { i += 1; } // skip whitespaces
@@ -320,6 +330,7 @@ fn findEscape(name: str) ?escapes.Escape { // helper for finding an escape seque
 // operand/operator, so just pass it to a plain runtime
 // evaluate() if this returns null
 
+// expects input in the IR format described previously
 
 fn classifyOperand(tok: str) ExprOperand { // helper for classifying operands
     const v = parseValue(tok);
@@ -331,11 +342,12 @@ fn classifyOperand(tok: str) ExprOperand { // helper for classifying operands
 
 fn compileExpression(allocator: std.mem.Allocator, text: str) !?[]const ExprOperand {
     var token_list: std.ArrayList(str) = .empty;
-    var it = std.mem.splitScalar(byte, text, ' ');
-    while (it.next()) |tok| {
-        try token_list.append(mem.temp(), tok);
-    }
-    defer mem.resetTemp();
+    var it = std.mem.splitScalar(byte, text, ' '); // split on spaces
+    
+    // create an array from the split IR text
+    while (it.next()) |tok| { try token_list.append(mem.temp(), tok); }
+
+    defer mem.resetTemp(); // reset the temporary allocator
 
     if (token_list.items.len == 1) {
         const out = try allocator.alloc(ExprOperand, 1);
@@ -391,20 +403,22 @@ fn compileInstruction(allocator: std.mem.Allocator, list: dstr) !Instruction {
         }
     }
 
-    return .{
-        .op = op,
-        .dest_text = dest_text,
-        .dest_mode = dest_mode,
-        .data_text = data_text,
-        .data_mode = data_mode,
-        .has_data = has_data,
-        .dest_expr = dest_expr,
-        .data_expr = data_expr,
+    return .{ // return formatted instruction
+        .op = op, // opcode
+        .dest_text = dest_text, // destination operand
+        .dest_mode = dest_mode, // destination addressing mode
+        .data_text = data_text, // data operand
+        .data_mode = data_mode, // data addressing mode
+        .has_data = has_data, // has data operand?
+        .dest_expr = dest_expr, // is the destination operand an expression?
+        .data_expr = data_expr, // is the data operand an expression?
     };
 }
 
 fn isTailCall(pc: word) bool { // helper to check if there is a tail-call
     const next = pc + 1;
+    // if the next instruction is before the end of the code table and we
+    // are parsing an end instruction, it is safe to jump
     return next < state.code.items.len and state.code.items[next].op == .End;
 }
 
@@ -439,9 +453,10 @@ fn interpret(instr: Instruction) !void { // main interpreter
         print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
         exit(1);
     }
+
     limits.inst_curr += 1;
 
-    if (recording) {
+    if (recording) { // change behavior if the function is recursive
         try state.code.append(allocator, instr);
         if (instr.op == .Func) {
             recording_depth += 1;
@@ -461,16 +476,17 @@ fn interpret(instr: Instruction) !void { // main interpreter
                 print("VM: FATAL: INSTRUCTION LIMIT REACHED\n", .{});
                 exit(1);
             }
+    
             limits.inst_new_curr += 1;
 
             var dest: str = undefined;
 
-            switch (instr.dest_mode) {
+            switch (instr.dest_mode) { // resolve the addressing mode of the destination operand
                 .true_literal => {
                     const v = if (instr.dest_expr) |expr|
-                        try evalCompiledExpr(expr)
+                        try evalCompiledExpr(expr) // try to evaluate the compiled expression
                     else
-                        try evaluate(instr.dest_text);
+                        try evaluate(instr.dest_text); // evaluate at runtime if we cannot
                     dest = try persistStr(try valueToString(mem.temp(), v));
                 },
                 .forced_eval => {
@@ -490,7 +506,7 @@ fn interpret(instr: Instruction) !void { // main interpreter
 
             if (!instr.has_data) return error.UnknownAddressingMode;
 
-            switch (instr.data_mode) {
+            switch (instr.data_mode) { // resolve the addressing mode of the data operand
                 .literal => {
                     const v = if (instr.data_expr) |expr|
                         try evalCompiledExpr(expr)
@@ -707,6 +723,8 @@ fn interpret(instr: Instruction) !void { // main interpreter
 }
 
 fn drive() !void { // main driver
+    // used to allow trampoline stuff so we do not pollute the host stack
+
     while (callStack.items.len > 0) {
         const idx = callStack.items.len - 1;
         const pc_before = callStack.items[idx].pc;
@@ -780,6 +798,8 @@ fn reduceRt(tier: []const Op, operands: []const RtOperand) EvalError![]RtOperand
     return try out.toOwnedSlice(allocator);
 }
 
+// evaluate a pre-compiled expression
+// (AKA the fast path)
 fn evalCompiledExpr(expr: []const ExprOperand) EvalError!state.Value {
     defer mem.resetTemp();
 
@@ -813,7 +833,7 @@ fn evalCompiledExpr(expr: []const ExprOperand) EvalError!state.Value {
     return toScratch(slice[0].value);
 }
 
-// dynamic evaluator (fallback - evaluates at runtime)
+// dynamic evaluator (fallback - evaluates full text at runtime)
 fn isOperator(op: str) bool {
     return std.mem.eql(byte, op, "s++") or
         std.mem.eql(byte, op, "?=") or
@@ -1061,3 +1081,5 @@ fn debugDump(instr: Instruction) !void { // debugger
     print("STACK: {}\n", .{callStack.items.len});
     print("\n======== VM DEBUG ========\n", .{});
 }
+
+// end of codebase :D
