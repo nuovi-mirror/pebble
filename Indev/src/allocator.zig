@@ -15,9 +15,9 @@ pub fn init() void {
     scratch_arena = std.heap.ArenaAllocator.init(backing());
     temp_arena = std.heap.ArenaAllocator.init(backing());
 
-    _ = persistent_arena.?.allocator().alloc(u8, 4 * 1024 * 1024) catch {};
-    _ = scratch_arena.?.allocator().alloc(u8, 1 * 1024 * 1024) catch {};
-    _ = temp_arena.?.allocator().alloc(u8, 256 * 1024) catch {};
+    _ = persistent_arena.?.allocator().alloc(u8, 8 * 1024 * 1024) catch {}; // 8MB
+    _ = scratch_arena.?.allocator().alloc(u8, 2 * 1024 * 1024) catch {}; // 2MB
+    _ = temp_arena.?.allocator().alloc(u8, 256 * 1024) catch {}; // 256KB
 }
 
 pub fn deinit() void {

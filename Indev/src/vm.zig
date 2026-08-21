@@ -503,7 +503,7 @@ fn interpret(instr: Instruction) !void { // main interpreter
                     const input = try valueToString(mem.temp(), indirect);
                     value = try persistValue(try evaluate(input));
                 },
-                .true_literal => value = .{ .str = instr.data_text },
+                .true_literal => value = try persistValue(parseValue(instr.data_text)),
                 .bare => {
                     const indirect = state.data.get(instr.data_text) orelse return error.UnknownVariable;
                     value = indirect;

@@ -10,5 +10,5 @@ pub fn run() !void {
     
     const input = try stdin.takeDelimiterExclusive('\n');
     const copy = try mem.alloc().dupe(u8, input);
-    try vm.data.put("__Escape_std.io.input_RET0", copy);
+    try vm.data.put("__Escape_std.io.input_RET0", .{ .str = copy });
 }

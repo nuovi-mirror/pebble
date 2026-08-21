@@ -2,7 +2,7 @@ const std = @import("std");
 const vm = @import("state");
 const mem = @import("allocator");
 
-fn xorshift(state: u16) u16 {
+fn xorshift(state: vm.word) vm.word {
     var x = state;
     x ^= x << 7;
     x ^= x >> 9;
@@ -11,22 +11,16 @@ fn xorshift(state: u16) u16 {
 }
 
 pub fn run() !void {
-    var seed: u16 = undefined;
+    var seed: vm.word = undefined;
 
     if (vm.data.get("__Escape_std.misc.random_last")) |last| {
-        seed = try std.fmt.parseInt(u16, last, 10);
+        seed = last.word;
     } else {
         try std.posix.getrandom(std.mem.asBytes(&seed));
     }
 
     const next = xorshift(seed);
 
-    const str = try std.fmt.allocPrint(
-        mem.alloc(),
-        "{}",
-        .{next},
-    );
-
-    try vm.data.put("__Escape_std.misc.random_last", str);
-    try vm.data.put("__Escape_std.misc.random_RET0", str);
+    try vm.data.put("__Escape_std.misc.random_last", .{ .word = next});
+    try vm.data.put("__Escape_std.misc.random_RET0", .{ .word = next});
 }

@@ -91,7 +91,7 @@ pub fn build(b: *std.Build) void {
     const platform = b.createModule(.{
         .root_source_file = b.path(switch (target.result.os.tag) {
            .windows => "platform/win32.zig",
-           else => "platform/posix.zig", // assume Windows if not POSIX
+           else => "platform/posix.zig", // assume POSIX if not Windows
         }),
         .target = target,
         .optimize = optimize,
