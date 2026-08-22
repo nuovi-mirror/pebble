@@ -589,7 +589,8 @@ fn interpret(instr: Instruction) !void { // main interpreter
                 const pc = callStack.items[callStack.items.len - 1].pc;
                 const end = try findFuncEnd(pc);
                 try state.codeTable.put(name, pc + 1);
-                callStack.items[callStack.items.len - 1].pc = end;
+                //callStack.items[callStack.items.len - 1].pc = end;
+                callStack.items[callStack.items.len - 1].pc = end + 1; // hotpatch
                 return;
             }
 
