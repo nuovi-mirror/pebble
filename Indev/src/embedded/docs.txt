@@ -149,3 +149,118 @@ Escape sequences include
 	        - back		        - Set the basic background color of the terminal
 		- fore			- Set the basic foreground color of the terminal
 		- reset			- Reset the basic terminal color to the default
+
+[TODO - finish this]
+
+Bytecode Specifcations
+
+The Pebble Bytecode format is a simple textualized format of the Pebble internal bytecode
+format. This format should generally compile 1:1 to Pebble internal bytecode, as in
+each instruction in this bytecode language should become one internal instruction, without
+RISC-esc lowering. There are currently only two versions of the Pebble textual bytecode
+format. These are simply versions one and two. Version one is rather depreciated, as it
+was only ever used in the earliest version of the Pebble virtual machine, version Alpha 1.
+Bytecode version two is the current standard of bytecode. Due to this, the schematics of
+Bytecode version one shall not be described in this document
+
+	Bytecode version two
+
+		Pebble Bytecode version two has seven instructions. These include
+		New, Func, End, If, Escape, Call, and Return. 
+
+		The New instruction is used to store data into a variable. Variables
+		have arbitrary English names. That is, any character included in the
+		English alphabet is allowed, as well as the underscore (_), period (.), and
+		minus (-) characters and numerics zero (0) through nine (9). The New
+		instruction accepts two data payloads, no less. These include the
+		first operand, being the destination payload, or the name of the
+		variable to store to, and the seond operand, being the data payload,
+		or the data to store to the variable. The data payload has a small
+		bit of special syntax, known as an addressing mode, which allows
+		a small bit of evaluation to be performed on it before resolution.
+		The addressing modes are marked by the characters the payload is 
+		wrapped in. These addressing mods include Literal (""), True Literal
+		(''), Bare (), and Forced Evaluation ({}) (commonly shortened to
+		Forced Eval or Indirect Eval). The Literal addressing mode accepts
+		expressions, where each piece of text separated by a space is resolved
+		as an item. An item can either be a literal, a variable, or a statement.
+		All supported statements should be assumed to be statements, and all
+		literals whos name matches the name of a currently established variable
+		should be resolved as that variable. Essentially, all variables should
+		be substituted to their value, all symbols referencing an operation
+		should mark that operation, and all other values should be treated as
+		a literal. The True Literal addressing mode should simply resolve to
+		storing that data as plain data. The Forced Evaluation mode shoud
+		resolve the variable given to it as a pointer, then resolve the 
+		data in that variable as an expression. Operators follow standard
+		ordering, but the ( ) operator syntax is explicitly excluded.
+		Operators include addition '+', subtraction '-', multiplication '*',
+		division '/', greater than numeric comparison '>', less than numeric
+		comparison '<', equal to numeric comparison '==', not equal to numeric
+		comparison '!=', string equal to comparison '?=', string ends with
+		comparison 'e?=', string starts with comparison 's?=', and string
+		contains comparison '-?='. All comparison operations should return
+		0 if the operation is true, and 1 if the operation is false.
+		On the second operand of this instruction, bare is used to represent
+		a copy of a variable, while it is used to represent a variable on 
+		the first operand.
+
+		The Func instruction will begin recording a function to the function
+		table. All of the instructions defined should be stored under the function
+		name specified by the operand immediatly after the Func keyword. The
+		operand can be any English text, and follows the same schematics as the
+		New instruction's destination operand. This code can be executed later
+		using the Call instruction, folowed by the name of the function to call
+		using the same schematics, or the If keyword, which takes two operands,
+		the first being the name of the function to call if the second operand
+		as an expression following the syntax of the New instruction's Literal
+		addressing mode resolves to 0 (True). The function should not be called
+		if the expression does not resolve to 0. The expression should be wrapped
+		in the '"' character, one being placed at the start, and one at the end.
+
+		The Escape keyword is used to call a foreign function. Argument passing
+		to the foreign function should be done via the variables named as
+		__Escape_<escape name>_ARG<argument number>, and the Escape sequence
+		should return to the variable __Escape_<escape name>_ARG<argument number>.
+		The Escape is only allowed to modify variables starting with
+		__Escape_<escape name>_ - this is used as a light enforcement boundary.
+		The Escape instruction should take one operand as a literal, as the name
+		of the Escape sequence to call. The name of the Escape sequence follows
+		the same schematics as variable names.
+
+		The Return instruction is used to return early from a function. This
+		instruction simply returns to the caller and takes no operands.
+
+		Comments can be used as either the '#' or the '/' keyword. Any line
+		starting with a comment should be ignored. This also goes for lines
+		which are invalid or not a known instruction.
+
+		An example of a valid program may be
+
+			# Store 5 into x
+			New x '5'
+			New y x
+			/ Store a copy of x into y
+
+
+			/ begin recording a function
+			Func a
+			Escape print
+			/ Call the print Escape Sequence
+			End
+			/ End will automatically return from
+			/ the instruction
+			Call a
+			/ Call function a
+			If a "1 == 1"
+			/ Call function a if 1 equals 1
+			foo bar baz quax quux
+			/ last line ignored since it is invalid
+			/this comment is also valid since it is
+			/ the first character
+			#so is this one
+[TODO - document AAE]
+
+[TODO - finish this section]
+
+[TODO - finish docs ToT]
