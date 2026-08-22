@@ -90,11 +90,11 @@ const opcode_kind = std.StaticStringMap(Opcode).initComptime(.{ // table of opco
 });
 
 const addr_mode_kind = std.StaticStringMap(AddrMode).initComptime(.{ // table of addressing modes
-    .{ "//", .literal },
-    .{ "///", .true_literal },
-    .{ "////", .forced_eval },
-    .{ "/////", .pointer },
-    .{ "/", .bare },
+    .{ "//", .literal }, // " "
+    .{ "///", .true_literal }, // ' '
+    .{ "////", .forced_eval }, // { {
+    .{ "/////", .pointer }, // < >
+    .{ "/", .bare }, // (nothing)
 });
 
 const Frame = struct { // stack data
@@ -482,7 +482,7 @@ fn interpret(instr: Instruction) !void { // main interpreter
             var dest: str = undefined;
 
             switch (instr.dest_mode) { // resolve the addressing mode of the destination operand
-                .true_literal => {
+                .literal => {
                     const v = if (instr.dest_expr) |expr|
                         try evalCompiledExpr(expr) // try to evaluate the compiled expression
                     else
@@ -495,11 +495,11 @@ fn interpret(instr: Instruction) !void { // main interpreter
                     dest = try persistStr(try valueToString(mem.temp(), try evaluate(name)));
                 },
                 .bare => dest = instr.dest_text,
+                .true_literal => dest = instr.dest_text,
                 .pointer => {
                     const indirect = state.data.get(instr.dest_text) orelse return error.InvalidPointer;
                     dest = try persistStr(try valueToString(mem.temp(), indirect));
                 },
-                .literal => return error.UnknownAddressingMode,
             }
 
             var value: state.Value = undefined;
@@ -544,7 +544,8 @@ fn interpret(instr: Instruction) !void { // main interpreter
 
             switch (instr.dest_mode) {
                 .bare => escapename = instr.dest_text,
-                .true_literal => escapename = try valueToString(mem.temp(), try evaluate(instr.dest_text)),
+                .true_literal => escapename = instr.dest_text,
+                .literal => escapename = try valueToString(mem.temp(), try evaluate(instr.dest_text)),
                 .forced_eval => {
                     const indirect = state.data.get(instr.dest_text) orelse return error.UnknownVariable;
                     const input = try valueToString(mem.temp(), indirect);
@@ -554,7 +555,6 @@ fn interpret(instr: Instruction) !void { // main interpreter
                     const value = state.data.get(instr.dest_text) orelse return error.InvalidPointer;
                     escapename = try valueToString(mem.temp(), value);
                 },
-                .literal => return error.UnknownAddressingMode,
             }
 
             const escape = findEscape(escapename) orelse return error.UnknownEscape;
@@ -578,11 +578,11 @@ fn interpret(instr: Instruction) !void { // main interpreter
                     name = try persistStr(try valueToString(mem.temp(), try evaluate(input)));
                 },
                 .bare => name = instr.dest_text,
+                .true_literal => name = instr.dest_text,
                 .pointer => {
                     const indirect = state.data.get(instr.dest_text) orelse return error.InvalidPointer;
                     name = try persistStr(try valueToString(mem.temp(), indirect));
                 },
-                .true_literal => return error.UnknownAddressingMode,
             }
 
             if (callStack.items.len > 0) {
@@ -615,11 +615,11 @@ fn interpret(instr: Instruction) !void { // main interpreter
                     curr_funcname = try persistStr(try valueToString(mem.temp(), try evaluate(input)));
                 },
                 .bare => curr_funcname = instr.dest_text,
+                .true_literal => curr_funcname = instr.dest_text,
                 .pointer => {
                     const indirect = state.data.get(instr.dest_text) orelse return error.InvalidPointer;
                     curr_funcname = try persistStr(try valueToString(mem.temp(), indirect));
                 },
-                .true_literal => return error.UnknownAddressingMode,
             }
 
             const start = state.codeTable.get(curr_funcname) orelse return error.UnknownFunction;
@@ -649,6 +649,7 @@ fn interpret(instr: Instruction) !void { // main interpreter
 
             switch (instr.dest_mode) {
                 .bare => curr_funcname = instr.dest_text,
+                .true_literal => curr_funcname = instr.dest_text,
                 .literal => 
                     curr_funcname = try persistStr(try valueToString(mem.temp(), try evaluate(instr.dest_text))),
                 .forced_eval => {
@@ -660,7 +661,6 @@ fn interpret(instr: Instruction) !void { // main interpreter
                     const indirect = state.data.get(instr.dest_text) orelse return error.InvalidPointer;
                     curr_funcname = try persistStr(try valueToString(mem.temp(), indirect));
                 },
-                .true_literal => return error.UnknownAddressingMode,
             }
 
             if (!instr.has_data) return error.UnknownAddressingMode;
