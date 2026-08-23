@@ -1,8 +1,7 @@
 #!/bin/sh
 
-FLAGS="-std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wformat=2 -Wundef -Wcast-qual -Wcast-align -Wold-style-definition -Wswitch-enum -Wvla -Wdouble-promotion -Wfloat-equal"
-
 echo "Finding C compiler..."
+
 if command -v cc >/dev/null; then
 	CC="$(which cc)"
 else
@@ -23,6 +22,8 @@ else
 fi
 
 echo "C compiler found at $CC"
+
+FLAGS="-std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wformat=2 -Wundef -Wcast-qual -Wcast-align -Wold-style-definition -Wswitch-enum -Wvla -Wdouble-promotion -Wfloat-equal"
 
 SRCPATH="." # path to source directory
 BINPATH="bin" # path to output directory
