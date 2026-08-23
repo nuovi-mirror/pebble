@@ -21,7 +21,7 @@ const size_t PRIME = 0x01000193;
 size_t hashVar(struct VarMap *m, char *str) {
 	size_t inital = BASE;
 	while(*str) {
-		inital ^= *str++;
+		inital ^= (unsigned char)*str++;
 		inital *= PRIME;
 	}
 

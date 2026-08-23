@@ -11,7 +11,7 @@
 #include "../platform/use/getstrlen.h"
 #include "../platform/use/copystr.h"
 
-void testAllocator() {
+void testAllocator(void) {
 	struct Arena *arena = arena = initAlloc(4096);
 
 	char *arenamsg1 = "Arena allocation working (1)\n";
@@ -29,7 +29,7 @@ void testAllocator() {
 	free(arena);
 }
 
-void testVariables() {
+void testVariables(void) {
 	struct Arena *arena = arena = initAlloc(4096);
 	Map vars = initVars(32);
 	
@@ -54,7 +54,7 @@ void testVariables() {
 	free(arena);
 }
 
-int main() {
+int main(void) {
 	testAllocator();
 	testVariables();
 

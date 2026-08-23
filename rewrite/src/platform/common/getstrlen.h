@@ -1,7 +1,7 @@
 #pragma once
 
-int getstrlen(char *s) {
-	int n = 0;
+size_t getstrlen(char *s) {
+	size_t n = 0;
 
 	while (s[n] != '\0')
 		n++;

@@ -1,5 +1,6 @@
 #!/bin/sh
 
+FLAGS="-std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wformat=2 -Wundef -Wcast-qual -Wcast-align -Wold-style-definition -Wswitch-enum -Wvla -Wdouble-promotion -Wfloat-equal"
 
 echo "Finding C compiler..."
 if command -v cc >/dev/null; then
@@ -39,15 +40,17 @@ VMBINPATH="$BINPATH/$VMBINNAME"
 VMTESTBINPATH="$BINPATH/$VMTESTBINNAME"
 
 if [ "$1" == "d" ]; then
-	FLAGS="-g"
+	FLAGS="$FLAGS -g -O0 -fsanitize=address,undefined -fno-omit-frame-pointer"
+else
+	FLAGS="$FLAGS -O3"
 fi
 
 mkdir -p "$BINPATH"
 
 echo "Building VM: $CC "$FLAGS" -o $VMBINPATH $VMSRCPATH"
-$CC "$FLAGS" -o $VMBINPATH $VMSRCPATH
+$CC $FLAGS -o $VMBINPATH $VMSRCPATH
 
 echo "Building test suite: $CC "$FLAGS" -o $VMTESTBINPATH $VMTESTSRCPATH"
-$CC "$FLAGS" -o $VMTESTBINPATH $VMTESTSRCPATH
+$CC $FLAGS -o $VMTESTBINPATH $VMTESTSRCPATH
 
 echo "Done!"
