@@ -54,6 +54,10 @@ char *alloc(struct Arena *arena, size_t size) {	/* function to allocate data on 
 	return result;
 }
 
+void freeAllocator(struct Arena *arena) {
+	freezero(arena->arena_ptr, arena->size);
+}
+
 /* example
 
 int main() {
@@ -70,6 +74,7 @@ int main() {
 		ptr[i] = data[i];
 
 	print(ptr);
+	free(arena);
 	return 0;
 }
 
