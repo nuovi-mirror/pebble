@@ -1,19 +1,9 @@
-#include <stdlib.h>
-#include <string.h>
+#pragma once
 
 #include "../platform/use/print.h"
+#include "../platform/use/cmpstr.h"
 
-typedef struct VarEntry {
-	char *key;
-	void *value;
-	struct VarEntry *next;
-} Entry;
-
-typedef struct VarMap {
-	size_t size;					/* number of entries */
-	size_t cap;					/* number of buckets */
-	void **buckets;					/* array of chain heads */
-} Map;
+#include "hashmap.h"
 
 const size_t BASE = 0x811c9dc5;
 const size_t PRIME = 0x01000193;
@@ -47,7 +37,7 @@ void putVar(struct VarMap *m, char *str, void *value) {
 	Entry *e = m->buckets[idx];
 
 	while (e != NULL) {
-		if (strcmp(e->key, str) == 0) {
+		if (cmpstr(e->key, str) == 0) {
 			e-> value = value; /* override existing */
 			return;
 		}
@@ -74,7 +64,7 @@ void *getVar(struct VarMap *m, char *str) {
 	Entry *e = m->buckets[hashVar(m, str)];
 
 	while (e != NULL) {
-		if (strcmp(e->key, str) == 0)
+		if (cmpstr(e->key, str) == 0)
 			return e->value;
 		e = e->next;
 	}

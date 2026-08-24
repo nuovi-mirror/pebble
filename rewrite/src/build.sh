@@ -34,14 +34,15 @@ VMTESTSRCNAME="vm/test.c" # VMtest source code file name
 VMSRCPATH="$SRCPATH/$VMSRCNAME"
 VMTESTSRCPATH="$SRCPATH/$VMTESTSRCNAME"
 
-VMBINNAME="pblvm" # VM output file name
-VMTESTBINNAME="vmtest" # VMtest output file name
+VMBINNAME="vm" # VM output file name
+VMTESTBINNAME="test" # VMtest output file name
 
 VMBINPATH="$BINPATH/$VMBINNAME"
 VMTESTBINPATH="$BINPATH/$VMTESTBINNAME"
 
 if [ "$1" == "d" ]; then
-	FLAGS="$FLAGS -g -O0 -fsanitize=address,undefined -fno-omit-frame-pointer"
+	#FLAGS="$FLAGS -g -O0 -fsanitize=address,undefined -fno-omit-frame-pointer"
+	FLAGS="$FLAGS -g -O0 -fno-omit-frame-pointer"
 else
 	FLAGS="$FLAGS -O3"
 fi

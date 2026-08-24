@@ -1,3 +1,7 @@
+#pragma once
+
+#include <stdio.h>
+
 typedef enum {
 	type_word,
 	type_sword,
