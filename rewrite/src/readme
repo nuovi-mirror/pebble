@@ -1,6 +1,11 @@
 Building from source
 	simply run the build.sh script
 
+	You can use the first argument to select the build type
+	no arguments for standard releases
+	fast for non-portable releases (as in dependent on CPU extensions)
+	debug for debug releases
+
 Swapping targtes
 	Syslink or copy the files from your platform into platform/use.
 	Eg. if i am on a POSIX platform and want printing, I may do

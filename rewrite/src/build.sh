@@ -40,11 +40,13 @@ VMTESTBINNAME="test" # VMtest output file name
 VMBINPATH="$BINPATH/$VMBINNAME"
 VMTESTBINPATH="$BINPATH/$VMTESTBINNAME"
 
-if [ "$1" == "d" ]; then
+if [ "$1" == "debug" ]; then
 	#FLAGS="$FLAGS -g -O0 -fsanitize=address,undefined -fno-omit-frame-pointer"
 	FLAGS="$FLAGS -g -O0 -fno-omit-frame-pointer"
+elif [ "$1" == "fast" ]; then
+	FLAGS="$FLAGS -O3 -flto -fno-semantic-interposition -ffast-math -march=native -mtune=native"
 else
-	FLAGS="$FLAGS -O3"
+	FLAGS="$FLAGS -O2"
 fi
 
 mkdir -p "$BINPATH"
