@@ -37,7 +37,7 @@ struct Arena *initAlloc(size_t size) {		/* function to init an arena
 						   arena */
 }
 
-char *alloc(struct Arena *arena, unsigned long size) {	
+void *alloc(struct Arena *arena, unsigned long size) {	
 						/* function to allocate data on an arena
 						   takes the arena to allocate against and
 						   the size of the data to allocate

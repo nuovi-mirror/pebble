@@ -53,7 +53,7 @@ int valuetostr(char *buff, Value v) {
 	}
 }
 			
-Value guessvaluetype(const char *data, size_t size) {
+Value guessvaluetype(const char *data) {
 	Value out = { 0 };
 	int consumed;
 
@@ -79,7 +79,7 @@ Value guessvaluetype(const char *data, size_t size) {
 		}
 	}
 
-	float value;
+	double value;
 
 	/* check if float */
 	if (sscanf(data, "%f%n", &value, &consumed) == 1 &&

@@ -9,7 +9,7 @@ char *readfile(const char *path, void *buf, size_t nbytes) {
 	if (d == -1)
 		return NULL;
 
-	int size_read = read(d, buf, nbytes - 1);
+	ssize_t  size_read = read(d, buf, nbytes - 1);
 	close(d);
 
 	if (size_read == -1 || size_read == 0)
