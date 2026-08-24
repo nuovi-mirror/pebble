@@ -1,0 +1,206 @@
+#pragma once
+
+/* include this to get the main VM entry point */
+/* run vmmain to run the VM */
+/* main itself is owned by the platform layer */
+
+#include "../platform/use/print.h"
+#include "../platform/use/copystr.h"
+#include "../platform/use/getstrlen.h"
+#include "../platform/use/findnewline.h"
+#include "../platform/use/readfile.h"
+#include "../platform/use/skipspace.h"
+
+#include "../allocator/allocator.h"
+
+#include "../state/variables.h"
+#include "../state/functions.h"
+#include "../state/values.h"
+#include "../state/instructions.h"
+
+int parseoperand(char **cursor, InstructionOperand *out) {
+	char *p = skipspace(*cursor);
+	if (p == NULL)
+		return 0;
+
+	char delim = 0;
+
+	switch (*p) {
+		case '"': out->Addressing = addrmode_literal; delim = '"'; break;
+		case '\'': out->Addressing = addrmode_true_literal; delim = '\''; break;
+		case '{': out->Addressing = addrmode_forced_eval; delim = '}'; break;
+		case '<': out->Addressing = addrmode_pointer; delim = '>'; break;
+		default: out->Addressing = addrmode_bare; delim = 0; break;
+	}
+
+	char *start;
+
+	if (delim) {
+		p++;					/* skip opening delim */
+		start = p;
+
+		while (*p != delim && *p != '\0')
+			p++;
+
+		if (*p != delim) {
+			print("ERROR: VM: MAKEIR: UNDETERMINED OPERAND\n");
+			exit(1);
+		}
+
+		*p = '\0';				/* terminate operand text */
+		p++;					/* move past it for next parse */
+	} else {
+		start = p;
+
+		while (*p != ' ' && *p != '\t' && *p != '\0') 
+			p++;
+
+		if (*p != '\0') {
+			*p = '\0';
+			p++;
+		}
+	}
+
+	out->Data.Type = type_str;
+	out->Data.as.str = start;
+
+	*cursor = p;
+	return 1;
+}
+
+Instruction makeIR(char *line) {
+	Instruction instr = { 0 };
+	char *cursor = line;
+
+	char *p = skipspace(cursor);
+	if (p == NULL) {
+		print("ERROR: VM: MAKEIR: EMPTY LINE\n");
+		exit(1);
+	}
+
+	char *opcode_start = p;
+	while (*p != ' ' && *p != '\t' && *p != '\0')
+		p++;
+
+	if (*p != '\0') {
+		*p = '\0';
+		p++;
+	}
+
+	cursor = p;
+
+	if (!lookupopcode(opcode_start, &instr.Opcode)) {
+		print("ERROR: VM: MAKEIR: UNKNOWN OPCODE\n");
+		exit(1);
+	}
+
+	parseoperand(&cursor, &instr.FirstOperand);
+	parseoperand(&cursor, &instr.SecondOperand);
+	/* third operand unused for now */
+
+	return instr;
+}
+
+void interpret(Instruction instr, Map *vars, Arena *persistAlloc, Arena *scratchAlloc) {
+	switch (instr.Opcode) {
+		case Opcode_New: {
+			char dest[32];
+			char data[32];
+			Value val;
+
+			switch (instr.FirstOperand.Addressing) {
+				case addrmode_bare:
+					valuetostr(dest, instr.FirstOperand.Data);
+					break;
+				case addrmode_true_literal:
+					valuetostr(dest, instr.FirstOperand.Data);
+					break;
+				default:
+					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING MODE ON OPERAND ONE\n");
+					exit(1);
+			}
+
+			switch (instr.SecondOperand.Addressing) {
+				case addrmode_true_literal:
+					valuetostr(data, instr.SecondOperand.Data);
+					val.Type = type_str;
+					val.as.str = data;
+					break;
+				default:
+					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING MODE ON OPERAND TWO\n");
+					exit(1);
+			}
+			Value *valptr = alloc(persistAlloc, sizeof(val));
+			putVar(vars, dest, valptr);
+			break;
+				 }
+
+		case Opcode_Func:
+			/* handle Func */
+			break;
+
+		case Opcode_If:
+			/* handle If */
+			break;
+
+		case Opcode_Call:
+			/* handle Call */
+			break;
+
+		case Opcode_Return:
+			/* handle Retrun */
+			break;
+
+		case Opcode_End:
+			/* handle End */
+			break;
+
+		case Opcode_Escape:
+			/* handle Escape */
+			break;
+
+		default:
+			break;
+	}
+}
+
+int vmmain(Args cliargs, Stack *stack) {
+
+	
+	/* init */
+	struct Arena *tempAlloc = initAlloc(512 * 1024); /* N kb */
+	struct Arena *permAlloc = initAlloc(6 * 1024 * 1024); /* N mb */
+	struct Arena *scratchAlloc = initAlloc(128 * 1024); /* N kb */
+
+	Map vars = initVars(512); /* N total variables */
+	/* end init */
+
+	size_t freadsize = 512 * 1024;
+	char *file = alloc(permAlloc, freadsize); 
+							/* N bytes to use for the
+							   file data (allocate
+							   and read) */
+	
+	char *filedata = readfile(cliargs.values[1], file, freadsize);
+							/* argument 0 passed to us from */
+							/* the platform layer */
+							/* pointer to file data */
+	if (filedata == NULL) {
+		print("VM: INIT: ERROR: CANNOT OPEN SPECIFIED FILE\n");
+		exit(1);
+	}
+
+	char *line;
+	while ((line = findnewline(&filedata)) != NULL) {
+		if (line[0] == '\0')
+			continue;			/* skip empty lines */
+
+		Instruction instr = makeIR(line);	/* parse source code */
+		interpret(instr, &vars, permAlloc, scratchAlloc);
+							/* interpret bytecode */
+	}
+
+	return 0;
+}
+
+
