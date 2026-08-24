@@ -23,7 +23,7 @@ fi
 
 echo "C compiler found at $CC"
 
-FLAGS="-std=c11"
+FLAGS="-std=c99"
 
 SRCPATH="." # path to source directory
 BINPATH="bin" # path to output directory

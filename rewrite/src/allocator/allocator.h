@@ -5,11 +5,11 @@
 
 #include "../platform/use/print.h"
 
-struct Arena {					/* template for an arena */
+typedef struct Arena {				/* template for an arena */
 	char *curr_ptr;				/* pointer to the next free block */
 	char *arena_ptr;			/* pointer to the start of the arena */
 	unsigned long size;			/* size of the arena in bytes */
-};
+} Arena;
 
 struct Arena *initAlloc(size_t size) {		/* function to init an arena 
 						   takes the size of the arena to init
