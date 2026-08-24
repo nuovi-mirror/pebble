@@ -1,6 +1,9 @@
 #pragma once
 
 char *findnewline(char **cursor) {
+	if (cursor == NULL || *cursor == NULL)
+		return NULL;
+
 	if (**cursor == '\0')
 		return NULL;				/* nothing left */
 

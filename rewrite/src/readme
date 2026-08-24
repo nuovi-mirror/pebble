@@ -13,3 +13,5 @@ Swapping targtes
 		$ ln -s ../posix/print.h platform/use/print.h 
 	
 	from the source root dir.
+
+	Then simply link the platform's main.c into the VM directory

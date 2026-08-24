@@ -23,7 +23,7 @@ fi
 
 echo "C compiler found at $CC"
 
-FLAGS="-std=c11 -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wformat=2 -Wundef -Wcast-qual -Wcast-align -Wold-style-definition -Wswitch-enum -Wvla -Wdouble-promotion -Wfloat-equal"
+FLAGS="-std=c11"
 
 SRCPATH="." # path to source directory
 BINPATH="bin" # path to output directory
@@ -42,7 +42,7 @@ VMTESTBINPATH="$BINPATH/$VMTESTBINNAME"
 
 if [ "$1" == "debug" ]; then
 	#FLAGS="$FLAGS -g -O0 -fsanitize=address,undefined -fno-omit-frame-pointer"
-	FLAGS="$FLAGS -g -O0 -fno-omit-frame-pointer"
+	FLAGS="$FLAGS -g -O0 -fno-omit-frame-pointer -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wformat=2 -Wundef -Wcast-qual -Wcast-align -Wold-style-definition -Wswitch-enum -Wvla -Wdouble-promotion -Wfloat-equal"
 elif [ "$1" == "fast" ]; then
 	FLAGS="$FLAGS -O3 -flto -fno-semantic-interposition -ffast-math -march=native -mtune=native"
 else

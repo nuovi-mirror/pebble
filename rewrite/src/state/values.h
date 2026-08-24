@@ -35,3 +35,20 @@ void printValue(Value v) {
 			break;
 	}
 }
+
+int valuetostr(char *buff, Value v) {
+	switch (v.type) {
+		case type_word:
+			return snprintf(buff, sizeof(buff), "%lu", v.as.word);
+		case type_sword:
+			return snprintf(buff, sizeof(buff), "%ld", v.as.sword);
+		case type_float:
+			return snprintf(buff, sizeof(buff), "%f", v.as.flt);
+		case type_string:
+			return snprintf(buff, sizeof(buff), "%s", v.as.str);
+		default:
+			return -1;
+	}
+}
+			
+

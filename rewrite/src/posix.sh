@@ -12,3 +12,6 @@ ln -s ../common/skipspace.h platform/use/skipspace.h
 # POSIX
 ln -s ../posix/readfile.h platform/use/readfile.h
 ln -s ../posix/print.h platform/use/print.h
+
+# entry point
+ln -s ../platform/posix/main.c vm/main.c
