@@ -4,6 +4,10 @@
 #include <stdlib.h>
 
 #include "../platform/use/print.h"
+#include "../platform/use/exitproc.h"
+#include "../platform/use/lalloc.h"
+#include "../platform/use/lfree.h"
+#include "../platform/use/lfreezero.h"
 
 typedef struct Arena {				/* template for an arena */
 	char *curr_ptr;				/* pointer to the next free block */
@@ -14,17 +18,17 @@ typedef struct Arena {				/* template for an arena */
 struct Arena *initAlloc(size_t size) {		/* function to init an arena 
 						   takes the size of the arena to init
 						   returns a pointer to the Arena struct */
-	char *srt_ptr = malloc(size);		/* allocate the arena */
+	char *srt_ptr = lalloc(size);		/* allocate the arena */
 	
 	if (srt_ptr == NULL) {
 		print("ERROR: ALLOCATOR: NONFATAL: GIVEN NULL ALLOCATOR POINTER\n");
 		return NULL;
 	}
 
-	struct Arena *arena = malloc(sizeof(struct Arena));
+	struct Arena *arena = lalloc(sizeof(struct Arena));
 	
 	if (arena == NULL) {			/* if we cannot allocate the area */
-		free(srt_ptr);			/* free the are we already allocated */
+		lfree(srt_ptr);			/* free the are we already allocated */
 		print("ERROR: ALLOCATOR: ALLOCATOR INIT FAILED\n");
 		return NULL;			/* return null */
 	}
@@ -46,7 +50,7 @@ void *alloc(struct Arena *arena, unsigned long size) {
 						/* get the size used */
 	if (used + size > arena->size) {
 		print("ERROR: ALLOCATOR: FATAL: OUT OF MEMORY!");
-		exit(1);			/* exit with OOM error */
+		exitproc(1);			/* exit with OOM error */
 	}
 
 	char *result = arena->curr_ptr;
@@ -56,27 +60,5 @@ void *alloc(struct Arena *arena, unsigned long size) {
 }
 
 void freeAllocator(struct Arena *arena) {
-	freezero(arena->arena_ptr, arena->size);
+	lfreezero(arena->arena_ptr, arena->size);
 }
-
-/* example
-
-int main() {
-	struct Arena *arena = initArena(32);	init an arena of 32 bytes
-	
-	if (arena == NULL)
-		exit(1);
-
-	char *data = "stuff\n";
-	char *ptr = alloc(arena, 12); 		grab a slice of 12 bytes
-						allocate a spot for the data
-
-	for (int i = 0; i < getstrlen(data) + 1; i++)
-		ptr[i] = data[i];
-
-	print(ptr);
-	free(arena);
-	return 0;
-}
-
-*/

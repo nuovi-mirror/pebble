@@ -23,6 +23,33 @@ fi
 
 echo "C compiler found at $CC"
 
+echo "Setting platform libraries..."
+rm platform/use/*
+rm vm/main.c
+
+if [ "$2" == "" ]; then
+	echo "Error: No platform selected."
+	exit 1
+fi
+
+# common
+for i in platform/common/*; do
+	echo "Linking platform/common/$(basename $i) to platform/use/"
+	ln -s  "../common/$(basename $i)" platform/use/
+done
+
+# platform
+for i in platform/$2/*; do
+	echo "Linking platform/$2/$(basename $i) to platform/use/"
+	ln -s "../$2/$(basename $i)" platform/use/
+done
+
+# entry point
+echo "Linking platform entry point..."
+ln -s ../platform/$2/main.c vm/main.c
+rm platform/use/main.c
+
+
 FLAGS="-std=c99"
 
 SRCPATH="." # path to source directory
@@ -45,8 +72,11 @@ if [ "$1" == "debug" ]; then
 	FLAGS="$FLAGS -g -O0 -fno-omit-frame-pointer -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wformat=2 -Wundef -Wcast-qual -Wcast-align -Wold-style-definition -Wswitch-enum -Wvla -Wdouble-promotion -Wfloat-equal"
 elif [ "$1" == "fast" ]; then
 	FLAGS="$FLAGS -O3 -flto -fno-semantic-interposition -ffast-math -march=native -mtune=native"
-else
+elif [ "$1" == "default" ]; then
 	FLAGS="$FLAGS -O2"
+else 
+	echo "Error: Build type not found"
+	exit 1
 fi
 
 mkdir -p "$BINPATH"
@@ -57,4 +87,6 @@ $CC $FLAGS -o $VMBINPATH $VMSRCPATH
 echo "Building test suite: $CC "$FLAGS" -o $VMTESTBINPATH $VMTESTSRCPATH"
 $CC $FLAGS -o $VMTESTBINPATH $VMTESTSRCPATH
 
+rm platform/use/*
+rm vm/main.c
 echo "Done!"

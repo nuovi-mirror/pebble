@@ -21,23 +21,6 @@ typedef struct Value {
 	}as;
 } Value;
 
-void printValue(Value v) {
-	switch(v.Type) {
-		case type_word:
-			printf("word of %lu\n", v.as.word);
-			break;
-		case type_sword:
-			printf("sword of %ld\n", v.as.sword);
-			break;
-		case type_flt:
-			printf("float of %f\n", v.as.flt);
-			break;
-		case type_str:
-			printf("string of \"%s\"\n", v.as.str);
-			break;
-	}
-}
-
 int valuetostr(char *buff, Value v) {
 	switch (v.Type) {
 		case type_word:

@@ -10,6 +10,7 @@
 #include "../platform/use/findnewline.h"
 #include "../platform/use/readfile.h"
 #include "../platform/use/skipspace.h"
+#include "../platform/use/exitproc.h"
 
 #include "../allocator/allocator.h"
 
@@ -44,7 +45,7 @@ int parseoperand(char **cursor, InstructionOperand *out) {
 
 		if (*p != delim) {
 			print("ERROR: VM: MAKEIR: UNDETERMINED OPERAND\n");
-			exit(1);
+			exitproc(1);
 		}
 
 		*p = '\0';				/* terminate operand text */
@@ -75,7 +76,7 @@ Instruction makeIR(char *line) {
 	char *p = skipspace(cursor);
 	if (p == NULL) {
 		print("ERROR: VM: MAKEIR: EMPTY LINE\n");
-		exit(1);
+		exitproc(1);
 	}
 
 	char *opcode_start = p;
@@ -91,7 +92,7 @@ Instruction makeIR(char *line) {
 
 	if (!lookupopcode(opcode_start, &instr.Opcode)) {
 		print("ERROR: VM: MAKEIR: UNKNOWN OPCODE\n");
-		exit(1);
+		exitproc(1);
 	}
 
 	parseoperand(&cursor, &instr.FirstOperand);
@@ -117,7 +118,7 @@ void interpret(Instruction instr, Map *vars, Arena *persistAlloc, Arena *scratch
 					break;
 				default:
 					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING MODE ON OPERAND ONE\n");
-					exit(1);
+					exitproc(1);
 			}
 
 			switch (instr.SecondOperand.Addressing) {
@@ -128,7 +129,7 @@ void interpret(Instruction instr, Map *vars, Arena *persistAlloc, Arena *scratch
 					break;
 				default:
 					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING MODE ON OPERAND TWO\n");
-					exit(1);
+					exitproc(1);
 			}
 			Value *valptr = alloc(persistAlloc, sizeof(val));
 			putVar(vars, dest, valptr);
@@ -187,7 +188,7 @@ int vmmain(Args cliargs, Stack *stack) {
 							/* pointer to file data */
 	if (filedata == NULL) {
 		print("VM: INIT: ERROR: CANNOT OPEN SPECIFIED FILE\n");
-		exit(1);
+		exitproc(1);
 	}
 
 	char *line;
