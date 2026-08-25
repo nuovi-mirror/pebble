@@ -28,8 +28,8 @@ if [ "$2" == "" ]; then
 	exit 1
 fi
 
-rm platform/use/*
 rm vm/main.c
+mkdir platform/use/
 echo "Linking $2 libraries..."
 
 if [ "$2" == "freestanding" ]; then
@@ -105,5 +105,6 @@ echo "Building test suite: $CC "$FLAGS" -o $VMTESTBINPATH $VMTESTSRCPATH"
 $CC $FLAGS -o $VMTESTBINPATH $VMTESTSRCPATH
 
 rm platform/use/*
+rm -rf platform/use/
 rm vm/main.c
 echo "Done!"
