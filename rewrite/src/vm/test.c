@@ -31,7 +31,7 @@ void testAllocator(void) {
 
 void testVariables(void) {
 	struct Arena *arena = arena = initAlloc(4096);
-	Map vars = initVars(32);
+	VarMap vars = initVars(32);
 	
 	char *varsmsg1 = "Variable tables working (1)\n";
 	char *varsmsg2 = "Variable tables working (2)\n";

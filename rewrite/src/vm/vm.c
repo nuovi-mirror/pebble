@@ -102,7 +102,7 @@ Instruction makeIR(char *line) {
 	return instr;
 }
 
-void interpret(Instruction instr, Map *vars, Arena *persistAlloc, Arena *scratchAlloc) {
+void interpret(Instruction instr, VarMap *vars, Arena *persistAlloc, Arena *scratchAlloc) {
 	switch (instr.Opcode) {
 		case Opcode_New: {
 			char dest[32];
@@ -173,7 +173,7 @@ int vmmain(Args cliargs, Stack *stack) {
 	struct Arena *permAlloc = initAlloc(6 * 1024 * 1024); /* N mb */
 	struct Arena *scratchAlloc = initAlloc(128 * 1024); /* N kb */
 
-	Map vars = initVars(512); /* N total variables */
+	VarMap vars = initVars(512); /* N total variables */
 	/* end init */
 
 	size_t freadsize = 512 * 1024;

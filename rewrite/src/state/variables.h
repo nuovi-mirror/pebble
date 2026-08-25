@@ -1,90 +1,11 @@
 #pragma once
 
-#include "../platform/use/print.h"
-#include "../platform/use/cmpstr.h"
-
 #include "hashmap.h"
 
-const size_t BASE = 0x811c9dc5;
-const size_t PRIME = 0x01000193;
+typedef SHashMap VarMap;
 
-size_t hashVar(struct VarMap *m, char *str) {
-	size_t inital = BASE;
-	while(*str) {
-		inital ^= (unsigned char)*str++;
-		inital *= PRIME;
-	}
-
-	return inital & (m->cap - 1);
-}
-
-struct VarMap initVars(size_t cap) {
-	struct VarMap m;
-	m.size = 0;
-	m.cap = cap;
-	m.buckets = calloc(cap, sizeof(Entry *));
-	
-	if (m.buckets == NULL) {
-		print("ERROR: VARIABLES: FATAL: ALLOCATION FAILED!\n");
-		exit(1);
-	}
-
-	return m;
-}
-
-void putVar(struct VarMap *m, char *str, void *value) {
-	size_t idx = hashVar(m, str);
-	Entry *e = m->buckets[idx];
-
-	while (e != NULL) {
-		if (cmpstr(e->key, str) == 0) {
-			e-> value = value; /* override existing */
-			return;
-		}
-
-		e = e->next;
-	}
-
-	/* not found - prepend new entry */
-	Entry *entry = malloc(sizeof(Entry));
-
-	if (entry == NULL) {
-		print("ERROR: VARIABLES: FATAL: ALLOCATION FAILED!\n");
-		exit(1);
-	}
-
-	entry->key = str;
-	entry->value = value;
-	entry->next = m->buckets[idx];
-	m->buckets[idx] = entry;
-	m->size++;
-}
-
-void *getVar(struct VarMap *m, char *str) {
-	Entry *e = m->buckets[hashVar(m, str)];
-
-	while (e != NULL) {
-		if (cmpstr(e->key, str) == 0)
-			return e->value;
-		e = e->next;
-	}
-
-	return NULL;
-
-}
-
-void freeVars(struct VarMap *m) {
-	for (size_t i = 0; i < m->cap; i++) {
-		Entry *e = m->buckets[i];
-		while (e != NULL) {
-			Entry *next = e->next;
-			free(e);
-			e = next;
-		}
-	}
-
-	free(m->buckets);
-	m->buckets = NULL;
-	m->size = 0;
-	m->cap = 0;
-}
+static size_t hashVar(VarMap *m, char *str)              { return mapHash(m, str); }
+static VarMap initVars(size_t cap)                       { return initHashMap(cap); }
+static void   putVar(VarMap *m, char *key, void *value)  { hashMapPut(m, key, value); }
+static void  *getVar(VarMap *m, char *key)               { return hashMapGet(m, key); }
+static void   freeVars(VarMap *m)                        { hashMapFreeMap(m); }

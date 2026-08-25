@@ -37,7 +37,7 @@ if [ "$2" == "freestanding" ]; then
 		ln -sf  "../freestand/$(basename $i)" platform/use/
 	done
 	
-	ln -sf "../freestand/main.c" vm/main.c
+	ln -sf "../platform/freestand/main.c" vm/main.c
 
 elif [ "$2" == "c" ]; then
 	for i in platform/freestand/*; do
@@ -48,7 +48,7 @@ elif [ "$2" == "c" ]; then
 		ln -sf  "../c/$(basename $i)" platform/use/
 	done
 
-	ln -sf "../c/main.c" vm/main.c
+	ln -sf "../platform/c/main.c" vm/main.c
 
 else
 	for i in platform/freestand/*; do
@@ -63,7 +63,7 @@ else
 		ln -sf  "../$2/$(basename $i)" platform/use/
 	done
 
-	ln -sf "../c/main.c" vm/main.c
+	ln -sf "../platform/$2/main.c" vm/main.c
 fi
 
 

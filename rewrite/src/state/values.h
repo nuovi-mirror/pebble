@@ -28,7 +28,7 @@ int valuetostr(char *buff, Value v) {
 		case type_sword:
 			return snprintf(buff, sizeof(buff), "%ld", v.as.sword);
 		case type_flt:
-			return snprintf(buff, sizeof(buff), "%f", v.as.flt);
+			return snprintf(buff, sizeof(buff), "%lf", v.as.flt);
 		case type_str:
 			return snprintf(buff, sizeof(buff), "%s", v.as.str);
 		default:
@@ -65,7 +65,7 @@ Value guessvaluetype(const char *data) {
 	double value;
 
 	/* check if float */
-	if (sscanf(data, "%f%n", &value, &consumed) == 1 &&
+	if (sscanf(data, "%lf%n", &value, &consumed) == 1 &&
 			data[consumed] == '\0') {
 		out.Type = type_flt;
 		out.as.flt = strtof(data, NULL);
