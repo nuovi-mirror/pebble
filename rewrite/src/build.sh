@@ -23,31 +23,48 @@ fi
 
 echo "C compiler found at $CC"
 
-echo "Setting platform libraries..."
-rm platform/use/*
-rm vm/main.c
-
 if [ "$2" == "" ]; then
 	echo "Error: No platform selected."
 	exit 1
 fi
 
-# common
-for i in platform/common/*; do
-	echo "Linking platform/common/$(basename $i) to platform/use/"
-	ln -s  "../common/$(basename $i)" platform/use/
-done
+rm platform/use/*
+rm vm/main.c
+echo "Linking $2 libraries..."
 
-# platform
-for i in platform/$2/*; do
-	echo "Linking platform/$2/$(basename $i) to platform/use/"
-	ln -s "../$2/$(basename $i)" platform/use/
-done
+if [ "$2" == "freestanding" ]; then
+	for i in platform/freestand/*; do
+		ln -sf  "../freestand/$(basename $i)" platform/use/
+	done
+	
+	ln -sf "../freestand/main.c" vm/main.c
 
-# entry point
-echo "Linking platform entry point..."
-ln -s ../platform/$2/main.c vm/main.c
-rm platform/use/main.c
+elif [ "$2" == "c" ]; then
+	for i in platform/freestand/*; do
+		ln -sf  "../freestand/$(basename $i)" platform/use/
+	done
+
+	for i in platform/c/*; do
+		ln -sf  "../c/$(basename $i)" platform/use/
+	done
+
+	ln -sf "../c/main.c" vm/main.c
+
+else
+	for i in platform/freestand/*; do
+		ln -sf  "../freestand/$(basename $i)" platform/use/
+	done
+
+	for i in platform/c/*; do
+		ln -sf  "../c/$(basename $i)" platform/use/
+	done
+
+	for i in platform/$2/*; do
+		ln -sf  "../$2/$(basename $i)" platform/use/
+	done
+
+	ln -sf "../c/main.c" vm/main.c
+fi
 
 
 FLAGS="-std=c99"

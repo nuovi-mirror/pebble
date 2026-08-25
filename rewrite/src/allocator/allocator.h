@@ -1,8 +1,5 @@
 #pragma once
 
-#include <unistd.h>
-#include <stdlib.h>
-
 #include "../platform/use/print.h"
 #include "../platform/use/exitproc.h"
 #include "../platform/use/lalloc.h"
