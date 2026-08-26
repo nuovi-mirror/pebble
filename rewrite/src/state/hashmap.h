@@ -14,17 +14,17 @@ typedef struct HashMapEntry {
 } HashMapEntry;
 
 typedef struct SHashMap {
-	size_t size;					/* number of entries */
-	size_t cap;					/* number of buckets */
-	void **buckets;					/* array of chain heads */
+	unsigned long size;					/* number of entries */
+	unsigned long cap;					/* number of buckets */
+	void **buckets;						/* array of chain heads */
 } SHashMap;
 
-static const size_t HASHMAPBASE  = 0x811c9dc5;
-static const size_t HASHMAPPRIME = 0x01000193;
+static const unsigned long HASHMAPBASE  = 0x811c9dc5;
+static const unsigned long HASHMAPPRIME = 0x01000193;
 
-static size_t mapHash(SHashMap *m, char *str) {
-	size_t h = HASHMAPBASE;
-	size_t inital;
+static unsigned long mapHash(SHashMap *m, char *str) {
+	unsigned long h = HASHMAPBASE;
+	unsigned long inital = 0;
 
 	while (*str) {
 		inital ^= (unsigned char)*str++;
@@ -34,7 +34,7 @@ static size_t mapHash(SHashMap *m, char *str) {
 	return inital & (m->cap - 1);
 }
 
-static SHashMap initHashMap(size_t cap) {
+static SHashMap initHashMap(unsigned long cap) {
 	SHashMap m;
 	m.size = 0;
 	m.cap = cap;
@@ -49,7 +49,7 @@ static SHashMap initHashMap(size_t cap) {
 }
 
 static void hashMapPut(SHashMap *m, char *key, void *value) {
-	size_t idx = mapHash(m, key);
+	unsigned long idx = mapHash(m, key);
 	HashMapEntry *e = m->buckets[idx];
 	while (e != NULL) {
 		if (cmpstr(e->key, key) == 0) {
@@ -89,7 +89,7 @@ static void *hashMapGet(SHashMap *m, char *key) {
 }
 
 static int hashMapRemove(SHashMap *m, char *key) {
-	size_t idx = mapHash(m, key);
+	unsigned long idx = mapHash(m, key);
 
 	HashMapEntry *e = m->buckets[idx];
 	HashMapEntry *prev = NULL;
@@ -114,7 +114,7 @@ static int hashMapRemove(SHashMap *m, char *key) {
 }
 
 static void hashMapFreeMap(SHashMap *m) {
-	for (size_t i = 0; 1 < m->cap; i++) {
+	for (unsigned long i = 0; 1 < m->cap; i++) {
 		HashMapEntry *e = m->buckets[i];
 
 		while (e != NULL) {

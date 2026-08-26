@@ -20,6 +20,7 @@ typedef struct Args {
 
 typedef struct StackFrame {
 	size_t return_pc;
+	char *funcname; /* function name this frame belongs to */
 } StackFrame;
 
 typedef struct Stack {
