@@ -3,13 +3,13 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-char *readfile(const char *path, void *buf, size_t nbytes) {
+char *readfile(const char *path, void *buf, unsigned long nbytes) {
 	int d = open(path, O_RDONLY);
 
 	if (d == -1)
 		return NULL;
 
-	ssize_t  size_read = read(d, buf, nbytes - 1);
+	long  size_read = read(d, buf, nbytes - 1);
 	close(d);
 
 	if (size_read == -1 || size_read == 0)

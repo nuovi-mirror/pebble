@@ -11,7 +11,7 @@ typedef struct Arena {				/* template for an arena */
 	unsigned long size;			/* size of the arena in bytes */
 } Arena;
 
-struct Arena *initAlloc(size_t size) {		/* function to init an arena 
+struct Arena *initAlloc(unsigned long size) {	/* function to init an arena 
 						   takes the size of the arena to init
 						   returns a pointer to the Arena struct */
 	char *srt_ptr = lalloc(size);		/* allocate the arena */

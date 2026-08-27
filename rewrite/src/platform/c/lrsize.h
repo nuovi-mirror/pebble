@@ -2,6 +2,6 @@
 
 #include <stdlib.h>
 
-void *lrsize(void *ptr, size_t size) {
+void *lrsize(void *ptr, unsigned long size) {
 	return realloc(ptr, size);
 }

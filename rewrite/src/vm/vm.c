@@ -176,7 +176,7 @@ int vmmain(Args cliargs, Stack *stack) {
 	VarMap vars = initVars(512); /* N total variables */
 	/* end init */
 
-	size_t freadsize = 512 * 1024;
+	unsigned long freadsize = 512 * 1024;
 	char *file = alloc(permAlloc, freadsize); 
 							/* N bytes to use for the
 							   file data (allocate

@@ -50,7 +50,7 @@ typedef struct Instruction {
 } Instruction;
 
 int lookupopcode(const char *word, InstructionOpcode *out) {
-	for (size_t i = 0; i < INSTRUCTION_OPCODE_TABLE_LEN; i++) {
+	for (unsigned long i = 0; i < INSTRUCTION_OPCODE_TABLE_LEN; i++) {
 		if (cmpstr(InstructionOpcodeEntryTable[i].name, word) == 0) {
 			*out = InstructionOpcodeEntryTable[i].op;
 			return 1;

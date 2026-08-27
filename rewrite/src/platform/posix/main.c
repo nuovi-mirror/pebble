@@ -14,19 +14,19 @@
 
 /* structs for the VM */
 typedef struct Args {
-	size_t count;
+	unsigned long count;
 	char **values;
 } Args;
 
 typedef struct StackFrame {
-	size_t return_pc;
+	unsigned long return_pc;
 	char *funcname; /* function name this frame belongs to */
 } StackFrame;
 
 typedef struct Stack {
 	StackFrame *items;
-	size_t count;
-	size_t capacity;
+	unsigned long count;
+	unsigned long capacity;
 } Stack;
 
 /* stack helpers */
@@ -65,7 +65,7 @@ StackFrame popframe(Stack *stack) {
 int main(int argc, char **argv) {
 	Args cliargs; /* init argument struct */
 
-	cliargs.count = (size_t)argc; /* set the count */
+	cliargs.count = (unsigned long)argc; /* set the count */
 	cliargs.values = argv; /* set the arguments */
 
 	/* initalize the stack */

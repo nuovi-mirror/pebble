@@ -2,6 +2,6 @@
 
 #include <stdlib.h>
 
-void *lcalloc(size_t nmemb, size_t size) {
+void *lcalloc(unsigned long nmemb, unsigned long size) {
 	return calloc(nmemb, size);
 }

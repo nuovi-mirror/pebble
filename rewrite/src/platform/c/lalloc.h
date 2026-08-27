@@ -2,6 +2,6 @@
 
 #include <stdlib.h>
 
-void *lalloc(size_t size) {
+void *lalloc(unsigned long size) {
 	return malloc(size);
 }
