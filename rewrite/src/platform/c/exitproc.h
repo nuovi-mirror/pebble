@@ -2,6 +2,6 @@
 
 #include <stdlib.h>
 
-void exitproc(int status) {
+int exitproc(int status) {
 	return exit(status);
 }

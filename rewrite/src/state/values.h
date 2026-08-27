@@ -21,16 +21,16 @@ typedef struct Value {
 	}as;
 } Value;
 
-int valuetostr(char *buff, Value v) {
+int valuetostr(char *buff, unsigned long buffsize, Value v) {
 	switch (v.Type) {
 		case type_word:
-			return snprintf(buff, sizeof(buff), "%lu", v.as.word);
+			return snprintf(buff, buffsize, "%lu", v.as.word);
 		case type_sword:
-			return snprintf(buff, sizeof(buff), "%ld", v.as.sword);
+			return snprintf(buff, buffsize, "%ld", v.as.sword);
 		case type_flt:
-			return snprintf(buff, sizeof(buff), "%lf", v.as.flt);
+			return snprintf(buff, buffsize, "%lf", v.as.flt);
 		case type_str:
-			return snprintf(buff, sizeof(buff), "%s", v.as.str);
+			return snprintf(buff, buffsize, "%s", v.as.str);
 		default:
 			return -1;
 	}
@@ -47,7 +47,7 @@ Value guessvaluetype(const char *data) {
 		if (sscanf(data, "%ld%n", &value, &consumed) == 1 &&
 				data[consumed] == '\0') {
 			out.Type = type_sword;
-			out.as.word = strtoul(data, NULL, 10);
+			out.as.word = strtol(data, NULL, 10);
 			return out;
 		}
 	} else {
@@ -57,7 +57,7 @@ Value guessvaluetype(const char *data) {
 		if (sscanf(data, "%lu%n", &value, &consumed) == 1 &&
 				data[consumed] == '\0') {
 			out.Type = type_word;
-			out.as.sword = strtol(data, NULL, 10);
+			out.as.sword = strtoul(data, NULL, 10);
 			return out;
 		}
 	}
@@ -68,7 +68,7 @@ Value guessvaluetype(const char *data) {
 	if (sscanf(data, "%lf%n", &value, &consumed) == 1 &&
 			data[consumed] == '\0') {
 		out.Type = type_flt;
-		out.as.flt = strtof(data, NULL);
+		out.as.flt = strtod(data, NULL);
 		return out;
 	}
 

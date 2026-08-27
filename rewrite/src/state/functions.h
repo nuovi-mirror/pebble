@@ -3,6 +3,8 @@
 #include "instructions.h"
 
 #include "../platform/use/lalloc.h"
+#include "../platform/use/getstrlen.h"
+#include "../platform/use/copystr.h"
 
 #define InstrMax 4096 /* max number of instructions on the table */
 #define FuncnameMaxLen 32 /* max number of characters in a function name */
@@ -23,7 +25,7 @@ static void recordFirstInstruction(FuncIndex *m, InstructionTable *c,
 		exitproc(1);
 	}
 
-	if (sizeof(*funcname) >= FuncnameMaxLen) {
+	if (getstrlen(funcname) >= FuncnameMaxLen) {
 		print("ERROR: VM: FUNCTIONS: INSTRUCTION NAME TOO LONG!\n");
 		exitproc(1);
 	}
@@ -31,12 +33,12 @@ static void recordFirstInstruction(FuncIndex *m, InstructionTable *c,
 	c->items[c->count++] = instruction;
 
 	Instruction *instructioncopy = lalloc(sizeof(Instruction));
-	char *funcnamecopy = lalloc(sizeof(funcname));
+	*instructioncopy = instruction;
 
-	unsigned long key = mapHash(m, funcnamecopy);
-	unsigned long *keycopy = lalloc(sizeof(unsigned long));
+	char *funcnamecopy = lalloc(getstrlen(funcname));
+	copystr(funcname, funcnamecopy);
 
-	hashMapPut(m, *keycopy, *funcname);
+	hashMapPut(m, funcname, instructioncopy);
 }
 
 static void recordInstruction(InstructionTable *c, Instruction instruction) {
@@ -54,6 +56,14 @@ static Instruction fetchInstruction(InstructionTable *c) {
 		exitproc(1);
 	}
 
-	Instruction instruction = c->items[c->count];
+	Instruction instruction = c->items[c->count - 1];
 	return instruction;
+}
+
+static InstructionTable *initInstructionTable(void) {
+	
+	InstructionTable *table = lalloc(sizeof(InstructionTable));
+	table->count = 0;
+
+	return table;
 }

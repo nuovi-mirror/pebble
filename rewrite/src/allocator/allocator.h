@@ -4,7 +4,6 @@
 #include "../platform/use/exitproc.h"
 #include "../platform/use/lalloc.h"
 #include "../platform/use/lfree.h"
-#include "../platform/use/lfreezero.h"
 
 typedef struct Arena {				/* template for an arena */
 	char *curr_ptr;				/* pointer to the next free block */
@@ -57,5 +56,9 @@ void *alloc(struct Arena *arena, unsigned long size) {
 }
 
 void freeAllocator(struct Arena *arena) {
-	lfreezero(arena->arena_ptr, arena->size);
+	if (arena == NULL)
+		return;
+
+	lfree(arena->arena_ptr);
+	lfree(arena);
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-void copystr(char *src, char *dst) {
+void copystr(const char *src, char *dst) {
 	size_t i = 0;
 
 	while(src[i] != '\0') {

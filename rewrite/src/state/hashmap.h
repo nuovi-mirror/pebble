@@ -31,7 +31,7 @@ static unsigned long mapHash(SHashMap *m, char *str) {
 		inital *= HASHMAPPRIME;
 	}
 
-	return inital & (m->cap - 1);
+	return inital & (m->cap - 1); /* must be power of two */
 }
 
 static SHashMap initHashMap(unsigned long cap) {
@@ -114,7 +114,7 @@ static int hashMapRemove(SHashMap *m, char *key) {
 }
 
 static void hashMapFreeMap(SHashMap *m) {
-	for (unsigned long i = 0; 1 < m->cap; i++) {
+	for (unsigned long i = 0; i < m->cap; i++) {
 		HashMapEntry *e = m->buckets[i];
 
 		while (e != NULL) {

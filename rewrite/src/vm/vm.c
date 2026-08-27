@@ -111,10 +111,10 @@ void interpret(Instruction instr, VarMap *vars, Arena *persistAlloc, Arena *scra
 
 			switch (instr.FirstOperand.Addressing) {
 				case addrmode_bare:
-					valuetostr(dest, instr.FirstOperand.Data);
+					valuetostr(dest, sizeof(dest), instr.FirstOperand.Data);
 					break;
 				case addrmode_true_literal:
-					valuetostr(dest, instr.FirstOperand.Data);
+					valuetostr(dest, sizeof(dest), instr.FirstOperand.Data);
 					break;
 				default:
 					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING MODE ON OPERAND ONE\n");
@@ -123,7 +123,7 @@ void interpret(Instruction instr, VarMap *vars, Arena *persistAlloc, Arena *scra
 
 			switch (instr.SecondOperand.Addressing) {
 				case addrmode_true_literal:
-					valuetostr(data, instr.SecondOperand.Data);
+					valuetostr(data, sizeof(dest), instr.SecondOperand.Data);
 					val.Type = type_str;
 					val.as.str = data;
 					break;

@@ -26,7 +26,7 @@ void testAllocator(void) {
 	print(arenaarea1);
 	print(arenaarea2);
 
-	free(arena);
+	freeAllocator(arena);
 }
 
 void testVariables(void) {
@@ -51,7 +51,7 @@ void testVariables(void) {
 	print(varresult1);
 	print(varresult2);
 
-	free(arena);
+	freeAllocator(arena);
 }
 
 int main(void) {
