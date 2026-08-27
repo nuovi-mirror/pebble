@@ -50,6 +50,25 @@ elif [ "$2" == "c" ]; then
 
 	ln -sf "../platform/c/main.c" vm/main.c
 
+elif [ "$2" = "openbsd" ]; then
+	for i in platform/freestand/*; do
+		ln -sf  "../freestand/$(basename $i)" platform/use/
+	done
+
+	for i in platform/c/*; do
+		ln -sf  "../c/$(basename $i)" platform/use/
+	done
+
+	for i in platform/posix/*; do
+		ln -sf  "../posix/$(basename $i)" platform/use/
+	done
+
+	for i in platform/$2/*; do
+		ln -sf  "../$2/$(basename $i)" platform/use/
+	done
+
+	ln -sf "../platform/$2/main.c" vm/main.c
+
 else
 	for i in platform/freestand/*; do
 		ln -sf  "../freestand/$(basename $i)" platform/use/
@@ -65,7 +84,6 @@ else
 
 	ln -sf "../platform/$2/main.c" vm/main.c
 fi
-
 
 FLAGS="-std=c99"
 
