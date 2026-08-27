@@ -62,8 +62,7 @@ int parseoperand(char **cursor, InstructionOperand *out) {
 		}
 	}
 
-	out->Data.Type = type_str;
-	out->Data.as.str = start;
+	out->Data = guessvaluetype(start);
 
 	*cursor = p;
 	return 1;
@@ -159,8 +158,39 @@ void interpret(Instruction instr, VarMap *vars, Arena *persistAlloc, Arena *scra
 			/* handle Escape */
 			break;
 
-		default:
+		/* internal opcodes */
+		case Opcode_Internal_PRINT: {
+			char buf[32];
+
+			print("_PRINT (INTERNAL INSTRUCTION): ");
+			print("TYPE: ");
+			
+			switch (instr.FirstOperand.Data.Type) {
+				case type_word:
+					print("WORD,  DATA: ");
+					valuetostr(buf, sizeof(buf), instr.FirstOperand.Data);
+					break;
+
+				case type_sword:
+					print("SWORD, DATA: ");
+					valuetostr(buf, sizeof(buf), instr.FirstOperand.Data);
+					break;
+
+				case type_str:
+					print("STR,   DATA: ");
+					copystr(instr.FirstOperand.Data.as.str, buf);
+					break;
+
+				case type_flt:
+					print("FLT,   DATA: ");
+					valuetostr(buf, sizeof(buf), instr.FirstOperand.Data);
+					break;
+			}
+			print(buf);
+			print("\n");
+
 			break;
+		}
 	}
 }
 

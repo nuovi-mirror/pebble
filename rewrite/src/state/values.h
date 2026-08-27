@@ -47,7 +47,7 @@ Value guessvaluetype(const char *data) {
 		if (sscanf(data, "%ld%n", &value, &consumed) == 1 &&
 				data[consumed] == '\0') {
 			out.Type = type_sword;
-			out.as.word = strtol(data, NULL, 10);
+			out.as.sword = strtol(data, NULL, 10);
 			return out;
 		}
 	} else {
@@ -57,7 +57,7 @@ Value guessvaluetype(const char *data) {
 		if (sscanf(data, "%lu%n", &value, &consumed) == 1 &&
 				data[consumed] == '\0') {
 			out.Type = type_word;
-			out.as.sword = strtoul(data, NULL, 10);
+			out.as.word = strtoul(data, NULL, 10);
 			return out;
 		}
 	}

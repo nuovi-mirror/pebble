@@ -1,1 +1,4 @@
-New x '1'
+_PRINT 1
+_PRINT hello
+_PRINT 3.12
+_PRINT -3

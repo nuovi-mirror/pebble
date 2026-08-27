@@ -18,6 +18,7 @@ typedef enum {
 	Opcode_Return,
 	Opcode_Escape,
 	Opcode_End,
+	Opcode_Internal_PRINT,
 } InstructionOpcode;
 
 typedef struct InstructionOperand {
@@ -38,6 +39,8 @@ static const InstructionOpcodeEntry InstructionOpcodeEntryTable[] = {
 	{ "Return", Opcode_Return },
 	{ "End", Opcode_End },
 	{ "Escape", Opcode_Escape },
+	/* internal opcodes */
+	{ "_PRINT", Opcode_Internal_PRINT },
 };
 
 #define INSTRUCTION_OPCODE_TABLE_LEN (sizeof(InstructionOpcodeEntryTable) / sizeof(InstructionOpcodeEntryTable[0]))
