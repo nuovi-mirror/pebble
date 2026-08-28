@@ -1,5 +1,7 @@
 /* portable platform entry code (C) */
 
+#pragma once
+
 #include "print.h"
 #include "exitproc.h"
 #include "lalloc.h"

@@ -1,21 +1,27 @@
 #!/bin/sh
 
-echo "Finding C compiler..."
+if [ -n "$3" ] && command -v "$3" >/dev/null 2>&1; then
+	echo "Argument 3 contains a valid C compiler ($3). Using that."
+	CC="$3"
+else 
 
-if command -v cc >/dev/null; then
-	CC="$(which cc)"
-else
-	if command -v clang >/dev/null; then
-		CC="$(which clang)"
+	echo "Finding C compiler..."
+
+	if command -v cc >/dev/null; then
+		CC="$(which cc)"
 	else
-		if command -v pcc >/dev/null; then
-			CC="$(which pcc)"
+		if command -v clang >/dev/null; then
+			CC="$(which clang)"
 		else
-			if command -v gcc >/dev/null; then
-				CC="$(which gcc)"
+			if command -v pcc >/dev/null; then
+				CC="$(which pcc)"
 			else
-				echo "Error: No suitable C compiler found."
-				exit 1
+				if command -v gcc >/dev/null; then
+					CC="$(which gcc)"
+				else
+					echo "Error: No suitable C compiler found."
+					exit 1
+				fi
 			fi
 		fi
 	fi

@@ -1,6 +1,6 @@
 #pragma once
 
-size_t getstrlen(char *s) {
+unsigned long getstrlen(char *s) {
 	unsigned long n = 0;
 
 	while (s[n] != '\0')
