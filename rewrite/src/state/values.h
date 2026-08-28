@@ -18,6 +18,7 @@ typedef struct Value {
 		long sword;
 		double flt;
 		char *str;
+		void *null;
 	}as;
 } Value;
 
