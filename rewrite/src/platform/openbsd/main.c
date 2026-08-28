@@ -3,6 +3,8 @@
 #include "../platform/use/exitproc.h"
 #include "vm.c"
 
+#define NULL ((void *)0) /* null type */
+
 #include <unistd.h> /* needed for the two magical calls */
 
 /* literally just the POSIX one but with 

@@ -44,6 +44,8 @@ Platform layers
 	layer
 	
 	the entry point must
+	  - define the NULL value (usually just with 
+		#define NULL ((void *)0) to be compliant with 2018 C)
 	  - set up a stack
 	  - get arguments
 	  - provide main()
