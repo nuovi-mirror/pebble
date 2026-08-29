@@ -1,10 +1,7 @@
 #pragma once
 
-/* Implemented independently with the Berkeley strtok implementation
- * used as a reference for algorithmic behavior. */
-
 char *str2tokn
-(char *str, const char *sep)
+(char *str, const char sep)
 {
 	static char *last;
 	return str2toknl(str, sep, &last);
@@ -13,68 +10,43 @@ char *str2tokn
 
 
 char *str2toknl
-(char *str, const char *sep, char **last)
+(char *str, const char sep, char **last)
 {
 	if (str == NULL)
 	{
 		str = *last;
+
 		if (str == NULL)
 			return NULL;
 	}
 
-	unsigned long count = 0;
-	unsigned long item = 0;
-	
-	char *spanp;
-	char *token;
-	char character = *str;
-
-	while (character != item)
-	{
-		character = *str;
+	/* skip deliminators */
+	while (*str == sep)
 		str++;
 
-		spanp = sep;
-
-		item = *spanp;
-		spanp++;
-
-		if (character != item)
-		{
-			break;
-		}
-	}
-
-	if (character == 0)
+	/* nothing left to do */
+	if (*str == '\0')
 	{
 		*last = NULL;
-		return (NULL);
+		return NULL;
 	}
 
-	token = str - 1;
+	token = str;
 
-	for (;;)
-	{
-		character = *str;
+	/* find the end of the token */
+	while (*str != sep && *str != '\0')
 		str++;
 
-		spanp = sep;
-
-		if (item == character)
-		{
-			do {
-				item = *spanp;
-				spanp++;
-
-				if (item == character)
-					*str = NULL;
-				else
-					*str[-1] = '\0';
-
-				*last = str;
-				return (token);
-			}
-		} while (item != 0);
+	/* terminate the token and save the next position */
+	if (*str == sep)
+	{
+		*str = '\0';
+		*last = str + 1;
 	}
-	/* this is never reached */
+	else 
+	{
+		*last = NULL;
+	}
+
+	return token;
 }
