@@ -8,16 +8,16 @@ else
 	echo "Finding C compiler..."
 
 	if command -v cc >/dev/null; then
-		CC="$(which cc)"
+		CC="$(command -v cc)"
 	else
 		if command -v clang >/dev/null; then
-			CC="$(which clang)"
+			CC="$(command -v clang)"
 		else
 			if command -v pcc >/dev/null; then
-				CC="$(which pcc)"
+				CC="$(command -v pcc)"
 			else
 				if command -v gcc >/dev/null; then
-					CC="$(which gcc)"
+					CC="$(command -v gcc)"
 				else
 					echo "Error: No suitable C compiler found."
 					exit 1
@@ -29,7 +29,7 @@ fi
 
 echo "C compiler found at $CC"
 
-if [ "$2" == "" ]; then
+if [ "$2" = "" ]; then
 	echo "Error: No platform selected."
 	exit 1
 fi
@@ -38,14 +38,14 @@ rm vm/main.c
 mkdir platform/use/
 echo "Linking $2 libraries..."
 
-if [ "$2" == "freestanding" ]; then
+if [ "$2" = "freestanding" ]; then
 	for i in platform/freestand/*; do
 		ln -sf  "../freestand/$(basename $i)" platform/use/
 	done
 	
 	ln -sf "../platform/freestand/main.c" vm/main.c
 
-elif [ "$2" == "c" ]; then
+elif [ "$2" = "c" ]; then
 	for i in platform/freestand/*; do
 		ln -sf  "../freestand/$(basename $i)" platform/use/
 	done
@@ -108,12 +108,12 @@ VMTESTBINNAME="test" # VMtest output file name
 VMBINPATH="$BINPATH/$VMBINNAME"
 VMTESTBINPATH="$BINPATH/$VMTESTBINNAME"
 
-if [ "$1" == "debug" ]; then
+if [ "$1" = "debug" ]; then
 	#FLAGS="$FLAGS -g -O0 -fsanitize=address,undefined -fno-omit-frame-pointer"
 	FLAGS="$FLAGS -g -O0 -fno-omit-frame-pointer -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wformat=2 -Wundef -Wcast-qual -Wcast-align -Wold-style-definition -Wswitch-enum -Wvla -Wdouble-promotion -Wfloat-equal"
-elif [ "$1" == "fast" ]; then
+elif [ "$1" = "fast" ]; then
 	FLAGS="$FLAGS -O3 -flto -fno-semantic-interposition -ffast-math -march=native -mtune=native"
-elif [ "$1" == "default" ]; then
+elif [ "$1" = "default" ]; then
 	FLAGS="$FLAGS -O2"
 else 
 	echo "Error: Build type not found"
