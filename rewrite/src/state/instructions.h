@@ -32,6 +32,7 @@ typedef struct {
 } InstructionOpcodeEntry;
 
 static const InstructionOpcodeEntry InstructionOpcodeEntryTable[] = {
+	/* external opcodes */
 	{ "New", Opcode_New },
 	{ "Func", Opcode_Func },
 	{ "If", Opcode_If },
