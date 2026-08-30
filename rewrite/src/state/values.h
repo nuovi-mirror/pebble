@@ -4,11 +4,15 @@
 #include <stdlib.h>
 #include <stddef.h>
 
+#include "expressions.h"
+
 typedef enum {
 	type_word,
 	type_sword,
 	type_flt,
 	type_str,
+	type_expr,
+	type_null, /* debug */
 } ValueTypes;
 
 typedef struct Value {
@@ -18,6 +22,7 @@ typedef struct Value {
 		long sword;
 		double flt;
 		char *str;
+		ExprNode *expr;
 		void *null;
 	}as;
 } Value;

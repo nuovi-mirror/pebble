@@ -5,6 +5,7 @@
 #include "../platform/use/skipspace.h"
 #include "../platform/use/lalloc.h"
 #include "../platform/use/cmpstr.h"
+#include "../platform/use/cmpstrn.h"
 #include "../platform/use/copymem.h"
 #include "../platform/use/snprint.h"
 
@@ -160,7 +161,7 @@ void nexttoken
 	if (**str == ')')
 	{
 		(*str)++;
-		token->Type = Token_LeftParent;
+		token->Type = Token_RightParent;
 		return;
 	}
 
@@ -171,7 +172,7 @@ void nexttoken
 	for (unsigned long i = 0; i < sizeof(ExprOperators) / sizeof(ExprOperators[0]); i++)
 	{
 		unsigned long len = strlen(ExprOperators[i].Sym);
-		if (cmpstr(*str, ExprOperators) == 0 && len < bestlen)
+		if (cmpstrn(*str, ExprOperators[i].Sym, len) == 0)
 		{
 			best = &ExprOperators[i];
 			bestlen = len;
@@ -225,7 +226,7 @@ ExprNodeData parseprimary
 {
 	ExprNodeData data;
 
-	if (p->lookahead.Type += Token_LeftParent)
+	if (p->lookahead.Type == Token_LeftParent)
 	{
 		parseradvance(p); /* consume '(' */
 		/* set that to whatever the currest loosest tier is */
@@ -292,14 +293,14 @@ ExprNodeData str2expr
 	p.error = 0;
 	parseradvance(&p); /* prime lookahead */
 
-	int maxLevel = 0;
+	int maxLevel = 4;
 	for (unsigned long i = 0; i < sizeof(ExprOperators) / sizeof(ExprOperators[0]); i++)
 		if (ExprOperators[i].Pres < maxLevel)
 			maxLevel = ExprOperators[i].Pres;
 
 	ExprNodeData result = parseexpr(&p, maxLevel);
 
-	if (p.lookahead.Type == Token_End)
+	if (p.lookahead.Type != Token_End)
 		p.error = 1; /* trailing garbage */
 
 	if (!p.error && result.Type == ExprDataNode)
