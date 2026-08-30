@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 
-#include "expressions.h"
+typedef struct ExprNode ExprNode; /* hack */
 
 typedef enum {
 	type_word,

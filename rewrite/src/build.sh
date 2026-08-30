@@ -34,7 +34,7 @@ if [ "$2" = "" ]; then
 	exit 1
 fi
 
-rm vm/main.c
+rm vm/main.c >/dev/null 2>&1
 mkdir platform/use/
 echo "Linking $2 libraries..."
 
@@ -128,7 +128,7 @@ $CC $FLAGS -o $VMBINPATH $VMSRCPATH
 echo "Building test suite: $CC "$FLAGS" -o $VMTESTBINPATH $VMTESTSRCPATH"
 $CC $FLAGS -o $VMTESTBINPATH $VMTESTSRCPATH
 
-rm platform/use/*
-rm -rf platform/use/
-rm vm/main.c
+rm platform/use/* >/dev/null 2>&1
+rm -rf platform/use/ >/dev/null 2>&1
+rm vm/main.c >/dev/null 2>&1
 echo "Done!"
