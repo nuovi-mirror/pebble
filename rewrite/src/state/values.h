@@ -37,7 +37,7 @@ int valuetostr(char *buff, unsigned long buffsize, Value v) {
 	}
 }
 			
-Value guessvaluetype(const char *data) {
+Value guessvaluetype(char *data) {
 	Value out = { 0 };
 	int consumed;
 
