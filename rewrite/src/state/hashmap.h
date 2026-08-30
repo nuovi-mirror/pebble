@@ -1,4 +1,5 @@
-#pragma once
+#ifndef STATE_HASHMAP_H_
+#define STATE_HASHMAP_H_
 
 #include "../platform/use/lcalloc.h"
 #include "../platform/use/lalloc.h"
@@ -129,3 +130,5 @@ static void hashMapFreeMap(SHashMap *m) {
 	m->size = 0;
 	m->cap = 0;
 }
+
+#endif

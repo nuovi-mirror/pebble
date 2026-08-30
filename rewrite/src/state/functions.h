@@ -1,4 +1,5 @@
-#pragma once
+#ifndef STATE_FUNCTIONS_H_
+#define STATE_FUNCTIONS_H_
 
 #include "instructions.h"
 
@@ -67,3 +68,5 @@ static InstructionTable *initInstructionTable(void) {
 
 	return table;
 }
+
+#endif

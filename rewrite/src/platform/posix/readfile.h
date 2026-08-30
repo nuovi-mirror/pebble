@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PLATFORM_READFILE_H_
+#define PLATFORM_READFILE_H_
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -19,3 +20,5 @@ char *readfile(const char *path, void *buf, unsigned long nbytes) {
 
 	return buf;
 }
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PLATFORM_GETSTRLEN_H_
+#define PLATFORM_GETSTRLEN_H_
 
 unsigned long getstrlen(const char *s) {
 	unsigned long n = 0;
@@ -7,3 +8,5 @@ unsigned long getstrlen(const char *s) {
 		n++;
 	return n + 1;
 }
+
+#endif

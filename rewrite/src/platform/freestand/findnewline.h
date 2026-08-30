@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PLATFORM_FINDNEWLINE_H_
+#define PLATFORM_FINDNEWLINE_H_
 
 char *findnewline(char **cursor) {
 	if (cursor == NULL || *cursor == NULL)
@@ -22,3 +23,5 @@ char *findnewline(char **cursor) {
 
 	return start;
 }
+
+#endif

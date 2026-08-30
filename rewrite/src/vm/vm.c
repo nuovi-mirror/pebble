@@ -1,5 +1,3 @@
-#pragma once
-
 /* include this to get the main VM entry point */
 /* run vmmain to run the VM */
 /* main itself is owned by the platform layer */

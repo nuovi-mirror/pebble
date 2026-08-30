@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PLATFORM_COPYSTR_H_
+#define PLATFORM_COPYSTR_H_
 
 void copystr(const char *src, char *dst) {
 	size_t i = 0;
@@ -10,3 +11,5 @@ void copystr(const char *src, char *dst) {
 
 	dst[i] = '\0';
 }
+
+#endif

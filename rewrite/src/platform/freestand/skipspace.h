@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PLATFORM_SKIPSPACE_H_
+#define PLATFORM_SKIPSPACE_H_
 
 #include "getstrlen.h"
 
@@ -18,3 +19,5 @@ char *tskipspace
 	char *r = skipspace((char *)p);
 	return r ? r : p + getstrlen(p);
 }
+
+#endif

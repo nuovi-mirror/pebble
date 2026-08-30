@@ -1,4 +1,5 @@
-#pragma once 
+#ifndef PLATFORM_SNPRINT_H_
+#define PLATFORM_SNPRINT_H_
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -14,3 +15,5 @@ int snprint
 	va_end(args);
 	return result;
 }
+
+#endif

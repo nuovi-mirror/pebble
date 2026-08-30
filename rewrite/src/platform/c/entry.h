@@ -1,6 +1,7 @@
-/* portable platform entry code (C) */
+/* portable entry point helper (C) */
 
-#pragma once
+#ifndef PLATFORM_ENTRY_H_
+#define PLATFORM_ENTRY_H_
 
 #include "print.h"
 #include "exitproc.h"
@@ -94,3 +95,5 @@ int main(int argc, char **argv) {
 }
 
 */
+
+#endif

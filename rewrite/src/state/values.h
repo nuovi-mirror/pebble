@@ -1,4 +1,5 @@
-#pragma once
+#ifndef STATE_VALUES_H_
+#define STATE_VALUES_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -83,3 +84,5 @@ Value guessvaluetype(char *data) {
 	out.as.str = data;
 	return out;
 }
+
+#endif

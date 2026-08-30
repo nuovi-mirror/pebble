@@ -1,4 +1,5 @@
-#pragma once
+#ifndef STATE_VARIABLES_H_
+#define STATE_VARIABLES_H_
 
 #include "hashmap.h"
 
@@ -9,3 +10,5 @@ static VarMap initVars(unsigned long cap)			{ return initHashMap(cap); }
 static void   putVar(VarMap *m, char *key, void *value)		{ hashMapPut(m, key, value); }
 static void  *getVar(VarMap *m, char *key)			{ return hashMapGet(m, key); }
 static void   freeVars(VarMap *m)				{ hashMapFreeMap(m); }
+
+#endif

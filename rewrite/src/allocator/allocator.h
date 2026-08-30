@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ALLOCATOR_H_
+#define ALLOCATOR_H_
 
 #include "../platform/use/print.h"
 #include "../platform/use/exitproc.h"
@@ -62,3 +63,5 @@ void freeAllocator(struct Arena *arena) {
 	lfree(arena->arena_ptr);
 	lfree(arena);
 }
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PLATFORM_COPYMEM_H_
+#define PLATFORM_COPYMEM_H_
 
 #include <string.h>
 
@@ -7,3 +8,5 @@ void *copymem
 {
 	return memcpy(dst, src, len);
 }
+
+#endif

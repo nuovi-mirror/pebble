@@ -1,4 +1,5 @@
-#pragma once
+#ifndef STATE_EXPRESSIONS_H_
+#define STATE_EXPRESSIONS_H_
 
 #include "values.h"
 #include "../platform/use/cmpstr.h"
@@ -143,7 +144,7 @@ Value parseliteral
 void nexttoken
 (const char **str, Token *token)
 {
-	skipspace(str);
+	*str = tskipspace(*str);
 
 	if (**str == '\0')
 	{
@@ -317,3 +318,4 @@ ExprNodeData str2expr
 	return result;
 }
 
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef STATE_INSTRUCTIONS_H_
+#define STATE_INSTRUCTIONS_H_
 
 #include "values.h"
 
@@ -63,3 +64,5 @@ int lookupopcode(const char *word, InstructionOpcode *out) {
 
 	return 0;
 }
+
+#endif
