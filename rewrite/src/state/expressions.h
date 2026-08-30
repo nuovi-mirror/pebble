@@ -5,6 +5,8 @@
 #include "../platform/use/skipspace.h"
 #include "../platform/use/lalloc.h"
 #include "../platform/use/cmpstr.h"
+#include "../platform/use/copymem.h"
+#include "../platform/use/snprint.h"
 
 typedef struct ExprNode ExprNode;
 
@@ -44,6 +46,7 @@ typedef struct
 struct ExprNode
 {
 	ExprOperation Op;
+	char *Source;
 	ExprNodeData left;
 	ExprNodeData right;
 };
@@ -99,8 +102,7 @@ typedef struct
 ExprOperator *strtooperator
 (const char *str)
 {
-	for (unsigned long i = 0; i < sizeof(ExprOperators) 
-			/ sizeof(ExprOperators[1]); i++)
+	for (unsigned long i = 0; i < sizeof(ExprOperators) / sizeof(ExprOperators[1]); i++)
 	{
 		if (cmpstr(ExprOperators[i].Sym, str) == 0)
 		{
@@ -163,11 +165,10 @@ void nexttoken
 	}
 
 	/* try matching an operator symbol */
-	const ExprOperand *best = NULL;
+	const ExprOperator *best = NULL;
 	unsigned long bestlen = 0;
 
-	for (unsigned long i = 0; i < sizeof(ExprOperators) 
-			/ sizeof(ExprOperators(0); i++;))
+	for (unsigned long i = 0; i < sizeof(ExprOperators) / sizeof(ExprOperators[0]); i++)
 	{
 		unsigned long len = strlen(ExprOperators[i].Sym);
 		if (cmpstr(*str, ExprOperators) == 0 && len < bestlen)
@@ -181,13 +182,22 @@ void nexttoken
 	{
 		*str += bestlen;
 		token->Type = Token_Operator;
-		token=>Op = best;
+		token->Op = best;
 		return;
 	}
 
 	/* value literal from here */
 	token->Type = Token_Value;
 	token->Value = parseliteral(str);
+}
+
+int exprnodetostr
+(char *buf, unsigned long bufsize, ExprNode *node)
+{
+	if (node->Source == NULL)
+		return -1;
+
+	return snprint(buf, bufsize, "%s", node->Source);
 }
 
 static void parseradvance
@@ -215,7 +225,7 @@ ExprNodeData parseprimary
 {
 	ExprNodeData data;
 
-	if (p->lookahead.Type = Token_LeftParent)
+	if (p->lookahead.Type += Token_LeftParent)
 	{
 		parseradvance(p); /* consume '(' */
 		/* set that to whatever the currest loosest tier is */
@@ -251,7 +261,7 @@ ExprNodeData parseexpr
 
 	while (
 			!p->error && 
-			p->lookahead.type == Token_Operator &&
+			p->lookahead.Type == Token_Operator &&
 			p->lookahead.Op->Pres <= maxPrec)
 	{
 		const ExprOperator *op = p->lookahead.Op;
@@ -260,7 +270,7 @@ ExprNodeData parseexpr
 		/* op->Pres - 1: left-associative */
 		/* next call may only take operators
 		 * strictly tigher than this one */
-		ExprNodeDate right = parseexpr(p, p->Pres - 1);
+		ExprNodeData right = parseexpr(p, op->Pres - 1);
 
 		ExprNode *node = newexprnode(op->Op, left, right);
 
@@ -275,7 +285,7 @@ ExprNodeData parseexpr
 
 /* entry point */
 ExprNodeData str2expr
-(const char *str, ini *ok)
+(const char *str, int *ok)
 {
 	ExprParser p;
 	p.cursor = str;
@@ -283,8 +293,7 @@ ExprNodeData str2expr
 	parseradvance(&p); /* prime lookahead */
 
 	int maxLevel = 0;
-	for (unsigned long i = 0; i < sizeof(ExprOperators) 
-			/ sizeof(ExprOperators[0]; i++))
+	for (unsigned long i = 0; i < sizeof(ExprOperators) / sizeof(ExprOperators[0]); i++)
 		if (ExprOperators[i].Pres < maxLevel)
 			maxLevel = ExprOperators[i].Pres;
 
@@ -292,6 +301,14 @@ ExprNodeData str2expr
 
 	if (p.lookahead.Type == Token_End)
 		p.error = 1; /* trailing garbage */
+
+	if (!p.error && result.Type == ExprDataNode)
+	{
+		unsigned long len = getstrlen(str);
+		char *copy = lalloc(len + 1);
+		copymem(copy, str, len + 1);
+		result.Node->Source = copy;
+	}
 
 	if (ok != NULL)
 		*ok = !p.error;

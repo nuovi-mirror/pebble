@@ -18,6 +18,7 @@
 #include "../state/functions.h"
 #include "../state/values.h"
 #include "../state/instructions.h"
+#include "../state/expressions.h"
 
 int parseoperand(char **cursor, InstructionOperand *out) {
 	char *p = skipspace(*cursor);
