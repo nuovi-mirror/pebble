@@ -126,7 +126,7 @@ void interpret(Instruction instr, VarMap *vars, Arena *persistAlloc, Arena *scra
 					break;
 				case addrmode_literal: {
 					if (instr.SecondOperand.Data.Type == type_expr)
-						val = evalexprnode(instr.SecondOperand.Data.as.expr);
+						val = evalexprnode(instr.SecondOperand.Data.as.expr, vars);
 					else 
 					{
 						char buf[32];
@@ -150,7 +150,7 @@ void interpret(Instruction instr, VarMap *vars, Arena *persistAlloc, Arena *scra
 							exitproc(1);
 						}
 
-						val = evalexprdata(tree);
+						val = evalexprdata(tree, vars);
 					}
 
 					break;

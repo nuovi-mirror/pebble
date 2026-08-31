@@ -8,9 +8,11 @@ New b '-1'
 New c 'hell0'
 New d '1.1'
 New e "1 + 2"
+New f "a + a"
 
 _PRINT2 a
 _PRINT2 b
 _PRINT2 c
 _PRINT2 d
 _PRINT2 e
+_PRINT2 f
