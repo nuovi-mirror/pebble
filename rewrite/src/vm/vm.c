@@ -102,7 +102,9 @@ Instruction makeIR(char *line) {
 	return instr;
 }
 
-void interpret(Instruction instr, VarMap *vars, Arena *persistAlloc, Arena *scratchAlloc) {
+void interpret
+(Instruction instr, VarMap *vars, Arena *persistAlloc, Arena *scratchAlloc, Arena *tempAlloc) 
+{
 	switch (instr.Opcode) {
 		case Opcode_New: {
 			char dest[32];
@@ -277,9 +279,46 @@ void interpret(Instruction instr, VarMap *vars, Arena *persistAlloc, Arena *scra
 
 			print("\n");
 
+			print("  TEMP: USED: ");
+			snprint(buf, sizeof(buf), "%lu", getAllocatorSizeUsed(tempAlloc));
+			print(buf);
+			setmem(buf, 0, sizeof(buf));
+	
+			print(", REMAIN: ");
+			snprint(buf, sizeof(buf), "%lu", getAllocatorSizeRemaining(tempAlloc));
+			print(buf);
+			setmem(buf, 0, sizeof(buf));
+
+			print(", MAX: ");
+			snprint(buf, sizeof(buf), "%lu", tempAlloc->size);
+			print(buf);
+			setmem(buf, 0, sizeof(buf));
+
+			print("\n");
+
+			print("  SCRATCH: USED: ");
+			snprint(buf, sizeof(buf), "%lu", getAllocatorSizeUsed(scratchAlloc));
+			print(buf);
+			setmem(buf, 0, sizeof(buf));
+	
+			print(", REMAIN: ");
+			snprint(buf, sizeof(buf), "%lu", getAllocatorSizeRemaining(scratchAlloc));
+			print(buf);
+			setmem(buf, 0, sizeof(buf));
+
+			print(", MAX: ");
+			snprint(buf, sizeof(buf), "%lu", scratchAlloc->size);
+			print(buf);
+			setmem(buf, 0, sizeof(buf));
+
+			print("\n");
+
 			break;
 		}
-
+		
+		case Opcode_Internal_NOP: 
+			/* do nothing */
+			break;
 	}
 }
 
@@ -287,15 +326,15 @@ int vmmain(Args cliargs, Stack *stack) {
 
 	
 	/* init */
-	struct Arena *tempAlloc = initAlloc(512 * 1024); /* N kb */
+	struct Arena *tempAlloc = initAlloc(2 * 1024 * 1024); /* N mb */
 	struct Arena *permAlloc = initAlloc(8 * 1024 * 1024); /* N mb */
-	struct Arena *scratchAlloc = initAlloc(128 * 1024); /* N kb */
+	struct Arena *scratchAlloc = initAlloc(2 * 1024 * 1024); /* N mb */
 
 	VarMap vars = initVars(512); /* N total variables */
 	/* end init */
 
 	unsigned long freadsize = 512 * 1024;
-	char *file = alloc(permAlloc, freadsize); 
+	char *file = alloc(scratchAlloc, freadsize); 
 							/* N bytes to use for the
 							   file data (allocate
 							   and read) */
@@ -344,9 +383,16 @@ int vmmain(Args cliargs, Stack *stack) {
 		count++;
 	}
 
+	/* free buffer */
+	resetAllocator(scratchAlloc);
+
 	/* execution */
 	for (unsigned long pc = 0; pc < count; pc++)
-		interpret(program[pc], &vars, permAlloc, scratchAlloc);
+	{
+		interpret(program[pc], &vars, permAlloc, scratchAlloc, tempAlloc);
+		resetAllocator(scratchAlloc); /* just in-case */
+		resetAllocator(tempAlloc);
+	}	
 
 	return 0;
 }

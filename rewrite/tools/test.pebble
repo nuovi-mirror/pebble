@@ -1,3 +1,7 @@
+_GETMEM
+
+_NOP
+
 _PRINT 1
 _PRINT hello
 _PRINT 3.12

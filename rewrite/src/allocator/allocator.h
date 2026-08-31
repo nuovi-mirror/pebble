@@ -64,6 +64,17 @@ void freeAllocator(struct Arena *arena) {
 	lfree(arena);
 }
 
+void resetAllocator
+(struct Arena *arena)
+{
+	if (arena == NULL)
+		return;
+
+	arena->curr_ptr = arena->arena_ptr;
+	return;
+}
+	
+
 unsigned long getAllocatorSizeUsed
 (struct Arena *arena)
 { return (unsigned long)(arena->curr_ptr - arena->arena_ptr); }
