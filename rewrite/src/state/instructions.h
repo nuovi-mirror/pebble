@@ -23,6 +23,7 @@ typedef enum {
 	/* internal opcodes */
 	Opcode_Internal_PRINT,
 	Opcode_Internal_PRINT2,
+	Opcode_Internal_GETMEM,
 
 } InstructionOpcode;
 
@@ -48,6 +49,7 @@ static const InstructionOpcodeEntry InstructionOpcodeEntryTable[] = {
 	/* internal opcodes */
 	{ "_PRINT", 	Opcode_Internal_PRINT },
 	{ "_PRINT2", 	Opcode_Internal_PRINT2 },
+	{ "_GETMEM", Opcode_Internal_GETMEM },
 };
 
 #define INSTRUCTION_OPCODE_TABLE_LEN (sizeof(InstructionOpcodeEntryTable) / sizeof(InstructionOpcodeEntryTable[0]))

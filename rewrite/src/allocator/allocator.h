@@ -64,4 +64,12 @@ void freeAllocator(struct Arena *arena) {
 	lfree(arena);
 }
 
+unsigned long getAllocatorSizeUsed
+(struct Arena *arena)
+{ return (unsigned long)(arena->curr_ptr - arena->arena_ptr); }
+
+unsigned long getAllocatorSizeRemaining
+(struct Arena *arena)
+{ return arena->size - getAllocatorSizeUsed(arena); }
+
 #endif

@@ -9,6 +9,7 @@
 #include "../platform/use/readfile.h"
 #include "../platform/use/skipspace.h"
 #include "../platform/use/exitproc.h"
+#include "../platform/use/setmem.h"
 
 #include "../allocator/allocator.h"
 
@@ -254,6 +255,30 @@ void interpret(Instruction instr, VarMap *vars, Arena *persistAlloc, Arena *scra
 
 			break;
 		}
+		case Opcode_Internal_GETMEM: {
+			char buf[32];
+
+			print("_GETMEM (INTERNAL INSTRUCTION)\n");
+			
+			print("  PERMALLOC: USED: ");
+			snprint(buf, sizeof(buf), "%lu", getAllocatorSizeUsed(persistAlloc));
+			print(buf);
+			setmem(buf, 0, sizeof(buf));
+	
+			print(", REMAIN: ");
+			snprint(buf, sizeof(buf), "%lu", getAllocatorSizeRemaining(persistAlloc));
+			print(buf);
+			setmem(buf, 0, sizeof(buf));
+
+			print(", MAX: ");
+			snprint(buf, sizeof(buf), "%lu", persistAlloc->size);
+			print(buf);
+			setmem(buf, 0, sizeof(buf));
+
+			print("\n");
+
+			break;
+		}
 
 	}
 }
@@ -263,7 +288,7 @@ int vmmain(Args cliargs, Stack *stack) {
 	
 	/* init */
 	struct Arena *tempAlloc = initAlloc(512 * 1024); /* N kb */
-	struct Arena *permAlloc = initAlloc(6 * 1024 * 1024); /* N mb */
+	struct Arena *permAlloc = initAlloc(8 * 1024 * 1024); /* N mb */
 	struct Arena *scratchAlloc = initAlloc(128 * 1024); /* N kb */
 
 	VarMap vars = initVars(512); /* N total variables */
@@ -284,15 +309,44 @@ int vmmain(Args cliargs, Stack *stack) {
 		exitproc(1);
 	}
 
+	unsigned long limits_maxinstr = 4096; /* max num of instructions */
+	unsigned long capacity = 512; /* inital allocation size of instruction buffer */
+	unsigned long count = 0;
 	char *line;
-	while ((line = findnewline(&filedata)) != NULL) {
-		if (line[0] == '\0')
-			continue;			/* skip empty lines */
 
-		Instruction instr = makeIR(line);	/* parse source code */
-		interpret(instr, &vars, permAlloc, scratchAlloc);
-							/* interpret bytecode */
+	Instruction *program = alloc(permAlloc, capacity * sizeof(Instruction));
+
+	/* startup */
+	while ((line = findnewline(&filedata)) != NULL)
+	{
+		if (count >= limits_maxinstr)
+		{
+			print("ERROR: LIMITS: INSTRUCTION CAP REACHED!\n");
+			exitproc(1);
+		}
+
+		char *p = skipspace(line);
+
+		if (p == NULL)
+			continue;
+
+		if (count >= capacity)
+		{
+			capacity *= 2;
+
+			Instruction *newprogram = alloc(permAlloc, capacity * sizeof(Instruction));
+
+			copymem(newprogram, program, count * sizeof(Instruction));
+			program = newprogram;
+		}
+
+		program[count] = makeIR(line);
+		count++;
 	}
+
+	/* execution */
+	for (unsigned long pc = 0; pc < count; pc++)
+		interpret(program[pc], &vars, permAlloc, scratchAlloc);
 
 	return 0;
 }
