@@ -2,3 +2,15 @@ _PRINT 1
 _PRINT hello
 _PRINT 3.12
 _PRINT -3
+
+New a '1'
+New b '-1'
+New c 'hell0'
+New d '1.1'
+New e "1 + 2"
+
+_PRINT2 a
+_PRINT2 b
+_PRINT2 c
+_PRINT2 d
+_PRINT2 e

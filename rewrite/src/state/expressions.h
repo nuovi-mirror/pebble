@@ -132,7 +132,7 @@ Value parseliteral
 		p++;
 
 	unsigned long len = (unsigned long)(p - start);
-	char *buf = lalloc(len + 1);
+	char *buf = lalloc(len);
 	copymem(buf, start, len);
 	buf[len] = '\0';
 
@@ -296,7 +296,7 @@ ExprNodeData str2expr
 
 	int maxLevel = 4;
 	for (unsigned long i = 0; i < sizeof(ExprOperators) / sizeof(ExprOperators[0]); i++)
-		if (ExprOperators[i].Pres < maxLevel)
+		if (ExprOperators[i].Pres > maxLevel)
 			maxLevel = ExprOperators[i].Pres;
 
 	ExprNodeData result = parseexpr(&p, maxLevel);
@@ -316,6 +316,77 @@ ExprNodeData str2expr
 		*ok = !p.error;
 
 	return result;
+}
+
+/* type guesser infa */
+int isexpression
+(const char *str)
+{
+	const char *p = str;
+
+	while (*p != '\0')
+	{
+		const ExprOperator *best = NULL;
+		unsigned long bestlen = 0;
+
+		/* longest match at this position, same rule nexttoken uses */
+		for (unsigned long i = 0; i < sizeof(ExprOperators) / sizeof(ExprOperators[0]); i++)
+		{
+			unsigned long len = strlen(ExprOperators[i].Sym);
+			if (cmpstrn(p, ExprOperators[i].Sym, len) == 0 && len > bestlen)
+			{
+				best = &ExprOperators[i];
+				bestlen = len;
+			}
+		}
+
+		if (best)
+		{
+			unsigned long i = (unsigned long)(p - str);
+
+			/* need exactly one space to the left: str[i-1]==' ' and str[i-2]!=' ' */
+			int leftok = (i >= 2) && (str[i-1] == ' ') && (str[i-2] != ' ');
+
+			/* need exactly one space to the right, followed by a real char */
+			const char *after = p + bestlen;
+			int rightok = (after[0] == ' ') && (after[1] != '\0') && (after[1] != ' ');
+
+			if (leftok && rightok)
+				return 1;
+
+			/* not a valid flanked operator here - keep scanning past it */
+			p += bestlen;
+			continue;
+		}
+
+		p++;
+	}
+
+	return 0;
+}
+
+/* wrapper */
+Value guessvaluetypeorexpr
+(char *data)
+{
+	if (isexpression(data))
+	{
+		Value v;
+		int ok;
+		ExprNodeData tree = str2expr(data, &ok);
+
+		v.Type = type_expr;
+		v.as.expr = (ok && tree.Type == ExprDataNode) ? tree.Node : NULL;
+
+		/*
+		if (v.as.expr == NULL)
+			v.Type = type_null;
+		*/
+
+		return v;
+	}
+
+	return guessvaluetype(data);
 }
 
 #endif

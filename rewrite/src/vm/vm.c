@@ -17,6 +17,7 @@
 #include "../state/values.h"
 #include "../state/instructions.h"
 #include "../state/expressions.h"
+#include "../state/evaluator.h"
 
 int parseoperand(char **cursor, InstructionOperand *out) {
 	char *p = skipspace(*cursor);
@@ -61,7 +62,7 @@ int parseoperand(char **cursor, InstructionOperand *out) {
 		}
 	}
 
-	out->Data = guessvaluetype(start);
+	out->Data = guessvaluetypeorexpr(start);
 
 	*cursor = p;
 	return 1;
@@ -121,17 +122,52 @@ void interpret(Instruction instr, VarMap *vars, Arena *persistAlloc, Arena *scra
 
 			switch (instr.SecondOperand.Addressing) {
 				case addrmode_true_literal:
-					val = guessvaluetype(dest);
-					/* valuetostr(data, sizeof(dest), instr.SecondOperand.Data); */
+					val = instr.SecondOperand.Data;
 					break;
+				case addrmode_literal: {
+					if (instr.SecondOperand.Data.Type == type_expr)
+						val = evalexprnode(instr.SecondOperand.Data.as.expr);
+					else 
+					{
+						char buf[32];
+						const char *text;
+						
+						if (instr.SecondOperand.Data.Type == type_str)
+							text = instr.SecondOperand.Data.as.str;
+						else 
+						{
+							valuetostr(buf, sizeof(buf), 
+									instr.SecondOperand.Data);
+							text = buf;
+						}
+
+						int ok;
+						ExprNodeData tree = str2expr(text, &ok);
+
+						if (!ok)
+						{
+							print("ERROR: VM: INTERPRETER: NEW: MALFORMED EXPRESSION!\n");
+							exitproc(1);
+						}
+
+						val = evalexprdata(tree);
+					}
+
+					break;
+				}
+
 				default:
 					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING MODE ON OPERAND TWO\n");
 					exitproc(1);
 			}
+
 			Value *valptr = alloc(persistAlloc, sizeof(val));
-			putVar(vars, dest, valptr);
+			*valptr = val;
+			char *name = alloc(persistAlloc, getstrlen(dest));
+			copymem(name, dest, getstrlen(dest));
+			putVar(vars, name, valptr);
 			break;
-				 }
+		}
 
 		case Opcode_Func:
 			/* handle Func */
@@ -158,6 +194,27 @@ void interpret(Instruction instr, VarMap *vars, Arena *persistAlloc, Arena *scra
 			break;
 
 		/* internal opcodes */
+
+		/* big long comment to grab your attention
+		 * LALALLALALALALALLALALLALALALALALLALALALA
+		 * LALALLALALALALALLALALLALALALALALLALALALA
+		 * LALALLALALALALALLALALLALALALALALLALALALA
+		 * LALALLALALALALALLALALLALALALALALLALALALA
+		 * LALALLALALALALALLALALLALALALALALLALALALA
+		 * LALALLALALALALALLALALLALALALALALLALALALA
+		 * LALALLALALALALALLALALLALALALALALLALALALA
+		 * LALALLALALALALALLALALLALALALALALLALALALA
+		 * LALALLALALALALALLALALLALALALALALLALALALA
+		 * LALALLALALALALALLALALLALALALALALLALALALA
+		 * LALALLALALALALALLALALLALALALALALLALALALA
+		 * LALALLALALALALALLALALLALALALALALLALALALA
+		 */
+
+		/* kay, now that i have your attention, these
+		 * next bits are internal / debug instructions
+		 * DO NOT USE THESE UNLESS YOU KNOW WHAT YOU ARE DOING */
+		
+
 		case Opcode_Internal_PRINT: {
 			char buf[32];
 
@@ -165,31 +222,39 @@ void interpret(Instruction instr, VarMap *vars, Arena *persistAlloc, Arena *scra
 			print("TYPE: ");
 			
 			switch (instr.FirstOperand.Data.Type) {
-				case type_word:
-					print("WORD,  DATA: ");
-					valuetostr(buf, sizeof(buf), instr.FirstOperand.Data);
-					break;
-
-				case type_sword:
-					print("SWORD, DATA: ");
-					valuetostr(buf, sizeof(buf), instr.FirstOperand.Data);
-					break;
-
-				case type_str:
-					print("STR,   DATA: ");
-					copystr(instr.FirstOperand.Data.as.str, buf);
-					break;
-
-				case type_flt:
-					print("FLT,   DATA: ");
-					valuetostr(buf, sizeof(buf), instr.FirstOperand.Data);
-					break;
+				case type_word:		print("WORD,  DATA: ");		valuetostr(buf, sizeof(buf), instr.FirstOperand.Data);	break;
+				case type_sword:	print("SWORD, DATA: "); 	valuetostr(buf, sizeof(buf), instr.FirstOperand.Data); 	break;
+				case type_str:		print("STR,   DATA: ");		copystr(instr.FirstOperand.Data.as.str, buf);		break;
+				case type_flt:		print("FLT,   DATA: ");		valuetostr(buf, sizeof(buf), instr.FirstOperand.Data);	break;
 			}
 			print(buf);
 			print("\n");
 
 			break;
 		}
+
+		case Opcode_Internal_PRINT2: {
+			char buf[32];
+
+			Value *stored = getVar(vars, instr.FirstOperand.Data.as.str);
+			Value data = *stored; /* assume it exists - breaks if it does not */
+			/* this is fine since this is a debug instruction */
+			print("_PRINT2 (INTERNAL INSTRUCTION): ");
+			print("TYPE: ");
+	
+			switch (data.Type) {
+				case type_word:		print("WORD,  DATA: ");		valuetostr(buf, sizeof(buf), data);		break;
+				case type_sword:	print("SWORD, DATA: "); 	valuetostr(buf, sizeof(buf), data); 		break;
+				case type_str:		print("STR,   DATA: ");		copystr(data.as.str, buf);			break;
+				case type_flt:		print("FLT,   DATA: ");		valuetostr(buf, sizeof(buf), data);		break;
+			}
+
+			print(buf);
+			print("\n");
+
+			break;
+		}
+
 	}
 }
 

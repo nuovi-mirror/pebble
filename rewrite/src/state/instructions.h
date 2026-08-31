@@ -12,6 +12,7 @@ typedef enum {
 } InstructionAddressingMode;
 
 typedef enum {
+	/* external opcodes */
 	Opcode_New,
 	Opcode_Func,
 	Opcode_If,
@@ -19,7 +20,10 @@ typedef enum {
 	Opcode_Return,
 	Opcode_Escape,
 	Opcode_End,
+	/* internal opcodes */
 	Opcode_Internal_PRINT,
+	Opcode_Internal_PRINT2,
+
 } InstructionOpcode;
 
 typedef struct InstructionOperand {
@@ -34,15 +38,16 @@ typedef struct {
 
 static const InstructionOpcodeEntry InstructionOpcodeEntryTable[] = {
 	/* external opcodes */
-	{ "New", Opcode_New },
-	{ "Func", Opcode_Func },
-	{ "If", Opcode_If },
-	{ "Call", Opcode_Call },
-	{ "Return", Opcode_Return },
-	{ "End", Opcode_End },
-	{ "Escape", Opcode_Escape },
+	{ "New", 	Opcode_New },
+	{ "Func", 	Opcode_Func },
+	{ "If", 	Opcode_If },
+	{ "Call", 	Opcode_Call },
+	{ "Return", 	Opcode_Return },
+	{ "End", 	Opcode_End },
+	{ "Escape", 	Opcode_Escape },
 	/* internal opcodes */
-	{ "_PRINT", Opcode_Internal_PRINT },
+	{ "_PRINT", 	Opcode_Internal_PRINT },
+	{ "_PRINT2", 	Opcode_Internal_PRINT2 },
 };
 
 #define INSTRUCTION_OPCODE_TABLE_LEN (sizeof(InstructionOpcodeEntryTable) / sizeof(InstructionOpcodeEntryTable[0]))

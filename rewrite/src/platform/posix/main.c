@@ -1,7 +1,8 @@
+#undef NULL
+#define NULL ((void *)0) /* null type */
+
 #include "../platform/use/entry.h"
 #include "vm.c"
-
-#define NULL ((void *)0) /* null type */
 
 int main(int argc, char **argv) {
 	Args cliargs = initargs(argc, argv);
