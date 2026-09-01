@@ -5,6 +5,7 @@ findcc() {
 
 	if [ -n "$1" ] && command -v "$1" && [ "$1" != "N" ]; then
 		echo "Compiler given as argument three ($1). Using that."
+		CC="$(command -v  $1)"
 	else
 		if command -v cc >/dev/null; then
 			CC="$(command -v cc)"
@@ -169,7 +170,7 @@ getflags() {
 	elif [ "$1" = "debug" ]; then FLAGS="-g -O0 -fno-omit-frame-pointer -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wformat=2 -Wundef -Wcast-qual -Wcast-align -Wold-style-definition -Wswitch-enum -Wvla -Wdouble-promotion -Wfloat-equal -fsanitize=address,undefined -fno-omit-frame-pointer"
 	else
 		echo "Error: Build Type Not Selected!"
-		echo "Argument one should be the platform!"
+		echo "Argument one should be the build type!"
 		exit 1
 	fi
 
@@ -191,7 +192,7 @@ mkdir -p bin/
 echo "Building VM         : $ANYZ $CC $FLAGS -o bin/vm vm/main.c"
 $ANYZ $CC $FLAGS -o bin/vm vm/main.c
 
-echo "Building test suite : $ANYZ $CC $FLAGS -o bim/test vm/test.c"
+echo "Building test suite : $ANYZ $CC $FLAGS -o bin/test vm/test.c"
 $ANYZ $CC $FLAGS -o bin/test vm/test.c
 
 rm -rf platform/use/

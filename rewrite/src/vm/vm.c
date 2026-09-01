@@ -174,6 +174,9 @@ void interpret
 
 					}
 
+					break;
+				}
+
 				case addrmode_forced_eval: {
 					char buff[32];
 					valuetostr(buff, sizeof(buff), instr.SecondOperand.Data);
@@ -221,11 +224,10 @@ void interpret
 
 			Value *valptr = alloc(persistAlloc, sizeof(val));
 			*valptr = val;
-			char *name = alloc(persistAlloc, getstrlen(dest));
-			copymem(name, dest, getstrlen(dest));
-			name[getstrlen(name)] = '\0'; /* we dont need to allocate more space since
-						       * getstrlen includes space for a mull
-						       * null terminator already */
+			unsigned long namelen = getstrlen(dest);
+			char *name = alloc(persistAlloc, namelen + 1); /* +1 for the null terminator */
+			copymem(name, dest, namelen);
+			name[namelen] = '\0';
 			putVar(vars, name, valptr);
 
 			break;
@@ -378,7 +380,6 @@ void interpret
 		case Opcode_Internal_NOP: 
 			/* do nothing */
 			break;
-		}
 	}
 }
 
@@ -460,4 +461,3 @@ int vmmain(Args cliargs, Stack *stack) {
 
 	return 0;	
 }
-
