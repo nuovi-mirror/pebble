@@ -18,3 +18,4 @@
 #define limits_misc_maxfilebuffersize 512 * 1024 /* max buffer size for the bytecode file */
 
 #endif
+

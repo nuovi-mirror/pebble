@@ -396,7 +396,7 @@ int vmmain(Args cliargs, Stack *stack) {
 	{
 		interpret(program[pc], &vars, persistAlloc, scratchAlloc, tempAlloc);
 		resetAllocator(scratchAlloc);
-		resetAllocator(scratchAlloc);
+		resetAllocator(tempAlloc);
 	}
 
 	return 0;	
