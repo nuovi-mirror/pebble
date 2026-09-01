@@ -1,12 +1,20 @@
 #!/bin/sh
 
-if [ -n "$3" ] && command -v "$3" >/dev/null 2>&1; then
-	echo "Argument 3 contains a valid C compiler ($3). Using that."
-	CC="$3"
-else 
-
+findcc() {
 	echo "Finding C compiler..."
+	
+	if [ -n "$1" ] && command -v "$1" >/dev/null 2>&1; then
+		if [ "$1" = "N" ]; then
+			findcc2()
+		else
+			CC="$1"
+		fi
+	else
+		findcc2()
+	fi
+}
 
+findcc2() {
 	if command -v cc >/dev/null; then
 		CC="$(command -v cc)"
 	else
@@ -25,6 +33,11 @@ else
 			fi
 		fi
 	fi
+}
+
+if [ -n "$4" ] && command -v "$4" >/dev/null 2>&1; then
+	echo "Argument 4 contains a valid static analyzer ($4). Using that."
+	ANYZ="$3"
 fi
 
 echo "C compiler found at $CC"
@@ -108,6 +121,8 @@ VMTESTBINNAME="test" # VMtest output file name
 VMBINPATH="$BINPATH/$VMBINNAME"
 VMTESTBINPATH="$BINPATH/$VMTESTBINNAME"
 
+findcc
+
 if [ "$1" = "debug" ]; then
 	#FLAGS="$FLAGS -g -O0 -fsanitize=address,undefined -fno-omit-frame-pointer"
 	FLAGS="$FLAGS -g -O0 -fno-omit-frame-pointer -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wformat=2 -Wundef -Wcast-qual -Wcast-align -Wold-style-definition -Wswitch-enum -Wvla -Wdouble-promotion -Wfloat-equal"
@@ -123,7 +138,7 @@ fi
 mkdir -p "$BINPATH"
 
 echo "Building VM: $CC "$FLAGS" -o $VMBINPATH $VMSRCPATH"
-$CC $FLAGS -o $VMBINPATH $VMSRCPATH
+$ANYZ $CC $FLAGS -o $VMBINPATH $VMSRCPATH
 
 echo "Building test suite: $CC "$FLAGS" -o $VMTESTBINPATH $VMTESTSRCPATH"
 $CC $FLAGS -o $VMTESTBINPATH $VMTESTSRCPATH

@@ -21,14 +21,19 @@
 #include "../state/expressions.h"
 #include "../state/evaluator.h"
 
-int parseoperand(char **cursor, InstructionOperand *out) {
+/* used to parse an instruction operand - guesses the type
+ * and addressing mode */
+int parseoperand
+(char **cursor, InstructionOperand *out) 
+{
 	char *p = skipspace(*cursor);
 	if (p == NULL)
 		return 0;
 
 	char delim = 0;
 
-	switch (*p) {
+	switch (*p) 
+	{
 		case '"': out->Addressing = addrmode_literal; delim = '"'; break;
 		case '\'': out->Addressing = addrmode_true_literal; delim = '\''; break;
 		case '{': out->Addressing = addrmode_forced_eval; delim = '}'; break;
@@ -38,27 +43,32 @@ int parseoperand(char **cursor, InstructionOperand *out) {
 
 	char *start;
 
-	if (delim) {
+	if (delim) 
+	{
 		p++;					/* skip opening delim */
 		start = p;
 
 		while (*p != delim && *p != '\0')
 			p++;
 
-		if (*p != delim) {
+		if (*p != delim) 
+		{
 			print("ERROR: VM: MAKEIR: UNDETERMINED OPERAND\n");
 			exitproc(1);
 		}
 
 		*p = '\0';				/* terminate operand text */
 		p++;					/* move past it for next parse */
-	} else {
+	} 
+	else 
+	{
 		start = p;
 
 		while (*p != ' ' && *p != '\t' && *p != '\0') 
 			p++;
 
-		if (*p != '\0') {
+		if (*p != '\0') 
+		{
 			*p = '\0';
 			p++;
 		}
@@ -70,12 +80,17 @@ int parseoperand(char **cursor, InstructionOperand *out) {
 	return 1;
 }
 
-Instruction makeIR(char *line) {
+/* used to generate and optimize instruction intermediate
+ * representation (IR) */
+Instruction makeIR
+(char *line) 
+{
 	Instruction instr = { 0 };
 	char *cursor = line;
 
 	char *p = skipspace(cursor);
-	if (p == NULL) {
+	if (p == NULL) 
+	{
 		print("ERROR: VM: MAKEIR: EMPTY LINE\n");
 		exitproc(1);
 	}
@@ -103,6 +118,7 @@ Instruction makeIR(char *line) {
 	return instr;
 }
 
+/* instruction interpreter - instruction-by-instruction loop of execution */
 void interpret
 (Instruction instr, VarMap *vars, Arena *persistAlloc, Arena *scratchAlloc, Arena *tempAlloc) 
 {
@@ -155,6 +171,44 @@ void interpret
 						}
 
 						val = evalexprdata(tree, vars);
+
+					}
+
+				case addrmode_forced_eval: {
+					char buff[32];
+					valuetostr(buff, sizeof(buff), instr.SecondOperand.Data);
+					Value *var = { 0 };
+					
+					if (var == NULL)
+						var = &instr.SecondOperand.Data;
+					else
+						var = getVar(vars, buff);
+
+					if (var->Type == type_expr)
+						val = evalexprnode(var->as.expr, vars);
+					else 
+					{
+						char buf[32];
+						const char *text;
+						
+						if (var->Type == type_str)
+							text = var->as.str;
+						else 
+						{
+							valuetostr(buf, sizeof(buf), *var);
+							text = buf;
+						}
+
+						int ok;
+						ExprNodeData tree = str2expr(text, &ok);
+
+						if (!ok)
+						{
+							print("ERROR: VM: INTERPRETER: NEW: MALFORMED EXPRESSION!\n");
+							exitproc(1);
+						}
+
+						val = evalexprdata(tree, vars);
 					}
 
 					break;
@@ -173,6 +227,7 @@ void interpret
 						       * getstrlen includes space for a mull
 						       * null terminator already */
 			putVar(vars, name, valptr);
+
 			break;
 		}
 
@@ -323,6 +378,7 @@ void interpret
 		case Opcode_Internal_NOP: 
 			/* do nothing */
 			break;
+		}
 	}
 }
 
