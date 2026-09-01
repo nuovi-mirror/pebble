@@ -169,6 +169,9 @@ void interpret
 			*valptr = val;
 			char *name = alloc(persistAlloc, getstrlen(dest));
 			copymem(name, dest, getstrlen(dest));
+			name[getstrlen(name)] = '\0'; /* we dont need to allocate more space since
+						       * getstrlen includes space for a mull
+						       * null terminator already */
 			putVar(vars, name, valptr);
 			break;
 		}
