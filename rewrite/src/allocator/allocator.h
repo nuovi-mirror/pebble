@@ -46,7 +46,7 @@ void *alloc(struct Arena *arena, unsigned long size) {
 	unsigned long used = (unsigned long)(arena->curr_ptr - arena->arena_ptr);
 						/* get the size used */
 	if (used + size > arena->size) {
-		print("ERROR: ALLOCATOR: FATAL: OUT OF MEMORY!");
+		print("ERROR: ALLOCATOR: FATAL: OUT OF MEMORY!\n");
 		exitproc(1);			/* exit with OOM error */
 	}
 

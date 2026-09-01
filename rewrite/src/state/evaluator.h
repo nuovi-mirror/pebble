@@ -7,9 +7,11 @@
 
 #include "../platform/use/cmpstr.h"
 
-Value evalexprdata(ExprNodeData data, VarMap *vars);
+Value evalexprdata
+(ExprNodeData data, VarMap *vars);
 
-Value resolveleaf(Value v, VarMap *vars)
+Value resolveleaf
+(Value v, VarMap *vars)
 {
 	if (v.Type != type_str)
 		return v;
@@ -18,7 +20,8 @@ Value resolveleaf(Value v, VarMap *vars)
 	return stored != NULL ? *stored : v;
 }
 
-static ValueTypes numtype(Value l, Value r)
+static ValueTypes numtype
+(Value l, Value r)
 {
 	if (l.Type == type_flt || r.Type == type_flt)
 		return type_flt;
@@ -29,17 +32,16 @@ static ValueTypes numtype(Value l, Value r)
 	return type_word;
 }
 
-static long numsword(Value v)
-{
-	return v.Type == type_sword ? v.as.sword : (long)v.as.word;
-}
+static long numsword
+(Value v)
+{ return v.Type == type_sword ? v.as.sword : (long)v.as.word; }
 
-static unsigned long numword(Value v)
-{
-	return v.as.word;
-}
+static unsigned long numword
+(Value v)
+{ return v.as.word; }
 
-static double numflt(Value v)
+static double numflt
+(Value v)
 {
 	switch (v.Type)
 	{
@@ -49,7 +51,8 @@ static double numflt(Value v)
 	}
 }
 
-static Value h_NumericAdd(Value l, Value r)
+static Value h_NumericAdd
+(Value l, Value r)
 {
 	Value v;
 
@@ -63,7 +66,8 @@ static Value h_NumericAdd(Value l, Value r)
 	return v;
 }
 
-static Value h_NumericSub(Value l, Value r)
+static Value h_NumericSub
+(Value l, Value r)
 {
 	Value v;
 
@@ -77,7 +81,8 @@ static Value h_NumericSub(Value l, Value r)
 	return v;
 }
 
-static Value h_NumericMul(Value l, Value r)
+static Value h_NumericMul
+(Value l, Value r)
 {
 	Value v;
 
@@ -91,14 +96,14 @@ static Value h_NumericMul(Value l, Value r)
 	return v;
 }
 
-static Value h_NumericDiv(Value l, Value r)
+static Value h_NumericDiv
+(Value l, Value r)
 {
 	Value v;
 
 	switch (numtype(l, r))
 	{
 		case type_flt: v.Type = type_flt; v.as.flt = numflt(r) == 0.0 ? 0.0 : numflt(l) / numflt(r); break;
-
 		case type_sword: v.Type = type_sword; v.as.sword = numsword(r) == 0 ? 0 : numsword(l) / numsword(r); break;
 		default: v.Type = type_word; v.as.word = numword(r) == 0 ? 0 : numword(l) / numword(r); break;
 	}
@@ -106,7 +111,8 @@ static Value h_NumericDiv(Value l, Value r)
 	return v;
 }
 
-static int h_NumericCmp(Value l, Value r)
+static int h_NumericCmp
+(Value l, Value r)
 {
 	switch (numtype(l, r))
 	{
@@ -116,7 +122,8 @@ static int h_NumericCmp(Value l, Value r)
 	}
 }
 
-static const char *asstr(Value v, char *buf, unsigned long n)
+static const char *asstr
+(Value v, char *buf, unsigned long n)
 {
 	if (v.Type == type_str)
 		return v.as.str;
@@ -125,7 +132,8 @@ static const char *asstr(Value v, char *buf, unsigned long n)
 	return buf;
 }
 
-static Value mkbool(int b)
+static Value mkbool
+(int b)
 {
 	Value v;
 	v.Type = type_word;
@@ -133,7 +141,8 @@ static Value mkbool(int b)
 	return v;
 }
 
-Value evalexprnode(ExprNode *node, VarMap *vars)
+Value evalexprnode
+(ExprNode *node, VarMap *vars)
 {
 	Value l = evalexprdata(node->left, vars);
 	Value r = evalexprdata(node->right, vars);
@@ -142,17 +151,10 @@ Value evalexprnode(ExprNode *node, VarMap *vars)
 
 	switch (node->Op)
 	{
-		case ExprOp_NumericAdd:
-			return h_NumericAdd(l, r);
-
-		case ExprOp_NumericSub:
-			return h_NumericSub(l, r);
-
-		case ExprOp_NumericMul:
-			return h_NumericMul(l, r);
-
-		case ExprOp_NumericDiv:
-			return h_NumericDiv(l, r);
+		case ExprOp_NumericAdd: return h_NumericAdd(l, r);
+		case ExprOp_NumericSub: return h_NumericSub(l, r);
+		case ExprOp_NumericMul: return h_NumericMul(l, r);
+		case ExprOp_NumericDiv: return h_NumericDiv(l, r);
 
 		case ExprOp_NumericGreaterThan:
 			cmp = h_NumericCmp(l, r);
@@ -193,7 +195,7 @@ Value evalexprnode(ExprNode *node, VarMap *vars)
 			unsigned long start = 0;
 			unsigned long end = ll - rl;
 
-			if (node->Op == ExprOp_StringStartsWith)
+			if (node->Op == ExprOp_StringStartsWith) 
 				end = 0;
 
 			if (node->Op == ExprOp_StringEndsWith)
@@ -228,7 +230,8 @@ Value evalexprnode(ExprNode *node, VarMap *vars)
 	return mkbool(0);
 }
 
-Value evalexprdata(ExprNodeData data, VarMap *vars)
+Value evalexprdata
+(ExprNodeData data, VarMap *vars)
 {
 	if (data.Type == ExprDataVal)
 		return resolveleaf(data.value, vars);
@@ -236,9 +239,8 @@ Value evalexprdata(ExprNodeData data, VarMap *vars)
 	return evalexprnode(data.Node, vars);
 }
 
-Value evalstr(const char *str, int *ok, VarMap *vars)
-{
-	return evalexprdata(str2expr(str, ok), vars);
-}
+Value evalstr
+(const char *str, int *ok, VarMap *vars)
+{ return evalexprdata(str2expr(str, ok), vars); }
 
 #endif

@@ -1,7 +1,7 @@
 #ifndef PLATFORM_SETMEM_
 #define PLATFORM_SETMEM_
 
-#include <strings.h>
+#include <string.h>
 
 void *setmem
 (void *b, int c, size_t len)

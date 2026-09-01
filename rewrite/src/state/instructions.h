@@ -3,6 +3,8 @@
 
 #include "values.h"
 
+#include "../platform/use/cmpstr.h"
+
 typedef enum {
 	addrmode_literal,
 	addrmode_true_literal,

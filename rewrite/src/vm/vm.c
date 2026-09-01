@@ -13,6 +13,7 @@
 
 #include "../allocator/allocator.h"
 
+#include "../state/limits.h"
 #include "../state/variables.h"
 #include "../state/functions.h"
 #include "../state/values.h"
@@ -324,41 +325,32 @@ void interpret
 
 int vmmain(Args cliargs, Stack *stack) {
 
-	
-	/* init */
-	struct Arena *tempAlloc = initAlloc(2 * 1024 * 1024); /* N mb */
-	struct Arena *permAlloc = initAlloc(8 * 1024 * 1024); /* N mb */
-	struct Arena *scratchAlloc = initAlloc(2 * 1024 * 1024); /* N mb */
+	struct Arena *tempAlloc = initAlloc(limits_allocator_temp_maxmem);
+	struct Arena *persistAlloc = initAlloc(limits_allocator_persist_maxmem);
+	struct Arena *scratchAlloc = initAlloc(limits_allocator_scratch_maxmem);
 
-	VarMap vars = initVars(512); /* N total variables */
-	/* end init */
+	VarMap vars = initVars(limits_variables_max);
 
-	unsigned long freadsize = 512 * 1024;
-	char *file = alloc(scratchAlloc, freadsize); 
-							/* N bytes to use for the
-							   file data (allocate
-							   and read) */
-	
-	char *filedata = readfile(cliargs.values[1], file, freadsize);
-							/* argument 0 passed to us from */
-							/* the platform layer */
-							/* pointer to file data */
-	if (filedata == NULL) {
-		print("VM: INIT: ERROR: CANNOT OPEN SPECIFIED FILE\n");
+	char *file = alloc(scratchAlloc, limits_misc_maxfilebuffersize);
+	char *filedata = readfile(cliargs.values[1], file, limits_misc_maxfilebuffersize);
+
+	if (filedata == NULL )
+	{
+		print("ERROR: VM: INIT: CANNOT OPEN SPECIFIED FILE!\n");
 		exitproc(1);
 	}
 
-	unsigned long limits_maxinstr = 4096; /* max num of instructions */
-	unsigned long capacity = 512; /* inital allocation size of instruction buffer */
-	unsigned long count = 0;
+	unsigned long current_instruction_count = 0;
 	char *line;
 
-	Instruction *program = alloc(permAlloc, capacity * sizeof(Instruction));
+	unsigned long current_instruction_buffersize = limits_instructions_initbuffersize;
+
+	Instruction *program = alloc(persistAlloc, limits_instructions_initbuffersize);
 
 	/* startup */
 	while ((line = findnewline(&filedata)) != NULL)
 	{
-		if (count >= limits_maxinstr)
+		if (current_instruction_count >= limits_instructions_max)
 		{
 			print("ERROR: LIMITS: INSTRUCTION CAP REACHED!\n");
 			exitproc(1);
@@ -369,30 +361,44 @@ int vmmain(Args cliargs, Stack *stack) {
 		if (p == NULL)
 			continue;
 
-		if (count >= capacity)
+		if (current_instruction_buffersize > limits_instructions_maxbuffersize)
 		{
-			capacity *= 2;
+			print("ERROR: LIMITS: INSTRUCTION BUFFER OVERFLOW!\n");
+			exitproc(1);
+		}
 
-			Instruction *newprogram = alloc(permAlloc, capacity * sizeof(Instruction));
+		if (current_instruction_count * sizeof(Instruction) > limits_instructions_maxbuffersize)
+		{
+	
+			if (current_instruction_buffersize * 2 > limits_instructions_maxbuffersize)
+			{
+				print("ERROR: LIMITS: INSTRUCTION BUFFER OVERFLOW!\n");
+				exitproc(1);
+			}
 
-			copymem(newprogram, program, count * sizeof(Instruction));
+			unsigned long old_instruction_buffersize = current_instruction_buffersize;
+			current_instruction_buffersize *= 2;
+
+			Instruction *newprogram = alloc(persistAlloc, current_instruction_buffersize);
+			copymem(newprogram, program, old_instruction_buffersize);
 			program = newprogram;
 		}
 
-		program[count] = makeIR(line);
-		count++;
+		program[current_instruction_count] = makeIR(line);
+		current_instruction_count++;
 	}
 
-	/* free buffer */
+	/* free buffer holding file */
 	resetAllocator(scratchAlloc);
 
 	/* execution */
-	for (unsigned long pc = 0; pc < count; pc++)
+	for (unsigned long pc = 0; pc < current_instruction_count; pc++)
 	{
-		interpret(program[pc], &vars, permAlloc, scratchAlloc, tempAlloc);
-		resetAllocator(scratchAlloc); /* just in-case */
-		resetAllocator(tempAlloc);
-	}	
+		interpret(program[pc], &vars, persistAlloc, scratchAlloc, tempAlloc);
+		resetAllocator(scratchAlloc);
+		resetAllocator(scratchAlloc);
+	}
 
-	return 0;
+	return 0;	
 }
+
