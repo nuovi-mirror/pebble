@@ -132,7 +132,7 @@ Value parseliteral
 		p++;
 
 	unsigned long len = (unsigned long)(p - start);
-	char *buf = lalloc(len);
+	char *buf = lalloc(len + 1);
 	copymem(buf, start, len);
 	buf[len] = '\0';
 

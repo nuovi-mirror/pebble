@@ -120,44 +120,44 @@ Instruction makeIR
 
 /* instruction interpreter - instruction-by-instruction loop of execution */
 void interpret
-(Instruction instr, VarMap *vars, Arena *persistAlloc, Arena *scratchAlloc, Arena *tempAlloc) 
+(Instruction *instr, VarMap *vars, Arena *persistAlloc, Arena *scratchAlloc, Arena *tempAlloc) 
 {
-	switch (instr.Opcode) {
+	switch (instr->Opcode) {
 		case Opcode_New: {
 			char dest[32];
 			char data[32];
 			Value val;
 
-			switch (instr.FirstOperand.Addressing) {
+			switch (instr->FirstOperand.Addressing) {
 				case addrmode_bare:
-					valuetostr(dest, sizeof(dest), instr.FirstOperand.Data);
+					valuetostr(dest, sizeof(dest), instr->FirstOperand.Data);
 					break;
 				case addrmode_true_literal:
-					valuetostr(dest, sizeof(dest), instr.FirstOperand.Data);
+					valuetostr(dest, sizeof(dest), instr->FirstOperand.Data);
 					break;
 				default:
 					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING MODE ON OPERAND ONE\n");
 					exitproc(1);
 			}
 
-			switch (instr.SecondOperand.Addressing) {
+			switch (instr->SecondOperand.Addressing) {
 				case addrmode_true_literal:
-					val = instr.SecondOperand.Data;
+					val = instr->SecondOperand.Data;
 					break;
 				case addrmode_literal: {
-					if (instr.SecondOperand.Data.Type == type_expr)
-						val = evalexprnode(instr.SecondOperand.Data.as.expr, vars);
+					if (instr->SecondOperand.Data.Type == type_expr)
+						val = evalexprnode(instr->SecondOperand.Data.as.expr, vars);
 					else 
 					{
 						char buf[32];
 						const char *text;
 						
-						if (instr.SecondOperand.Data.Type == type_str)
-							text = instr.SecondOperand.Data.as.str;
+						if (instr->SecondOperand.Data.Type == type_str)
+							text = instr->SecondOperand.Data.as.str;
 						else 
 						{
 							valuetostr(buf, sizeof(buf), 
-									instr.SecondOperand.Data);
+									instr->SecondOperand.Data);
 							text = buf;
 						}
 
@@ -179,11 +179,11 @@ void interpret
 
 				case addrmode_forced_eval: {
 					char buff[32];
-					valuetostr(buff, sizeof(buff), instr.SecondOperand.Data);
+					valuetostr(buff, sizeof(buff), instr->SecondOperand.Data);
 					Value *var = { 0 };
 					
 					if (var == NULL)
-						var = &instr.SecondOperand.Data;
+						var = &instr->SecondOperand.Data;
 					else
 						var = getVar(vars, buff);
 
@@ -285,11 +285,11 @@ void interpret
 			print("_PRINT (INTERNAL INSTRUCTION): ");
 			print("TYPE: ");
 			
-			switch (instr.FirstOperand.Data.Type) {
-				case type_word:		print("WORD,  DATA: ");		valuetostr(buf, sizeof(buf), instr.FirstOperand.Data);	break;
-				case type_sword:	print("SWORD, DATA: "); 	valuetostr(buf, sizeof(buf), instr.FirstOperand.Data); 	break;
-				case type_str:		print("STR,   DATA: ");		copystr(instr.FirstOperand.Data.as.str, buf);		break;
-				case type_flt:		print("FLT,   DATA: ");		valuetostr(buf, sizeof(buf), instr.FirstOperand.Data);	break;
+			switch (instr->FirstOperand.Data.Type) {
+				case type_word:		print("WORD,  DATA: ");		valuetostr(buf, sizeof(buf), instr->FirstOperand.Data);	break;
+				case type_sword:	print("SWORD, DATA: "); 	valuetostr(buf, sizeof(buf), instr->FirstOperand.Data); break;
+				case type_str:		print("STR,   DATA: ");		copystr(instr->FirstOperand.Data.as.str, buf);		break;
+				case type_flt:		print("FLT,   DATA: ");		valuetostr(buf, sizeof(buf), instr->FirstOperand.Data);	break;
 			}
 			print(buf);
 			print("\n");
@@ -300,7 +300,7 @@ void interpret
 		case Opcode_Internal_PRINT2: {
 			char buf[32];
 
-			Value *stored = getVar(vars, instr.FirstOperand.Data.as.str);
+			Value *stored = getVar(vars, instr->FirstOperand.Data.as.str);
 			Value data = *stored; /* assume it exists - breaks if it does not */
 			/* this is fine since this is a debug instruction */
 			print("_PRINT2 (INTERNAL INSTRUCTION): ");
@@ -385,13 +385,14 @@ void interpret
 
 int vmmain(Args cliargs, Stack *stack) {
 
-	struct Arena *tempAlloc = initAlloc(limits_allocator_temp_maxmem);
-	struct Arena *persistAlloc = initAlloc(limits_allocator_persist_maxmem);
-	struct Arena *scratchAlloc = initAlloc(limits_allocator_scratch_maxmem);
+	struct Arena *tempAlloc 	= initAlloc(limits_allocator_temp_maxmem);
+	struct Arena *persistAlloc 	= initAlloc(limits_allocator_persist_maxmem);
+	struct Arena *scratchAlloc 	= initAlloc(limits_allocator_scratch_maxmem);
+	struct Arena *IRAlloc 		= initAlloc(limits_instructions_maxbuffersize);
 
 	VarMap vars = initVars(limits_variables_max);
 
-	char *file = alloc(scratchAlloc, limits_misc_maxfilebuffersize);
+	char *file = alloc(tempAlloc, limits_misc_maxfilebuffersize);
 	char *filedata = readfile(cliargs.values[1], file, limits_misc_maxfilebuffersize);
 
 	if (filedata == NULL )
@@ -405,7 +406,7 @@ int vmmain(Args cliargs, Stack *stack) {
 
 	unsigned long current_instruction_buffersize = limits_instructions_initbuffersize;
 
-	Instruction *program = alloc(persistAlloc, limits_instructions_initbuffersize);
+	Instruction *program = alloc(IRAlloc, limits_instructions_maxbuffersize);
 
 	/* startup */
 	while ((line = findnewline(&filedata)) != NULL)
@@ -421,29 +422,6 @@ int vmmain(Args cliargs, Stack *stack) {
 		if (p == NULL)
 			continue;
 
-		if (current_instruction_buffersize > limits_instructions_maxbuffersize)
-		{
-			print("ERROR: LIMITS: INSTRUCTION BUFFER OVERFLOW!\n");
-			exitproc(1);
-		}
-
-		if (current_instruction_count * sizeof(Instruction) > limits_instructions_maxbuffersize)
-		{
-	
-			if (current_instruction_buffersize * 2 > limits_instructions_maxbuffersize)
-			{
-				print("ERROR: LIMITS: INSTRUCTION BUFFER OVERFLOW!\n");
-				exitproc(1);
-			}
-
-			unsigned long old_instruction_buffersize = current_instruction_buffersize;
-			current_instruction_buffersize *= 2;
-
-			Instruction *newprogram = alloc(persistAlloc, current_instruction_buffersize);
-			copymem(newprogram, program, old_instruction_buffersize);
-			program = newprogram;
-		}
-
 		program[current_instruction_count] = makeIR(line);
 		current_instruction_count++;
 	}
@@ -454,10 +432,16 @@ int vmmain(Args cliargs, Stack *stack) {
 	/* execution */
 	for (unsigned long pc = 0; pc < current_instruction_count; pc++)
 	{
-		interpret(program[pc], &vars, persistAlloc, scratchAlloc, tempAlloc);
+		interpret(&program[pc], &vars, persistAlloc, scratchAlloc, tempAlloc);
 		resetAllocator(scratchAlloc);
 		resetAllocator(tempAlloc);
 	}
+
+	/* clean-up */
+	freeAllocator(persistAlloc);
+	freeAllocator(tempAlloc);
+	freeAllocator(scratchAlloc);
+	freeAllocator(IRAlloc);
 
 	return 0;	
 }

@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-void exitproc(int status) {
+_Noreturn void exitproc(int status) {
 	exit(status);
 }
 
