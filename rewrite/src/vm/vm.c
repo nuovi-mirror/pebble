@@ -87,10 +87,14 @@ Instruction makeIR
 (char *line, Arena *persistAlloc, InstructionMap *instructionMap) 
 {	
 	Instruction *instrFromMap = getInstruction(instructionMap, line);
+
 	if (instrFromMap != NULL)
 		return *instrFromMap;
 		/* this is safe since it should have already been placed on
 		 * the persistent allocator */
+
+	char *linecpy = alloc(persistAlloc, sizeof(*line));
+	copymem(line, linecpy, sizeof(*line));
 
 	Instruction instr = { 0 };
 	char *cursor = line;
@@ -241,8 +245,15 @@ void interpret
 			*valptr = val;
 			unsigned long namelen = getstrlen(dest);
 			char *name = alloc(persistAlloc, namelen + 1); /* +1 for the null terminator */
-			copymem(name, dest, namelen);
+			copymem(dest, name, namelen);
 			name[namelen] = '\0';
+		
+			/*	
+			print("DEBUG: STORING VARIABLE [");
+			print(name);
+			print("]\n");
+			*/
+
 			putVar(vars, name, valptr);
 
 			break;
@@ -316,8 +327,15 @@ void interpret
 			char buf[32];
 
 			Value *stored = getVar(vars, instr->FirstOperand.Data.as.str);
+
+			if (stored == NULL)
+			{
+				print("ERROR: VM: INTERPRETER: _PRINT2: VARIABLE DOES NOT EXIST!\n");
+				exitproc(1);
+			}
+			
 			Value data = *stored; /* assume it exists - breaks if it does not */
-			/* this is fine since this is a debug instruction */
+
 			print("_PRINT2 (INTERNAL INSTRUCTION): ");
 			print("TYPE: ");
 	
