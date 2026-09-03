@@ -58,5 +58,30 @@ Platform layers
     	  - provide main()
     	  - call the main VM entry point (vmmain())
 
+Supported Platforms
+	As did the Zig version of Pebble, this has no tiers. 
+	All platforms are expected to fully self-host. However,
+	that last requirement is to be treated much stricter
+	than before, as platforms that cannot self-host should
+	not be listed as supported.
+
+	The canonical platform is OpenBSD. Any platform
+	whos target build derives from the OpenBSD build 
+	(besides truly OpenBSD-specific pieces) shall
+	be consitored invalid and unsupported.
+
+	Working platforms include
+		OpenBSD 7.9 AMD64 GENERIC (baremetal, Intel Tigerlake), Clang 19.1.7 (base)
+		NetBSD 11.0 AMD64 GENERIC (QEMU TCG, AMD K6), Clang 21.1.8 (pkgsrc)
+		FreeBSD 15.1 Release AMD64 GENERIC (QEMU TCG, AMD K6), Clang 19.1.7 (base)
+		DragonFlyBSD 6.4.2 Release AMD64 GENERIC (Qemu TCG, AMD K6), CC 8.3 (base)
+		
+
+	Failed platfomrs include
+		PureDarwin 20.5.0 (QEMU, Intel Ivy Bridge), Clang 21.1.8 (base)
+			VM: Undefined AMD64 symbols: _close$UNIX2003, _read$UNIX2003, _strtod$UNIX2003
+			test: Undefined AMD64 symbols: _strtod$UNIX2003
+			
+
 Product of The Nuovi Orizzonti Company
 http://thenuoviorizzonticompany.org
