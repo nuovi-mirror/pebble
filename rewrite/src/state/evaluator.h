@@ -216,8 +216,8 @@ Value evalexprnode
 			unsigned long rl = getstrlen(rs);
 			char *out = lalloc(ll + rl + 1);
 
-			copymem(out, ls, ll);
-			copymem(out + ll, rs, rl);
+			copymem(ls, out, ll);
+			copymem(rs, out + ll, rl);
 			out[ll + rl] = '\0';
 
 			Value v;

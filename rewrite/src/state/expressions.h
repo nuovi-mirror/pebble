@@ -134,7 +134,7 @@ Value parseliteral
 
 	unsigned long len = (unsigned long)(p - start);
 	char *buf = alloc(arena, len + 1);
-	copymem(buf, start, len);
+	copymem(start, buf, len);
 	buf[len] = '\0';
 
 	*str = p;
@@ -309,7 +309,7 @@ ExprNodeData str2expr
 	{
 		unsigned long len = getstrlen(str);
 		char *copy = alloc(arena, len + 1);
-		copymem(copy, str, len + 1);
+		copymem(str, copy, len + 1);
 		result.Node->Source = copy;
 	}
 

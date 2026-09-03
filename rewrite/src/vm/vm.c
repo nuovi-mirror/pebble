@@ -20,6 +20,7 @@
 #include "../state/instructions.h"
 #include "../state/expressions.h"
 #include "../state/evaluator.h"
+#include "../state/instructionmapper.h"
 
 /* used to parse an instruction operand - guesses the type
  * and addressing mode */
@@ -83,8 +84,14 @@ int parseoperand
 /* used to generate and optimize instruction intermediate
  * representation (IR) */
 Instruction makeIR
-(char *line, Arena *persistAlloc) 
-{
+(char *line, Arena *persistAlloc, InstructionMap *instructionMap) 
+{	
+	Instruction *instrFromMap = getInstruction(instructionMap, line);
+	if (instrFromMap != NULL)
+		return *instrFromMap;
+		/* this is safe since it should have already been placed on
+		 * the persistent allocator */
+
 	Instruction instr = { 0 };
 	char *cursor = line;
 
@@ -114,6 +121,14 @@ Instruction makeIR
 	parseoperand(&cursor, &instr.FirstOperand, persistAlloc);
 	parseoperand(&cursor, &instr.SecondOperand, persistAlloc);
 	/* third operand unused for now */
+
+	/* the instruction has been made 
+	 * the instruction does not exist on the mapper yet 
+	 * so we map it for future use */
+
+	char *buf = alloc(persistAlloc, sizeof(Instruction));
+	copymem(&instr, buf, sizeof(instr));
+	putInstruction(instructionMap, line, buf);
 
 	return instr;
 }
@@ -391,6 +406,7 @@ int vmmain(Args cliargs, Stack *stack) {
 	struct Arena *IRAlloc 		= initAlloc(limits_instructions_maxbuffersize);
 
 	VarMap vars = initVars(limits_variables_max);
+	InstructionMap instructionMap = initInstructionMap(4096);
 
 	char *file = alloc(tempAlloc, limits_misc_maxfilebuffersize);
 	char *filedata = readfile(cliargs.values[1], file, limits_misc_maxfilebuffersize);
@@ -422,7 +438,7 @@ int vmmain(Args cliargs, Stack *stack) {
 		if (p == NULL)
 			continue;
 
-		program[current_instruction_count] = makeIR(line, persistAlloc);
+		program[current_instruction_count] = makeIR(line, persistAlloc, &instructionMap);
 		current_instruction_count++;
 	}
 

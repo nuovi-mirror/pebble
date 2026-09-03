@@ -167,7 +167,7 @@ getflags() {
 
 	if [ "$1" = "default" ]; then FLAGS="$FLAGS -O2"
 	elif [ "$1" = "fast" ]; then FLAGS="$FLAGS -O3 -flto -fno-semantic-interposition -ffast-math -march=native -mtune=native"
-	elif [ "$1" = "debug" ]; then FLAGS="-g -O0 -fno-omit-frame-pointer -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wformat=2 -Wundef -Wcast-qual -Wcast-align -Wold-style-definition -Wswitch-enum -Wvla -Wdouble-promotion -Wfloat-equal -fsanitize=address,undefined -fno-omit-frame-pointer"
+	elif [ "$1" = "debug" ]; then FLAGS="-g -O0 -fno-omit-frame-pointer -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wformat=2 -Wundef -Wcast-qual -Wcast-align -Wold-style-definition -Wswitch-enum -Wvla -Wdouble-promotion -Wfloat-equal -fno-omit-frame-pointer"
 	else
 		echo "Error: Build Type Not Selected!"
 		echo "Argument one should be the build type!"
