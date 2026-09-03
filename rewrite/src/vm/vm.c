@@ -24,7 +24,7 @@
 /* used to parse an instruction operand - guesses the type
  * and addressing mode */
 int parseoperand
-(char **cursor, InstructionOperand *out) 
+(char **cursor, InstructionOperand *out, Arena *persistAlloc) 
 {
 	char *p = skipspace(*cursor);
 	if (p == NULL)
@@ -74,7 +74,7 @@ int parseoperand
 		}
 	}
 
-	out->Data = guessvaluetypeorexpr(start);
+	out->Data = guessvaluetypeorexpr(start, persistAlloc);
 
 	*cursor = p;
 	return 1;
@@ -83,7 +83,7 @@ int parseoperand
 /* used to generate and optimize instruction intermediate
  * representation (IR) */
 Instruction makeIR
-(char *line) 
+(char *line, Arena *persistAlloc) 
 {
 	Instruction instr = { 0 };
 	char *cursor = line;
@@ -111,8 +111,8 @@ Instruction makeIR
 		exitproc(1);
 	}
 
-	parseoperand(&cursor, &instr.FirstOperand);
-	parseoperand(&cursor, &instr.SecondOperand);
+	parseoperand(&cursor, &instr.FirstOperand, persistAlloc);
+	parseoperand(&cursor, &instr.SecondOperand, persistAlloc);
 	/* third operand unused for now */
 
 	return instr;
@@ -162,7 +162,7 @@ void interpret
 						}
 
 						int ok;
-						ExprNodeData tree = str2expr(text, &ok);
+						ExprNodeData tree = str2expr(text, &ok, tempAlloc);
 
 						if (!ok)
 						{
@@ -203,7 +203,7 @@ void interpret
 						}
 
 						int ok;
-						ExprNodeData tree = str2expr(text, &ok);
+						ExprNodeData tree = str2expr(text, &ok, tempAlloc);
 
 						if (!ok)
 						{
@@ -422,7 +422,7 @@ int vmmain(Args cliargs, Stack *stack) {
 		if (p == NULL)
 			continue;
 
-		program[current_instruction_count] = makeIR(line);
+		program[current_instruction_count] = makeIR(line, persistAlloc);
 		current_instruction_count++;
 	}
 

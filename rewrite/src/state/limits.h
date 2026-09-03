@@ -5,7 +5,7 @@
 
 /* allocator-related */
 #define limits_allocator_temp_maxmem 8 * 1024 * 1024 /* max mem in temp allocator */
-#define limits_allocator_persist_maxmem 32 * 1024 * 1024 /* max mem in persist allocator */
+#define limits_allocator_persist_maxmem 128 * 1024 * 1024 /* max mem in persist allocator */
 #define limits_allocator_scratch_maxmem 6 * 1024 * 1024 /* max mem in scratch allocator */
 
 /* instruction-related */

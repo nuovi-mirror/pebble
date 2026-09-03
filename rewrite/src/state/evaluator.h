@@ -240,7 +240,7 @@ Value evalexprdata
 }
 
 Value evalstr
-(const char *str, int *ok, VarMap *vars)
-{ return evalexprdata(str2expr(str, ok), vars); }
+(const char *str, int *ok, VarMap *vars, Arena *arena)
+{ return evalexprdata(str2expr(str, ok, arena), vars); }
 
 #endif
