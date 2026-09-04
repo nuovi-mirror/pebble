@@ -65,6 +65,11 @@ Supported Platforms
 	than before, as platforms that cannot self-host should
 	not be listed as supported.
 
+	Self hosting is defined as being able to build from source
+	and the binary produced being valid with behavior the same
+	as the canonical platform. Cross-compiling is NOT supported
+	in any way, and should not be attempted.
+
 	The canonical platform is OpenBSD. Any platform
 	whos target build derives from the OpenBSD build 
 	(besides truly OpenBSD-specific pieces) shall
@@ -72,13 +77,13 @@ Supported Platforms
 
 	Working platforms include
 		OpenBSD 7.9 AMD64 GENERIC (baremetal, Intel Tigerlake), Clang 19.1.7 (base), openbsd, posix
-		NetBSD 11.0 AMD64 GENERIC (QEMU TCG, AMD K6), Clang 21.1.8 (pkgsrc), posix
+		NetBSD 11.0 AMD64 GENERIC (Qemu TCG, AMD K6), Clang 21.1.8 (pkgsrc), posix
 		FreeBSD 15.1 Release AMD64 GENERIC (QEMU TCG, AMD K6), Clang 19.1.7 (base), posix
 		DragonFlyBSD 6.4.2 Release AMD64 GENERIC (Qemu TCG, AMD K6), GCC 8.3 (base), posix
 		Linux 6.12.107+deb13 AMD64 Debian 13.6.0 (Qemu TCG, AMD K6), GCC 14.2.0 (apt), posix
 		
 	Failed platfomrs include
-		PureDarwin 20.5.0 (QEMU, Intel Ivy Bridge), Clang 21.1.8 (base), posix
+		PureDarwin 20.5.0 (Qemu, Intel Ivy Bridge), Clang 21.1.8 (base), posix
 			VM: Undefined AMD64 symbols: _close$UNIX2003, _read$UNIX2003, _strtod$UNIX2003
 			test: Undefined AMD64 symbols: _strtod$UNIX2003
 			

@@ -8,15 +8,15 @@
  * a few unfinished bits, so we need to alias
  * these to avoid linking errors. */
 
-static long _read$UNIX2003
+long _read$UNIX2003
 (int fd, void *buf, unsigned long nbyte)
 { return read(fd, buf, nbyte); }
 
-static int _close$UNIX2003
+int _close$UNIX2003
 (int fd)
 { return close(fd); }
 
-static double _strtod$UNIX2003
+double _strtod$UNIX2003
 (const char *nptr, char **endptr)
 { return strtod(nptr, endptr); }
 
@@ -28,6 +28,7 @@ static double _strtod$UNIX2003
 int main(int argc, char **argv) {
 	Args cliargs = initargs(argc, argv);
 	Stack *stack = initstack(1024, 1024);
-	return vmmain(cliargs, stack);
+	int ret = vmmain(cliargs, stack);
 	freestack(stack);
+	return ret;
 }
