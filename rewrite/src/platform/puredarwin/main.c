@@ -8,15 +8,20 @@
  * a few unfinished bits, so we need to alias
  * these to avoid linking errors. */
 
-long _read$UNIX2003
+/* we need to define symbols from the wierd
+ * MacOS compat stuff 
+ * it is important to note an underscore is usually
+ * placed infront of it */
+
+long read$UNIX2003
 (int fd, void *buf, unsigned long nbyte)
 { return read(fd, buf, nbyte); }
 
-int _close$UNIX2003
+int close$UNIX2003
 (int fd)
 { return close(fd); }
 
-double _strtod$UNIX2003
+double strtod$UNIX2003
 (const char *nptr, char **endptr)
 { return strtod(nptr, endptr); }
 
