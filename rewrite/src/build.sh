@@ -134,6 +134,41 @@ getplatform() {
 
 		ln -s "../platform/openbsd/main.c" vm/main.c
 
+	elif [ "$1" = "puredarwin" ]; then
+		for i in platform/freestand/*; do
+			if [ -e "platform/use/$i" ]; then
+				rm "platform/use/$i"
+			fi
+
+			ln -s "../freestand/$(basename $i)" platform/use/
+		done
+		
+		for i in platform/c/*; do
+			if [ -e "platform/use/$(basename $i)" ]; then
+				rm "platform/use/$(basename $i)"
+			fi
+
+			ln -s "../c/$(basename $i)" platform/use/
+		done
+		
+		for i in platform/posix/*; do
+			if [ -e "platform/use/$(basename $i)" ]; then
+				rm "platform/use/$(basename $i)"
+			fi
+
+			ln -s "../posix/$(basename $i)" platform/use/
+		done
+
+		for i in platform/puredarwin/*; do
+			if [ -e "platform/use/$(basename $i)" ]; then
+				rm "platform/use/$(basename $i)"
+			fi
+
+			ln -s "../puredarwin/$(basename $i)" platform/use/
+		done
+
+		ln -s "../platform/puredarwin/main.c" vm/main.c
+	
 	else
 		echo "Error: Invalid Platform!"
 		exit 1
