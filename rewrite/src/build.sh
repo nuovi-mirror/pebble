@@ -230,7 +230,7 @@ $ANYZ $CC $FLAGS -o bin/vm vm/main.c
 echo "Building test suite : $ANYZ $CC $FLAGS -o bin/test vm/test.c"
 $ANYZ $CC $FLAGS -o bin/test vm/test.c
 
-rm -rf platform/use/
-rm vm/main.c
+#rm -rf platform/use/
+#rm vm/main.c
 
 echo "Done!"

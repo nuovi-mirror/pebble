@@ -13,7 +13,14 @@ New c 'hell0'
 New d '1.1'
 New e "1 + 2"
 New f "a + a"
+New w "al s++ la"
+_PRINT2 w
+_PRINT dbg
 New g {f}
+New h 'al s++ la'
+_PRINT dbg
+New "al s++ la" '3'
+_PRINT dbg
 
 _PRINT2 a
 _PRINT2 b
@@ -22,5 +29,7 @@ _PRINT2 d
 _PRINT2 e
 _PRINT2 f
 _PRINT2 g
+_PRINT2 h
+_PRINT2 ab
 
 _GETMEM

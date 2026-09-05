@@ -15,7 +15,6 @@
 
 #include "../state/limits.h"
 #include "../state/variables.h"
-#include "../state/functions.h"
 #include "../state/values.h"
 #include "../state/instructions.h"
 #include "../state/expressions.h"
@@ -154,6 +153,37 @@ void interpret
 				case addrmode_true_literal:
 					valuetostr(dest, sizeof(dest), instr->FirstOperand.Data);
 					break;
+				case addrmode_literal: {
+					if (instr->FirstOperand.Data.Type == type_expr)
+						val = evalexprnode(instr->FirstOperand.Data.as.expr, vars);
+					else 
+					{
+						char buf[32];
+						const char *text;
+						
+						if (instr->FirstOperand.Data.Type == type_str)
+							text = instr->FirstOperand.Data.as.str;
+						else 
+						{
+							valuetostr(buf, sizeof(buf), instr->FirstOperand.Data);
+							text = buf;
+						}
+
+						int ok;
+						ExprNodeData tree = str2expr(text, &ok, tempAlloc);
+
+						if (!ok)
+						{
+							print("ERROR: VM: INTERPRETER: NEW: MALFORMED EXPRESSION!\n");
+							exitproc(1);
+						}
+
+						val = evalexprdata(tree, vars);
+
+					}
+					valuetostr(dest, sizeof(dest), val);
+				}
+
 				default:
 					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING MODE ON OPERAND ONE\n");
 					exitproc(1);
@@ -175,8 +205,7 @@ void interpret
 							text = instr->SecondOperand.Data.as.str;
 						else 
 						{
-							valuetostr(buf, sizeof(buf), 
-									instr->SecondOperand.Data);
+							valuetostr(buf, sizeof(buf), instr->SecondOperand.Data);
 							text = buf;
 						}
 
