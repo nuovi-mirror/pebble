@@ -1,7 +1,7 @@
 #ifndef PLATFORM_SKIPSPACE_H_
 #define PLATFORM_SKIPSPACE_H_
 
-#include "getstrlen.h"
+#include "getnstrlen.h"
 
 /* function with old behavior for legacy compat */
 char *skipspace
@@ -14,10 +14,10 @@ char *skipspace
 
 /* wrapper that is a bit more useful */
 char *tskipspace
-(const char *p)
+(char *p)
 {
 	char *r = skipspace((char *)p);
-	return r ? r : p + getstrlen(p);
+	return r ? r : p + getnstrlen(p);
 }
 
 #endif

@@ -1,35 +1,34 @@
-_GETMEM
-
-_NOP
-
 _PRINT 1
-_PRINT hello
-_PRINT 3.12
-_PRINT -3
+_PRINT -1
+_PRINT 1.2
+_PRINT abcd
 
 New a '1'
 New b '-1'
-New c 'hell0'
-New d '1.1'
-New e "1 + 2"
-New f "a + a"
-New w "al s++ la"
-_PRINT2 w
-_PRINT dbg
-New g {f}
-New h 'al s++ la'
-_PRINT dbg
-New "al s++ la" '3'
-_PRINT dbg
+New c '1.2'
+New d 'abcd'
 
 _PRINT2 a
 _PRINT2 b
 _PRINT2 c
 _PRINT2 d
+
+New e "1 + 2"
+New f "8 - 2"
+New g "4 / 2"
+New h "2 * 2"
+
 _PRINT2 e
 _PRINT2 f
 _PRINT2 g
 _PRINT2 h
-_PRINT2 ab
 
-_GETMEM
+New "la s++ la" '1'
+New "ab s++ ab" '2'
+New "ab s++ cd" '3'
+New i "0 s++ 1"
+
+_PRINT2 lala
+_PRINT2 abab
+_PRINT2 abcd
+_PRINT2 i

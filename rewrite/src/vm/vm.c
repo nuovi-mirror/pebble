@@ -182,6 +182,7 @@ void interpret
 
 					}
 					valuetostr(dest, sizeof(dest), val);
+					break;
 				}
 
 				default:

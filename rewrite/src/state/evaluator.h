@@ -6,6 +6,7 @@
 #include "variables.h"
 
 #include "../platform/use/cmpstr.h"
+#include "../platform/use/getnstrlen.h"
 
 Value evalexprdata
 (ExprNodeData data, VarMap *vars);
@@ -212,8 +213,8 @@ Value evalexprnode
 		{
 			const char *ls = asstr(l, lb, sizeof(lb));
 			const char *rs = asstr(r, rb, sizeof(rb));
-			unsigned long ll = getstrlen(ls);
-			unsigned long rl = getstrlen(rs);
+			unsigned long ll = getnstrlen(ls);
+			unsigned long rl = getnstrlen(rs);
 			char *out = lalloc(ll + rl + 1);
 
 			copymem(ls, out, ll);
