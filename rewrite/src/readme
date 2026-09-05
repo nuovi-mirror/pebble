@@ -86,6 +86,9 @@ Supported Platforms
 		PureDarwin 20.5.0 (Qemu, Intel Ivy Bridge), Clang 21.1.8 (base), posix
 			VM: Undefined AMD64 symbols: _close$UNIX2003, _read$UNIX2003, _strtod$UNIX2003
 			test: Undefined AMD64 symbols: _strtod$UNIX2003
+
+			These issues for the VM have been fixed, so the virtual machine itself
+			compiles, however this has not been tested yet.
 			
 
 Product of The Nuovi Orizzonti Company
