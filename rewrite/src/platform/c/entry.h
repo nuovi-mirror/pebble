@@ -98,7 +98,7 @@ Stack *initstack
 	return stack;
 }
 
-void *freestack
+void freestack
 (Stack *stack)
 {
 	lfree(stack->items);

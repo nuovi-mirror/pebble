@@ -342,10 +342,12 @@ void interpret
 			print("TYPE: ");
 			
 			switch (instr->FirstOperand.Data.Type) {
-				case type_word:		print("WORD,  DATA: ");		valuetostr(buf, sizeof(buf), instr->FirstOperand.Data);	break;
-				case type_sword:	print("SWORD, DATA: "); 	valuetostr(buf, sizeof(buf), instr->FirstOperand.Data); break;
-				case type_str:		print("STR,   DATA: ");		copystr(instr->FirstOperand.Data.as.str, buf);		break;
-				case type_flt:		print("FLT,   DATA: ");		valuetostr(buf, sizeof(buf), instr->FirstOperand.Data);	break;
+				case type_word:	print("WORD,  DATA: ");	valuetostr(buf, sizeof(buf), instr->FirstOperand.Data);	break;
+				case type_sword:print("SWORD, DATA: "); valuetostr(buf, sizeof(buf), instr->FirstOperand.Data); break;
+				case type_str:	print("STR,   DATA: ");	copystr(instr->FirstOperand.Data.as.str, buf);		break;
+				case type_flt:	print("FLT,   DATA: ");	valuetostr(buf, sizeof(buf), instr->FirstOperand.Data);	break;
+				case type_expr: print("ERROR: THIS CANNOT HANDLE EXPRESSIONS!"); exitproc(1); 			break;
+				case type_null: print("ERROR: THIS CANNOT HANDLE NULL TYPES!"); exitproc(1); 			break;
 			}
 			print(buf);
 			print("\n");
@@ -370,10 +372,12 @@ void interpret
 			print("TYPE: ");
 	
 			switch (data.Type) {
-				case type_word:		print("WORD,  DATA: ");		valuetostr(buf, sizeof(buf), data);		break;
-				case type_sword:	print("SWORD, DATA: "); 	valuetostr(buf, sizeof(buf), data); 		break;
-				case type_str:		print("STR,   DATA: ");		copystr(data.as.str, buf);			break;
-				case type_flt:		print("FLT,   DATA: ");		valuetostr(buf, sizeof(buf), data);		break;
+				case type_word:	print("WORD,  DATA: ");	valuetostr(buf, sizeof(buf), data);	break;
+				case type_sword:print("SWORD, DATA: "); valuetostr(buf, sizeof(buf), data);	break;
+				case type_str:	print("STR,   DATA: ");	copystr(data.as.str, buf);		break;
+				case type_flt:	print("FLT,   DATA: ");	valuetostr(buf, sizeof(buf), data);	break;
+				case type_expr: print("ERROR: THIS CANNOT HANDLE EXPRESSIONS!"); exitproc(1); 	break;
+				case type_null: print("ERROR: THIS CANNOT HANDLE NULL TYPES!"); exitproc(1); 	break;
 			}
 
 			print(buf);

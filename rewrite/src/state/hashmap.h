@@ -24,8 +24,7 @@ static const unsigned long HASHMAPBASE  = 0x811c9dc5;
 static const unsigned long HASHMAPPRIME = 0x01000193;
 
 static unsigned long mapHash(SHashMap *m, char *str) {
-	unsigned long h = HASHMAPBASE;
-	unsigned long inital = 0;
+	unsigned long inital = HASHMAPBASE;
 
 	while (*str) {
 		inital ^= (unsigned char)*str++;

@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 void lfree(void *ptr) {
-	return free(ptr);
+	free(ptr);
 }
 
 #endif

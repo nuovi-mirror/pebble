@@ -74,7 +74,7 @@ void *alloc
 	}
 
 	char *result = arena->curr_ptr;
-	arena->curr_ptr = arena->curr_ptr + size;
+	arena->curr_ptr = arena->curr_ptr + size + padding;
 						/* set the new pointer */
 	return result;
 }

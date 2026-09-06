@@ -102,7 +102,7 @@ typedef struct
 	int error; /* = 1 if parser error */
 } ExprParser;
 
-ExprOperator *strtooperator
+const ExprOperator *strtooperator
 (const char *str)
 {
 	for (unsigned long i = 0; i < sizeof(ExprOperators) / sizeof(ExprOperators[1]); i++)
