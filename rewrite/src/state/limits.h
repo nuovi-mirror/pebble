@@ -10,10 +10,12 @@
 
 /* instruction-related */
 #define limits_instructions_max 500000 /* max number of instructions that can be executed */
-#define limits_instructions_maxbuffersize limits_instructions_max * sizeof(Instruction)
-			/* max size of instruction memory buffer */
-#define limits_instructions_initbuffersize 512 * sizeof(Instruction)
-			/* inital buffer size for instruction buffer */
+#define limits_instructions_maxbuffersize limits_instructions_max * sizeof(Instruction) /* max size of instruction memory buffer */
+#define limits_instructions_initbuffersize 512 * sizeof(Instruction) /* inital buffer size for instruction buffer */
+#define limits_instructions_maxcache 512 /* max number of instructions in the instruction cache */
+
+/* function-related */
+#define limits_functions_max 5000 /* max number of functiosn that can be defined */
 
 /* variable-related */
 #define limits_variables_max 512 /* max number of variables at a time */

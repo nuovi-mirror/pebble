@@ -16,6 +16,7 @@
 #include "../state/limits.h"
 #include "../state/variables.h"
 #include "../state/values.h"
+#include "../state/functions.h"
 #include "../state/instructions.h"
 #include "../state/expressions.h"
 #include "../state/evaluator.h"
@@ -86,6 +87,7 @@ Instruction makeIR
 (char *line, Arena *persistAlloc, InstructionMap *instructionMap) 
 {	
 	Instruction *instrFromMap = getInstruction(instructionMap, line);
+	static unsigned long current_instruction_cachesize;
 
 	if (instrFromMap != NULL)
 		return *instrFromMap;
@@ -129,9 +131,13 @@ Instruction makeIR
 	 * the instruction does not exist on the mapper yet 
 	 * so we map it for future use */
 
-	char *buf = alloc(persistAlloc, sizeof(Instruction));
-	copymem(&instr, buf, sizeof(instr));
-	putInstruction(instructionMap, line, buf);
+	/* but only if we did not hit the max */
+	if (current_instruction_cachesize <= limits_instructions_maxcache)
+	{
+		char *buf = alloc(persistAlloc, sizeof(Instruction));
+		copymem(&instr, buf, sizeof(instr));
+		putInstruction(instructionMap, line, buf);
+	}
 
 	return instr;
 }
@@ -314,27 +320,6 @@ void interpret
 			break;
 
 		/* internal opcodes */
-
-		/* big long comment to grab your attention
-		 * LALALLALALALALALLALALLALALALALALLALALALA
-		 * LALALLALALALALALLALALLALALALALALLALALALA
-		 * LALALLALALALALALLALALLALALALALALLALALALA
-		 * LALALLALALALALALLALALLALALALALALLALALALA
-		 * LALALLALALALALALLALALLALALALALALLALALALA
-		 * LALALLALALALALALLALALLALALALALALLALALALA
-		 * LALALLALALALALALLALALLALALALALALLALALALA
-		 * LALALLALALALALALLALALLALALALALALLALALALA
-		 * LALALLALALALALALLALALLALALALALALLALALALA
-		 * LALALLALALALALALLALALLALALALALALLALALALA
-		 * LALALLALALALALALLALALLALALALALALLALALALA
-		 * LALALLALALALALALLALALLALALALALALLALALALA
-		 */
-
-		/* kay, now that i have your attention, these
-		 * next bits are internal / debug instructions
-		 * DO NOT USE THESE UNLESS YOU KNOW WHAT YOU ARE DOING */
-		
-
 		case Opcode_Internal_PRINT: {
 			char buf[32];
 
@@ -450,15 +435,20 @@ void interpret
 	}
 }
 
-int vmmain(Args cliargs, Stack *stack) {
-
+/* Args and Stack should be defined by the platform entry code 
+ * which will include this file */
+int vmmain
+(Args cliargs, Stack *stack) 
+{
+	/* init */
 	struct Arena *tempAlloc 	= initAlloc(limits_allocator_temp_maxmem);
 	struct Arena *persistAlloc 	= initAlloc(limits_allocator_persist_maxmem);
 	struct Arena *scratchAlloc 	= initAlloc(limits_allocator_scratch_maxmem);
 	struct Arena *IRAlloc 		= initAlloc(limits_instructions_maxbuffersize);
 
 	VarMap vars = initVars(limits_variables_max);
-	InstructionMap instructionMap = initInstructionMap(4096);
+	FuncMap funcs = initFuncs(limits_functions_max);
+	InstructionMap instructionMap = initInstructionMap(limits_instructions_maxcache);
 
 	char *file = alloc(tempAlloc, limits_misc_maxfilebuffersize);
 	char *filedata = readfile(cliargs.values[1], file, limits_misc_maxfilebuffersize);
@@ -471,9 +461,7 @@ int vmmain(Args cliargs, Stack *stack) {
 
 	unsigned long current_instruction_count = 0;
 	char *line;
-
 	unsigned long current_instruction_buffersize = limits_instructions_initbuffersize;
-
 	Instruction *program = alloc(IRAlloc, limits_instructions_maxbuffersize);
 
 	/* startup */
