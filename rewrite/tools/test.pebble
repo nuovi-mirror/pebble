@@ -41,6 +41,15 @@ Call a
 
 Func b 
 _PRINT funcb
+_PRINT funcb_2
 End
 
 Call b
+
+Func c
+_PRINT funcc
+_PRINT calling_a
+Call a
+End
+
+Call c

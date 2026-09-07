@@ -377,7 +377,7 @@ unsigned long interpret
 			if (stack->count != 0) 
 			{
 				StackFrame frame = popframe(stack);
-				pc = frame.return_pc;
+				return pc = frame.return_pc;
 			}
 			break;
 
