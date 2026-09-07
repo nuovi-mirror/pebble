@@ -34,3 +34,7 @@ _PRINT2 abcd
 _PRINT2 i
 
 Func a
+_PRINT func
+End
+
+Call a

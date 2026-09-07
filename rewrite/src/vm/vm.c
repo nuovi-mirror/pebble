@@ -302,11 +302,6 @@ unsigned long interpret
 									    /* XXX handle case -1 */
 			switch(instr->FirstOperand.Addressing) {
 				case addrmode_bare:
-					// XXX remove this i was tired okay?? 
-					// StackFrame *frame = alloc(scratchAlloc, sizeof(StackFrame));
-					// frame->return_pc = pc + 1; /* since we are on the func instruction */
-					// frame->funcname = funcname; /* XXX may be invalid as stated above */
-					// pushframe(stack, *frame); 
 					unsigned long *lpc = alloc(persistAlloc, sizeof(long));
 					*lpc = pc + 1; /* since we are on the func instruction */
 					putFunc(funcs, funcname, lpc); /* place the function onto the index */
@@ -352,8 +347,17 @@ unsigned long interpret
 			break;
 
 		case Opcode_End:
-			/* XXX handle End */
-			break;
+			/* XXX solve this */
+			switch(instr->FirstOperand.Addressing) {
+				case addrmode_bare:
+					if (stack->count != 0) 
+					{
+						StackFrame frame = popframe(stack);
+						pc = frame.return_pc;
+					}
+					break;
+				}
+				break;
 
 		case Opcode_Escape:
 			/* XXX handle Escape */
