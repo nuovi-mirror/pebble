@@ -34,7 +34,13 @@ _PRINT2 abcd
 _PRINT2 i
 
 Func a
-_PRINT func
+_PRINT funca
 End
 
 Call a
+
+Func b 
+_PRINT funcb
+End
+
+Call b

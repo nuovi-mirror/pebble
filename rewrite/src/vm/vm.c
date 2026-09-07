@@ -142,10 +142,34 @@ Instruction makeIR
 	return instr;
 }
 
+unsigned long findend
+(Instruction *program, unsigned long instruction_count, unsigned long start)
+{
+	unsigned long depth = 1;
+	unsigned long pc = start + 1;
+ 
+	for (; pc < instruction_count; pc++)
+	{
+		if (program[pc].Opcode == Opcode_Func)
+			depth++;
+		else if (program[pc].Opcode == Opcode_End)
+		{
+			depth--;
+			if (depth == 0)
+				return pc;
+		}
+	}
+ 
+	print("ERROR: INTERPRETER: FUNC: NO MATCHING END FOUND!\n");
+	exitproc(1);
+	return pc; /* unreachable - exitproc doesn't return */
+}
+
+
 /* instruction interpreter - instruction-by-instruction loop of execution */
 unsigned long interpret
-(Instruction *instr, VarMap *vars, Stack *stack, FuncMap 
- *funcs, unsigned long pc, Arena *persistAlloc, Arena *scratchAlloc, Arena *tempAlloc) 
+(Instruction *instr, Instruction *program,  unsigned long instruction_count, VarMap *vars, Stack *stack, 
+ FuncMap *funcs, unsigned long pc, Arena *persistAlloc, Arena *scratchAlloc, Arena *tempAlloc) 
 {
 	switch (instr->Opcode) {
 		case Opcode_New: {
@@ -314,6 +338,8 @@ unsigned long interpret
 					break;
 			}
 			
+			return findend(program, instruction_count, pc) + 1; /* find the End statement for this
+									     * function and goto it */
 			break;
 		}
 
@@ -348,16 +374,12 @@ unsigned long interpret
 
 		case Opcode_End:
 			/* XXX solve this */
-			switch(instr->FirstOperand.Addressing) {
-				case addrmode_bare:
-					if (stack->count != 0) 
-					{
-						StackFrame frame = popframe(stack);
-						pc = frame.return_pc;
-					}
-					break;
-				}
-				break;
+			if (stack->count != 0) 
+			{
+				StackFrame frame = popframe(stack);
+				pc = frame.return_pc;
+			}
+			break;
 
 		case Opcode_Escape:
 			/* XXX handle Escape */
@@ -367,7 +389,7 @@ unsigned long interpret
 		case Opcode_Internal_PRINT: {
 			char buf[32];
 
-			print("_PRINT (INTERNAL INSTRUCTION): ");
+			print("_PRINT  (INTERNAL INSTRUCTION): ");
 			print("TYPE: ");
 			
 			switch (instr->FirstOperand.Data.Type) {
@@ -536,7 +558,7 @@ int vmmain
 	unsigned long pc = 0;
 	while (pc < current_instruction_count)
 	{
-		pc = interpret(&program[pc], &vars, stack, &funcs, pc, persistAlloc, scratchAlloc, tempAlloc);
+		pc = interpret(&program[pc], program, current_instruction_count, &vars, stack, &funcs, pc, persistAlloc, scratchAlloc, tempAlloc);
 		resetAllocator(scratchAlloc);
 		resetAllocator(tempAlloc);
 	}
