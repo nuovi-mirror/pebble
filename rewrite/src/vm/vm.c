@@ -143,8 +143,9 @@ Instruction makeIR
 }
 
 /* instruction interpreter - instruction-by-instruction loop of execution */
-void interpret
-(Instruction *instr, VarMap *vars, Arena *persistAlloc, Arena *scratchAlloc, Arena *tempAlloc) 
+unsigned long interpret
+(Instruction *instr, VarMap *vars, Stack *stack, FuncMap 
+ *funcs, unsigned long pc, Arena *persistAlloc, Arena *scratchAlloc, Arena *tempAlloc) 
 {
 	switch (instr->Opcode) {
 		case Opcode_New: {
@@ -284,7 +285,7 @@ void interpret
 			copymem(dest, name, namelen);
 			name[namelen] = '\0';
 		
-			/*	
+			/* XXX remove debug
 			print("DEBUG: STORING VARIABLE [");
 			print(name);
 			print("]\n");
@@ -295,28 +296,67 @@ void interpret
 			break;
 		}
 
-		case Opcode_Func:
-			/* handle Func */
+		case Opcode_Func: {
+			char *funcname = alloc(persistAlloc, 32); /* XXX set this to the correct size later */
+			valuetostr(funcname, 32, instr->FirstOperand.Data); /* XXX set the correct size later */
+									    /* XXX handle case -1 */
+			switch(instr->FirstOperand.Addressing) {
+				case addrmode_bare:
+					// XXX remove this i was tired okay?? 
+					// StackFrame *frame = alloc(scratchAlloc, sizeof(StackFrame));
+					// frame->return_pc = pc + 1; /* since we are on the func instruction */
+					// frame->funcname = funcname; /* XXX may be invalid as stated above */
+					// pushframe(stack, *frame); 
+					unsigned long *lpc = alloc(persistAlloc, sizeof(long));
+					*lpc = pc + 1; /* since we are on the func instruction */
+					putFunc(funcs, funcname, lpc); /* place the function onto the index */
+				break;
+
+				default: 
+					/* XXX handle other cases */
+					print("ERROR: INTERPRETER: FUNC: UNSUPPORTED ADDRESSING MODE!\n");
+					exitproc(1);
+					break;
+			}
+			
 			break;
+		}
 
 		case Opcode_If:
-			/* handle If */
+			/* XXX handle If */
 			break;
 
-		case Opcode_Call:
-			/* handle Call */
+		case Opcode_Call: {
+			char *funcname = alloc(persistAlloc, 32); /* XXX set this to the correct size later */
+			valuetostr(funcname, 32, instr->FirstOperand.Data); /* XXX set this to be the corrext size later */
+
+			switch(instr->FirstOperand.Addressing) {
+				case addrmode_bare:
+					StackFrame *frame = alloc(scratchAlloc, sizeof(StackFrame));
+					frame->return_pc = pc + 1; /* since we are on the func instruction */
+					frame->funcname = funcname; /* XXX may be invalid as stated above */
+					pushframe(stack, frame); 
+					unsigned long *retpc = getFunc(funcs, funcname);
+					return *retpc;
+					break;
+				}	
+
+				default:
+					print("ERROR: INTERPRETER: CALL: UNSUPPORTED ADDRESSING MODE!\n");
+					exitproc(1);
 			break;
+		}
 
 		case Opcode_Return:
-			/* handle Retrun */
+			/* XXX handle Retrun */
 			break;
 
 		case Opcode_End:
-			/* handle End */
+			/* XXX handle End */
 			break;
 
 		case Opcode_Escape:
-			/* handle Escape */
+			/* XXX handle Escape */
 			break;
 
 		/* internal opcodes */
@@ -433,6 +473,9 @@ void interpret
 			/* do nothing */
 			break;
 	}
+	
+	/* no fancy control flow needed here - incriment the pc */
+	return pc + 1;
 }
 
 /* Args and Stack should be defined by the platform entry code 
@@ -486,9 +529,10 @@ int vmmain
 	resetAllocator(scratchAlloc);
 
 	/* execution */
-	for (unsigned long pc = 0; pc < current_instruction_count; pc++)
+	unsigned long pc = 0;
+	while (pc < current_instruction_count)
 	{
-		interpret(&program[pc], &vars, persistAlloc, scratchAlloc, tempAlloc);
+		pc = interpret(&program[pc], &vars, stack, &funcs, pc, persistAlloc, scratchAlloc, tempAlloc);
 		resetAllocator(scratchAlloc);
 		resetAllocator(tempAlloc);
 	}

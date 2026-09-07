@@ -30,7 +30,7 @@ typedef struct Stack
 
 /* stack helpers */
 void pushframe
-(Stack *stack, StackFrame frame) 
+(Stack *stack, StackFrame *frame) 
 {
 	if (stack->count >= stack->capacity) 
 	{
@@ -38,7 +38,7 @@ void pushframe
 		exitproc(1);
 	}
 
-	stack->items[stack->count] = frame;
+	stack->items[stack->count] = *frame;
 	stack->count++;
 }
 
