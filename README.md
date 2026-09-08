@@ -14,8 +14,8 @@ to how hastily instruction pre-compiling was added.
 Source code for the C re-write can be found in the rewrite/src/
 directory from the root of this repository.
 
-A GitHub mirror is available <a href="https://github.com/nuovi-mirror/pebble">here</a> for anyone
-who may need it.
+A list of mirrors is available <a href="http://pebblevm.org/mirrors.html">here</a>
+The canonical source can be fetched <a href="http://pebblevm.org/git">here</a> over Git
 
 Please note this item is still in an early Alpha phase.
 
