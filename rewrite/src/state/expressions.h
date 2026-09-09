@@ -2,6 +2,7 @@
 #define STATE_EXPRESSIONS_H_
 
 #include "values.h"
+
 #include "../platform/use/cmpstr.h"
 #include "../platform/use/skipspace.h"
 #include "../platform/use/cmpstr.h"
@@ -378,11 +379,6 @@ Value guessvaluetypeorexpr
 
 		v.Type = type_expr;
 		v.as.expr = (ok && tree.Type == ExprDataNode) ? tree.Node : NULL;
-
-		/*
-		if (v.as.expr == NULL)
-			v.Type = type_null;
-		*/
 
 		return v;
 	}

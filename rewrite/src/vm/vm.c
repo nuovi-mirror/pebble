@@ -162,7 +162,6 @@ unsigned long findend
  
 	print("ERROR: INTERPRETER: FUNC: NO MATCHING END FOUND!\n");
 	exitproc(1);
-	return pc; /* unreachable - exitproc doesn't return */
 }
 
 
@@ -309,21 +308,14 @@ unsigned long interpret
 			copymem(dest, name, namelen);
 			name[namelen] = '\0';
 		
-			/* XXX remove debug
-			print("DEBUG: STORING VARIABLE [");
-			print(name);
-			print("]\n");
-			*/
-
 			putVar(vars, name, valptr);
 
 			break;
 		}
 
 		case Opcode_Func: {
-			char *funcname = alloc(persistAlloc, 32); /* XXX set this to the correct size later */
-			valuetostr(funcname, 32, instr->FirstOperand.Data); /* XXX set the correct size later */
-									    /* XXX handle case -1 */
+			char *funcname = alloc(persistAlloc, limits_functions_namesize);
+			valuetostr(funcname, limits_functions_namesize, instr->FirstOperand.Data);
 			switch(instr->FirstOperand.Addressing) {
 				case addrmode_bare:
 					unsigned long *lpc = alloc(persistAlloc, sizeof(long));

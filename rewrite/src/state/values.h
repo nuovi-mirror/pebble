@@ -5,7 +5,10 @@
 #include <stdlib.h>
 #include <stddef.h>
 
-typedef struct ExprNode ExprNode; /* hack */
+#include "expressions.h"
+#include "../platform/use/copystr.h"
+
+/* typedef struct ExprNode ExprNode; XXX hack */
 
 typedef enum {
 	type_word,
@@ -30,16 +33,13 @@ typedef struct Value {
 
 int valuetostr(char *buff, unsigned long buffsize, Value v) {
 	switch (v.Type) {
-		case type_word:
-			return snprintf(buff, buffsize, "%lu", v.as.word);
-		case type_sword:
-			return snprintf(buff, buffsize, "%ld", v.as.sword);
-		case type_flt:
-			return snprintf(buff, buffsize, "%lf", v.as.flt);
-		case type_str:
-			return snprintf(buff, buffsize, "%s", v.as.str);
-		default:
-			return -1;
+		case type_word:  return snprintf(buff, buffsize, "%lu", v.as.word);
+		case type_sword: return snprintf(buff, buffsize, "%ld", v.as.sword);
+		case type_flt:   return snprintf(buff, buffsize, "%lf", v.as.flt);
+		case type_str:   return snprintf(buff, buffsize, "%s", v.as.str);
+		case type_null:  copystr(buff, "NULL");
+		case type_expr:  copystr(buff, v.as.expr->Source);
+		default:	return -1; /* should never be hit */
 	}
 }
 			

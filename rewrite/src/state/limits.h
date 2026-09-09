@@ -16,6 +16,7 @@
 
 /* function-related */
 #define limits_functions_max 5000 /* max number of functiosn that can be defined */
+#define limits_functions_namesize 32 /* size in bytes of a function name */
 
 /* variable-related */
 #define limits_variables_max 512 /* max number of variables at a time */
