@@ -164,7 +164,6 @@ unsigned long findend
 	exitproc(1);
 }
 
-
 /* instruction interpreter - instruction-by-instruction loop of execution */
 unsigned long interpret
 (Instruction *instr, Instruction *program,  unsigned long instruction_count, VarMap *vars, Stack *stack, 
@@ -317,11 +316,12 @@ unsigned long interpret
 			char *funcname = alloc(persistAlloc, limits_functions_namesize);
 			valuetostr(funcname, limits_functions_namesize, instr->FirstOperand.Data);
 			switch(instr->FirstOperand.Addressing) {
-				case addrmode_bare:
+				case addrmode_bare: {
 					unsigned long *lpc = alloc(persistAlloc, sizeof(long));
 					*lpc = pc + 1; /* since we are on the func instruction */
 					putFunc(funcs, funcname, lpc); /* place the function onto the index */
-				break;
+					break;
+				}
 
 				default: 
 					/* XXX handle other cases */
@@ -340,23 +340,33 @@ unsigned long interpret
 			break;
 
 		case Opcode_Call: {
-			char *funcname = alloc(persistAlloc, 32); /* XXX set this to the correct size later */
-			valuetostr(funcname, 32, instr->FirstOperand.Data); /* XXX set this to be the corrext size later */
+			char *funcname = alloc(persistAlloc, limits_functions_namesize);
+			valuetostr(funcname, limits_functions_namesize, instr->FirstOperand.Data);
 
 			switch(instr->FirstOperand.Addressing) {
-				case addrmode_bare:
+				case addrmode_bare: {
+					unsigned long *retpc = getFunc(funcs, funcname);
+					int tpos = (pc + 1 < instruction_count)
+						&& program[pc + 1].Opcode == Opcode_End;
+					int scall = (stack->count != 0) 
+						&& cmpstr(stack->items[stack->count - 1].funcname, funcname) == 0;
+
+					if (tpos && scall) /* tail-call */
+						return *retpc;
+
+					/* is not a tail call */
 					StackFrame *frame = alloc(scratchAlloc, sizeof(StackFrame));
 					frame->return_pc = pc + 1; /* since we are on the func instruction */
-					frame->funcname = funcname; /* XXX may be invalid as stated above */
+					frame->funcname = funcname;
 					pushframe(stack, frame); 
-					unsigned long *retpc = getFunc(funcs, funcname);
 					return *retpc;
 					break;
-				}	
+				}
 
 				default:
 					print("ERROR: INTERPRETER: CALL: UNSUPPORTED ADDRESSING MODE!\n");
 					exitproc(1);
+			}
 			break;
 		}
 

@@ -34,7 +34,7 @@ void pushframe
 {
 	if (stack->count >= stack->capacity) 
 	{
-		print("ERROR: CALLSTACK: STACK OVERFLOW!");
+		print("ERROR: CALLSTACK: STACK OVERFLOW!\n");
 		exitproc(1);
 	}
 
@@ -49,7 +49,7 @@ StackFrame popframe
 
 	if (stack->count == 0) 
 	{
-		print("ERROR: CALLSTACK: STACK UNDERFLOW!");
+		print("ERROR: CALLSTACK: STACK UNDERFLOW!\n");
 		exitproc(1);
 	}
 
@@ -59,6 +59,19 @@ StackFrame popframe
 	return frame;
 }
 
+StackFrame readframe
+(Stack *stack) 
+{
+	StackFrame frame;
+
+	if (stack->count == 0) 
+	{
+		print("ERROR: CALLSTACK: STACK UNDERFLOW!\n");
+		exitproc(1);
+	}
+
+	return frame;
+}
 /* VM arguments follow a POSIX-esque structure */
 /*   - Args struct */
 /*     - size_t count = number of args */
