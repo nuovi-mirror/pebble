@@ -1,8 +1,6 @@
 #ifndef STATE_EXPRESSIONS_H_
 #define STATE_EXPRESSIONS_H_
 
-#include "values.h"
-
 #include "../platform/use/cmpstr.h"
 #include "../platform/use/skipspace.h"
 #include "../platform/use/cmpstr.h"
@@ -13,6 +11,7 @@
 #include "../allocator/allocator.h"
 
 typedef struct ExprNode ExprNode;
+typedef Value Value; 
 
 typedef enum 
 {
@@ -54,6 +53,8 @@ struct ExprNode
 	ExprNodeData left;
 	ExprNodeData right;
 };
+
+#include "values.h"
 
 typedef struct
 {
