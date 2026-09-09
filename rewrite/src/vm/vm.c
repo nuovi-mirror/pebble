@@ -159,6 +159,7 @@ Instruction makeIR
 	return instr;
 }
 
+/* helper to find the end of a function during definition */
 unsigned long findend
 (Instruction *program, unsigned long instruction_count, unsigned long start)
 {
@@ -177,8 +178,90 @@ unsigned long findend
 		}
 	}
 
-	print("ERROR: INTERPRETER: FUNC: NO MATCHING END FOUND!\n");
+	print("ERROR: HELPER FINDEND: NO MATCHING END FOUND!\n");
 	exitproc(1);
+}
+
+/* helpers to resolve addressing modes */
+Value resolve_literal
+(char *buff, unsigned long buffsize, Value *val, VarMap *vars, Arena *tempAlloc)
+{
+	valuetostr(buff, buffsize, *val);
+	Value *var = { 0 };
+
+	var = val;
+
+	if (var->Type == type_expr)
+		*val = evalexprnode(var->as.expr, vars);
+	else 
+	{
+		char buf[32];
+		const char *text;
+	
+		if (var->Type == type_str)
+			text = var->as.str;
+		else 
+		{
+			valuetostr(buf, buffsize, *var);
+			text = buf;
+		}
+
+		int ok;
+		ExprNodeData tree = str2expr(text, &ok, tempAlloc);
+
+		if (!ok)
+		{
+			print("ERROR: HELPER RESOLVE_LITERAL: MALFORMED EXPRESSION!\n");
+			exitproc(1);
+		}
+
+	
+		*val = evalexprdata(tree, vars);
+	}
+
+	return *val;
+}
+	
+Value resolve_forced_eval
+(char *buff, unsigned long buffsize, Value *val, VarMap *vars, Arena *tempAlloc)
+{
+	valuetostr(buff, buffsize, *val);
+	Value *var = { 0 };
+
+	if (var == NULL)
+		var = val;
+	else
+		var = getVar(vars, buff);
+
+	if (var->Type == type_expr)
+		*val = evalexprnode(var->as.expr, vars);
+	else 
+	{
+		char buf[32];
+		const char *text;
+	
+		if (var->Type == type_str)
+			text = var->as.str;
+		else 
+		{
+			valuetostr(buf, buffsize, *var);
+			text = buf;
+		}
+
+		int ok;
+		ExprNodeData tree = str2expr(text, &ok, tempAlloc);
+
+		if (!ok)
+		{
+			print("ERROR: HELPER RESOLVE_FORCED_EVAL: MALFORMED EXPRESSION!\n");
+			exitproc(1);
+		}
+
+	
+		*val = evalexprdata(tree, vars);
+	}
+
+	return *val;
 }
 
 /* instruction interpreter - instruction-by-instruction loop of execution */
@@ -188,8 +271,8 @@ unsigned long interpret
 {
 	switch (instr->Opcode) {
 		case Opcode_New: {
-			char dest[32];
-			char data[32];
+			char *dest = alloc(tempAlloc, limits_instructions_varnamesize);
+			char *data = alloc(tempAlloc, limits_instruction_new_datasize);
 			Value val;
 
 			switch (instr->FirstOperand.Addressing) {
@@ -200,38 +283,20 @@ unsigned long interpret
 					valuetostr(dest, sizeof(dest), instr->FirstOperand.Data);
 					break;
 				case addrmode_literal: {
-					if (instr->FirstOperand.Data.Type == type_expr)
-						val = evalexprnode(instr->FirstOperand.Data.as.expr, vars);
-					else 
-					{
-						char buf[32];
-						const char *text;
-						
-						if (instr->FirstOperand.Data.Type == type_str)
-							text = instr->FirstOperand.Data.as.str;
-						else 
-						{
-							valuetostr(buf, sizeof(buf), instr->FirstOperand.Data);
-							text = buf;
-						}
-
-						int ok;
-						ExprNodeData tree = str2expr(text, &ok, tempAlloc);
-
-						if (!ok)
-						{
-							print("ERROR: VM: INTERPRETER: NEW: MALFORMED EXPRESSION!\n");
-							exitproc(1);
-						}
-
-						val = evalexprdata(tree, vars);
-
-					}
+					char *buf = alloc(tempAlloc, limits_instructions_varnamesize);
+					val = resolve_literal(buf, limits_instructions_varnamesize, 
+							&instr->FirstOperand.Data, vars, tempAlloc);
 					valuetostr(dest, sizeof(dest), val);
 					break;
 				}
-
-				/* XXX handle addressing mode forced_eval */
+				case addrmode_forced_eval: {
+					char *buf = alloc(tempAlloc, limits_instructions_varnamesize);
+					val = resolve_forced_eval(buf, limits_instructions_varnamesize, 
+							&instr->FirstOperand.Data, vars, tempAlloc);
+					valuetostr(dest, sizeof(dest), val);
+					break;
+				}
+	
 				/* XXX handle addressing mode pointer */
 				default:
 					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING MODE ON OPERAND ONE\n");
@@ -243,74 +308,16 @@ unsigned long interpret
 					val = instr->SecondOperand.Data;
 					break;
 				case addrmode_literal: {
-					if (instr->SecondOperand.Data.Type == type_expr)
-						val = evalexprnode(instr->SecondOperand.Data.as.expr, vars);
-					else 
-					{
-						char buf[32];
-						const char *text;
-						
-						if (instr->SecondOperand.Data.Type == type_str)
-							text = instr->SecondOperand.Data.as.str;
-						else 
-						{
-							valuetostr(buf, sizeof(buf), instr->SecondOperand.Data);
-							text = buf;
-						}
-
-						int ok;
-						ExprNodeData tree = str2expr(text, &ok, tempAlloc);
-
-						if (!ok)
-						{
-							print("ERROR: VM: INTERPRETER: NEW: MALFORMED EXPRESSION!\n");
-							exitproc(1);
-						}
-
-						val = evalexprdata(tree, vars);
-
-					}
-
+					char *buf = alloc(tempAlloc, limits_instructions_varnamesize);
+					val = resolve_literal(buf, limits_instructions_varnamesize, 
+						&instr->SecondOperand.Data, vars, tempAlloc);
 					break;
 				}
 
 				case addrmode_forced_eval: {
-					char buff[32];
-					valuetostr(buff, sizeof(buff), instr->SecondOperand.Data);
-					Value *var = { 0 };
-					
-					if (var == NULL)
-						var = &instr->SecondOperand.Data;
-					else
-						var = getVar(vars, buff);
-
-					if (var->Type == type_expr)
-						val = evalexprnode(var->as.expr, vars);
-					else 
-					{
-						char buf[32];
-						const char *text;
-						
-						if (var->Type == type_str)
-							text = var->as.str;
-						else 
-						{
-							valuetostr(buf, sizeof(buf), *var);
-							text = buf;
-						}
-
-						int ok;
-						ExprNodeData tree = str2expr(text, &ok, tempAlloc);
-
-						if (!ok)
-						{
-							print("ERROR: VM: INTERPRETER: NEW: MALFORMED EXPRESSION!\n");
-							exitproc(1);
-						}
-
-						val = evalexprdata(tree, vars);
-					}
-
+					char *buf = alloc(tempAlloc, limits_instructions_varnamesize);
+					val = resolve_forced_eval(buf, limits_instructions_varnamesize, 
+						&instr->SecondOperand.Data, vars, tempAlloc);
 					break;
 				}
 

@@ -33,6 +33,9 @@ _PRINT2 abab
 _PRINT2 abcd
 _PRINT2 i
 
+New {i} '1'
+_PRINT2 01
+
 Func a
 _PRINT funca
 End

@@ -13,6 +13,7 @@
 #define limits_instructions_maxbuffersize limits_instructions_max * sizeof(Instruction) /* max size of instruction memory buffer */
 #define limits_instructions_initbuffersize 512 * sizeof(Instruction) /* inital buffer size for instruction buffer */
 #define limits_instructions_maxcache 512 /* max number of instructions in the instruction cache */
+#define limits_instructions_varnamesize 32 /* number of chars for a variable name */
 
 /* function-related */
 #define limits_functions_max 5000 /* max number of functiosn that can be defined */
@@ -23,6 +24,10 @@
 
 /* misc */
 #define limits_misc_maxfilebuffersize 8 * 1024 * 1024 /* max buffer size for the bytecode file */
+
+/* specific instructions */
+#define limits_instruction_new_destsize limits_instructions_varnamesize /* size in bytes of the dest buffer */
+#define limits_instruction_new_datasize 32 /* size in bytes of the data buffer */
 
 #endif
 
