@@ -24,7 +24,7 @@
 
 /* todo list
  * XXX add addressing mode pointer to the New instruction operand one in the interperter
- * XXX add addressing mode forced_eval to the New instruciton New operand one in the interperter
+ * XXX fix segfault in the addressing mode forced_eval the New instruciton New operand one in the interperter
  * XXX add addressing mode pointer to the New instruction operand two in the interpreter
  * XXX add addressing mode bare to the New instruction operand two in the interpreter
  * XXX add the If instruction to the interpreter
