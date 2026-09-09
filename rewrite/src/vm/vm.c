@@ -22,6 +22,23 @@
 #include "../state/evaluator.h"
 #include "../state/instructionmapper.h"
 
+/* todo list
+ * XXX add addressing mode pointer to the New instruction operand one in the interperter
+ * XXX add addressing mode forced_eval to the New instruciton New operand one in the interperter
+ * XXX add addressing mode pointer to the New instruction operand two in the interpreter
+ * XXX add addressing mode bare to the New instruction operand two in the interpreter
+ * XXX add the If instruction to the interpreter
+ * XXX add addressing mode forced_eval to the Call instruction operand one in the interperter
+ * XXX add addressing mode pointer to the Call instruction operand one in the interperter
+ * XXX add addressing mode literal to the Call instruction operand one in the interperter
+ * XXX add addressing mode true_literal to the Call instruction operand one in the interperter
+ * XXX add addressing mode literal to the Func instruction operand one in the interpreter
+ * XXX add addressing mode true_literal to the Func instruction operand one in the interpreter
+ * XXX add addressing mode pointer to the Func instruction operand one in the interpreter
+ * XXX add addressing mode forced_eval to the Func instruction operand one in the interpreter
+ * XXX finish the limits bits 
+ */
+
 /* used to parse an instruction operand - guesses the type
  * and addressing mode */
 int parseoperand
@@ -159,7 +176,7 @@ unsigned long findend
 				return pc;
 		}
 	}
- 
+
 	print("ERROR: INTERPRETER: FUNC: NO MATCHING END FOUND!\n");
 	exitproc(1);
 }
@@ -214,6 +231,8 @@ unsigned long interpret
 					break;
 				}
 
+				/* XXX handle addressing mode forced_eval */
+				/* XXX handle addressing mode pointer */
 				default:
 					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING MODE ON OPERAND ONE\n");
 					exitproc(1);
@@ -295,6 +314,8 @@ unsigned long interpret
 					break;
 				}
 
+				/* XXX handle addressing mode pointer for this */
+				/* XXX handle addressing mode bare for this */
 				default:
 					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING MODE ON OPERAND TWO\n");
 					exitproc(1);
@@ -323,8 +344,11 @@ unsigned long interpret
 					break;
 				}
 
+				/* XXX handle addressing mode literal */
+				/* XXX handle addressing mode true_literal */
+				/* XXX handle addressing mode pointer */
+				/* XXX handle addressing mode forced_eval */
 				default: 
-					/* XXX handle other cases */
 					print("ERROR: INTERPRETER: FUNC: UNSUPPORTED ADDRESSING MODE!\n");
 					exitproc(1);
 					break;
@@ -336,7 +360,7 @@ unsigned long interpret
 		}
 
 		case Opcode_If:
-			/* XXX handle If */
+			/* XXX add If support */
 			break;
 
 		case Opcode_Call: {
@@ -363,6 +387,10 @@ unsigned long interpret
 					break;
 				}
 
+				/* XXX handle addressing mode literal */
+				/* XXX handle addressing mode true_literal */
+				/* XXX handle addressing mode pointer */
+				/* XXX handle addressing mode forced_eval */
 				default:
 					print("ERROR: INTERPRETER: CALL: UNSUPPORTED ADDRESSING MODE!\n");
 					exitproc(1);
@@ -371,11 +399,10 @@ unsigned long interpret
 		}
 
 		case Opcode_Return:
-			/* XXX handle Retrun */
+			/* XXX add Return support */
 			break;
 
 		case Opcode_End:
-			/* XXX solve this */
 			if (stack->count != 0) 
 			{
 				StackFrame frame = popframe(stack);
@@ -384,7 +411,7 @@ unsigned long interpret
 			break;
 
 		case Opcode_Escape:
-			/* XXX handle Escape */
+			/* XXX add Escape support */
 			break;
 
 		/* internal opcodes */
