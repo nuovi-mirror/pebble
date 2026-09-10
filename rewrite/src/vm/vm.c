@@ -187,43 +187,46 @@ unsigned long findend
 }
 
 /* helpers to resolve addressing modes */
+/* XXX audit this */
 Value resolve_literal
 (char *buff, unsigned long buffsize, Value *val, VarMap *vars, Arena *tempAlloc)
 {
-	valuetostr(buff, buffsize, *val);
-	Value *var = { 0 };
+    if (val->Type == type_expr)
+    {
+        if (val->as.expr == NULL)
+        {
+            print("ERROR: HELPER RESOLVE_LITERAL: NULL EXPRESSION!\n");
+            exitproc(1);
+        }
 
-	var = val;
+        *val = evalexprnode(val->as.expr, vars);
+        return *val;
+    }
 
-	if (var->Type == type_expr)
-		*val = evalexprnode(var->as.expr, vars);
-	else 
-	{
-		char buf[32];
-		const char *text;
-	
-		if (var->Type == type_str)
-			text = var->as.str;
-		else 
-		{
-			valuetostr(buf, buffsize, *var);
-			text = buf;
-		}
+    char buf[32];
+    const char *text;
 
-		int ok;
-		ExprNodeData tree = str2expr(text, &ok, tempAlloc);
+    if (val->Type == type_str)
+    {
+        text = val->as.str;
+    }
+    else
+    {
+        valuetostr(buf, sizeof(buf), *val);
+        text = buf;
+    }
 
-		if (!ok)
-		{
-			print("ERROR: HELPER RESOLVE_LITERAL: MALFORMED EXPRESSION!\n");
-			exitproc(1);
-		}
+    int ok;
+    ExprNodeData tree = str2expr(text, &ok, tempAlloc);
 
-	
-		*val = evalexprdata(tree, vars);
-	}
+    if (!ok)
+    {
+        print("ERROR: HELPER RESOLVE_LITERAL: MALFORMED EXPRESSION!\n");
+        exitproc(1);
+    }
 
-	return *val;
+    *val = evalexprdata(tree, vars);
+    return *val;
 }
 	
 Value resolve_forced_eval
