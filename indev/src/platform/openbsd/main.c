@@ -1,10 +1,10 @@
 #undef NULL
 #define NULL ((void *)0) /* null type */
 
-#include "../platform/use/entry.h"
-#include "../platform/use/print.h"
-#include "../platform/use/exitproc.h"
-#include "vm.c"
+#include "entry.h"
+#include "print.h"
+#include "exitproc.h"
+#include "vm.h"
 
 #include <unistd.h> /* needed for the two magical calls */
 

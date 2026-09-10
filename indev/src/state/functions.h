@@ -5,10 +5,19 @@
 
 typedef SHashMap FuncMap;
 
-static unsigned long hasFunc(FuncMap *m, char *str)		{ return mapHash(m, str); }
-static FuncMap initFuncs(unsigned long cap)			{ return initHashMap(cap); }
-static void   putFunc(FuncMap *m, char *key, void *value)	{ hashMapPut(m, key, value); }
-static void  *getFunc(FuncMap *m, char *key)			{ return hashMapGet(m, key); }
-static void   freeFuncs(FuncMap *m)				{ hashMapFreeMap(m); }
+unsigned long hasFunc
+(FuncMap *m, char *str);
+
+FuncMap initFuncs
+(unsigned long cap);
+
+void putFunc
+(FuncMap *m, char *key, void *value);
+
+void *getFunc
+(FuncMap *m, char *key);
+
+void freeFuncs
+(FuncMap *m);
 
 #endif

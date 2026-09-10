@@ -3,8 +3,6 @@
 
 #include "values.h"
 
-#include "../platform/use/cmpstr.h"
-
 typedef enum {
 	addrmode_literal,
 	addrmode_true_literal,
@@ -65,15 +63,6 @@ typedef struct Instruction {
 	InstructionOperand ThirdOperand;
 } Instruction;
 
-int lookupopcode(const char *word, InstructionOpcode *out) {
-	for (unsigned long i = 0; i < INSTRUCTION_OPCODE_TABLE_LEN; i++) {
-		if (cmpstr(InstructionOpcodeEntryTable[i].name, word) == 0) {
-			*out = InstructionOpcodeEntryTable[i].op;
-			return 1;
-		}
-	}
-
-	return 0;
-}
-
+int lookupopcode
+(const char *word, InstructionOpcode *out);
 #endif

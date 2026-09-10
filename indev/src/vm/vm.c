@@ -4,25 +4,26 @@
  * main itself is owned by the platform layer 
  */
 
-#include "../platform/use/print.h"
-#include "../platform/use/copystr.h"
-#include "../platform/use/getstrlen.h"
-#include "../platform/use/findnewline.h"
-#include "../platform/use/readfile.h"
-#include "../platform/use/skipspace.h"
-#include "../platform/use/exitproc.h"
-#include "../platform/use/setmem.h"
-
-#include "../allocator/allocator.h"
-
-#include "../state/limits.h"
-#include "../state/variables.h"
-#include "../state/values.h"
-#include "../state/functions.h"
-#include "../state/instructions.h"
-#include "../state/expressions.h"
-#include "../state/evaluator.h"
-#include "../state/instructionmapper.h"
+#include "vm.h"
+#include "entry.h"
+#include "print.h"
+#include "copystr.h"
+#include "getstrlen.h"
+#include "findnewline.h"
+#include "readfile.h"
+#include "skipspace.h"
+#include "exitproc.h"
+#include "setmem.h"
+#include "allocator.h"
+#include "limits.h"
+#include "variables.h"
+#include "values.h"
+#include "functions.h"
+#include "instructions.h"
+#include "expressions.h"
+#include "evaluator.h"
+#include "instructionmapper.h"
+#include "main.h"
 
 /* todo list
  * XXX add addressing mode pointer to the New instruction operand one in the interperter

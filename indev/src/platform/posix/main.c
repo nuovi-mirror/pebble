@@ -1,8 +1,6 @@
-#undef NULL
-#define NULL ((void *)0)
-
-#include "../platform/use/entry.h"
-#include "vm.c"
+#include "main.h"
+#include "entry.h"
+#include "vm.h"
 
 int main(int argc, char **argv) {
 	Args cliargs = initargs(argc, argv);

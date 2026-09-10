@@ -2,13 +2,23 @@
 #define STATE_VARIABLES_H_
 
 #include "hashmap.h"
+#include "variables.h"
 
 typedef SHashMap VarMap;
 
-static unsigned long hashVar(VarMap *m, char *str)		{ return mapHash(m, str); }
-static VarMap initVars(unsigned long cap)			{ return initHashMap(cap); }
-static void   putVar(VarMap *m, char *key, void *value)		{ hashMapPut(m, key, value); }
-static void  *getVar(VarMap *m, char *key)			{ return hashMapGet(m, key); }
-static void   freeVars(VarMap *m)				{ hashMapFreeMap(m); }
+static unsigned long hashVar
+(VarMap *m, char *str);
+
+VarMap initVars
+(unsigned long cap);
+
+void putVar
+(VarMap *m, char *key, void *value);
+
+void *getVar
+(VarMap *m, char *key);
+
+void freeVars
+(VarMap *m);
 
 #endif

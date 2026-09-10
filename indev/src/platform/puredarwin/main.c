@@ -27,7 +27,7 @@ double strtod$UNIX2003
 
 /* and now it is just POSIX code */
 
-#include "../platform/use/entry.h"
+#include "entry.h"
 #include "vm.c"
 
 int main(int argc, char **argv) {
