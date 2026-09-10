@@ -1,4 +1,4 @@
-Pebble is a small and simple virtual machine language
+<a href="http://pebblevm.org">Pebble</a> is a small and simple virtual machine language
 written in Zig.
 
 The language is designed to be small, simple, reliable and safe, 
