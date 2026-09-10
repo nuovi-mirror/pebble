@@ -1,1 +1,0 @@
-../freestand/getnstrlen.h

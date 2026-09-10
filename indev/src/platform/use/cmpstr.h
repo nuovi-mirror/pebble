@@ -1,1 +1,0 @@
-../freestand/cmpstr.h
