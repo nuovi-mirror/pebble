@@ -63,9 +63,17 @@ int valuetostr(char *buff, unsigned long buffsize, Value v) {
 		case type_sword: return snprintf(buff, buffsize, "%ld", v.as.sword);
 		case type_flt:   return snprintf(buff, buffsize, "%lf", v.as.flt);
 		case type_str:   return snprintf(buff, buffsize, "%s", v.as.str);
-		case type_null:  if (buffsize) copystr(buff, "NULL");
-		case type_expr:  return snprintf(buff, buffsize, "%s", v.as.expr->Source);
-		default:	 return -1; /* should never be hit */
+		case type_null:  if (buffsize) copystr(buff, "NULL"); return 0;
+		case type_expr:  
+			if (v.as.expr == NULL || v.as.expr->Source == NULL)
+			{
+				if (buffsize) buff[0] = '\0'; /* never leave buff unterminated */
+				return -1;
+			}
+			return snprintf(buff, buffsize, "%s", v.as.expr->Source);
+		default:	 
+			if (buffsize) buff[0] = '\0'; /* never leave buff unterminated */
+			return -1; /* should never be hit */
 	}
 }
 

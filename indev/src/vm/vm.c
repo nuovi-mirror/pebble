@@ -26,7 +26,6 @@
 
 /* todo list
  * XXX add addressing mode pointer to the New instruction operand one in the interperter
- * XXX fix segfault in the addressing mode forced_eval the New instruciton New operand one in the interperter
  * XXX add addressing mode pointer to the New instruction operand two in the interpreter
  * XXX add addressing mode bare to the New instruction operand two in the interpreter
  * XXX add the If instruction to the interpreter
@@ -112,11 +111,6 @@ Instruction makeIR
 		return *instrFromMap;
 		/* this is safe since it should have already been placed on
 		 * the persistent allocator */
-
-	/* XXX remove dead code here
-	char *linecpy = alloc(persistAlloc, getstrlen(line));
-	copymem(line, linecpy, getstrlen(line));
-	*/
 
 	Instruction instr = { 0 };
 	char *cursor = line;
@@ -420,9 +414,10 @@ unsigned long interpret
 		}
 
 		case Opcode_Internal_PRINT2: {
-			char buf[32];
+			char *buf = alloc(scratchAlloc, limits_instructions_varnamesize);
 
-			Value *stored = getVar(vars, instr->FirstOperand.Data.as.str);
+			valuetostr(buf, limits_instructions_varnamesize, instr->FirstOperand.Data);
+			Value *stored = getVar(vars, buf);
 
 			if (stored == NULL)
 			{
