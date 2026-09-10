@@ -5,5 +5,5 @@ unsigned long getstrlen(const char *s) {
 
 	while (s[n] != '\0')
 		n++;
-	return n + 1;
+	return n;
 }
