@@ -4,6 +4,9 @@ CPebble
     	it is deemed stable enough to replace the current Zig version.
 	The older Zig version can be viewed at ../../old/ relative to
 	this current path.
+	Please note this does not fully impliment pebble schematics
+	yet and is a work-in-progress, unlike the Zig version, which
+	is feature-complete.
     	As the ZIg version, the licence can be viewed at
 	http://thenuoviorizzonticompany.org/license/openlicense/3.txt
 
