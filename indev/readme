@@ -1,0 +1,43 @@
+CPebble
+	CPebble is an experiment at a modern and de-cluttered re-write of
+    	Pebble in C. At some point this will be re-named to Pebble once
+    	it is deemed stable enough to replace the current Zig version.
+	The older Zig version can be viewed at ../../old/ relative to
+	this current path.
+	Please note this does not fully impliment pebble schematics
+	yet and is a work-in-progress, unlike the Zig version, which
+	is feature-complete.
+    	As the ZIg version, the licence can be viewed at
+	http://thenuoviorizzonticompany.org/license/openlicense/3.txt
+
+Building from source
+	Building from source requires only a POSIX libc, a C99 compiler,
+	and a BSD make build system. Various variables can be used during
+	building, such as
+
+	TARGET - target operating system to build for - view the platform support
+		list to know what to place here. The default is 'posix'.
+
+	BUILD - the type of build to use - these include fast, debug, and
+		default. The default is 'default'. Please note fast builds
+		are not guaranteed to work on any machine besides the host
+		compiling.
+
+	ANALYZER - the name of the static analyzer to use when building.
+		No default, not required.
+
+	CC - the selected C compiler to use - defaults to 'cc'.
+
+	PROGRAM - the path to place the finished binary - defaults to
+		'./bin/vm'.
+
+	CFLAGS - the C compiler flags to use before adding the build-specific
+		compiler flags. The default is '-std=c99'.
+
+Supported Platforms
+	For a list of supported platforms, please go to http://pebblevm.org/platforms.html
+			
+
+Product of The Nuovi Orizzonti Company
+http://thenuoviorizzonticompany.org
+http://pebblevm.org

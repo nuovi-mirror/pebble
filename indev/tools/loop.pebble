@@ -1,0 +1,6 @@
+Func a
+_PRINT loop
+Call a
+End
+
+Call a
