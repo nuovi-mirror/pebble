@@ -26,12 +26,13 @@ _PRINT2 h
 New "la s++ la" '1'
 New "ab s++ ab" '2'
 New "ab s++ cd" '3'
-New i "0 s++ 1"
+New i '0 s++ 1'
+New j {i}
 
 _PRINT2 lala
 _PRINT2 abab
 _PRINT2 abcd
-_PRINT2 i
+_PRINT2 j
 
 New {i} '1'
 _PRINT2 01

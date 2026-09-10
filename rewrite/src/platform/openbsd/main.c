@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
 	/* now we can do init */
 
 	Args cliargs = initargs(argc, argv);
-	Stack *stack = initstack(1024, 1024);
+	Stack *stack = initstack(1024);
 	
 	int ret = vmmain(cliargs, stack);
 	freestack(stack);

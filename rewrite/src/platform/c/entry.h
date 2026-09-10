@@ -90,15 +90,15 @@ Args initargs
 }
 
 Stack *initstack
-(unsigned long stacksize, unsigned long stackmentries) 
+(unsigned long capacity) 
 {
 	/* initalize the stack */
-	StackFrame *stack_items = lalloc(stacksize * sizeof(*stack_items));
+	StackFrame *stack_items = lalloc(capacity * sizeof(*stack_items));
 		/* max number of bytes for the stack */
 
 	Stack *stack = lalloc(sizeof(Stack));
 
-	if (stack == NULL)
+	if (stack == NULL || stack_items == NULL || capacity == NULL)
 	{
 		print("ERROR: INIT: CANNOT ALLOCATE A CALL STACK!\n");
 		exitproc(1);
@@ -106,7 +106,7 @@ Stack *initstack
 
 	stack->items = stack_items;
 	stack->count = 0;
-	stack->capacity = stackmentries; /* max number of entries on the stack at a time */
+	stack->capacity = capacity; /* max number of entries on the stack at a time */
 
 	return stack;
 }
@@ -131,7 +131,7 @@ void freestack
 
 int main(int argc, char **argv) {
 	Args cliargs = initargs(argc, argv);
-	Stack *stack = initstack(1024, 1024);
+	Stack *stack = initstack(1024);
 	return vmmain(cliargs, stack);
 	freestack(stack);
 }

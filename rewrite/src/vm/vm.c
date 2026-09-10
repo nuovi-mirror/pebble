@@ -113,8 +113,10 @@ Instruction makeIR
 		/* this is safe since it should have already been placed on
 		 * the persistent allocator */
 
-	char *linecpy = alloc(persistAlloc, getstrlen(line)); /* getstrlen = size + 1 */
+	/* XXX remove dead code here
+	char *linecpy = alloc(persistAlloc, getstrlen(line));
 	copymem(line, linecpy, getstrlen(line));
+	*/
 
 	Instruction instr = { 0 };
 	char *cursor = line;
@@ -230,38 +232,10 @@ Value resolve_forced_eval
 	valuetostr(buff, buffsize, *val);
 	Value *var = getVar(vars, buff);
 
-	if (var == NULL)
-		var = val;
+	if (var != NULL)
+		return resolve_literal(buff, buffsize, var, vars, tempAlloc);
 
-	if (var->Type == type_expr)
-		*val = evalexprnode(var->as.expr, vars);
-	else 
-	{
-		char buf[32];
-		const char *text;
-	
-		if (var->Type == type_str)
-			text = var->as.str;
-		else 
-		{
-			valuetostr(buf, buffsize, *var);
-			text = buf;
-		}
-
-		int ok;
-		ExprNodeData tree = str2expr(text, &ok, tempAlloc);
-
-		if (!ok)
-		{
-			print("ERROR: HELPER RESOLVE_FORCED_EVAL: MALFORMED EXPRESSION!\n");
-			exitproc(1);
-		}
-
-	
-		*val = evalexprdata(tree, vars);
-	}
-
-	return *val;
+	return resolve_literal(buff, buffsize, val, vars, tempAlloc);
 }
 
 /* instruction interpreter - instruction-by-instruction loop of execution */
@@ -386,7 +360,7 @@ unsigned long interpret
 						return *retpc;
 
 					/* is not a tail call */
-					StackFrame *frame = alloc(persistAlloc, sizeof(StackFrame));
+					StackFrame *frame = alloc(scratchAlloc, sizeof(StackFrame));
 					frame->return_pc = pc + 1; /* since we are on the func instruction */
 					frame->funcname = funcname;
 					pushframe(stack, frame); 
@@ -433,8 +407,8 @@ unsigned long interpret
 				case type_sword:print("SWORD, DATA: "); valuetostr(buf, sizeof(buf), instr->FirstOperand.Data); break;
 				case type_str:	print("STR,   DATA: ");	copystr(instr->FirstOperand.Data.as.str, buf);		break;
 				case type_flt:	print("FLT,   DATA: ");	valuetostr(buf, sizeof(buf), instr->FirstOperand.Data);	break;
-				case type_expr: print("ERROR: THIS CANNOT HANDLE EXPRESSIONS!"); exitproc(1); 			break;
-				case type_null: print("ERROR: THIS CANNOT HANDLE NULL TYPES!"); exitproc(1); 			break;
+				case type_expr: print("ERROR: THIS CANNOT HANDLE EXPRESSIONS!\n"); exitproc(1); 			break;
+				case type_null: print("ERROR: THIS CANNOT HANDLE NULL TYPES!\n"); exitproc(1); 			break;
 			}
 			print(buf);
 			print("\n");
@@ -463,8 +437,8 @@ unsigned long interpret
 				case type_sword:print("SWORD, DATA: "); valuetostr(buf, sizeof(buf), data);	break;
 				case type_str:	print("STR,   DATA: ");	copystr(data.as.str, buf);		break;
 				case type_flt:	print("FLT,   DATA: ");	valuetostr(buf, sizeof(buf), data);	break;
-				case type_expr: print("ERROR: THIS CANNOT HANDLE EXPRESSIONS!"); exitproc(1); 	break;
-				case type_null: print("ERROR: THIS CANNOT HANDLE NULL TYPES!"); exitproc(1); 	break;
+				case type_expr: print("ERROR: THIS CANNOT HANDLE EXPRESSIONS!\n"); exitproc(1);	break;
+				case type_null: print("ERROR: THIS CANNOT HANDLE NULL TYPES!\n"); exitproc(1); 	break;
 			}
 
 			print(buf);
