@@ -30,19 +30,9 @@ typedef struct Value {
 	}as;
 } Value;
 
-int valuetostr(char *buff, unsigned long buffsize, Value v) {
-	switch (v.Type) {
-		case type_word:  return snprintf(buff, buffsize, "%lu", v.as.word);
-		case type_sword: return snprintf(buff, buffsize, "%ld", v.as.sword);
-		case type_flt:   return snprintf(buff, buffsize, "%lf", v.as.flt);
-		case type_str:   return snprintf(buff, buffsize, "%s", v.as.str);
-		case type_null:  copystr(buff, "NULL");
-		/* case type_expr:  copystr(buff, v.as.expr->Source); */
-		default:	return -1; /* should never be hit */
-	}
-}
+/* moved to expressions.h */
+int valuetostr(char *buff, unsigned long buffsize, Value v);
 
-			
 Value guessvaluetype(char *data) {
 	Value out = { 0 };
 	int consumed;

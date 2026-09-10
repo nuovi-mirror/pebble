@@ -565,7 +565,7 @@ int vmmain
 	}
 
 	/* free buffer holding file */
-	resetAllocator(scratchAlloc);
+	resetAllocator(tempAlloc);
 
 	/* execution */
 	unsigned long pc = 0;
