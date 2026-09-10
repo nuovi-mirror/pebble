@@ -1,7 +1,8 @@
 CC?=cc
 PROGRAM=bin/vm
 BUILD?=default
-PLATFORM?=posix
+TARGET?=posix
+PLATFORM?=$(TARGET)
 ANALYZER?=
 CFLAGS=-std=c99
 CPPFLAGS=
