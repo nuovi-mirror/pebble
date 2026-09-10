@@ -1,0 +1,55 @@
+
+New 1.1 ' (**)/'
+New 1.2 '<)  ) '
+New 1.3 ' /  \ '
+
+New 2.1 '\(**) '
+New 2.2 ' (  )>'
+New 2.3 ' /  \ '
+
+New time '500' # 500ms
+
+Func reset
+Escape std.term.screen.clear
+New x '1'
+New y '1'
+New __Escape_std.term.cursor.moveAbsolute_ARG0 'x'
+New __Escape_std.term.cursor.moveAbsolute_ARG1 'y'
+Escape std.term.cursor.moveAbsolute
+End
+
+Func p1
+New __Escape_std.io.print_ARG0 '1.1'
+Escape std.io.print
+New __Escape_std.io.print_ARG0 '1.2'
+Escape std.io.print
+New __Escape_std.io.print_ARG0 '1.3'
+Escape std.io.print
+End
+
+Func p2
+New __Escape_std.io.print_ARG0 '2.1'
+Escape std.io.print
+New __Escape_std.io.print_ARG0 '2.2'
+Escape std.io.print
+New __Escape_std.io.print_ARG0 '2.3'
+Escape std.io.print
+End
+
+Func sleep
+New __Escape_std.misc.sleep_ARG0 'time'
+Escape std.misc.sleep
+End
+
+Func loop
+
+Call reset
+Call p1
+Call sleep
+Call reset
+Call p2
+Call sleep
+Call loop
+End
+
+Call loop

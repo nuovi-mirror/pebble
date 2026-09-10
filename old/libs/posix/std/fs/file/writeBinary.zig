@@ -1,0 +1,19 @@
+const std = @import("std");
+const vm = @import("state");
+
+pub fn run() !void {
+    const indirect = vm.data.get("__Escape_std.io.fs.file.writeBinary_ARG0")
+        orelse return;
+
+    const fileData = vm.data.get(indirect) orelse return;
+
+    const indirect2 = vm.data.get("__Escape_std.io.fs.file.writeBinary_ARG1") 
+        orelse return;
+    
+    const fileName = vm.data.get(indirect2) orelse return;
+    
+    const file = try std.fs.cwd().createFile(fileName, .{});
+    defer file.close();
+
+    try file.writeAll(fileData);
+}

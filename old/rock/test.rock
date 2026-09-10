@@ -1,0 +1,14 @@
+//num = :std.io.input ( )
+//num = :std.fs.dir.list ( . )
+
+//cmd = !sleep 2
+cmd = !whoami
+
+//num = :std.proc.spawn ( cmd )
+//call std.proc.wait ( num )
+
+call std.proc.spawnBlocking ( cmd )
+
+//num = :std.misc.random ( )
+//call std.io.print ( num ) 
+//call std.io.printLn ( num ) 

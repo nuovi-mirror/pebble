@@ -1,0 +1,37 @@
+Func main
+
+Escape std.term.screen.clear
+
+New x '1'
+New y '1'
+New ARG1 'x'
+New ARG2 'y'
+Escape std.term.cursor.moveAbsolute
+
+New msg 'AAAA'
+New ARG1 'msg'
+Escape std.io.print
+
+New ARG1 'x'
+New ARG2 'y'
+Escape std.term.cursor.moveAbsolute
+
+Escape std.term.screen.clearToEndOfLine
+
+New msg 'BBBB'
+New ARG1 'msg'
+Escape std.io.print
+
+New ARG1 'x'
+New ARG2 'y'
+Escape std.term.cursor.moveAbsolute
+
+Escape std.term.screen.clearLine
+
+New msg 'CCCC'
+New ARG1 'msg'
+Escape std.io.print
+
+End
+
+Call main

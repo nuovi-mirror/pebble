@@ -1,0 +1,96 @@
+#!/usr/bin/pebble
+
+New prompt '> '
+New separator ' '
+
+Func getArg
+New __Escape_std.str.find_ARG0 <data>
+New __Escape_std.str.find_ARG1 <separator>
+Escape std.str.find
+New __Escape_std.str.split.num.right_ARG0 <data>
+New __Escape_std.str.split.num.right_ARG1 <__Escape_std.str.find_RET0>
+New __Escape_std.str.split.num.left_ARG0 <data>
+New __Escape_std.str.split.num.left_ARG1 <__Escape_std.str.find_RET0>
+Escape std.str.split.num.right
+Escape std.str.split.num.left
+New newdata __Escape_std.str.split.num.right_RET0
+New arg __Escape_std.str.split.num.left_RET0
+End
+
+Func loop
+New __Escape_std.io.printLn_ARG0 <prompt>
+Escape std.io.printLn
+Escape std.io.input
+New command __Escape_std.io.input_RET0
+
+If exit "command ?= exit"
+If cd "command s?= cd"
+If echo "command s?= echo"
+If pwd "command s?= pwd"
+If ls "command s?= ls"
+If clear "command ?= clear"
+
+New __Escape_std.proc.spawn_ARG0 <command>
+Escape std.proc.spawn
+New __Escape_std.proc.wait_ARG0 <__Escape_std.proc.spawn_RET0>
+Escape std.proc.wait
+Call loop
+End
+
+Func clear
+Escape std.term.screen.clear
+New x '1'
+New y '1'
+New __Escape_std.term.cursor.moveAbsolute_ARG0 <x>
+New __Escape_std.term.cursor.moveAbsolute_ARG1 <y>
+Escape std.term.cursor.moveAbsolute
+Call loop
+End
+
+Func exit
+New msg 'Goodbye!'
+New __Escape_std.io.print_ARG0 <msg>
+Escape std.io.print
+Escape std.proc.exit
+Call loop
+End
+
+Func cd
+New data command
+Call getArg
+New __Escape_std.fs.dir.change_ARG0 <newdata>
+Escape std.fs.dir.change
+Call loop
+End
+
+Func echo
+New data command
+Call getArg // newdata now contains the args
+New __Escape_std.io.print_ARG0 <newdata>
+Escape std.io.print
+Call loop
+End
+
+Func pwd
+Escape std.fs.dir.get
+New __Escape_std.io.print_ARG0 <__Escape_std.fs.dir.get_RET0>
+Escape std.io.print
+Call loop
+End
+
+Func ls
+New data command
+Call getArg 
+If _ls "command ?= ls"
+New __Escape_std.fs.dir.list_ARG0 <newdata>
+Escape std.fs.dir.list
+New __Escape_std.io.print_ARG0 <__Escape_std.fs.dir.list_RET0>
+Escape std.io.print
+Call loop
+End
+
+Func _ls
+New newdata '.'
+End
+
+Call loop
