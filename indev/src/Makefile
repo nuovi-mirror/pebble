@@ -1,18 +1,12 @@
 CC?=cc
-
 PROGRAM=bin/vm
-
 BUILD?=default
 PLATFORM?=posix
 ANALYZER?=
-
 CFLAGS=-std=c99
 CPPFLAGS=
 
-# ------------------------------------------------------------
-# Build type
-# ------------------------------------------------------------
-
+# build type
 .if ${BUILD} == "default"
 CFLAGS+=-O2
 
@@ -46,40 +40,29 @@ CFLAGS+=-O3 \
 .error Unknown build type: ${BUILD}
 .endif
 
-# ------------------------------------------------------------
-# Common include paths
-# ------------------------------------------------------------
-
+# common include paths
 CPPFLAGS+=-Iallocator
 CPPFLAGS+=-Istate
 CPPFLAGS+=-Ivm
 
-# ------------------------------------------------------------
-# Platform
-# ------------------------------------------------------------
-
+# platform
 .if ${PLATFORM} == "freestand"
-
 PLATFORM_DIRS=platform/freestand
 MAIN=platform/freestand/main.c
 
 .elif ${PLATFORM} == "c"
-
 PLATFORM_DIRS=platform/c platform/freestand
 MAIN=platform/c/main.c
 
 .elif ${PLATFORM} == "posix"
-
 PLATFORM_DIRS=platform/posix platform/c platform/freestand
 MAIN=platform/posix/main.c
 
 .elif ${PLATFORM} == "openbsd"
-
 PLATFORM_DIRS=platform/openbsd platform/posix platform/c platform/freestand
 MAIN=platform/openbsd/main.c
 
 .elif ${PLATFORM} == "puredarwin"
-
 PLATFORM_DIRS=platform/puredarwin platform/posix platform/c platform/freestand
 MAIN=platform/puredarwin/main.c
 
@@ -91,58 +74,36 @@ MAIN=platform/puredarwin/main.c
 CPPFLAGS+=-I${dir}
 .endfor
 
-# ------------------------------------------------------------
-# Platform sources
-#
-# The directories are ordered from most-specific to least-specific.
-# If multiple layers provide the same basename, the most-specific
-# implementation wins.
-# ------------------------------------------------------------
-
+# platform sources
 PLATFORM_SRCS!=find ${PLATFORM_DIRS} -name '*.c' ! -name 'main.c' | \
 	awk -F/ '!seen[$$NF]++'
 
-# ------------------------------------------------------------
 # VM sources
-# ------------------------------------------------------------
-
 VM_SRCS!=find allocator state vm -name '*.c'
 
 SRCS=${VM_SRCS} ${PLATFORM_SRCS} ${MAIN}
 OBJS=${SRCS:.c=.o}
 DEPS=${SRCS:.c=.d}
 
-# ------------------------------------------------------------
-# Targets
-# ------------------------------------------------------------
-
+# targets
 all: ${PROGRAM}
 
 ${PROGRAM}: ${OBJS}
 	@mkdir -p ${.TARGET:H}
 	${ANALYZER} ${CC} ${CFLAGS} ${LDFLAGS} -o ${.TARGET} ${OBJS}
 
-# ------------------------------------------------------------
-# Compilation
-# ------------------------------------------------------------
-
+# compilation
 .c.o:
 	${ANALYZER} ${CC} ${CPPFLAGS} ${CFLAGS} -MMD -MP -c -o ${.TARGET} ${.IMPSRC}
 
-# ------------------------------------------------------------
-# Header dependencies
-# ------------------------------------------------------------
-
+# header dependencies
 .for dep in ${DEPS}
 .if exists(${dep})
 .include "${dep}"
 .endif
 .endfor
 
-# ------------------------------------------------------------
-# Cleaning
-# ------------------------------------------------------------
-
+# cleaning
 clean:
 	rm -rf bin
 	rm -f ${OBJS} ${DEPS}

@@ -1,6 +1,4 @@
-#undef NULL
-#define NULL ((void *)0) /* null type */
-
+#include "main.h"
 #include "entry.h"
 #include "print.h"
 #include "exitproc.h"

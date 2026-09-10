@@ -1,6 +1,4 @@
-#undef NULL
-#define NULL ((void *)0)
-
+#include "main.h"
 #include <unistd.h>
 #include <stdlib.h>
 
@@ -28,7 +26,7 @@ double strtod$UNIX2003
 /* and now it is just POSIX code */
 
 #include "entry.h"
-#include "vm.c"
+#include "vm.h"
 
 int main(int argc, char **argv) {
 	Args cliargs = initargs(argc, argv);
