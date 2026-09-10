@@ -11,91 +11,31 @@ CPebble
 	http://thenuoviorizzonticompany.org/license/openlicense/3.txt
 
 Building from source
-    	Run the build.sh script using a POSIX shell
-    	Argument one should be the build type and argument two should
-    	be the target platform. The build types include fast as an
-    	optimized build, which should not be ran on any machine besides
-    	the build host, debug being the debugging build, and default
-    	being the default production release option.
+	Building from source requires only a POSIX libc, a C99 compiler,
+	and a BSD make build system. Various variables can be used during
+	building, such as
 
-Swapping targtes
-    	Syslink or copy the files from your platform into platform/use.
-    	Eg. if i am on a POSIX platform and want printing, I may do
-    	
-    		$ ln -s ../posix/print.h platform/use/print.h 
-	
-    	from the source root dir.
+	TARGET - target operating system to build for - view the platform support
+		list to know what to place here. The default is 'posix'.
 
-    	Then simply link the platform's main.c into the VM directory
-    	This is normally handled by the build script.
+	BUILD - the type of build to use - these include fast, debug, and
+		default. The default is 'default'. Please note fast builds
+		are not guaranteed to work on any machine besides the host
+		compiling.
 
-Platform layers
-    	a platform layer must provide two things
-    	  - a platform library
-    	  - a platform entry
-	
-    	the platform library must impliment 
-    	  - cmpstr (common)
-    	  - copystr (common)
-    	  - findnewline (common)
-    	  - getstrlen (common)
-    	  - skipspace (common)
-    	  - exitproc (cimmon)
-    	  - lalloc (common)
-    	  - lcalloc (common)
-    	  - lfree (common)
-    	  - lrsize (common)
-    	  - readfile
-    	  - print
-	
-    	most of this is implimented by
-    	the common platform-independent
-    	libraries 
-    	all of the ones not marked common
-    	must be implimented by the platform
-    	layer
-	
-    	the entry point must
-    	  - define the NULL value (usually just with 
-    		#define NULL ((void *)0) to be compliant with 2018 C)
-    	  - set up a stack
-    	  - get arguments
-    	  - provide main()
-    	  - call the main VM entry point (vmmain())
+	ANALYZER - the name of the static analyzer to use when building.
+		No default, not required.
+
+	CC - the selected C compiler to use - defaults to 'cc'.
+
+	PROGRAM - the path to place the finished binary - defaults to
+		'./bin/vm'.
+
+	CFLAGS - the C compiler flags to use before adding the build-specific
+		compiler flags. The default is '-std=c99'.
 
 Supported Platforms
-	As did the Zig version of Pebble, this has no tiers. 
-	All platforms are expected to fully self-host. However,
-	that last requirement is to be treated much stricter
-	than before, as platforms that cannot self-host should
-	not be listed as supported.
-
-	Self hosting is defined as being able to build from source
-	and the binary produced being valid with behavior the same
-	as the canonical platform. Cross-compiling is NOT supported
-	in any way, and should not be attempted.
-
-	The canonical platform is OpenBSD. Any platform
-	whos target build derives from the OpenBSD build 
-	(besides truly OpenBSD-specific pieces) shall
-	be consitored invalid and unsupported.
-
-	Working platforms include
-		OpenBSD 7.9 AMD64 GENERIC (baremetal, Intel Tigerlake), Clang 19.1.7 (base), openbsd, posix
-		NetBSD 11.0 AMD64 GENERIC (Qemu TCG, AMD K6), Clang 21.1.8 (pkgsrc), posix
-		FreeBSD 15.1 Release AMD64 GENERIC (QEMU TCG, AMD K6), Clang 19.1.7 (base), posix
-		DragonFlyBSD 6.4.2 Release AMD64 GENERIC (Qemu TCG, AMD K6), GCC 8.3 (base), posix
-		Linux 6.12.107+deb13 AMD64 Debian 13.6.0 (Qemu TCG, AMD K6), GCC 14.2.0 (apt), posix
-		
-	Failed platfomrs include
-		PureDarwin 20.5.0 (Qemu, Intel Ivy Bridge), Clang 21.1.8 (base), posix
-			VM: Undefined AMD64 symbols: _close$UNIX2003, _read$UNIX2003, _strtod$UNIX2003
-			test: Undefined AMD64 symbols: _strtod$UNIX2003
-
-			These issues for the VM have been fixed, so the virtual machine itself
-			compiles, however this has not been tested yet.
-
-	For a more up-to-date list, go to http://pebblevm.org/platforms.html
+	For a list of supported platforms, please go to http://pebblevm.org/platforms.html
 			
 
 Product of The Nuovi Orizzonti Company
