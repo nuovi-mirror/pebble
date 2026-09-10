@@ -1,6 +1,8 @@
-/* include this to get the main VM entry point */
-/* run vmmain to run the VM */
-/* main itself is owned by the platform layer */
+/* 
+ * include this to get the main VM entry point
+ * run vmmain to run the VM 
+ * main itself is owned by the platform layer 
+ */
 
 #include "../platform/use/print.h"
 #include "../platform/use/copystr.h"
@@ -111,8 +113,8 @@ Instruction makeIR
 		/* this is safe since it should have already been placed on
 		 * the persistent allocator */
 
-	char *linecpy = alloc(persistAlloc, sizeof(*line));
-	copymem(line, linecpy, sizeof(*line));
+	char *linecpy = alloc(persistAlloc, getstrlen(line)); /* getstrlen = size + 1 */
+	copymem(line, linecpy, getstrlen(line));
 
 	Instruction instr = { 0 };
 	char *cursor = line;
@@ -226,12 +228,10 @@ Value resolve_forced_eval
 (char *buff, unsigned long buffsize, Value *val, VarMap *vars, Arena *tempAlloc)
 {
 	valuetostr(buff, buffsize, *val);
-	Value *var = { 0 };
+	Value *var = getVar(vars, buff);
 
 	if (var == NULL)
 		var = val;
-	else
-		var = getVar(vars, buff);
 
 	if (var->Type == type_expr)
 		*val = evalexprnode(var->as.expr, vars);
@@ -277,23 +277,23 @@ unsigned long interpret
 
 			switch (instr->FirstOperand.Addressing) {
 				case addrmode_bare:
-					valuetostr(dest, sizeof(dest), instr->FirstOperand.Data);
+					valuetostr(dest, limits_instructions_varnamesize, instr->FirstOperand.Data);
 					break;
 				case addrmode_true_literal:
-					valuetostr(dest, sizeof(dest), instr->FirstOperand.Data);
+					valuetostr(dest, limits_instructions_varnamesize, instr->FirstOperand.Data);
 					break;
 				case addrmode_literal: {
 					char *buf = alloc(tempAlloc, limits_instructions_varnamesize);
 					val = resolve_literal(buf, limits_instructions_varnamesize, 
 							&instr->FirstOperand.Data, vars, tempAlloc);
-					valuetostr(dest, sizeof(dest), val);
+					valuetostr(dest, limits_instructions_varnamesize, val);
 					break;
 				}
 				case addrmode_forced_eval: {
 					char *buf = alloc(tempAlloc, limits_instructions_varnamesize);
 					val = resolve_forced_eval(buf, limits_instructions_varnamesize, 
 							&instr->FirstOperand.Data, vars, tempAlloc);
-					valuetostr(dest, sizeof(dest), val);
+					valuetostr(dest, limits_instructions_varnamesize, val);
 					break;
 				}
 	
@@ -386,7 +386,7 @@ unsigned long interpret
 						return *retpc;
 
 					/* is not a tail call */
-					StackFrame *frame = alloc(scratchAlloc, sizeof(StackFrame));
+					StackFrame *frame = alloc(persistAlloc, sizeof(StackFrame));
 					frame->return_pc = pc + 1; /* since we are on the func instruction */
 					frame->funcname = funcname;
 					pushframe(stack, frame); 
