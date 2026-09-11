@@ -1,8 +1,6 @@
 #include "functions.h"
 #include "hashmap.h"
 
-typedef SHashMap FuncMap;
-
 unsigned long hasFunc(FuncMap *m, char *str)		{ return mapHash(m, str); }
 FuncMap initFuncs(unsigned long cap)			{ return initHashMap(cap); }
 void   putFunc(FuncMap *m, char *key, void *value)	{ hashMapPut(m, key, value); }
