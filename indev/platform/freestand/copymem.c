@@ -3,7 +3,7 @@
 typedef unsigned long word; /* word size */
 
 #define wordsize sizeof(word)
-#define wordmask wordsize - 1
+#define wordmask (wordsize - 1)
 
 void *copymem
 (const void *src, void *dst, unsigned long len)
@@ -26,7 +26,7 @@ void *copymem
 	if (count > len)
 		count = len;
 
-	while (count--)
+	while (count != 0)
 	{
 		*chardst++ = *charsrc++;
 		--count;
