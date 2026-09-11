@@ -3,6 +3,7 @@
 #include "expressions.h"
 #include "variables.h"
 #include "cmpstr.h"
+#include "cmpstrn.h"
 #include "getnstrlen.h"
 #include "getstrlen.h"
 #include "main.h"
