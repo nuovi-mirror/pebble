@@ -1,112 +1,170 @@
-CC?=cc
-PROGRAM=bin/vm
-BUILD?=default
-TARGET?=posix
-PLATFORM?=$(TARGET)
-ANALYZER?=
-CFLAGS=-std=c99
-CPPFLAGS=
+.POSIX:
 
-# build type
-.if ${BUILD} == "default"
-CFLAGS+=-O2
+CC = cc
+PROGRAM = bin/vm
+BUILD = default
+TARGET = posix
+ANALYZER =
 
-.elif ${BUILD} == "debug"
-CFLAGS+=-g -O0 \
-	-Wall \
-	-Wextra \
-	-Wpedantic \
-	-Wshadow \
-	-Wconversion \
-	-Wsign-conversion \
-	-Wformat=2 \
-	-Wundef \
-	-Wcast-qual \
-	-Wcast-align \
-	-Wold-style-definition \
-	-Wswitch-enum \
-	-Wvla \
-	-Wdouble-promotion \
-	-Wfloat-equal
+CFLAGS = -std=c99
+CPPFLAGS = \
+	   -Iallocator \
+	   -Istate \
+	   -Ivm
 
-.elif ${BUILD} == "fast"
-CFLAGS+=-O3 \
-	-flto \
-	-fno-semantic-interposition \
-	-ffast-math \
-	-march=native \
-	-mtune=native
+# - build types - 
+#   standard build 
+BUILD_CFLAGS_default = \
+		       -O2
 
-.else
-.error Unknown build type: ${BUILD}
-.endif
+#   debugging builds
+BUILD_CFLAGS_debug = \
+		     -g \
+		     -O0 \
+		     -Wall \
+		     -Wextra \
+		     -Wpedantic \
+		     -Wshadow \
+		     -Wconversion \
+		     -Wsign-conversion \
+		     -Wformat=2 \
+		     -Wundef \
+		     -Wcast-qual \
+		     -Wcast-align \
+		     -Wold-style-definition \
+		     -Wswitch-enum \
+		     -Wvla \
+		     -Wdouble-promotion \
+		     -Wfloat-equal
 
-# common include paths
-CPPFLAGS+=-Iallocator
-CPPFLAGS+=-Istate
-CPPFLAGS+=-Ivm
+#   optimized builds
+#   please note this may not work on
+#   a machine that is not the machine
+#   compiling - do NOT use this type
+#   for cross-compiling or distributing
+BUILD_CFLAGS_fast = \
+		    -O3 \
+		    -flto \
+		    -fno-semantic-interposition \
+		    -ffast-math \
+		    -march=native \
+		    -mtune=native
 
-# platform
-.if ${PLATFORM} == "freestand"
-PLATFORM_DIRS=platform/freestand
-MAIN=platform/freestand/main.c
+CFLAGS = -std=c99 $(BUILD_CFLAGS_$(BUILD))
 
-.elif ${PLATFORM} == "c"
-PLATFORM_DIRS=platform/c platform/freestand
-MAIN=platform/c/main.c
+# - platform include paths -
+#   freestanding platform - needs nothing but itself
+PLATFORM_CPPFLAGS_freestand = \
+			      -Iplatform/freestand
 
-.elif ${PLATFORM} == "posix"
-PLATFORM_DIRS=platform/posix platform/c platform/freestand
-MAIN=platform/posix/main.c
+#   C platform - needs a hosted C99 LIBC
+#   and the freestand platform
+PLATFORM_CPPFLAGS_c = \
+		      -Iplatform/c \
+		      -Iplatform/freestand
 
-.elif ${PLATFORM} == "openbsd"
-PLATFORM_DIRS=platform/openbsd platform/posix platform/c platform/freestand
-MAIN=platform/openbsd/main.c
+#   POSIX platform - needs a POSIX libc
+#   and the C platform
+#   and the freestand platform
+PLATFORM_CPPFLAGS_posix = \
+			  -Iplatform/posix \
+			  -Iplatform/c \
+			  -Iplatform/freestand
 
-.elif ${PLATFORM} == "puredarwin"
-PLATFORM_DIRS=platform/puredarwin platform/posix platform/c platform/freestand
-MAIN=platform/puredarwin/main.c
+#   OpenBSD platform - needs an OpenBSD Kernel
+#   and the POSIX platform
+#   and the C platform
+#   and the freestand platform
+PLATFORM_CPPFLAGS_openbsd = \
+			    -Iplatform/openbsd \
+			    -Iplatform/posix \
+			    -Iplatform/c \
+			    -Iplatform/freestand
 
-.else
-.error Unknown platform: ${PLATFORM}
-.endif
+#   PureDarwin platform - needs a Darwin LIBC and Kernel
+#   and the POSIX platform
+#   and the C platform
+#   and the freestand platform
+PLATFORM_CPPFLAGS_puredarwin = \
+			       -Iplatform/puredarwin \
+			       -Iplatform/posix \
+			       -Iplatform/c \
+			       -Iplatform/freestand
 
-.for dir in ${PLATFORM_DIRS}
-CPPFLAGS+=-I${dir}
-.endfor
+CPPFLAGS = -Iallocator -Istate -Ivm $(PLATFORM_CPPFLAGS_$(TARGET))
 
-# platform sources
-PLATFORM_SRCS!=find ${PLATFORM_DIRS} -name '*.c' ! -name 'main.c' | \
-	awk -F/ '!seen[$$NF]++'
+#  - VM sources -
+VM_SRCS = \
+	  allocator/allocator.c \
+	  state/evaluator.c \
+	  state/expressions.c \
+	  state/functions.c \
+	  state/hashmap.c \
+	  state/instructionmapper.c \
+	  state/instructions.c \
+	  state/values.c \
+	  state/variables.c \
+	  vm/vm.c
 
-# VM sources
-VM_SRCS!=find allocator state vm -name '*.c'
+#  - freestand platform sources -
+FREESTAND_SRCS = \
+		 platform/freestand/cmpstr.c \
+		 platform/freestand/cmpstrn.c \
+		 platform/freestand/copystr.c \
+		 platform/freestand/findnewline.c \
+		 platform/freestand/getnstrlen.c \
+		 platform/freestand/getstrlen.c \
+		 platform/freestand/skipspace.c \
+		 platform/freestand/strsplit.c
 
-SRCS=${VM_SRCS} ${PLATFORM_SRCS} ${MAIN}
-OBJS=${SRCS:.c=.o}
-DEPS=${SRCS:.c=.d}
+#  - C platform sources -
+C_SRCS = \
+	 platform/c/copymem.c \
+	 platform/c/entry.c \
+	 platform/c/exitproc.c \
+	 platform/c/lalloc.c \
+	 platform/c/lcalloc.c \
+	 platform/c/lfree.c \
+	 platform/c/lrsize.c \
+	 platform/c/setmem.c \
+	 platform/c/snprint.c
 
-# targets
-all: ${PROGRAM}
+#  - POSIX platform sources -
+POSIX_SRCS = \
+	     platform/posix/print.c \
+	     platform/posix/readfile.c
 
-${PROGRAM}: ${OBJS}
-	@mkdir -p ${.TARGET:H}
-	${ANALYZER} ${CC} ${CFLAGS} ${LDFLAGS} -o ${.TARGET} ${OBJS}
+# platform inheritance logic
+PLATFORM_SRCS_freestand = $(FREESTAND_SRCS)
+PLATFORM_SRCS_c = $(C_SRCS) $(FREESTAND_SRCS)
+PLATFORM_SRCS_posix = $(POSIX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
+PLATFORM_SRCS_openbsd = $(POSIX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
+PLATFORM_SRCS_puredarwin = $(POSIX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
 
-# compilation
+# entry point
+MAIN_freestand = platform/freestand/main.c
+MAIN_c = platform/c/main.c
+MAIN_posix = platform/posix/main.c
+MAIN_openbsd = platform/openbsd/main.c
+MAIN_puredarwin = platform/puredarwin/main.c
+
+MAIN = $(MAIN_$(TARGET))
+
+SRCS = $(VM_SRCS) $(PLATFORM_SRCS_$(TARGET)) $(MAIN)
+OBJS = $(SRCS:.c=.o)
+
+# build the thing
+all: $(PROGRAM)
+
+$(PROGRAM): $(OBJS)
+	mkdir -p bin
+	$(ANALYZER)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS)
+
 .c.o:
-	${ANALYZER} ${CC} ${CPPFLAGS} ${CFLAGS} -MMD -MP -c -o ${.TARGET} ${.IMPSRC}
+	$(ANALYZER)$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
-# header dependencies
-.for dep in ${DEPS}
-.if exists(${dep})
-.include "${dep}"
-.endif
-.endfor
-
-# cleaning
+# clean up the thing
 clean:
-	rm -rf bin
-	rm -f ${OBJS} ${DEPS}
+	rm -f $(OBJS) $(PROGRAM)
 
 .PHONY: all clean
