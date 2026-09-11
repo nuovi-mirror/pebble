@@ -3,7 +3,7 @@
 CC = cc
 PROGRAM = bin/vm
 BUILD = default
-TARGET = posix
+TARGET = c
 ANALYZER =
 
 CFLAGS = -std=c99
@@ -63,14 +63,6 @@ PLATFORM_CPPFLAGS_c = \
 		      -Iplatform/c \
 		      -Iplatform/freestand
 
-#   POSIX platform - needs a POSIX libc
-#   and the C platform
-#   and the freestand platform
-PLATFORM_CPPFLAGS_posix = \
-			  -Iplatform/posix \
-			  -Iplatform/c \
-			  -Iplatform/freestand
-
 #   OpenBSD platform - needs an OpenBSD Kernel
 #   and the POSIX platform
 #   and the C platform
@@ -127,6 +119,8 @@ C_SRCS = \
 	 platform/c/lfree.c \
 	 platform/c/lrsize.c \
 	 platform/c/setmem.c \
+	 platform/c/print.c \
+	 platform/c/readfile.c \
 	 platform/c/snprint.c
 
 #  - POSIX platform sources -
@@ -157,7 +151,7 @@ OBJS = $(SRCS:.c=.o)
 all: $(PROGRAM)
 
 $(PROGRAM): $(OBJS)
-	mkdir -p bin
+	mkdir bin
 	$(ANALYZER)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS)
 
 .c.o:
@@ -165,6 +159,7 @@ $(PROGRAM): $(OBJS)
 
 # clean up the thing
 clean:
+	rm -rf bin
 	rm -f $(OBJS) $(PROGRAM)
 
 .PHONY: all clean
