@@ -1,0 +1,21 @@
+This is the bootstrap build system, a simple public domain POSIX make implementation,
+created by Ron Yorston (rmyorston) under the name 'pdpmake'. This software was re-licenced
+under our standard licence, The Nuovi Orizzonti Company Open License Version 3, viewable
+at http://thenuoviorizzonticompany.org/license/openlicense/3.txt
+However, you should probably be aware, since this software is public domain, you can
+simply choose to ignore this license. Although, since the new license is also public
+domain, there is not really a point in doing so. All pieces of code not dedicated
+to the public domain have been removed.
+
+To bootstrap this without make, simply run
+
+$ cc -o ../make *.c
+
+from this directory, or
+
+$ cc -o make bootstrap/*.c
+
+from the main source directroy.
+
+Thank you, Rom Yorston (https://github.com/rmyorston) for providing this wonderful
+piece of software.

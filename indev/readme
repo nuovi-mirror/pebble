@@ -4,19 +4,19 @@ CPebble
     	it is deemed stable enough to replace the current Zig version.
 	The older Zig version can be viewed at ../../old/ relative to
 	this current path.
-	Please note this does not fully impliment pebble schematics
+	Please note this does not fully implement pebble schematics
 	yet and is a work-in-progress, unlike the Zig version, which
 	is feature-complete.
-    	As the ZIg version, the licence can be viewed at
+    	As the Zig version, the license can be viewed at
 	http://thenuoviorizzonticompany.org/license/openlicense/3.txt
 
 Building from source
 	Building from source requires only a POSIX libc, a C99 compiler,
-	and a BSD make build system. Various variables can be used during
+	and a POSIX make build system. Various variables can be used during
 	building, such as
 
 	TARGET - target operating system to build for - view the platform support
-		list to know what to place here. The default is 'posix'.
+		list to know what to place here. The default is 'POSIX'.
 
 	BUILD - the type of build to use - these include fast, debug, and
 		default. The default is 'default'. Please note fast builds
@@ -33,6 +33,27 @@ Building from source
 
 	CFLAGS - the C compiler flags to use before adding the build-specific
 		compiler flags. The default is '-std=c99'.
+
+	If you do not have a POSIX make system, one was provided under the
+	bootstrap/ directory. The software from said directory was not written
+	by us, but instead by Ron Yorston as part of the pdpmake project. 
+
+	To bootstrap the build system, run the command
+
+	$ cc -o make bootstrap/*.c
+	
+	from the current directory. 
+
+	The readme file in the bootstrap/ directory may provide more information
+	on this software.
+
+	Software provided in this directory has been re-licensed under the same 
+	license as this project, as it was previously released to the public 
+	domain. All pieces of code that could not be re-licensed have been 
+	removed from the tree in this copy. 
+
+	Give a big thanks to him, he does some great work. Check him out at
+	https://github.com/rmyorston
 
 Supported Platforms
 	For a list of supported platforms, please go to http://pebblevm.org/platforms.html
