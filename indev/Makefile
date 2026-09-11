@@ -1,5 +1,3 @@
-.POSIX:
-
 CC = cc
 PROGRAM = bin/vm
 BUILD = default
@@ -8,6 +6,7 @@ ANALYZER =
 
 CFLAGS = -std=c99
 CPPFLAGS = \
+	   -Ih \
 	   -Iallocator \
 	   -Istate \
 	   -Ivm
@@ -50,7 +49,7 @@ BUILD_CFLAGS_fast = \
 		    -march=native \
 		    -mtune=native
 
-CFLAGS = -std=c99 $(BUILD_CFLAGS_$(BUILD))
+CFLAGS += $(BUILD_CFLAGS_$(BUILD))
 
 # - platform include paths -
 #   freestanding platform - needs nothing but itself
@@ -83,7 +82,7 @@ PLATFORM_CPPFLAGS_puredarwin = \
 			       -Iplatform/c \
 			       -Iplatform/freestand
 
-CPPFLAGS = -Iallocator -Istate -Ivm $(PLATFORM_CPPFLAGS_$(TARGET))
+CPPFLAGS += $(PLATFORM_CPPFLAGS_$(TARGET))
 
 #  - VM sources -
 VM_SRCS = \
@@ -107,11 +106,11 @@ FREESTAND_SRCS = \
 		 platform/freestand/getnstrlen.c \
 		 platform/freestand/getstrlen.c \
 		 platform/freestand/skipspace.c \
+		 platform/freestand/copymem.c \
 		 platform/freestand/strsplit.c
 
 #  - C platform sources -
 C_SRCS = \
-	 platform/c/copymem.c \
 	 platform/c/entry.c \
 	 platform/c/exitproc.c \
 	 platform/c/lalloc.c \
@@ -146,6 +145,7 @@ MAIN = $(MAIN_$(TARGET))
 
 SRCS = $(VM_SRCS) $(PLATFORM_SRCS_$(TARGET)) $(MAIN)
 OBJS = $(SRCS:.c=.o)
+DEPS = $(OBJS:.o=.d)
 
 # build the thing
 all: $(PROGRAM)
@@ -155,7 +155,9 @@ $(PROGRAM): $(OBJS)
 	$(ANALYZER)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS)
 
 .c.o:
-	$(ANALYZER)$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+	$(ANALYZER)$(CC) $(CPPFLAGS) $(CFLAGS) -MMD -MP -c -o $@ $<
+
+-include $(DEPS)
 
 # clean up the thing
 clean:
