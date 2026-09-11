@@ -75,7 +75,7 @@ Stack *initstack
 
 	Stack *stack = lalloc(sizeof(Stack));
 
-	if (stack == NULL || stack_items == NULL || capacity == NULL)
+	if (stack == NULL || stack_items == NULL || capacity == 0)
 	{
 		print("ERROR: INIT: CANNOT ALLOCATE A CALL STACK!\n");
 		exitproc(1);

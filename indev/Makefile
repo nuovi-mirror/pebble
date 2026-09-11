@@ -152,10 +152,11 @@ all: $(PROGRAM)
 
 $(PROGRAM): $(OBJS)
 	mkdir bin
-	$(ANALYZER)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS)
+	$(ANALYZER) $(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS)
 
 .c.o:
-	$(ANALYZER)$(CC) $(CPPFLAGS) $(CFLAGS) -MMD -MP -c -o $@ $<
+	rm -rf bin
+	$(ANALYZER) $(CC) $(CPPFLAGS) $(CFLAGS) -MMD -MP -c -o $@ $<
 
 -include $(DEPS)
 

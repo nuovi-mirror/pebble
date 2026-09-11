@@ -247,7 +247,7 @@ unsigned long interpret
 	switch (instr->Opcode) {
 		case Opcode_New: {
 			char *dest = alloc(tempAlloc, limits_instructions_varnamesize);
-			char *data = alloc(tempAlloc, limits_instruction_new_datasize);
+			/* XXX remove this line char *data = alloc(tempAlloc, limits_instruction_new_datasize); */
 			Value val;
 
 			switch (instr->FirstOperand.Addressing) {
@@ -388,7 +388,8 @@ unsigned long interpret
 			if (stack->count != 0) 
 			{
 				StackFrame frame = popframe(stack);
-				return pc = frame.return_pc;
+				/* XXX remove this line return pc = frame.return_pc; */
+				return frame.return_pc;
 			}
 			break;
 
