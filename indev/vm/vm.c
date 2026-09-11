@@ -239,6 +239,28 @@ Value resolve_forced_eval
 	return resolve_literal(buff, buffsize, val, vars, tempAlloc);
 }
 
+unsigned long resolvefunction
+(unsigned long pc, FuncMap *funcs, Stack *stack, Instruction *program, Arena *scratchAlloc,
+ const char *funcname, unsigned long instruction_count)
+{
+	unsigned long *retpc = getFunc(funcs, funcname);
+	int tpos = (pc + 1 < instruction_count)
+		&& program[pc + 1].Opcode == Opcode_End;
+	int scall = (stack->count != 0) 
+		&& cmpstr(stack->items[stack->count - 1].funcname, funcname) == 0;
+
+	if (tpos && scall) /* tail-call */
+		return *retpc;
+
+	/* is not a tail call */
+	StackFrame *frame = alloc(scratchAlloc, sizeof(StackFrame));
+	frame->return_pc = pc + 1; /* since we are on the func instruction */
+	frame->funcname = funcname;
+	pushframe(stack, frame); 
+	return *retpc;
+}
+	
+
 /* instruction interpreter - instruction-by-instruction loop of execution */
 unsigned long interpret
 (Instruction *instr, Instruction *program,  unsigned long instruction_count, VarMap *vars, Stack *stack, 
@@ -341,33 +363,55 @@ unsigned long interpret
 			break;
 		}
 
-		case Opcode_If:
-			/* XXX add If support */
+		case Opcode_If: {
+			char *funcname = alloc(persistAlloc, limits_functions_namesize);
+
+			switch(instr->FirstOperand.Addressing) {
+				case addrmode_bare: 
+					valuetostr(funcname, limits_functions_namesize, instr->FirstOperand.Data);
+					break;
+
+
+				/* XXX handle addressing mode literal */
+				/* XXX handle addressing mode true_literal */
+				/* XXX handle addressing mode pointer */
+				/* XXX handle addressing mode forced_eval */
+				default:
+					print("ERROR: INTERPRETER: IF: UNSUPPORTED ADDRESSING MODE!\n");
+					exitproc(1);
+					break;
+			}
+
+			switch(instr->SecondOperand.Addressing) {
+				case addrmode_literal: {
+					char *buff = alloc(tempAlloc, limits_functions_namesize);
+					Value fname = resolve_literal(buff, limits_functions_namesize, 
+							&instr->SecondOperand.Data, vars, tempAlloc);
+					valuetostr(funcname, limits_functions_namesize, fname);
+					break;
+				}
+	
+				/* XXX handle addressing mode true_literal */
+				/* XXX handle addressing mode bare */
+				/* XXX handle addressing mode pointer */
+				/* XXX handle addressing mode forced_eval */
+				default:
+					print("ERROR: INTERPRETER: IF: UNSUPPORTED ADDRESSING MODE!\n");
+					exitproc(1);
+					break;
+
+			}		
 			break;
+
+			return resolvefunction(pc, funcs, stack, program, scratchAlloc, funcname, instruction_count);
+		}
 
 		case Opcode_Call: {
 			char *funcname = alloc(persistAlloc, limits_functions_namesize);
-			valuetostr(funcname, limits_functions_namesize, instr->FirstOperand.Data);
 
 			switch(instr->FirstOperand.Addressing) {
-				case addrmode_bare: {
-					unsigned long *retpc = getFunc(funcs, funcname);
-					int tpos = (pc + 1 < instruction_count)
-						&& program[pc + 1].Opcode == Opcode_End;
-					int scall = (stack->count != 0) 
-						&& cmpstr(stack->items[stack->count - 1].funcname, funcname) == 0;
-
-					if (tpos && scall) /* tail-call */
-						return *retpc;
-
-					/* is not a tail call */
-					StackFrame *frame = alloc(scratchAlloc, sizeof(StackFrame));
-					frame->return_pc = pc + 1; /* since we are on the func instruction */
-					frame->funcname = funcname;
-					pushframe(stack, frame); 
-					return *retpc;
-					break;
-				}
+				case addrmode_bare:
+					valuetostr(funcname, limits_functions_namesize, instr->FirstOperand.Data);
 
 				/* XXX handle addressing mode literal */
 				/* XXX handle addressing mode true_literal */
@@ -378,6 +422,8 @@ unsigned long interpret
 					exitproc(1);
 			}
 			break;
+			
+			return resolvefunction(pc, funcs, stack, program, scratchAlloc, funcname, instruction_count);
 		}
 
 		case Opcode_Return:
@@ -430,7 +476,7 @@ unsigned long interpret
 				exitproc(1);
 			}
 			
-			Value data = *stored; /* assume it exists - breaks if it does not */
+			Value data = *stored;
 
 			print("_PRINT2 (INTERNAL INSTRUCTION): ");
 			print("TYPE: ");
@@ -571,7 +617,8 @@ int vmmain
 	unsigned long pc = 0;
 	while (pc < current_instruction_count)
 	{
-		pc = interpret(&program[pc], program, current_instruction_count, &vars, stack, &funcs, pc, persistAlloc, scratchAlloc, tempAlloc);
+		pc = interpret(&program[pc], program, current_instruction_count, &vars, stack, &funcs, pc, 
+				persistAlloc, scratchAlloc, tempAlloc);
 		resetAllocator(scratchAlloc);
 		resetAllocator(tempAlloc);
 	}

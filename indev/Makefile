@@ -155,7 +155,6 @@ $(PROGRAM): $(OBJS)
 	$(ANALYZER) $(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS)
 
 .c.o:
-	rm -rf bin
 	$(ANALYZER) $(CC) $(CPPFLAGS) $(CFLAGS) -MMD -MP -c -o $@ $<
 
 -include $(DEPS)
@@ -163,6 +162,6 @@ $(PROGRAM): $(OBJS)
 # clean up the thing
 clean:
 	rm -rf bin
-	rm -f $(OBJS) $(PROGRAM)
+	rm -f $(OBJS) $(DEPS) $(PROGRAM)
 
 .PHONY: all clean
