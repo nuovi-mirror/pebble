@@ -181,8 +181,11 @@ Value resolve_literal
             exitproc(1);
         }
 
+	/* XXX hotpatch 
         *val = evalexprnode(val->as.expr, vars);
-        return *val;
+        return *val; */
+
+	return evalexprnode(val->as.expr, vars); /* XXX hotpatch, also */
     }
 
     char buf[32];
@@ -207,8 +210,11 @@ Value resolve_literal
         exitproc(1);
     }
 
-    *val = evalexprdata(tree, vars);
-    return *val;
+    /* XXX hotpatch 
+    *val = evalexprdata(tree, vars); 
+    return *val; */
+
+    return evalexprdata(tree, vars); /* XXX hotpatch, also */
 }
 	
 Value resolve_forced_eval

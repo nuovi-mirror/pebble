@@ -1,10 +1,10 @@
-New c '2'
-New m '5'
+New c '1'
+New m '100000'
 
 Func l
-New c "c * c"
-_PRINT2 c
+New c "c + 1"
 If l "c < m"
 End
 
 Call l
+_PRINT2 c
