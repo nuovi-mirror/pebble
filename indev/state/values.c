@@ -45,46 +45,79 @@ Value valuetoword(Value v, VarMap *vars) {
 	}
 }
 
-Value guessvaluetype(char *data) {
+Value guessvaluetype
+(char *data)
+{
 	Value out = { 0 };
-	int consumed;
+	unsigned long i = 0;
+	int negative = 0;
+	int dot = 0;
 
-	if (data[0] == '-') {
-		long value;
-
-		/* check of sword */
-		if (sscanf(data, "%ld%n", &value, &consumed) == 1 &&
-				data[consumed] == '\0') {
-			out.Type = type_sword;
-			out.as.sword = strtol(data, NULL, 10);
-			return out;
-		}
-	} else if (data[0] == '0') {
+	/* empty string */
+	if (data[0] == '\0')
 		goto string;
-	} else {
-		unsigned long value;
 
-		/* check if word */
-		if (sscanf(data, "%lu%n", &value, &consumed) == 1 &&
-				data[consumed] == '\0') {
-			out.Type = type_word;
-			out.as.word = strtoul(data, NULL, 10);
-			return out;
-		}
+	/* optional negative sign */
+	if (data[0] == '-')
+	{
+		negative = 1;
+		i++;
+
+		/* '-' by itself */
+		if (data[i] == '\0')
+			goto string;
+
+		if (data[1] == '0')
+			goto string;
 	}
 
-	double value;
+	/* validate the numeric form */
+	for (; data[i] != '\0'; i++)
+	{
+		if (data[i] == '.')
+		{
+			/* only one decimal point */
+			if (dot)
+				goto string;
 
-	/* check if float */
-	if (sscanf(data, "%lf%n", &value, &consumed) == 1 &&
-			data[consumed] == '\0') {
+			dot = 1;
+			continue;
+		}
+
+		/* anything other than a digit */
+		if (data[i] < '0' || data[i] > '9')
+			goto string;
+	}
+
+	/*
+	 * Leading zero without a decimal point is a string.
+	 * This makes things like "01" usable as identifiers.
+	 */
+	if (data[0] == '0' && !dot)
+		goto string;
+
+	/* decimal number */
+	if (dot)
+	{
 		out.Type = type_flt;
 		out.as.flt = strtod(data, NULL);
 		return out;
 	}
 
+	/* negative integer */
+	if (negative)
+	{
+		out.Type = type_sword;
+		out.as.sword = strtol(data, NULL, 10);
+		return out;
+	}
+
+	/* positive integer */
+	out.Type = type_word;
+	out.as.word = strtoul(data, NULL, 10);
+	return out;
+
 string:
-	/* assume string after this point since all others fail */
 	out.Type = type_str;
 	out.as.str = data;
 	return out;
