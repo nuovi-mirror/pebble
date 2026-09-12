@@ -475,6 +475,12 @@ unsigned long interpret
 				case type_expr: print("ERROR: THIS CANNOT HANDLE EXPRESSIONS!\n"); exitproc(1); 			break;
 				case type_null: print("ERROR: THIS CANNOT HANDLE NULL TYPES!\n"); exitproc(1); 			break;
 			}
+			if (getstrlen(buf) >= 32)
+			{
+				print("\nERROR: INTERPRETER: _PRINT (INTERNAL INSTRUCTION): DATA TOO LONG!\n");
+				exitproc(1);
+			}
+
 			print(buf);
 			print("\n");
 
@@ -499,10 +505,13 @@ unsigned long interpret
 			print("TYPE: ");
 	
 			switch (data.Type) {
-				case type_word:	print("WORD,  DATA: ");	valuetostr(buf, sizeof(buf), data);	break;
-				case type_sword:print("SWORD, DATA: "); valuetostr(buf, sizeof(buf), data);	break;
-				case type_str:	print("STR,   DATA: ");	copystr(data.as.str, buf);		break;
-				case type_flt:	print("FLT,   DATA: ");	valuetostr(buf, sizeof(buf), data);	break;
+				case type_word:	print("WORD,  DATA: ");	
+						valuetostr(buf, limits_instructions_varnamesize, data);	break;
+				case type_sword:print("SWORD, DATA: "); 
+						valuetostr(buf, limits_instructions_varnamesize, data);	break;
+				case type_str:	print("STR,   DATA: ");	copystr(data.as.str, buf);	break;
+				case type_flt:	print("FLT,   DATA: ");	
+						valuetostr(buf, limits_instructions_varnamesize, data);	break;
 				case type_expr: print("ERROR: THIS CANNOT HANDLE EXPRESSIONS!\n"); exitproc(1);	break;
 				case type_null: print("ERROR: THIS CANNOT HANDLE NULL TYPES!\n"); exitproc(1); 	break;
 			}

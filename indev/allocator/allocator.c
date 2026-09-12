@@ -1,6 +1,3 @@
-#ifndef ALLOCATOR_C_
-#define ALLOCATOR_C_
-
 #include "allocator.h"
 #include "print.h"
 #include "exitproc.h"
@@ -51,15 +48,15 @@ void *alloc
 	unsigned long padding = misalign ? (ARENA_ALIGNMENT - misalign) : 0;
 						/* bytes needed to bring curr_ptr up to
 						 * an aligned address */
-	if (used + size > arena->size) 
+	if (used + padding + size > arena->size) 
 	{
 		print("ERROR: ALLOCATOR: FATAL: OUT OF MEMORY!\n");
 		exitproc(1);			/* exit with OOM error */
 	}
 
-	char *result = arena->curr_ptr;
-	arena->curr_ptr = arena->curr_ptr + size + padding;
-						/* set the new pointer */
+	arena->curr_ptr += padding;
+	void *result = arena->curr_ptr;
+	arena->curr_ptr += size;
 	return result;
 }
 
@@ -91,6 +88,3 @@ unsigned long getAllocatorSizeUsed
 unsigned long getAllocatorSizeRemaining
 (struct Arena *arena)
 { return arena->size - getAllocatorSizeUsed(arena); }
-
-#endif
-
