@@ -28,22 +28,6 @@
 #include "instructionmapper.h"
 #include "main.h"
 
-/* todo list
- * XXX add addressing mode pointer to the New instruction operand one in the interperter
- * XXX add addressing mode pointer to the New instruction operand two in the interpreter
- * XXX add addressing mode bare to the New instruction operand two in the interpreter
- * XXX add the If instruction to the interpreter
- * XXX add addressing mode forced_eval to the Call instruction operand one in the interperter
- * XXX add addressing mode pointer to the Call instruction operand one in the interperter
- * XXX add addressing mode literal to the Call instruction operand one in the interperter
- * XXX add addressing mode true_literal to the Call instruction operand one in the interperter
- * XXX add addressing mode literal to the Func instruction operand one in the interpreter
- * XXX add addressing mode true_literal to the Func instruction operand one in the interpreter
- * XXX add addressing mode pointer to the Func instruction operand one in the interpreter
- * XXX add addressing mode forced_eval to the Func instruction operand one in the interpreter
- * XXX finish the limits bits 
- */
-
 /* used to parse an instruction operand - guesses the type
  * and addressing mode */
 int parseoperand
@@ -144,7 +128,7 @@ Instruction makeIR
 
 	parseoperand(&cursor, &instr.FirstOperand, persistAlloc);
 	parseoperand(&cursor, &instr.SecondOperand, persistAlloc);
-	/* third operand unused for now */
+	/* XXX third operand unused for now */
 
 	/* the instruction has been made 
 	 * the instruction does not exist on the mapper yet 
@@ -244,6 +228,12 @@ unsigned long resolvefunction
  const char *funcname, unsigned long instruction_count)
 {
 	unsigned long *retpc = getFunc(funcs, funcname);
+	if (retpc == NULL)
+	{
+		print("ERROR: HELPER RESOLVEFUNC: UNKNOWN FUNCTION!\n");
+		exitproc(1);
+	}
+	
 	int tpos = (pc + 1 < instruction_count)
 		&& program[pc + 1].Opcode == Opcode_End;
 	int scall = (stack->count != 0) 
@@ -269,7 +259,6 @@ unsigned long interpret
 	switch (instr->Opcode) {
 		case Opcode_New: {
 			char *dest = alloc(tempAlloc, limits_instructions_varnamesize);
-			/* XXX remove this line char *data = alloc(tempAlloc, limits_instruction_new_datasize); */
 			Value val;
 
 			switch (instr->FirstOperand.Addressing) {
@@ -357,7 +346,6 @@ unsigned long interpret
 					exitproc(1);
 					break;
 			}
-			
 			return findend(program, instruction_count, pc) + 1; /* find the End statement for this
 									     * function and goto it */
 			break;
@@ -365,6 +353,7 @@ unsigned long interpret
 
 		case Opcode_If: {
 			char *funcname = alloc(persistAlloc, limits_functions_namesize);
+			Value result;
 
 			switch(instr->FirstOperand.Addressing) {
 				case addrmode_bare: 
@@ -385,9 +374,8 @@ unsigned long interpret
 			switch(instr->SecondOperand.Addressing) {
 				case addrmode_literal: {
 					char *buff = alloc(tempAlloc, limits_functions_namesize);
-					Value fname = resolve_literal(buff, limits_functions_namesize, 
+					result = resolve_literal(buff, limits_functions_namesize, 
 							&instr->SecondOperand.Data, vars, tempAlloc);
-					valuetostr(funcname, limits_functions_namesize, fname);
 					break;
 				}
 	
@@ -401,9 +389,12 @@ unsigned long interpret
 					break;
 
 			}		
-			break;
+			if (valuetoword(result).as.word == 0)
+				return resolvefunction(pc, funcs, stack, program, scratchAlloc, funcname, instruction_count);
+			else
+				return pc++;
 
-			return resolvefunction(pc, funcs, stack, program, scratchAlloc, funcname, instruction_count);
+			break;
 		}
 
 		case Opcode_Call: {
@@ -412,6 +403,7 @@ unsigned long interpret
 			switch(instr->FirstOperand.Addressing) {
 				case addrmode_bare:
 					valuetostr(funcname, limits_functions_namesize, instr->FirstOperand.Data);
+					break;
 
 				/* XXX handle addressing mode literal */
 				/* XXX handle addressing mode true_literal */
@@ -420,10 +412,10 @@ unsigned long interpret
 				default:
 					print("ERROR: INTERPRETER: CALL: UNSUPPORTED ADDRESSING MODE!\n");
 					exitproc(1);
+					break;
 			}
-			break;
-			
 			return resolvefunction(pc, funcs, stack, program, scratchAlloc, funcname, instruction_count);
+			break;
 		}
 
 		case Opcode_Return:

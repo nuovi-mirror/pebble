@@ -24,9 +24,8 @@ typedef struct Value {
 	}as;
 } Value;
 
-/* moved to expressions.h */
 int valuetostr(char *buff, unsigned long buffsize, Value v);
-
+Value valuetoword(Value v);
 Value guessvaluetype(char *data);
 
 #endif

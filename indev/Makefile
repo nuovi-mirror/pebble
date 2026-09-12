@@ -120,6 +120,7 @@ C_SRCS = \
 	 platform/c/setmem.c \
 	 platform/c/print.c \
 	 platform/c/readfile.c \
+	 platform/c/str2ul.c \
 	 platform/c/snprint.c
 
 #  - POSIX platform sources -
@@ -151,6 +152,7 @@ DEPS = $(OBJS:.o=.d)
 all: $(PROGRAM)
 
 $(PROGRAM): $(OBJS)
+	rm -rf bin
 	mkdir bin
 	$(ANALYZER) $(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS)
 

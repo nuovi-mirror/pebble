@@ -48,9 +48,6 @@ struct ExprNode
 	ExprNodeData right;
 };
 
-/* moved from values.h */
-int valuetostr(char *buff, unsigned long buffsize, Value v);
-
 typedef struct
 {
 	const char *Sym;

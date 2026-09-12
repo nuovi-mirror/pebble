@@ -30,27 +30,6 @@ ExprOperator ExprOperators[] =
 	{ "s++", 	ExprOp_StringConcat, 		3 },
 };
 
-/* moved from values.h */
-int valuetostr(char *buff, unsigned long buffsize, Value v) {
-	switch (v.Type) {
-		case type_word:  return snprint(buff, buffsize, "%lu", v.as.word);
-		case type_sword: return snprint(buff, buffsize, "%ld", v.as.sword);
-		case type_flt:   return snprint(buff, buffsize, "%lf", v.as.flt);
-		case type_str:   return snprint(buff, buffsize, "%s", v.as.str);
-		case type_null:  if (buffsize) copystr(buff, "NULL"); return 0;
-		case type_expr:  
-			if (v.as.expr == NULL || v.as.expr->Source == NULL)
-			{
-				if (buffsize) buff[0] = '\0'; /* never leave buff unterminated */
-				return -1;
-			}
-			return snprint(buff, buffsize, "%s", v.as.expr->Source);
-		default:	 
-			if (buffsize) buff[0] = '\0'; /* never leave buff unterminated */
-			return -1; /* should never be hit */
-	}
-}
-
 const ExprOperator *strtooperator
 (const char *str)
 {
@@ -170,7 +149,6 @@ ExprNode *newexprnode
 	return n;
 }
 
-ExprNodeData parseexpr(ExprParser *p, int maxPrec, Arena *arena);
 
 ExprNodeData parseprimary
 (ExprParser *p, Arena *arena)

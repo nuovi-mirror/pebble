@@ -41,7 +41,7 @@ Func a
 _PRINT funca
 End
 
-If a "3 > 1"
+If a "1 > 0"
 
 Call a
 
