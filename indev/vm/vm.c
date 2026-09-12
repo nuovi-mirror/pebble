@@ -406,7 +406,7 @@ unsigned long interpret
 		}
 
 		case Opcode_Call: {
-			char *funcname = alloc(persistAlloc, limits_functions_namesize);
+			char *funcname = alloc(scratchAlloc, limits_functions_namesize);
 
 			switch(instr->FirstOperand.Addressing) {
 				case addrmode_bare:
