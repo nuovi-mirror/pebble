@@ -15,23 +15,23 @@ Building from source
 	and a POSIX make build system. Various variables can be used during
 	building, such as
 
-	TARGET - target operating system to build for - view the platform support
+	target - target operating system to build for - view the platform support
 		list to know what to place here. The default is 'POSIX'.
 
-	BUILD - the type of build to use - these include fast, debug, and
+	build - the type of build to use - these include fast, debug, and
 		default. The default is 'default'. Please note fast builds
 		are not guaranteed to work on any machine besides the host
 		compiling.
 
-	ANALYZER - the name of the static analyzer to use when building.
+	analyser - the name of the static analyzer to use when building.
 		No default, not required.
 
-	CC - the selected C compiler to use - defaults to 'cc'.
+	cc - the selected C compiler to use - defaults to 'cc'.
 
-	PROGRAM - the path to place the finished binary - defaults to
+	program - the path to place the finished binary - defaults to
 		'./bin/vm'.
 
-	CFLAGS - the C compiler flags to use before adding the build-specific
+	cflags - the C compiler flags to use before adding the build-specific
 		compiler flags. The default is '-std=c99'.
 
 	If you do not have a POSIX make system, one was provided under the
