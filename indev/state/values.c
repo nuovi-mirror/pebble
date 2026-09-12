@@ -59,6 +59,8 @@ Value guessvaluetype(char *data) {
 			out.as.sword = strtol(data, NULL, 10);
 			return out;
 		}
+	} else if (data[0] == '0') {
+		goto string;
 	} else {
 		unsigned long value;
 
@@ -81,6 +83,7 @@ Value guessvaluetype(char *data) {
 		return out;
 	}
 
+string:
 	/* assume string after this point since all others fail */
 	out.Type = type_str;
 	out.as.str = data;
