@@ -377,7 +377,7 @@ unsigned long interpret
 		}
 
 		case Opcode_If: {
-			char *funcname = alloc(persistAlloc, limits_functions_namesize);
+			char *funcname = alloc(scratchAlloc, limits_functions_namesize);
 			Value result;
 
 			switch(instr->FirstOperand.Addressing) {
