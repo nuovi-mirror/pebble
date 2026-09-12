@@ -1,6 +1,8 @@
 #ifndef STATE_VALUES_H_
 #define STATE_VALUES_H_
 
+#include "variables.h"
+
 typedef struct ExprNode ExprNode; /* from expressions.h */
 
 typedef enum {
@@ -25,7 +27,7 @@ typedef struct Value {
 } Value;
 
 int valuetostr(char *buff, unsigned long buffsize, Value v);
-Value valuetoword(Value v);
+Value valuetoword(Value v, VarMap *vars);
 Value guessvaluetype(char *data);
 
 #endif

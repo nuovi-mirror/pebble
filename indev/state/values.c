@@ -8,6 +8,7 @@
 #include "main.h"
 #include "expressions.h"
 #include "evaluator.h"
+#include "variables.h"
 
 int valuetostr(char *buff, unsigned long buffsize, Value v) {
 	switch (v.Type) {
@@ -29,7 +30,7 @@ int valuetostr(char *buff, unsigned long buffsize, Value v) {
 	}
 }
 
-Value valuetoword(Value v) {
+Value valuetoword(Value v, VarMap *vars) {
 	switch (v.Type) {
 		case type_word:  return v;
 		case type_sword: return (struct Value){ type_word, (unsigned long)v.as.sword };
@@ -38,8 +39,7 @@ Value valuetoword(Value v) {
 		case type_null:  return (struct Value){ type_word, 0 }; 
 				 /* XXX  ¯\_(°▽°)_/¯  idk what to put here ngl */
 		case type_expr:  
-			/* XXX evaluate */
-			return (struct Value){ type_word, 0 };
+			return evalexprnode(v.as.expr, vars);
 		default:	 
 			return (struct Value){ type_word, -1 }; /* should never be hit */
 	}

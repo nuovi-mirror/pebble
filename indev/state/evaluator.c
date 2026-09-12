@@ -137,7 +137,7 @@ static Value mkbool
 {
 	Value v;
 	v.Type = type_word;
-	v.as.word = b != 0;
+	v.as.word = b == 0;
 	return v;
 }
 

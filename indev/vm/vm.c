@@ -389,10 +389,10 @@ unsigned long interpret
 					break;
 
 			}		
-			if (valuetoword(result).as.word == 0)
+			if (valuetoword(result, vars).as.word == 0)
 				return resolvefunction(pc, funcs, stack, program, scratchAlloc, funcname, instruction_count);
 			else
-				return pc++;
+				return pc + 1;
 
 			break;
 		}

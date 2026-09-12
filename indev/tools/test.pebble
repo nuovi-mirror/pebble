@@ -42,7 +42,7 @@ _PRINT funca
 End
 
 If a "1 > 0"
-
+If a "1 < 0"
 Call a
 
 Func b 
