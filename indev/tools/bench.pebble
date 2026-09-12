@@ -1,5 +1,5 @@
 New c '1'
-New m '999999'
+New m '9999999'
 
 Func l
 New c "c + 1"

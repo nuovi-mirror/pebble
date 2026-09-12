@@ -322,20 +322,37 @@ unsigned long interpret
 					break;
 			}
 
-			Value *valptr = alloc(persistAlloc, sizeof(val));
-			*valptr = val;
-			unsigned long namelen = getstrlen(dest);
-			char *name = alloc(persistAlloc, namelen + 1); /* +1 for the null terminator */
-			copymem(dest, name, namelen);
-			name[namelen] = '\0';
-		
-			putVar(vars, name, valptr);
+ 			Value *existing = getVar(vars, dest);
+
+ 			if (existing != NULL)
+ 			{
+ 				/* variable already exists - update in place rather than
+ 				 * leaking a fresh Value + name into persistAlloc on every
+ 				 * reassignment. matters a lot once tail-call recursion
+ 				 * lets a loop body run for millions of iterations - each
+ 				 * one would otherwise permanently claim more of the arena,
+ 				 * even though nothing about the program actually needs
+ 				 * that memory to stick around */
+ 				*existing = val;
+ 			}
+ 			else
+ 			{
+ 				Value *valptr = alloc(persistAlloc, sizeof(val));
+ 				*valptr = val;
+ 				unsigned long namelen = getstrlen(dest);
+ 				char *name = alloc(persistAlloc, namelen + 1); /* +1 for the null terminator */
+ 				copymem(dest, name, namelen);
+ 				name[namelen] = '\0';
+
+ 				putVar(vars, name, valptr);
+ 			}
+
 
 			break;
 		}
 
 		case Opcode_Func: {
-			char *funcname = alloc(persistAlloc, limits_functions_namesize);
+			char *funcname = alloc(scratchAlloc, limits_functions_namesize);
 			valuetostr(funcname, limits_functions_namesize, instr->FirstOperand.Data);
 			switch(instr->FirstOperand.Addressing) {
 				case addrmode_bare: {
