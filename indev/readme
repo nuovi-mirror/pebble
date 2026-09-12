@@ -11,7 +11,7 @@ CPebble
 	http://thenuoviorizzonticompany.org/license/openlicense/3.txt
 
 Building from source
-	Building from source requires only a POSIX libc, a C99 compiler,
+	Building from source requires only a C99 libc, a C99 compiler,
 	and a POSIX make build system. Various variables can be used during
 	building, such as
 
