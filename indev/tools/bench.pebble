@@ -1,0 +1,10 @@
+New c '2'
+New m '5'
+
+Func l
+New c "c * c"
+_PRINT2 c
+If l "c < m"
+End
+
+Call l

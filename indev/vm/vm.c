@@ -287,6 +287,7 @@ unsigned long interpret
 				default:
 					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING MODE ON OPERAND ONE\n");
 					exitproc(1);
+					break;
 			}
 
 			switch (instr->SecondOperand.Addressing) {
@@ -312,6 +313,7 @@ unsigned long interpret
 				default:
 					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING MODE ON OPERAND TWO\n");
 					exitproc(1);
+					break;
 			}
 
 			Value *valptr = alloc(persistAlloc, sizeof(val));
