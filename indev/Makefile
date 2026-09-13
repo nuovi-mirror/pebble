@@ -1,10 +1,13 @@
-CC = cc
-PROGRAM = bin/vm
-BUILD = default
-TARGET = c
-ANALYZER =
+# variables starting with a lowercase char may be
+# modified by the user
 
-CFLAGS = -std=c99
+cc = cc
+program = bin/vm
+build = default
+target = c
+analzyer =
+
+cflags = -std=c99
 CPPFLAGS = \
 	   -Ih \
 	   -Iallocator \
@@ -49,7 +52,7 @@ BUILD_CFLAGS_fast = \
 		    -march=native \
 		    -mtune=native
 
-CFLAGS += $(BUILD_CFLAGS_$(BUILD))
+cflags += $(BUILD_CFLAGS_$(build))
 
 # - platform include paths -
 #   freestanding platform - needs nothing but itself
@@ -82,7 +85,7 @@ PLATFORM_CPPFLAGS_puredarwin = \
 			       -Iplatform/c \
 			       -Iplatform/freestand
 
-CPPFLAGS += $(PLATFORM_CPPFLAGS_$(TARGET))
+CPPFLAGS += $(PLATFORM_CPPFLAGS_$(target))
 
 #  - VM sources -
 VM_SRCS = \
@@ -142,28 +145,28 @@ MAIN_posix = platform/posix/main.c
 MAIN_openbsd = platform/openbsd/main.c
 MAIN_puredarwin = platform/puredarwin/main.c
 
-MAIN = $(MAIN_$(TARGET))
+MAIN = $(MAIN_$(target))
 
-SRCS = $(VM_SRCS) $(PLATFORM_SRCS_$(TARGET)) $(MAIN)
+SRCS = $(VM_SRCS) $(PLATFORM_SRCS_$(target)) $(MAIN)
 OBJS = $(SRCS:.c=.o)
 DEPS = $(OBJS:.o=.d)
 
 # build the thing
-all: $(PROGRAM)
+all: $(program)
 
-$(PROGRAM): $(OBJS)
+$(program): $(OBJS)
 	rm -rf bin
 	mkdir bin
-	$(ANALYZER) $(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS)
+	$(analzyer) $(cc) $(cflags) $(LDFLAGS) -o $@ $(OBJS)
 
 .c.o:
-	$(ANALYZER) $(CC) $(CPPFLAGS) $(CFLAGS) -MMD -MP -c -o $@ $<
+	$(analyzer) $(cc) $(CPPFLAGS) $(cflags) -MMD -MP -c -o $@ $<
 
 -include $(DEPS)
 
 # clean up the thing
 clean:
 	rm -rf bin
-	rm -f $(OBJS) $(DEPS) $(PROGRAM)
+	rm -f $(OBJS) $(DEPS) $(program)
 
 .PHONY: all clean
