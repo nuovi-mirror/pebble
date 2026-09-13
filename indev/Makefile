@@ -10,9 +10,7 @@ analzyer =
 cflags = -std=c99
 CPPFLAGS = \
 	   -Ih \
-	   -Iallocator \
-	   -Istate \
-	   -Ivm
+	   -Iffi
 
 # - build types - 
 #   standard build 
@@ -71,7 +69,6 @@ PLATFORM_CPPFLAGS_c = \
 #   and the freestand platform
 PLATFORM_CPPFLAGS_openbsd = \
 			    -Iplatform/openbsd \
-			    -Iplatform/posix \
 			    -Iplatform/c \
 			    -Iplatform/freestand
 
@@ -81,7 +78,6 @@ PLATFORM_CPPFLAGS_openbsd = \
 #   and the freestand platform
 PLATFORM_CPPFLAGS_puredarwin = \
 			       -Iplatform/puredarwin \
-			       -Iplatform/posix \
 			       -Iplatform/c \
 			       -Iplatform/freestand
 
@@ -126,10 +122,11 @@ C_SRCS = \
 	 platform/c/str2ul.c \
 	 platform/c/snprint.c
 
-#  - POSIX platform sources -
-POSIX_SRCS = \
-	     platform/posix/print.c \
-	     platform/posix/readfile.c
+FFI_SRCS = \
+	   ffi/ffi.c 
+
+# libs srcs here
+# LIBS_SRCS = \
 
 # platform inheritance logic
 PLATFORM_SRCS_freestand = $(FREESTAND_SRCS)
