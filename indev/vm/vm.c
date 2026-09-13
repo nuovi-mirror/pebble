@@ -92,6 +92,8 @@ int parseoperand
 Instruction makeIR
 (char *line, Arena *persistAlloc, InstructionMap *instructionMap) 
 {	
+	if (*line == '/' || *line == '#')
+		return (struct Instruction){ Opcode_Internal_NOP };
 	Instruction *instrFromMap = getInstruction(instructionMap, line);
 	static unsigned long current_instruction_cachesize;
 
@@ -443,9 +445,11 @@ unsigned long interpret
 			break;
 		}
 
-		case Opcode_Return:
-			/* XXX add Return support */
+		case Opcode_Return: {
+			StackFrame frame = popframe(stack);
+			return frame.return_pc;
 			break;
+		}
 
 		case Opcode_End:
 			if (stack->count != 0) 

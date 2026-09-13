@@ -1,3 +1,5 @@
+# this is a comment
+
 _PRINT 1
 _PRINT -1
 _PRINT 1.2
@@ -59,3 +61,10 @@ Call a
 End
 
 Call c
+
+Func r
+Return
+_PRINT2 broken
+End
+
+Call r
