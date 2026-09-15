@@ -27,6 +27,8 @@
 #include "evaluator.h"
 #include "instructionmapper.h"
 #include "main.h"
+#include "ffi.h"
+#include "escapes.h"
 
 /* used to parse an instruction operand - guesses the type
  * and addressing mode */
