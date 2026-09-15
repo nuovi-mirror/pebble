@@ -183,11 +183,7 @@ Value resolve_literal
             exitproc(1);
         }
 
-	/* XXX hotpatch 
-        *val = evalexprnode(val->as.expr, vars);
-        return *val; */
-
-	return evalexprnode(val->as.expr, vars); /* XXX hotpatch, also */
+	return evalexprnode(val->as.expr, vars);
     }
 
     char buf[32];
@@ -212,11 +208,7 @@ Value resolve_literal
         exitproc(1);
     }
 
-    /* XXX hotpatch 
-    *val = evalexprdata(tree, vars); 
-    return *val; */
-
-    return evalexprdata(tree, vars); /* XXX hotpatch, also */
+    return evalexprdata(tree, vars);
 }
 	
 Value resolve_forced_eval
@@ -316,8 +308,22 @@ unsigned long interpret
 					break;
 				}
 
+				case addrmode_bare: {
+					char *buf = alloc(scratchAlloc, limits_instructions_varnamesize);
+					valuetostr(buf, limits_instructions_varnamesize, instr->SecondOperand.Data);
+					Value *check = getVar(vars, buf);
+					if (check == NULL)
+					{
+						print("ERROR: VM: INTERPRETER: NEW: VARIABLE DOES NOT EXIST!\n");
+						exitproc(1);
+					}
+
+					val = *check;
+					break;
+				}
+
+
 				/* XXX handle addressing mode pointer for this */
-				/* XXX handle addressing mode bare for this */
 				default:
 					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING MODE ON OPERAND TWO\n");
 					exitproc(1);
@@ -328,13 +334,7 @@ unsigned long interpret
 
  			if (existing != NULL)
  			{
- 				/* variable already exists - update in place rather than
- 				 * leaking a fresh Value + name into persistAlloc on every
- 				 * reassignment. matters a lot once tail-call recursion
- 				 * lets a loop body run for millions of iterations - each
- 				 * one would otherwise permanently claim more of the arena,
- 				 * even though nothing about the program actually needs
- 				 * that memory to stick around */
+				/* update in-place */
  				*existing = val;
  			}
  			else

@@ -39,6 +39,10 @@ _PRINT2 j
 New {i} '1'
 _PRINT2 01
 
+New k '1'
+New l k
+_PRINT2 l
+
 Func a
 _PRINT funca
 End
