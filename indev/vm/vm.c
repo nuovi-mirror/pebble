@@ -630,6 +630,12 @@ int vmmain
 	struct Arena *scratchAlloc 	= initAlloc(limits_allocator_scratch_maxmem);
 	struct Arena *IRAlloc 		= initAlloc(limits_instructions_maxbuffersize);
 
+	/* XXX read this pls
+	 * tempAlloc may be freed once after every instruction 
+	 * scratchAlloc may be freed in-between function calls
+	 * persistAlloc may never be freed until the VM exits
+	 */
+
 	VarMap vars = initVars(limits_variables_max);
 	FuncMap funcs = initFuncs(limits_functions_max);
 	InstructionMap instructionMap = initInstructionMap(limits_instructions_maxcache);

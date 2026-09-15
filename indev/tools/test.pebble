@@ -1,5 +1,11 @@
 # this is a comment
 
+_GETMEM
+
+_NOP
+_NOP
+_NOP
+
 _PRINT 1
 _PRINT -1
 _PRINT 1.2
@@ -81,3 +87,8 @@ _PRINT2 bar
 New quux <foo>
 # quux = foo
 _PRINT2 quux
+
+
+
+
+_GETMEM
