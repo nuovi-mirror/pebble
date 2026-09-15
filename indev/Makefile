@@ -7,7 +7,7 @@ build = default
 target = c
 analzyer =
 
-cflags = -std=c99
+cflags =
 CPPFLAGS = \
 	   -Ih \
 	   -Iffi
@@ -50,7 +50,7 @@ BUILD_CFLAGS_fast = \
 		    -march=native \
 		    -mtune=native
 
-cflags += $(BUILD_CFLAGS_$(build))
+cflags += -std=c99 -static $(BUILD_CFLAGS_$(build))
 
 # - platform include paths -
 #   freestanding platform - needs nothing but itself
