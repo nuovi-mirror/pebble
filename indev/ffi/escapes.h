@@ -2,10 +2,11 @@
 #define FFI_ESCAPES_H_
 
 #include "sequences.h"
+#include "ffi.h"
 #include "allocator.h"
 
 typedef void (*EscapeEntry)
-	(Arena *scratchAlloc, Arena *tempAlloc, Arena *persistAlloc);
+	(VMFFIvars *vars, Arena *scratchAlloc, Arena *tempAlloc, Arena *persistAlloc);
 
 struct EscapeSequence {
 	const char *name;
@@ -17,6 +18,6 @@ static const struct EscapeSequence escapes[] = {
 };
 
 void callEscape
-(const char *name, Arena *scratchAlloc, Arena *tempAlloc, Arena *persistAlloc);
+(const char *name, VMFFIvars *vars, Arena *scratchAlloc, Arena *tempAlloc, Arena *persistAlloc);
 
 #endif

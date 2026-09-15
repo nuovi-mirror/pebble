@@ -20,6 +20,7 @@
 #include "expressions.h"
 #include "evaluator.h"
 #include "instructionmapper.h"
+#include "ffi.h"
 
 int parseoperand
 (char **cursor, InstructionOperand *out, Arena *persistAlloc);
@@ -38,7 +39,7 @@ Value resolve_forced_eval
 
 unsigned long interpret
 (Instruction *instr, Instruction *program,  unsigned long instruction_count, 
- VarMap *vars, Stack *stack, FuncMap *funcs, unsigned long pc, Arena *persistAlloc, 
+ VarMap *vars, VMFFIvars *ffivars, Stack *stack, FuncMap *funcs, unsigned long pc, Arena *persistAlloc, 
  Arena *scratchAlloc, Arena *tempAlloc);
 
 /* call this to enter the VM code */

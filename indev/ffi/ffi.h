@@ -3,7 +3,7 @@
 
 #include "variables.h"
 
-typedef struct VMFFIvars {
+typedef struct {
 	VarMap *map;
 	unsigned long count;
 	unsigned long max;

@@ -15,6 +15,7 @@
 #include "copymem.h"
 #include "readfile.h"
 #include "skipspace.h"
+#include "lfree.h"
 #include "exitproc.h"
 #include "setmem.h"
 #include "allocator.h"
@@ -255,7 +256,7 @@ unsigned long resolvefunction
 
 /* instruction interpreter - instruction-by-instruction loop of execution */
 unsigned long interpret
-(Instruction *instr, Instruction *program,  unsigned long instruction_count, VarMap *vars, Stack *stack, 
+(Instruction *instr, Instruction *program,  unsigned long instruction_count, VarMap *vars, VMFFIvars *ffivars, Stack *stack, 
  FuncMap *funcs, unsigned long pc, Arena *persistAlloc, Arena *scratchAlloc, Arena *tempAlloc) 
 {
 	switch (instr->Opcode) {
@@ -498,7 +499,7 @@ unsigned long interpret
 					break;
 			}
 
-			callEscape(name, scratchAlloc, tempAlloc, persistAlloc);
+			callEscape(name, ffivars, scratchAlloc, tempAlloc, persistAlloc);
 			break;
 		}
 
@@ -649,8 +650,14 @@ int vmmain
 	 */
 
 	VarMap vars = initVars(limits_variables_max);
+	VMFFIvars *ffivars = alloc(persistAlloc, sizeof(VMFFIvars));
 	FuncMap funcs = initFuncs(limits_functions_max);
 	InstructionMap instructionMap = initInstructionMap(limits_instructions_maxcache);
+
+	ffivars->map = &vars;
+	ffivars->count = 0;
+	ffivars->max = limits_variables_max;
+	ffivars->namesize = limits_instructions_varnamesize;
 
 	char *file = alloc(tempAlloc, limits_misc_maxfilebuffersize);
 	char *filedata = readfile(cliargs.values[1], file, limits_misc_maxfilebuffersize);
@@ -691,7 +698,7 @@ int vmmain
 	unsigned long pc = 0;
 	while (pc < current_instruction_count)
 	{
-		pc = interpret(&program[pc], program, current_instruction_count, &vars, stack, &funcs, pc, 
+		pc = interpret(&program[pc], program, current_instruction_count, &vars, ffivars, stack, &funcs, pc, 
 				persistAlloc, scratchAlloc, tempAlloc);
 		resetAllocator(scratchAlloc);
 		resetAllocator(tempAlloc);
@@ -702,6 +709,10 @@ int vmmain
 	freeAllocator(tempAlloc);
 	freeAllocator(scratchAlloc);
 	freeAllocator(IRAlloc);
+	/* lfree(ffivars); XXX hack */
+	freeVars(&vars);
+	freeInstructionMap(&instructionMap);
+	freeFuncs(&funcs);
 
 	return 0;	
 }

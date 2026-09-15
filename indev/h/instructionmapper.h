@@ -17,4 +17,7 @@ void putInstruction
 void *getInstruction
 (InstructionMap *m, char *key);
 
+void freeInstructionMap
+(InstructionMap *m);
+
 #endif
