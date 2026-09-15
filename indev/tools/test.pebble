@@ -72,3 +72,12 @@ _PRINT2 broken
 End
 
 Call r
+
+New foo 'bar'
+New <foo> 'qux'
+# bar = qux
+_PRINT2 bar
+
+New quux <foo>
+# quux = foo
+_PRINT2 quux

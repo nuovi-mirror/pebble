@@ -282,8 +282,23 @@ unsigned long interpret
 					valuetostr(dest, limits_instructions_varnamesize, val);
 					break;
 				}
-	
-				/* XXX handle addressing mode pointer */
+		
+				case addrmode_pointer: {
+					char *buf = alloc(tempAlloc, limits_instructions_varnamesize);
+					valuetostr(buf, limits_instructions_varnamesize, 
+							instr->FirstOperand.Data);
+					Value *valptr = getVar(vars, buf);
+					if (valptr == NULL)
+					{
+						print("ERROR: VM: NEW: VARIABLE DOES NOT EXIST!\n");
+						exitproc(1);
+					}
+
+					valuetostr(dest, limits_instructions_varnamesize, *valptr);
+
+					break;
+				}
+
 				default:
 					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING MODE ON OPERAND ONE\n");
 					exitproc(1);
@@ -321,9 +336,25 @@ unsigned long interpret
 					val = *check;
 					break;
 				}
+	
+				case addrmode_pointer: {
+					char *buf = alloc(persistAlloc, limits_instructions_varnamesize);
+					valuetostr(buf, limits_instructions_varnamesize, 
+							instr->SecondOperand.Data);
+					Value *valptr = getVar(vars, buf);
+					if (valptr == NULL)
+					{
+						print("ERROR: VM: NEW: VARIABLE DOES NOT EXIST!\n");
+						exitproc(1);
+					}
+
+					val = (Value){ .Type = type_str, .as.str = buf };
+
+					break;
+				}
 
 
-				/* XXX handle addressing mode pointer for this */
+
 				default:
 					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING MODE ON OPERAND TWO\n");
 					exitproc(1);
@@ -331,13 +362,10 @@ unsigned long interpret
 			}
 
  			Value *existing = getVar(vars, dest);
-
  			if (existing != NULL)
- 			{
-				/* update in-place */
- 				*existing = val;
- 			}
- 			else
+ 				*existing = val; 
+ 			
+			else
  			{
  				Value *valptr = alloc(persistAlloc, sizeof(val));
  				*valptr = val;
@@ -348,7 +376,6 @@ unsigned long interpret
 
  				putVar(vars, name, valptr);
  			}
-
 
 			break;
 		}
@@ -455,7 +482,6 @@ unsigned long interpret
 			if (stack->count != 0) 
 			{
 				StackFrame frame = popframe(stack);
-				/* XXX remove this line return pc = frame.return_pc; */
 				return frame.return_pc;
 			}
 			break;
@@ -526,7 +552,7 @@ unsigned long interpret
 			break;
 		}
 		case Opcode_Internal_GETMEM: {
-			char buf[32];
+			char buf[sizeof(long)];
 
 			print("_GETMEM (INTERNAL INSTRUCTION)\n");
 			
