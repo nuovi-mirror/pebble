@@ -22,6 +22,9 @@
 /* variable-related */
 #define limits_variables_max 512 /* max number of variables at a time */
 
+/* escape / FFI */
+#define limits_escapes_namesize 32 /* max chars for an escape name */
+
 /* misc */
 #define limits_misc_maxfilebuffersize 8 * 1024 * 1024 /* max buffer size for the bytecode file */
 

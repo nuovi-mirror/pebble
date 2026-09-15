@@ -488,9 +488,19 @@ unsigned long interpret
 			}
 			break;
 
-		case Opcode_Escape:
-			/* XXX add Escape support */
+		case Opcode_Escape: {
+			char *name = alloc(scratchAlloc, limits_escapes_namesize);
+
+			switch(instr->FirstOperand.Addressing) {
+				case addrmode_bare:
+					valuetostr(name, limits_escapes_namesize, 
+							instr->FirstOperand.Data);
+					break;
+			}
+
+			callEscape(name, scratchAlloc, tempAlloc, persistAlloc);
 			break;
+		}
 
 		/* internal opcodes */
 		case Opcode_Internal_PRINT: {

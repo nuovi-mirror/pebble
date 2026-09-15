@@ -123,7 +123,9 @@ C_SRCS = \
 	 platform/c/snprint.c
 
 FFI_SRCS = \
-	   ffi/ffi.c 
+	   ffi/ffi.c \
+	   ffi/escapes.c \
+	   ffi/libs/test/hello.c
 
 # libs srcs here
 # LIBS_SRCS = \
@@ -144,7 +146,7 @@ MAIN_puredarwin = platform/puredarwin/main.c
 
 MAIN = $(MAIN_$(target))
 
-SRCS = $(VM_SRCS) $(PLATFORM_SRCS_$(target)) $(MAIN)
+SRCS = $(VM_SRCS) $(PLATFORM_SRCS_$(target)) $(FFI_SRCS) $(MAIN)
 OBJS = $(SRCS:.c=.o)
 DEPS = $(OBJS:.o=.d)
 

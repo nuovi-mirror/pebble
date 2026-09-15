@@ -2,18 +2,21 @@
 #define FFI_ESCAPES_H_
 
 #include "sequences.h"
+#include "allocator.h"
 
-typedef void (*EscapeEntry)(void);
+typedef void (*EscapeEntry)
+	(Arena *scratchAlloc, Arena *tempAlloc, Arena *persistAlloc);
 
 struct EscapeSequence {
 	const char *name;
-	EscapeEntry entry;
+	EscapeEntry func;
 };
 
 static const struct EscapeSequence escapes[] = {
-	{ "test.hello", escape_test_hello_ },
+	{ "test.hello", escape_test_hello },
 };
 
-void callEscape(const char *name);
+void callEscape
+(const char *name, Arena *scratchAlloc, Arena *tempAlloc, Arena *persistAlloc);
 
 #endif
