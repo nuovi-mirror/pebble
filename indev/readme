@@ -34,6 +34,9 @@ Building from source
 	cflags - the C compiler flags to use before adding the build-specific
 		compiler flags. The default is '-std=c99'.
 
+	By default, CPebble builds as a static binary, meaning it requires
+	no runtime dependencies.
+
 	If you do not have a POSIX make system, one was provided under the
 	bootstrap/ directory. The software from said directory was not written
 	by us, but instead by Ron Yorston as part of the pdpmake project. 
