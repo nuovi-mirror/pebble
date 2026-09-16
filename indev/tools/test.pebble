@@ -49,7 +49,7 @@ New k '1'
 New l k
 _PRINT2 l
 
-Func a
+Func 'a'
 _PRINT funca
 End
 

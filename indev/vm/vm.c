@@ -356,8 +356,6 @@ unsigned long interpret
 					break;
 				}
 
-
-
 				default:
 					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING MODE ON OPERAND TWO\n");
 					exitproc(1);
@@ -385,17 +383,34 @@ unsigned long interpret
 
 		case Opcode_Func: {
 			char *funcname = alloc(scratchAlloc, limits_functions_namesize);
-			valuetostr(funcname, limits_functions_namesize, instr->FirstOperand.Data);
+			unsigned long *lpc = alloc(persistAlloc, sizeof(long));
 			switch(instr->FirstOperand.Addressing) {
 				case addrmode_bare: {
-					unsigned long *lpc = alloc(persistAlloc, sizeof(long));
-					*lpc = pc + 1; /* since we are on the func instruction */
-					putFunc(funcs, funcname, lpc); /* place the function onto the index */
+					valuetostr(funcname, limits_functions_namesize, instr->FirstOperand.Data);
 					break;
 				}
 
-				/* XXX handle addressing mode literal */
-				/* XXX handle addressing mode true_literal */
+				case addrmode_true_literal: {
+					valuetostr(funcname, limits_functions_namesize, instr->FirstOperand.Data);
+					break;
+				}
+
+				case addrmode_literal: {
+					char *buff = alloc(scratchAlloc, limits_functions_namesize);
+					Value vptr = resolve_literal(buff, limits_functions_namesize,
+							&instr->FirstOperand.Data, vars, tempAlloc);
+					valuetostr(funcname, limits_functions_namesize, vptr);
+					break;
+				}
+
+				case addrmode_forced_eval: {
+					char *buff = alloc(scratchAlloc, limits_functions_namesize);
+					Value vptr = resolve_forced_eval(buff, limits_functions_namesize,
+							&instr->FirstOperand.Data, vars, tempAlloc);
+					valuetostr(funcname, limits_functions_namesize, vptr);
+					break;
+				}
+
 				/* XXX handle addressing mode pointer */
 				/* XXX handle addressing mode forced_eval */
 				default: 
@@ -403,8 +418,9 @@ unsigned long interpret
 					exitproc(1);
 					break;
 			}
-			return findend(program, instruction_count, pc) + 1; /* find the End statement for this
-									     * function and goto it */
+			*lpc = pc + 1; /* since we are on the func instruction */
+			putFunc(funcs, funcname, lpc); /* place the function onto the index */
+			return findend(program, instruction_count, pc) + 1; /* find the End statement */
 			break;
 		}
 
