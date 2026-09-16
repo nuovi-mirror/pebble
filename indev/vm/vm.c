@@ -478,6 +478,18 @@ unsigned long interpret
 					valuetostr(funcname, limits_functions_namesize, instr->FirstOperand.Data);
 					break;
 
+				case addrmode_true_literal:
+					valuetostr(funcname, limits_functions_namesize, instr->FirstOperand.Data);
+					break;
+
+				case addrmode_literal: {
+					char *buff = alloc(scratchAlloc, limits_functions_namesize);
+					Value val = resolve_literal(buff, limits_functions_namesize, 
+							&instr->FirstOperand.Data, vars, tempAlloc);
+					valuetostr(funcname, limits_functions_namesize, val);
+					break;
+				}
+
 				/* XXX handle addressing mode literal */
 				/* XXX handle addressing mode true_literal */
 				/* XXX handle addressing mode pointer */
