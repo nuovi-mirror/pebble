@@ -5,7 +5,7 @@ cc = cc
 program = bin/vm
 build = default
 target = c
-analzyer =
+analyzer =
 
 cflags =
 CPPFLAGS = \
