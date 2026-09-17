@@ -1,0 +1,4 @@
+The Pebble Virtual Machine is a small, simple, ultralight and fully host-safe
+virtual machine executing programs compiled to the Pebble textual bytecode
+language. This package contains release builds of CPebble, the C re-implementation
+of the Virtual Machine. More up-to-date builds can be found at http://pebblevm.org/
