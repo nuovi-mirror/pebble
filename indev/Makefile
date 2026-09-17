@@ -168,4 +168,4 @@ clean:
 	rm -rf bin
 	rm -f $(OBJS) $(DEPS) $(program)
 
-.PHONY: all clean
+.PHONY: all clean bear
