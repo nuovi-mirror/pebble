@@ -39,7 +39,7 @@ Value resolve_forced_eval
 
 unsigned long interpret
 (Instruction *instr, Instruction *program,  unsigned long instruction_count, 
- VarMap *vars, VMFFIvars *ffivars, Stack *stack, FuncMap *funcs, unsigned long pc, Arena *persistAlloc, 
+ VarMap *vars, FFIvars *ffivars, Stack *stack, FuncMap *funcs, unsigned long pc, Arena *persistAlloc, 
  Arena *scratchAlloc, Arena *tempAlloc);
 
 /* call this to enter the VM code */

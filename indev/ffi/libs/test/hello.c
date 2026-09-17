@@ -1,8 +1,8 @@
 #include "ffi.h"
-#include "print.h"
-#include "allocator.h"
 
-void escape_test_hello(VMFFIvars *vars, Arena *scratchAlloc, Arena *tempAlloc, Arena *persistAlloc) 
+void escape_test_hello
+(FFIvars *vars, FFIArena *scratchAlloc, 
+ FFIArena *tempAlloc, FFIArena *persistAlloc) 
 {
-	print("Hello from C!\n");
+	FFIstdoutPrint("Hello from C!\n");
 }

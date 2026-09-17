@@ -6,7 +6,8 @@
 #include "allocator.h"
 
 typedef void (*EscapeEntry)
-	(VMFFIvars *vars, Arena *scratchAlloc, Arena *tempAlloc, Arena *persistAlloc);
+	(FFIvars *vars, FFIArena *scratchAlloc, 
+	 FFIArena *tempAlloc, FFIArena *persistAlloc);
 
 struct EscapeSequence {
 	const char *name;
@@ -15,9 +16,11 @@ struct EscapeSequence {
 
 static const struct EscapeSequence escapes[] = {
 	{ "test.hello", escape_test_hello },
+	{ "std.io.print", escape_std_io_print },
 };
 
 void callEscape
-(const char *name, VMFFIvars *vars, Arena *scratchAlloc, Arena *tempAlloc, Arena *persistAlloc);
+(const char *name, FFIvars *vars, FFIArena *scratchAlloc, 
+ FFIArena *tempAlloc, FFIArena *persistAlloc);
 
 #endif

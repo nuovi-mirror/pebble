@@ -1,10 +1,10 @@
 #include "escapes.h"
 #include "cmpstr.h"
-#include "allocator.h"
 #include "sequences.h"
 
 void callEscape
-(const char *name, VMFFIvars *vars, Arena *scratchAlloc, Arena *tempAlloc, Arena *persistAlloc)
+(const char *name, FFIvars *vars, FFIArena *scratchAlloc, 
+ FFIArena *tempAlloc, FFIArena *persistAlloc)
 {
 	unsigned long i;
 

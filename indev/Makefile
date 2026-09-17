@@ -125,7 +125,8 @@ C_SRCS = \
 FFI_SRCS = \
 	   ffi/ffi.c \
 	   ffi/escapes.c \
-	   ffi/libs/test/hello.c
+	   ffi/libs/test/hello.c \
+	   ffi/libs/std/io/print.c
 
 # platform inheritance logic
 PLATFORM_SRCS_freestand = $(FREESTAND_SRCS)

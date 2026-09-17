@@ -256,7 +256,7 @@ unsigned long resolvefunction
 
 /* instruction interpreter - instruction-by-instruction loop of execution */
 unsigned long interpret
-(Instruction *instr, Instruction *program,  unsigned long instruction_count, VarMap *vars, VMFFIvars *ffivars, Stack *stack, 
+(Instruction *instr, Instruction *program,  unsigned long instruction_count, VarMap *vars, FFIvars *ffivars, Stack *stack, 
  FuncMap *funcs, unsigned long pc, Arena *persistAlloc, Arena *scratchAlloc, Arena *tempAlloc) 
 {
 	switch (instr->Opcode) {
@@ -678,7 +678,7 @@ int vmmain
 	 */
 
 	VarMap vars = initVars(limits_variables_max);
-	VMFFIvars *ffivars = alloc(persistAlloc, sizeof(VMFFIvars));
+	FFIvars *ffivars = alloc(persistAlloc, sizeof(FFIvars));
 	FuncMap funcs = initFuncs(limits_functions_max);
 	InstructionMap instructionMap = initInstructionMap(limits_instructions_maxcache);
 

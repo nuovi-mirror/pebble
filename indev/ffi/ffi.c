@@ -1,12 +1,13 @@
 #include "ffi.h"
 #include "variables.h"
+#include "values.h"
 #include "getstrlen.h"
 #include "exitproc.h"
 #include "main.h"
 #include "print.h"
 
-void VMFFIallocateVariable
-(VMFFIvars *vars, const char* varname, void *value)
+void FFIallocateVariable
+(FFIvars *vars, const char* varname, void *value)
 {
 	if (vars->count >= vars->max)
 	{
@@ -35,8 +36,8 @@ void VMFFIallocateVariable
 	putVar(vars->map, &varname, value);
 }
 
-void *VMFFIreadVariableUnsafe
-(VMFFIvars *vars, const char* varname)
+void *FFIreadVariableUnsafe
+(FFIvars *vars, const char* varname)
 {
 	if (getstrlen(varname) == 0)
 	{
@@ -50,16 +51,16 @@ void *VMFFIreadVariableUnsafe
 		exitproc(1);
 	}
 
-	void *var = getVar(vars->map, &varname);
+	void *var = getVar(vars->map, varname);
 	
 	/* may return NULL */
 	return var;
 }
 
-void *VMFFIreadVariable /* safer wrapper */
-(VMFFIvars *vars, const char* varname)
+void *FFIreadVariable /* safer wrapper */
+(FFIvars *vars, const char* varname)
 {
-	void *uvar = VMFFIreadVariable(vars, varname);
+	void *uvar = FFIreadVariable(vars, varname);
 
 	if (uvar == NULL)
 	{
@@ -70,3 +71,15 @@ void *VMFFIreadVariable /* safer wrapper */
 	/* cannot be null anymore */
 	return uvar;
 }
+
+int FFIconvertValueToString
+(char *buff, unsigned long buffsize, FFIValue v)
+{ return valuetostr(buff, buffsize, v); }
+
+void FFIstdoutPrint
+(char *msg)
+{ return print(msg); }
+
+void *FFIallocateMemory
+(FFIArena *arena, unsigned long size)
+{ return alloc(arena, size); }
