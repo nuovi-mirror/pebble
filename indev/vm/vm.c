@@ -34,7 +34,7 @@
 /* used to parse an instruction operand - guesses the type
  * and addressing mode */
 int parseoperand
-(char **cursor, InstructionOperand *out, Arena *persistAlloc) 
+(char **cursor, InstructionOperand *out, Arena *tempAlloc, Arena *persistAlloc) 
 {
 	char *p = skipspace(*cursor);
 	if (p == NULL)
@@ -84,7 +84,7 @@ int parseoperand
 		}
 	}
 
-	out->Data = guessvaluetypeorexpr(start, persistAlloc);
+	out->Data = guessvaluetypeorexpr(start, tempAlloc, persistAlloc);
 
 	*cursor = p;
 	return 1;
@@ -93,7 +93,7 @@ int parseoperand
 /* used to generate and optimize instruction intermediate
  * representation (IR) */
 Instruction makeIR
-(char *line, Arena *persistAlloc, InstructionMap *instructionMap) 
+(char *line, Arena *tempAlloc, Arena *persistAlloc, InstructionMap *instructionMap) 
 {	
 	if (*line == '/' || *line == '#')
 		return (struct Instruction){ Opcode_Internal_NOP };
@@ -131,8 +131,8 @@ Instruction makeIR
 		exitproc(1);
 	}
 
-	parseoperand(&cursor, &instr.FirstOperand, persistAlloc);
-	parseoperand(&cursor, &instr.SecondOperand, persistAlloc);
+	parseoperand(&cursor, &instr.FirstOperand, tempAlloc, persistAlloc);
+	parseoperand(&cursor, &instr.SecondOperand, tempAlloc, persistAlloc);
 	/* XXX third operand unused for now */
 
 	/* the instruction has been made 
@@ -176,7 +176,8 @@ unsigned long findend
 /* helpers to resolve addressing modes */
 /* XXX audit this */
 Value resolve_literal
-(char *buff, unsigned long buffsize, Value *val, VarMap *vars, Arena *tempAlloc)
+(char *buff, unsigned long buffsize, Value *val, VarMap *vars, 
+ Arena *tempAlloc, Arena *persistAlloc)
 {
     if (val->Type == type_expr)
     {
@@ -215,15 +216,18 @@ Value resolve_literal
 }
 	
 Value resolve_forced_eval
-(char *buff, unsigned long buffsize, Value *val, VarMap *vars, Arena *tempAlloc)
+(char *buff, unsigned long buffsize, Value *val, VarMap *vars, 
+ Arena *tempAlloc, Arena *persistAlloc)
 {
 	valuetostr(buff, buffsize, *val);
 	Value *var = getVar(vars, buff);
 
 	if (var != NULL)
-		return resolve_literal(buff, buffsize, var, vars, tempAlloc);
+		return resolve_literal(buff, buffsize, var, vars, 
+				tempAlloc, persistAlloc);
 
-	return resolve_literal(buff, buffsize, val, vars, tempAlloc);
+	return resolve_literal(buff, buffsize, val, vars, 
+			tempAlloc, persistAlloc);
 }
 
 unsigned long resolvefunction
@@ -274,14 +278,14 @@ unsigned long interpret
 				case addrmode_literal: {
 					char *buf = alloc(tempAlloc, limits_instructions_varnamesize);
 					val = resolve_literal(buf, limits_instructions_varnamesize, 
-							&instr->FirstOperand.Data, vars, tempAlloc);
+							&instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
 					valuetostr(dest, limits_instructions_varnamesize, val);
 					break;
 				}
 				case addrmode_forced_eval: {
 					char *buf = alloc(tempAlloc, limits_instructions_varnamesize);
 					val = resolve_forced_eval(buf, limits_instructions_varnamesize, 
-							&instr->FirstOperand.Data, vars, tempAlloc);
+							&instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
 					valuetostr(dest, limits_instructions_varnamesize, val);
 					break;
 				}
@@ -315,14 +319,14 @@ unsigned long interpret
 				case addrmode_literal: {
 					char *buf = alloc(tempAlloc, limits_instructions_varnamesize);
 					val = resolve_literal(buf, limits_instructions_varnamesize, 
-						&instr->SecondOperand.Data, vars, tempAlloc);
+						&instr->SecondOperand.Data, vars, tempAlloc, persistAlloc);
 					break;
 				}
 
 				case addrmode_forced_eval: {
 					char *buf = alloc(tempAlloc, limits_instructions_varnamesize);
 					val = resolve_forced_eval(buf, limits_instructions_varnamesize, 
-						&instr->SecondOperand.Data, vars, tempAlloc);
+						&instr->SecondOperand.Data, vars, tempAlloc, persistAlloc);
 					break;
 				}
 
@@ -398,7 +402,7 @@ unsigned long interpret
 				case addrmode_literal: {
 					char *buff = alloc(scratchAlloc, limits_functions_namesize);
 					Value vptr = resolve_literal(buff, limits_functions_namesize,
-							&instr->FirstOperand.Data, vars, tempAlloc);
+							&instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
 					valuetostr(funcname, limits_functions_namesize, vptr);
 					break;
 				}
@@ -406,7 +410,7 @@ unsigned long interpret
 				case addrmode_forced_eval: {
 					char *buff = alloc(scratchAlloc, limits_functions_namesize);
 					Value vptr = resolve_forced_eval(buff, limits_functions_namesize,
-							&instr->FirstOperand.Data, vars, tempAlloc);
+							&instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
 					valuetostr(funcname, limits_functions_namesize, vptr);
 					break;
 				}
@@ -448,7 +452,7 @@ unsigned long interpret
 				case addrmode_literal: {
 					char *buff = alloc(tempAlloc, limits_functions_namesize);
 					result = resolve_literal(buff, limits_functions_namesize, 
-							&instr->SecondOperand.Data, vars, tempAlloc);
+							&instr->SecondOperand.Data, vars, tempAlloc, persistAlloc);
 					break;
 				}
 	
@@ -485,7 +489,7 @@ unsigned long interpret
 				case addrmode_literal: {
 					char *buff = alloc(scratchAlloc, limits_functions_namesize);
 					Value val = resolve_literal(buff, limits_functions_namesize, 
-							&instr->FirstOperand.Data, vars, tempAlloc);
+							&instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
 					valuetostr(funcname, limits_functions_namesize, val);
 					break;
 				}
@@ -715,7 +719,7 @@ int vmmain
 		if (p == NULL)
 			continue;
 
-		program[current_instruction_count] = makeIR(line, persistAlloc, &instructionMap);
+		program[current_instruction_count] = makeIR(line, tempAlloc, persistAlloc, &instructionMap);
 		current_instruction_count++;
 	}
 

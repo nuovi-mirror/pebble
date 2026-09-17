@@ -1,3 +1,0 @@
-- finish updating evaluator, expression parser, and VM to pass persistAlloc around
-  properly so the overriding edge case bug is fixed properly in string type
-  detection

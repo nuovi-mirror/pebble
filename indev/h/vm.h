@@ -23,19 +23,24 @@
 #include "ffi.h"
 
 int parseoperand
-(char **cursor, InstructionOperand *out, Arena *persistAlloc);
+(char **cursor, InstructionOperand *out, 
+ Arena *tempAlloc, Arena *persistAlloc);
 
 Instruction makeIR
-(char *line, Arena *persistAlloc, InstructionMap *instructionMap);
+(char *line, Arena *tempAlloc, Arena *persistAlloc, 
+ InstructionMap *instructionMap);
 
 unsigned long findend
-(Instruction *program, unsigned long instruction_count, unsigned long start);
+(Instruction *program, unsigned long instruction_count, 
+ unsigned long start);
 
 Value resolve_literal
-(char *buff, unsigned long buffsize, Value *val, VarMap *vars, Arena *tempAlloc);
+(char *buff, unsigned long buffsize, Value *val, VarMap *vars, 
+ Arena *tempAlloc, Arena *persistAlloc);
 	
 Value resolve_forced_eval
-(char *buff, unsigned long buffsize, Value *val, VarMap *vars, Arena *tempAlloc);
+(char *buff, unsigned long buffsize, Value *val, VarMap *vars, 
+ Arena *tempAlloc, Arena *persistAlloc);
 
 unsigned long interpret
 (Instruction *instr, Instruction *program,  unsigned long instruction_count, 
