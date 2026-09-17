@@ -127,9 +127,6 @@ FFI_SRCS = \
 	   ffi/escapes.c \
 	   ffi/libs/test/hello.c
 
-# libs srcs here
-# LIBS_SRCS = \
-
 # platform inheritance logic
 PLATFORM_SRCS_freestand = $(FREESTAND_SRCS)
 PLATFORM_SRCS_c = $(C_SRCS) $(FREESTAND_SRCS)
