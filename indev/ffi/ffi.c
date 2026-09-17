@@ -60,7 +60,7 @@ void *FFIreadVariableUnsafe
 void *FFIreadVariable /* safer wrapper */
 (FFIvars *vars, const char* varname)
 {
-	void *uvar = FFIreadVariable(vars, varname);
+	void *uvar = FFIreadVariableUnsafe(vars, varname);
 
 	if (uvar == NULL)
 	{
