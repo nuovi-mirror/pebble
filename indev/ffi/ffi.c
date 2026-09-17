@@ -1,5 +1,6 @@
 #include "ffi.h"
 #include "variables.h"
+#include "getstrlen.h"
 #include "exitproc.h"
 #include "main.h"
 #include "print.h"
@@ -25,7 +26,7 @@ void VMFFIallocateVariable
 		exitproc(1);
 	}
 
-	if (strlen(varname) == 0)
+	if (getstrlen(varname) == 0)
 	{
 		print("ERROR: FFI: NO VARIABLE NAME GIVEN!\n");
 		exitproc(1);
@@ -37,13 +38,13 @@ void VMFFIallocateVariable
 void *VMFFIreadVariableUnsafe
 (VMFFIvars *vars, const char* varname)
 {
-	if (strlen(varname) == 0)
+	if (getstrlen(varname) == 0)
 	{
 		print("ERROR: FFI: NO VARIABLE NAME GIVEN!\n");
 		exitproc(1);
 	}
 
-	if (strlen(varname) > vars->namesize)
+	if (getstrlen(varname) > vars->namesize)
 	{
 		print("ERROR: FFI: VARIABLE NAME IS TOO LONG!\n");
 		exitproc(1);
