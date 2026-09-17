@@ -240,5 +240,5 @@ Value evalexprdata
 }
 
 Value evalstr
-(const char *str, int *ok, VarMap *vars, Arena *arena)
-{ return evalexprdata(str2expr(str, ok, arena), vars); }
+(const char *str, int *ok, VarMap *vars, Arena *tempAlloc, Arena *persistAlloc)
+{ return evalexprdata(str2expr(str, ok, tempAlloc, persistAlloc), vars); }

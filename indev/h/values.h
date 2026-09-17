@@ -2,6 +2,7 @@
 #define STATE_VALUES_H_
 
 #include "variables.h"
+#include "allocator.h"
 
 typedef struct ExprNode ExprNode; /* from expressions.h */
 
@@ -28,6 +29,6 @@ typedef struct Value {
 
 int valuetostr(char *buff, unsigned long buffsize, Value v);
 Value valuetoword(Value v, VarMap *vars);
-Value guessvaluetype(char *data);
+Value guessvaluetype(char *data, Arena *persistAlloc);
 
 #endif

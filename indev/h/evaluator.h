@@ -51,6 +51,6 @@ Value evalexprdata
 (ExprNodeData data, VarMap *vars);
 
 Value evalstr
-(const char *str, int *ok, VarMap *vars, Arena *arena);
+(const char *str, int *ok, VarMap *vars, Arena *tempAlloc, Arena *persistAlloc);
 
 #endif

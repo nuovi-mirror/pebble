@@ -203,7 +203,7 @@ Value resolve_literal
     }
 
     int ok;
-    ExprNodeData tree = str2expr(text, &ok, tempAlloc);
+    ExprNodeData tree = str2expr(text, &ok, tempAlloc, persistAlloc);
 
     if (!ok)
     {

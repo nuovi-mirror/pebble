@@ -3,6 +3,9 @@
 #include <stddef.h>
 #include "copystr.h"
 #include "snprint.h"
+#include "copymem.h"
+#include "getstrlen.h"
+#include "allocator.h"
 #include "str2ul.h"
 #include "values.h"
 #include "main.h"
@@ -46,7 +49,7 @@ Value valuetoword(Value v, VarMap *vars) {
 }
 
 Value guessvaluetype
-(char *data)
+(char *data, Arena *persistAlloc)
 {
 	Value out = { 0 };
 	unsigned long i = 0;
@@ -119,6 +122,8 @@ Value guessvaluetype
 
 string:
 	out.Type = type_str;
-	out.as.str = data;
+	unsigned long len = getstrlen(data);
+	out.as.str = alloc(persistAlloc, len + 1);
+	copymem(data, out.as.str, len + 1);
 	return out;
 }

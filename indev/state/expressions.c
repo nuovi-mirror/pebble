@@ -46,7 +46,7 @@ const ExprOperator *strtooperator
 }
 
 Value parseliteral
-(const char **str, Arena *arena)
+(const char **str, Arena *tempAlloc, Arena *persistAlloc)
 {
 	const char *start = *str;
 	const char *p = start;
@@ -61,17 +61,17 @@ Value parseliteral
 		p++;
 
 	unsigned long len = (unsigned long)(p - start);
-	char *buf = alloc(arena, len + 1);
+	char *buf = alloc(tempAlloc, len + 1);
 	copymem(start, buf, len);
 	buf[len] = '\0';
 
 	*str = p;
 
-	return guessvaluetype(buf);
+	return guessvaluetype(buf, persistAlloc);
 }
 
 void nexttoken
-(const char **str, Token *token, Arena *arena)
+(const char **str, Token *token, Arena *tempAlloc, Arena *persistAlloc)
 {
 	*str = tskipspace(*str);
 
@@ -119,7 +119,7 @@ void nexttoken
 
 	/* value literal from here */
 	token->Type = Token_Value;
-	token->Value = parseliteral(str, arena);
+	token->Value = parseliteral(str, tempAlloc, persistAlloc);
 }
 
 int exprnodetostr
@@ -132,9 +132,9 @@ int exprnodetostr
 }
 
 static void parseradvance
-(ExprParser *p, Arena *arena)
+(ExprParser *p, Arena *tempAlloc, Arena *persistAlloc)
 {
-	nexttoken(&p->cursor, &p->lookahead, arena);
+	nexttoken(&p->cursor, &p->lookahead, tempAlloc, persistAlloc);
 }
 
 ExprNode *newexprnode
@@ -151,20 +151,20 @@ ExprNode *newexprnode
 
 
 ExprNodeData parseprimary
-(ExprParser *p, Arena *arena)
+(ExprParser *p, Arena *tempAlloc, Arena *persistAlloc)
 {
 	ExprNodeData data;
 
 	if (p->lookahead.Type == Token_LeftParent)
 	{
-		parseradvance(p, arena); /* consume '(' */
+		parseradvance(p, tempAlloc, persistAlloc); /* consume '(' */
 		/* set that to whatever the currest loosest tier is */
-		ExprNodeData inner = parseexpr(p, 2, arena);
+		ExprNodeData inner = parseexpr(p, 2, tempAlloc, persistAlloc);
 
 		if (p->lookahead.Type != Token_RightParent)
 			p->error = 1;
 		else
-			parseradvance(p, arena); /* consume ')' */
+			parseradvance(p, tempAlloc, persistAlloc); /* consume ')' */
 		return inner;
 	}
 
@@ -172,7 +172,7 @@ ExprNodeData parseprimary
 	{
 		data.Type = ExprDataVal;
 		data.value = p->lookahead.Value;
-		parseradvance(p, arena);
+		parseradvance(p, tempAlloc, persistAlloc);
 		return data;
 	}
 
@@ -185,9 +185,9 @@ ExprNodeData parseprimary
 }
 
 ExprNodeData parseexpr
-(ExprParser *p, int maxPrec, Arena *arena)
+(ExprParser *p, int maxPrec, Arena *tempAlloc, Arena *persistAlloc)
 {
-	ExprNodeData left = parseprimary(p, arena);
+	ExprNodeData left = parseprimary(p, tempAlloc, persistAlloc);
 
 	while (
 			!p->error && 
@@ -195,14 +195,14 @@ ExprNodeData parseexpr
 			p->lookahead.Op->Pres <= maxPrec)
 	{
 		const ExprOperator *op = p->lookahead.Op;
-		parseradvance(p, arena); /* consume operator */
+		parseradvance(p, tempAlloc, persistAlloc); /* consume operator */
 
 		/* op->Pres - 1: left-associative */
 		/* next call may only take operators
 		 * strictly tigher than this one */
-		ExprNodeData right = parseexpr(p, op->Pres - 1, arena);
+		ExprNodeData right = parseexpr(p, op->Pres - 1, tempAlloc, persistAlloc);
 
-		ExprNode *node = newexprnode(op->Op, left, right, arena);
+		ExprNode *node = newexprnode(op->Op, left, right, tempAlloc);
 
 		ExprNodeData wrapped;
 		wrapped.Type = ExprDataNode;
@@ -215,19 +215,19 @@ ExprNodeData parseexpr
 
 /* entry point */
 ExprNodeData str2expr
-(const char *str, int *ok, Arena *arena)
+(const char *str, int *ok, Arena *tempAlloc, Arena *persistAlloc)
 {
 	ExprParser p;
 	p.cursor = str;
 	p.error = 0;
-	parseradvance(&p, arena); /* prime lookahead */
+	parseradvance(&p, tempAlloc, persistAlloc); /* prime lookahead */
 
 	int maxLevel = 4;
 	for (unsigned long i = 0; i < sizeof(ExprOperators) / sizeof(ExprOperators[0]); i++)
 		if (ExprOperators[i].Pres > maxLevel)
 			maxLevel = ExprOperators[i].Pres;
 
-	ExprNodeData result = parseexpr(&p, maxLevel, arena);
+	ExprNodeData result = parseexpr(&p, maxLevel, tempAlloc, persistAlloc);
 
 	if (p.lookahead.Type != Token_End)
 		p.error = 1; /* trailing garbage */
@@ -235,7 +235,7 @@ ExprNodeData str2expr
 	if (!p.error && result.Type == ExprDataNode)
 	{
 		unsigned long len = getstrlen(str);
-		char *copy = alloc(arena, len + 1);
+		char *copy = alloc(tempAlloc, len + 1);
 		copymem(str, copy, len + 1);
 		result.Node->Source = copy;
 	}
@@ -295,13 +295,13 @@ int isexpression
 
 /* wrapper */
 Value guessvaluetypeorexpr
-(char *data, Arena *arena)
+(char *data, Arena *tempAlloc, Arena *persistAlloc)
 {
 	if (isexpression(data))
 	{
 		Value v;
 		int ok;
-		ExprNodeData tree = str2expr(data, &ok, arena);
+		ExprNodeData tree = str2expr(data, &ok, tempAlloc, persistAlloc);
 
 		v.Type = type_expr;
 		v.as.expr = (ok && tree.Type == ExprDataNode) ? tree.Node : NULL;
@@ -309,6 +309,6 @@ Value guessvaluetypeorexpr
 		return v;
 	}
 
-	return guessvaluetype(data);
+	return guessvaluetype(data, persistAlloc);
 }
 
