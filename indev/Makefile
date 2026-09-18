@@ -122,11 +122,18 @@ C_SRCS = \
 	 platform/c/str2ul.c \
 	 platform/c/snprint.c
 
+# main FFI sources
 FFI_SRCS = \
 	   ffi/ffi.c \
-	   ffi/escapes.c \
-	   ffi/libs/test/hello.c \
-	   ffi/libs/std/io/print.c
+	   ffi/escapes.c
+
+# FFI sources for the C platform
+C_FFI_SRCS = \
+	   ffi/platform/c/test/hello.c \
+	   ffi/platform/c/std/io/print.c
+
+# just do this for now; add platform selection logic later
+FFI_SRCS += $(C_FFI_SRCS)
 
 # platform inheritance logic
 PLATFORM_SRCS_freestand = $(FREESTAND_SRCS)
