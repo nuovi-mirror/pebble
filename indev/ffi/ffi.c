@@ -33,7 +33,7 @@ void FFIallocateVariable
 		exitproc(1);
 	}
 
-	putVar(vars->map, &varname, value);
+	putVar(vars->map, varname, value);
 }
 
 void *FFIreadVariableUnsafe
