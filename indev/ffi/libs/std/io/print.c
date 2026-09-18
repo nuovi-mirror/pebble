@@ -9,4 +9,5 @@ void escape_std_io_print
 	char *buff = FFIallocateMemory(tempAlloc, limits_instructions_varnamesize);
 	FFIconvertValueToString(buff, limits_instructions_varnamesize, *var);
 	FFIstdoutPrint(buff);
+	FFIstdoutPrint("\n");
 }

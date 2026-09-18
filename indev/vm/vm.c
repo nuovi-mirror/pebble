@@ -16,6 +16,7 @@
 #include "readfile.h"
 #include "skipspace.h"
 #include "lfree.h"
+#include "lalloc.h"
 #include "exitproc.h"
 #include "setmem.h"
 #include "allocator.h"
@@ -691,8 +692,26 @@ int vmmain
 	ffivars->max = limits_variables_max;
 	ffivars->namesize = limits_instructions_varnamesize;
 
+	/* XXX remove this
 	char *file = alloc(tempAlloc, limits_misc_maxfilebuffersize);
 	char *filedata = readfile(cliargs.values[1], file, limits_misc_maxfilebuffersize);
+	*/
+
+	unsigned long filesize = getfilesize(cliargs.values[1]);
+	if (filesize == 0)
+	{
+		print("ERROR: VM: INIT: CANNOT OPEN SPECIFIED FILE!\n");
+		exitproc(1);
+	}
+
+	if (filesize + 1 > limits_misc_maxfilebuffersize)
+	{
+		print("ERROR: VM: INIT: FILE IS TOO LARGE!\n");
+		exitproc(1);
+	}
+
+	char *file = alloc(tempAlloc, filesize + 1); /* +1 for null terminator readfile() appends */
+	char *filedata = readfile(cliargs.values[1], file, filesize + 1);
 
 	if (filedata == NULL )
 	{
@@ -700,8 +719,8 @@ int vmmain
 		exitproc(1);
 	}
 
-	unsigned long current_instruction_count = 0;
 	char *line;
+	unsigned long current_instruction_count = 0;
 	unsigned long current_instruction_buffersize = limits_instructions_initbuffersize;
 	Instruction *program = alloc(IRAlloc, limits_instructions_maxbuffersize);
 
