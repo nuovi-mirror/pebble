@@ -11,7 +11,7 @@ void escape_std_io_print
 	FFIValue *ptr = FFIreadVariable(vars, "__Escape_std.io.print_ARG0");
 	FFIconvertValueToString(ptrbuff, limits_instructions_varnamesize, *ptr);
 		
-	FFIValue *msg = FFIreadVariable(vars, *ptrbuff);
+	FFIValue *msg = FFIreadVariable(vars, ptrbuff);
 	FFIconvertValueToString(msgbuff, limits_instructions_varnamesize, *msg);
 
 	FFIstdoutPrint(msgbuff);
