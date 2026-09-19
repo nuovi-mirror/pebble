@@ -133,7 +133,7 @@ C_FFI_SRCS = \
 	   ffi/platform/c/std/io/print.c
 
 # just do this for now; add platform selection logic later
-FFI_SRCS += $(C_FFI_SRCS)
+FFI_SRCS += $($(target)_FFI_SRCS)
 
 # platform inheritance logic
 PLATFORM_SRCS_freestand = $(FREESTAND_SRCS)
@@ -161,7 +161,7 @@ all: $(program)
 $(program): $(OBJS)
 	rm -rf bin
 	mkdir bin
-	$(analzyer) $(cc) $(cflags) $(LDFLAGS) -o $@ $(OBJS)
+	$(analyzer) $(cc) $(cflags) $(LDFLAGS) -o $@ $(OBJS)
 
 .c.o:
 	$(analyzer) $(cc) $(CPPFLAGS) $(cflags) -MMD -MP -c -o $@ $<
