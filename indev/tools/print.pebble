@@ -1,4 +1,5 @@
-New __Escape_std.io.print_ARG0 'Hello from C! (2)'
+New msg 'Hello from C! (2)'
+New __Escape_std.io.print_ARG0 <msg>
 _PRINT __Escape_std.io.print_ARG0
 _PRINT2 __Escape_std.io.print_ARG0
 Escape std.io.print

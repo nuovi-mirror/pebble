@@ -5,9 +5,15 @@ void escape_std_io_print
 (FFIvars *vars, FFIArena *scratchAlloc, 
  FFIArena *tempAlloc, FFIArena *persistAlloc) 
 {
-	FFIValue *var = FFIreadVariable(vars, "__Escape_std.io.print_ARG0");
-	char *buff = FFIallocateMemory(tempAlloc, limits_instructions_varnamesize);
-	FFIconvertValueToString(buff, limits_instructions_varnamesize, *var);
-	FFIstdoutPrint(buff);
+	char *ptrbuff = FFIallocateMemory(tempAlloc, limits_instructions_varnamesize);
+	char *msgbuff = FFIallocateMemory(tempAlloc, limits_instructions_varnamesize);
+	
+	FFIValue *ptr = FFIreadVariable(vars, "__Escape_std.io.print_ARG0");
+	FFIconvertValueToString(ptrbuff, limits_instructions_varnamesize, *ptr);
+		
+	FFIValue *msg = FFIreadVariable(vars, *ptrbuff);
+	FFIconvertValueToString(msgbuff, limits_instructions_varnamesize, *msg);
+
+	FFIstdoutPrint(msgbuff);
 	FFIstdoutPrint("\n");
 }

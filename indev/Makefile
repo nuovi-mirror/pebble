@@ -123,7 +123,7 @@ C_SRCS = \
 	 platform/c/snprint.c
 
 # main FFI sources
-FFI_SRCS = \
+BASE_FFI_SRCS = \
 	   ffi/ffi.c \
 	   ffi/escapes.c
 
@@ -132,15 +132,15 @@ C_FFI_SRCS = \
 	   ffi/platform/c/test/hello.c \
 	   ffi/platform/c/std/io/print.c
 
-# just do this for now; add platform selection logic later
-FFI_SRCS += $($(target)_FFI_SRCS)
-
 # platform inheritance logic
 PLATFORM_SRCS_freestand = $(FREESTAND_SRCS)
 PLATFORM_SRCS_c = $(C_SRCS) $(FREESTAND_SRCS)
 PLATFORM_SRCS_posix = $(POSIX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
 PLATFORM_SRCS_openbsd = $(POSIX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
 PLATFORM_SRCS_puredarwin = $(POSIX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
+
+# FFI inheritance logic
+FFI_SRCS_c = $(BASE_FFI_SRCS) $(C_FFI_SRCS)
 
 # entry point
 MAIN_freestand = platform/freestand/main.c
@@ -151,7 +151,7 @@ MAIN_puredarwin = platform/puredarwin/main.c
 
 MAIN = $(MAIN_$(target))
 
-SRCS = $(VM_SRCS) $(PLATFORM_SRCS_$(target)) $(FFI_SRCS) $(MAIN)
+SRCS = $(VM_SRCS) $(PLATFORM_SRCS_$(target)) $(FFI_SRCS_$(target)) $(MAIN)
 OBJS = $(SRCS:.c=.o)
 DEPS = $(OBJS:.o=.d)
 
