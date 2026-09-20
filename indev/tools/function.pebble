@@ -1,0 +1,6 @@
+New a 'b'
+_PRINT2 a
+Func <a>
+_PRINT c
+End
+Call b

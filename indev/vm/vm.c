@@ -420,9 +420,11 @@ unsigned long interpret
 
 				case addrmode_pointer: {
 					char *vstr = alloc(scratchAlloc, limits_functions_namesize);
-					valuetostr(vstr, )
-					Value *vptr = getVar()
-				/* XXX handle addressing mode pointer */
+					valuetostr(vstr, limits_functions_namesize, instr->FirstOperand.Data);
+					Value *vptr = getVar(vars, funcname);
+					break;
+				}
+
 				/* XXX handle addressing mode forced_eval */
 				default: 
 					print("ERROR: INTERPRETER: FUNC: UNSUPPORTED ADDRESSING MODE!\n");
