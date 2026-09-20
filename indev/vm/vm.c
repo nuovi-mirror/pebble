@@ -204,16 +204,18 @@ Value resolve_literal
         text = buf;
     }
 
-    int ok;
-    ExprNodeData tree = str2expr(text, &ok, tempAlloc, persistAlloc);
-
-    if (!ok)
+    /* only actually try to parse it as an expression if it looks like one 
+     * parse it normally if not */
+    if (isexpression(text))
     {
-        print("ERROR: HELPER RESOLVE_LITERAL: MALFORMED EXPRESSION!\n");
-        exitproc(1);
+        int ok;
+        ExprNodeData tree = str2expr(text, &ok, tempAlloc, persistAlloc);
+
+        if (ok && tree.Type == ExprDataNode && tree.Node != NULL)
+            return evalexprdata(tree, vars);
     }
 
-    return evalexprdata(tree, vars);
+    return *val;
 }
 	
 Value resolve_forced_eval

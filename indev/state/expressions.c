@@ -299,16 +299,18 @@ Value guessvaluetypeorexpr
 {
 	if (isexpression(data))
 	{
-		Value v;
 		int ok;
 		ExprNodeData tree = str2expr(data, &ok, tempAlloc, persistAlloc);
 
-		v.Type = type_expr;
-		v.as.expr = (ok && tree.Type == ExprDataNode) ? tree.Node : NULL;
-
-		return v;
+		if (ok && tree.Type == ExprDataNode && tree.Node != NULL)
+		{
+			Value v;
+			v.Type = type_expr;
+			v.as.expr = tree.Node;
+			return v;
+		}
+		/* isexpression is heuristic and may parse a string as an expression */
 	}
 
 	return guessvaluetype(data, persistAlloc);
 }
-
