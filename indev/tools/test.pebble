@@ -88,7 +88,9 @@ New quux <foo>
 # quux = foo
 _PRINT2 quux
 
-
-
-
 _GETMEM
+
+New msg 'This will segfault now'
+New __Escape_std.io.print_ARG0 <msg>
+Escape std.io.print
+_SEGFAULT
