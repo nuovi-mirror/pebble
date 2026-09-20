@@ -418,6 +418,10 @@ unsigned long interpret
 					break;
 				}
 
+				case addrmode_pointer: {
+					char *vstr = alloc(scratchAlloc, limits_functions_namesize);
+					valuetostr(vstr, )
+					Value *vptr = getVar()
 				/* XXX handle addressing mode pointer */
 				/* XXX handle addressing mode forced_eval */
 				default: 
