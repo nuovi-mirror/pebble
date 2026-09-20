@@ -422,6 +422,11 @@ unsigned long interpret
 					char *vstr = alloc(scratchAlloc, limits_functions_namesize);
 					valuetostr(vstr, limits_functions_namesize, instr->FirstOperand.Data);
 					Value *vptr = getVar(vars, vstr);
+					if (vptr == NULL)
+					{
+						print("ERROR: INTERPERTER: FUNC: VARIABLE DOES NOT EXIST!\n");
+						exitproc(1);
+					}
 					valuetostr(funcname, limits_functions_namesize, *vptr);
 					break;
 				}
