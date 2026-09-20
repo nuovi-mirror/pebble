@@ -1,6 +1,5 @@
 New a 'b'
-_PRINT2 a
 Func <a>
-_PRINT c
+_PRINT b
 End
 Call b

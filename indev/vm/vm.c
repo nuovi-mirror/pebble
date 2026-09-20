@@ -421,7 +421,8 @@ unsigned long interpret
 				case addrmode_pointer: {
 					char *vstr = alloc(scratchAlloc, limits_functions_namesize);
 					valuetostr(vstr, limits_functions_namesize, instr->FirstOperand.Data);
-					Value *vptr = getVar(vars, funcname);
+					Value *vptr = getVar(vars, vstr);
+					valuetostr(funcname, limits_functions_namesize, *vptr);
 					break;
 				}
 
