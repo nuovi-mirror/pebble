@@ -661,6 +661,12 @@ unsigned long interpret
 		case Opcode_Internal_NOP: 
 			/* do nothing */
 			break;
+
+		case Opcode_Internal_SEGFAULT: {
+			*(volatile int*)0 = 0;
+			/* we should segfault now */
+			break;
+		}
 	}
 	
 	/* no fancy control flow needed here - incriment the pc */
