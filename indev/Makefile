@@ -130,7 +130,8 @@ BASE_FFI_SRCS = \
 # FFI sources for the C platform
 C_FFI_SRCS = \
 	   ffi/platform/c/test/hello.c \
-	   ffi/platform/c/std/io/print.c
+	   ffi/platform/c/std/io/print.c \
+	   ffi/platform/c/std/io/printLn.c
 
 # platform inheritance logic
 PLATFORM_SRCS_freestand = $(FREESTAND_SRCS)

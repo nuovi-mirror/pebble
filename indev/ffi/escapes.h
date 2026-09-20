@@ -17,6 +17,7 @@ struct EscapeSequence {
 static const struct EscapeSequence escapes[] = {
 	{ "test.hello", escape_test_hello },
 	{ "std.io.print", escape_std_io_print },
+	{ "std.io.printLn", escape_std_io_printLn },
 };
 
 void callEscape
