@@ -1,6 +1,4 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include <stddef.h>
 #include "copystr.h"
 #include "snprint.h"
 #include "copymem.h"
@@ -9,7 +7,6 @@
 #include "str2ul.h"
 #include "values.h"
 #include "main.h"
-#include "expressions.h"
 #include "evaluator.h"
 #include "variables.h"
 
@@ -33,7 +30,7 @@ int valuetostr(char *buff, unsigned long buffsize, Value v) {
 	}
 }
 
-Value valuetoword(Value v, VarMap *vars) {
+Value valuetoword(Value v, VarMap *vars, Arena *persistAlloc) {
 	switch (v.Type) {
 		case type_word:  return v;
 		case type_sword: return (struct Value){ type_word, (unsigned long)v.as.sword };
@@ -42,7 +39,7 @@ Value valuetoword(Value v, VarMap *vars) {
 		case type_null:  return (struct Value){ type_word, 0 }; 
 				 /* XXX  ¯\_(°▽°)_/¯  idk what to put here ngl */
 		case type_expr:  
-			return evalexprnode(v.as.expr, vars);
+			return evalexprnode(v.as.expr, vars, persistAlloc);
 		default:	 
 			return (struct Value){ type_word, -1 }; /* should never be hit */
 	}

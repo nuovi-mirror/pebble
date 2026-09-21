@@ -7,7 +7,6 @@
 #include "getnstrlen.h"
 #include "getstrlen.h"
 #include "main.h"
-#include "lalloc.h"
 #include "copymem.h"
 
 Value resolveleaf
@@ -142,10 +141,10 @@ static Value mkbool
 }
 
 Value evalexprnode
-(ExprNode *node, VarMap *vars)
+(ExprNode *node, VarMap *vars, Arena *persistAlloc)
 {
-	Value l = evalexprdata(node->left, vars);
-	Value r = evalexprdata(node->right, vars);
+	Value l = evalexprdata(node->left, vars, persistAlloc);
+	Value r = evalexprdata(node->right, vars, persistAlloc);
 	char lb[64], rb[64];
 	int cmp;
 
@@ -214,7 +213,7 @@ Value evalexprnode
 			const char *rs = asstr(r, rb, sizeof(rb));
 			unsigned long ll = getnstrlen(ls);
 			unsigned long rl = getnstrlen(rs);
-			char *out = lalloc(ll + rl + 1);
+			char *out = alloc(persistAlloc, ll + rl + 1);
 
 			copymem(ls, out, ll);
 			copymem(rs, out + ll, rl);
@@ -231,14 +230,23 @@ Value evalexprnode
 }
 
 Value evalexprdata
-(ExprNodeData data, VarMap *vars)
+(ExprNodeData data, VarMap *vars, Arena *persistAlloc)
 {
 	if (data.Type == ExprDataVal)
 		return resolveleaf(data.value, vars);
 
-	return evalexprnode(data.Node, vars);
+	return evalexprnode(data.Node, vars, persistAlloc);
 }
 
 Value evalstr
 (const char *str, int *ok, VarMap *vars, Arena *tempAlloc, Arena *persistAlloc)
-{ return evalexprdata(str2expr(str, ok, tempAlloc, persistAlloc), vars); }
+{ 
+	return evalexprdata(
+			str2expr(
+				str, 
+				ok, 
+				tempAlloc, 
+				persistAlloc), 
+			vars, 
+			persistAlloc); 
+}

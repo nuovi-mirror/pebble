@@ -187,7 +187,7 @@ Value resolve_literal
             exitproc(1);
         }
 
-	return evalexprnode(val->as.expr, vars);
+	return evalexprnode(val->as.expr, vars, persistAlloc);
     }
 
     char buf[32];
@@ -211,7 +211,7 @@ Value resolve_literal
         ExprNodeData tree = str2expr(text, &ok, tempAlloc, persistAlloc);
 
         if (ok && tree.Type == ExprDataNode && tree.Node != NULL)
-            return evalexprdata(tree, vars);
+            return evalexprdata(tree, vars, persistAlloc);
     }
 
     return *val;
@@ -531,7 +531,7 @@ unsigned long interpret
 					break;
 
 			}		
-			if (valuetoword(result, vars).as.word == 0)
+			if (valuetoword(result, vars, persistAlloc).as.word == 0)
 				return resolvefunction(pc, funcs, stack, program, scratchAlloc, funcname, instruction_count);
 			else
 				return pc + 1;
