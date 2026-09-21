@@ -6,16 +6,16 @@
 typedef SHashMap FuncMap;
 
 unsigned long hasFunc
-(FuncMap *m, char *str);
+(FuncMap *m, const char *str);
 
 FuncMap initFuncs
 (unsigned long cap);
 
 void putFunc
-(FuncMap *m, char *key, void *value);
+(FuncMap *m, const char *key, const void *value);
 
 void *getFunc
-(FuncMap *m, char *key);
+(FuncMap *m, const char *key);
 
 void freeFuncs
 (FuncMap *m);

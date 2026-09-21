@@ -6,16 +6,16 @@
 typedef SHashMap InstructionMap;
 
 unsigned long hashInstruction
-(InstructionMap *m, char *str);
+(InstructionMap *m, const char *str);
 
 InstructionMap initInstructionMap
 (unsigned long cap);
 
 void putInstruction
-(InstructionMap *m, char *key, void *value);
+(InstructionMap *m, const char *key, const void *value);
 
 void *getInstruction
-(InstructionMap *m, char *key);
+(InstructionMap *m, const char *key);
 
 void freeInstructionMap
 (InstructionMap *m);

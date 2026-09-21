@@ -7,7 +7,7 @@
 #include "cmpstr.h"
 #include "main.h"
 
-unsigned long mapHash(SHashMap *m, char *str) {
+unsigned long mapHash(SHashMap *m, const char *str) {
 	unsigned long inital = HASHMAPBASE;
 
 	while (*str) {
@@ -32,7 +32,7 @@ SHashMap initHashMap(unsigned long cap) {
 	return m;
 }
 
-void hashMapPut(SHashMap *m, char *key, void *value) {
+void hashMapPut(SHashMap *m, const char *key, const void *value) {
 	unsigned long idx = mapHash(m, key);
 	HashMapEntry *e = m->buckets[idx];
 	while (e != NULL) {
@@ -59,7 +59,7 @@ void hashMapPut(SHashMap *m, char *key, void *value) {
 	m->size++;
 }
 
-void *hashMapGet(SHashMap *m, char *key) {
+void *hashMapGet(SHashMap *m, const char *key) {
 	HashMapEntry *e = m->buckets[mapHash(m, key)];
 
 	while (e != NULL) {
@@ -72,7 +72,7 @@ void *hashMapGet(SHashMap *m, char *key) {
 	return NULL;
 }
 
-int hashMapRemove(SHashMap *m, char *key) {
+int hashMapRemove(SHashMap *m, const char *key) {
 	unsigned long idx = mapHash(m, key);
 
 	HashMapEntry *e = m->buckets[idx];

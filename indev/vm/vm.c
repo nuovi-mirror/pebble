@@ -15,8 +15,6 @@
 #include "copymem.h"
 #include "readfile.h"
 #include "skipspace.h"
-#include "lfree.h"
-#include "lalloc.h"
 #include "exitproc.h"
 #include "setmem.h"
 #include "allocator.h"

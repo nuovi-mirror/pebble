@@ -17,19 +17,19 @@ typedef struct SHashMap {
 #define HASHMAPPRIME 0x01000193;
 
 unsigned long mapHash
-(SHashMap *m, char *str);
+(SHashMap *m, const char *str);
 
 SHashMap initHashMap
 (unsigned long cap);
 
 void hashMapPut
-(SHashMap *m, char *key, void *value);
+(SHashMap *m, const char *key, const void *value);
 
 void *hashMapGet
-(SHashMap *m, char *key);
+(SHashMap *m, const char *key);
 
 int hashMapRemove
-(SHashMap *m, char *key);
+(SHashMap *m, const char *key);
 
 void hashMapFreeMap
 (SHashMap *m);
