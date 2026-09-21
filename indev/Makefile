@@ -107,6 +107,7 @@ CPPFLAGS += $(PLATFORM_CPPFLAGS_$(target))
 #  - VM sources -
 VM_SRCS = \
 	  allocator/allocator.c \
+	  allocator/mem.c \
 	  state/evaluator.c \
 	  state/expressions.c \
 	  state/functions.c \

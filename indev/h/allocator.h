@@ -20,7 +20,7 @@ typedef union
 #define ARENA_ALIGNMENT (sizeof(MaxAlign))
 
 struct Arena *initAlloc
-(unsigned long size);
+(void *backing, unsigned long size);
 
 void *alloc
 (struct Arena *arena, unsigned long size); 

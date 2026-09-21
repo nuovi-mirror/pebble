@@ -6,12 +6,11 @@
 #include "main.h"
 
 struct Arena *initAlloc
-(unsigned long size) 
-{						/* function to init an arena 
-						   takes the size of the arena to init
-						   returns a pointer to the Arena struct */
-	char *srt_ptr = lalloc(size);		/* allocate the arena */
-	
+(void *backing, unsigned long size) 
+{
+	/* char *srt_ptr = lalloc(size); XXX this */
+	char *srt_ptr = backing; /* XXX hack */
+
 	if (srt_ptr == NULL) 
 	{
 		print("ERROR: ALLOCATOR: NONFATAL: GIVEN NULL ALLOCATOR POINTER\n");
@@ -22,7 +21,7 @@ struct Arena *initAlloc
 	
 	if (arena == NULL) 
 	{					/* if we cannot allocate the area */
-		lfree(srt_ptr);			/* free the are we already allocated */
+		/* lfree(srt_ptr); XXX not needed now */
 		print("ERROR: ALLOCATOR: ALLOCATOR INIT FAILED\n");
 		return NULL;			/* return null */
 	}
@@ -31,8 +30,8 @@ struct Arena *initAlloc
 	arena->curr_ptr = srt_ptr;		/* set the current pointer */
 	arena->arena_ptr = srt_ptr;		/* set the start of the arena */
 
-	return arena;				/* return a pointer to the new allocated 
-						   arena */
+	return arena;				/* return a pointer to the new 
+						   allocated arena */
 }
 
 void *alloc
@@ -66,8 +65,10 @@ void freeAllocator
 	if (arena == NULL)
 		return;
 
+	/* XXX hack
 	lfree(arena->arena_ptr);
 	lfree(arena);
+	*/
 }
 
 void resetAllocator

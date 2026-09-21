@@ -29,6 +29,7 @@
 #include "main.h"
 #include "ffi.h"
 #include "escapes.h"
+#include "mem.h"
 
 /* used to parse an instruction operand - guesses the type
  * and addressing mode */
@@ -745,10 +746,18 @@ int vmmain
 (Args cliargs, Stack *stack) 
 {
 	/* init */
-	struct Arena *tempAlloc 	= initAlloc(limits_allocator_temp_maxmem);
-	struct Arena *persistAlloc 	= initAlloc(limits_allocator_persist_maxmem);
-	struct Arena *scratchAlloc 	= initAlloc(limits_allocator_scratch_maxmem);
-	struct Arena *IRAlloc 		= initAlloc(limits_instructions_maxbuffersize);
+	struct Arena *tempAlloc = initAlloc(
+			mem_arena_tempAlloc_backing, 
+			limits_allocator_temp_maxmem);
+	struct Arena *persistAlloc = initAlloc(
+			mem_arena_persistAlloc_backing, 
+			limits_allocator_persist_maxmem);
+	struct Arena *scratchAlloc = initAlloc(
+			mem_arena_scratchAlloc_backing, 
+			limits_allocator_scratch_maxmem);
+	struct Arena *IRAlloc = initAlloc(
+			mem_arena_IRAlloc_backing, 
+			limits_instructions_maxbuffersize);
 
 	/* XXX read this pls
 	 * tempAlloc may be freed once after every instruction 
