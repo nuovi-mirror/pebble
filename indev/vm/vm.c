@@ -429,7 +429,6 @@ unsigned long interpret
 					break;
 				}
 
-				/* XXX handle addressing mode forced_eval */
 				default: 
 					print("ERROR: INTERPRETER: FUNC: UNSUPPORTED ADDRESSING MODE!\n");
 					exitproc(1);
@@ -449,12 +448,41 @@ unsigned long interpret
 				case addrmode_bare: 
 					valuetostr(funcname, limits_functions_namesize, instr->FirstOperand.Data);
 					break;
+					
+				case addrmode_true_literal: 
+					valuetostr(funcname, limits_functions_namesize, instr->FirstOperand.Data);
+					break;
+
+				case addrmode_literal: {
+					char *buff = alloc(scratchAlloc, limits_functions_namesize);
+					Value vptr = resolve_literal(buff, limits_functions_namesize,
+							&instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
+					valuetostr(funcname, limits_functions_namesize, vptr);
+					break;
+				}
+
+				case addrmode_forced_eval: {
+					char *buff = alloc(scratchAlloc, limits_functions_namesize);
+					Value vptr = resolve_forced_eval(buff, limits_functions_namesize,
+							&instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
+					valuetostr(funcname, limits_functions_namesize, vptr);
+					break;
+				}
 
 
-				/* XXX handle addressing mode literal */
-				/* XXX handle addressing mode true_literal */
-				/* XXX handle addressing mode pointer */
-				/* XXX handle addressing mode forced_eval */
+				case addrmode_pointer: {
+					char *vstr = alloc(scratchAlloc, limits_functions_namesize);
+					valuetostr(vstr, limits_functions_namesize, instr->FirstOperand.Data);
+					Value *vptr = getVar(vars, vstr);
+					if (vptr == NULL)
+					{
+						print("ERROR: INTERPERTER: FUNC: VARIABLE DOES NOT EXIST!\n");
+						exitproc(1);
+					}
+					valuetostr(funcname, limits_functions_namesize, *vptr);
+					break;
+				}
+
 				default:
 					print("ERROR: INTERPRETER: IF: UNSUPPORTED ADDRESSING MODE!\n");
 					exitproc(1);
@@ -469,10 +497,33 @@ unsigned long interpret
 					break;
 				}
 	
-				/* XXX handle addressing mode true_literal */
-				/* XXX handle addressing mode bare */
-				/* XXX handle addressing mode pointer */
-				/* XXX handle addressing mode forced_eval */
+				case addrmode_forced_eval: {
+					char *buff = alloc(tempAlloc, limits_functions_namesize);
+					result = resolve_forced_eval(buff, limits_functions_namesize, 
+							&instr->SecondOperand.Data, vars, tempAlloc, persistAlloc);
+					break;
+				}
+		
+				/* in this case, a pointer refers to a pointer to an expression, which is 
+				 * compatable with the forced_eavl addressing mode, so we can just copy that */
+				case addrmode_pointer: {
+					char *buff = alloc(tempAlloc, limits_functions_namesize);
+					result = resolve_forced_eval(buff, limits_functions_namesize, 
+							&instr->SecondOperand.Data, vars, tempAlloc, persistAlloc);
+					break;
+				}
+		
+				case addrmode_bare: {
+					result = instr->FirstOperand.Data;
+					break;
+				}
+		
+				case addrmode_true_literal: {
+					result = instr->FirstOperand.Data;
+					break;
+				}
+
+
 				default:
 					print("ERROR: INTERPRETER: IF: UNSUPPORTED ADDRESSING MODE!\n");
 					exitproc(1);
