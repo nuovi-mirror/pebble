@@ -1,23 +1,23 @@
 #include "allocator.h"
 #include "print.h"
 #include "exitproc.h"
-#include "lalloc.h"
-#include "lfree.h"
 #include "main.h"
 
 struct Arena *initAlloc
 (void *backing, unsigned long size) 
 {
 	/* char *srt_ptr = lalloc(size); XXX this */
-	char *srt_ptr = backing; /* XXX hack */
+	char *srt_ptr; /* XXX hack */
 
-	if (srt_ptr == NULL) 
+	if (backing == NULL) 
 	{
-		print("ERROR: ALLOCATOR: NONFATAL: GIVEN NULL ALLOCATOR POINTER\n");
+		print("ERROR: ALLOCATOR: NONFATAL: GIVEN NULL BACKING POINTER\n");
 		return NULL;
 	}
 
-	struct Arena *arena = lalloc(sizeof(struct Arena));
+	/* struct Arena *arena = lalloc(sizeof(struct Arena)); XXX this */
+	struct Arena *arena = backing;
+	srt_ptr = (char *)backing + sizeof(struct Arena);
 	
 	if (arena == NULL) 
 	{					/* if we cannot allocate the area */
