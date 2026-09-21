@@ -1,5 +1,6 @@
 #include "variables.h"
 #include "hashmap.h"
+#include "allocator.h"
 
 unsigned long hashVar
 (VarMap *m, const char *str)		
@@ -10,8 +11,8 @@ VarMap initVars
 { return initHashMap(cap); }
 
 void putVar
-(VarMap *m, const char *key, const void *value)		
-{ hashMapPut(m, key, value); }
+(VarMap *m, const char *key, const void *value, Arena *persistAlloc)		
+{ hashMapPut(m, key, value, persistAlloc); }
 
 void *getVar
 (VarMap *m, const char *key)			

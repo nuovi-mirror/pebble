@@ -1,6 +1,8 @@
 #ifndef STATE_HASHMAP_H_
 #define STATE_HASHMAP_H_
 
+#include "allocator.h"
+
 typedef struct HashMapEntry {
 	char *key;
 	void *value;
@@ -23,7 +25,7 @@ SHashMap initHashMap
 (unsigned long cap);
 
 void hashMapPut
-(SHashMap *m, const char *key, const void *value);
+(SHashMap *m, const char *key, const void *value, Arena *persistAlloc);
 
 void *hashMapGet
 (SHashMap *m, const char *key);

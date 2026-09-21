@@ -144,7 +144,7 @@ Instruction makeIR
 	{
 		char *buf = alloc(persistAlloc, sizeof(Instruction));
 		copymem(&instr, buf, sizeof(instr));
-		putInstruction(instructionMap, line, buf);
+		putInstruction(instructionMap, line, buf, persistAlloc);
 	}
 
 	return instr;
@@ -381,7 +381,7 @@ unsigned long interpret
  				copymem(dest, name, namelen);
  				name[namelen] = '\0';
 
- 				putVar(vars, name, valptr);
+ 				putVar(vars, name, valptr, persistAlloc);
  			}
 
 			break;
@@ -436,7 +436,7 @@ unsigned long interpret
 					break;
 			}
 			*lpc = pc + 1; /* since we are on the func instruction */
-			putFunc(funcs, funcname, lpc); /* place the function onto the index */
+			putFunc(funcs, funcname, lpc, persistAlloc); /* place the function onto the index */
 			return findend(program, instruction_count, pc) + 1; /* find the End statement */
 			break;
 		}

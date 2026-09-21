@@ -2,6 +2,7 @@
 #define STATE_INSTRUCTOINMAPPER_H_
 
 #include "hashmap.h"
+#include "allocator.h"
 
 typedef SHashMap InstructionMap;
 
@@ -12,7 +13,7 @@ InstructionMap initInstructionMap
 (unsigned long cap);
 
 void putInstruction
-(InstructionMap *m, const char *key, const void *value);
+(InstructionMap *m, const char *key, const void *value, Arena *persistAlloc);
 
 void *getInstruction
 (InstructionMap *m, const char *key);

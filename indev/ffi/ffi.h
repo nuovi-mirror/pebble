@@ -16,7 +16,7 @@ typedef Value FFIValue;
 typedef Arena FFIArena;
 
 void FFIallocateVariable
-(FFIvars *vars, const char *varname, void *value);
+(FFIvars *vars, const char *varname, void *value, FFIArena *persistAlloc);
 
 void *FFIreadVariableUnsafe
 (FFIvars *vars, const char *varname);

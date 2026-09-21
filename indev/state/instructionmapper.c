@@ -1,5 +1,6 @@
 #include "instructionmapper.h"
 #include "hashmap.h"
+#include "allocator.h"
 
 unsigned long hashInstruction
 (InstructionMap *m, const char *str)		
@@ -10,8 +11,8 @@ InstructionMap initInstructionMap
 { return initHashMap(cap); }
 
 void putInstruction
-(InstructionMap *m, const char *key, const void *value)	
-{ hashMapPut(m, key, value); }
+(InstructionMap *m, const char *key, const void *value, Arena *persistAlloc)	
+{ hashMapPut(m, key, value, persistAlloc); }
 
 void *getInstruction
 (InstructionMap *m, const char *key)			

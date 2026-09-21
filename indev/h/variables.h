@@ -2,6 +2,7 @@
 #define STATE_VARIABLES_H_
 
 #include "hashmap.h"
+#include "allocator.h"
 
 typedef	SHashMap VarMap;
 
@@ -12,7 +13,7 @@ VarMap initVars
 (unsigned long cap);
 
 void putVar 
-(VarMap *m, const char *key, const void *value);
+(VarMap *m, const char *key, const void *value, Arena *persistAlloc);
 
 void *getVar 
 (VarMap *m, const char *key);

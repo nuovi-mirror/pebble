@@ -7,7 +7,7 @@
 #include "print.h"
 
 void FFIallocateVariable
-(FFIvars *vars, const char* varname, void *value)
+(FFIvars *vars, const char* varname, void *value, FFIArena *persistAlloc)
 {
 	if (vars->count >= vars->max)
 	{
@@ -33,7 +33,7 @@ void FFIallocateVariable
 		exitproc(1);
 	}
 
-	putVar(vars->map, varname, value);
+	putVar(vars->map, varname, value, persistAlloc);
 }
 
 void *FFIreadVariableUnsafe

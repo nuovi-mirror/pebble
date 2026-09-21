@@ -2,6 +2,7 @@
 #define STATE_FUNCTIONS_H_
 
 #include "hashmap.h"
+#include "allocator.h"
 
 typedef SHashMap FuncMap;
 
@@ -12,7 +13,7 @@ FuncMap initFuncs
 (unsigned long cap);
 
 void putFunc
-(FuncMap *m, const char *key, const void *value);
+(FuncMap *m, const char *key, const void *value, Arena *persistAlloc);
 
 void *getFunc
 (FuncMap *m, const char *key);

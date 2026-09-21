@@ -1,11 +1,10 @@
 #include "hashmap.h"
 #include "lcalloc.h"
-#include "lalloc.h"
-#include "lfree.h"
 #include "exitproc.h"
 #include "print.h"
 #include "cmpstr.h"
 #include "main.h"
+#include "allocator.h"
 
 unsigned long mapHash(SHashMap *m, const char *str) {
 	unsigned long inital = HASHMAPBASE;
@@ -32,7 +31,9 @@ SHashMap initHashMap(unsigned long cap) {
 	return m;
 }
 
-void hashMapPut(SHashMap *m, const char *key, const void *value) {
+void hashMapPut
+(SHashMap *m, const char *key, const void *value, Arena *persistAlloc) 
+{
 	unsigned long idx = mapHash(m, key);
 	HashMapEntry *e = m->buckets[idx];
 	while (e != NULL) {
@@ -45,7 +46,7 @@ void hashMapPut(SHashMap *m, const char *key, const void *value) {
 	}
 
 	/* not found - prep new entry */
-	HashMapEntry *entry = lalloc(sizeof(HashMapEntry));
+	HashMapEntry *entry = alloc(persistAlloc, sizeof(HashMapEntry));
 
 	if (entry == NULL) {
 		print("ERROR: HASHMAP: FATAL: ALLOCATION FAILED!\n");
@@ -85,7 +86,7 @@ int hashMapRemove(SHashMap *m, const char *key) {
 			else
 				prev->next = e->next;
 
-			lfree(e);
+			/* lfree(e); XXX hack */
 			m->size--;
 			return 1;
 		}
@@ -103,12 +104,12 @@ void hashMapFreeMap(SHashMap *m) {
 
 		while (e != NULL) {
 			HashMapEntry *next = e->next;
-			lfree(e);
+			/* lfree(e); XXX hack */
 			e = next;
 		}
 	}
 
-	lfree(m->buckets);
+	/* lfree(m->buckets); XXX hack */
 	m->buckets = NULL;
 	m->size = 0;
 	m->cap = 0;
