@@ -1,5 +1,4 @@
 #include "expressions.h"
-#include "copystr.h"
 #include "getstrlen.h"
 #include "cmpstr.h"
 #include "skipspace.h"
@@ -71,7 +70,7 @@ Value parseliteral
 }
 
 void nexttoken
-(const char **str, Token *token, Arena *tempAlloc, Arena *persistAlloc)
+(char **str, Token *token, Arena *tempAlloc, Arena *persistAlloc)
 {
 	*str = tskipspace(*str);
 
@@ -119,7 +118,7 @@ void nexttoken
 
 	/* value literal from here */
 	token->Type = Token_Value;
-	token->Value = parseliteral(str, tempAlloc, persistAlloc);
+	token->Value = parseliteral((const char **)str, tempAlloc, persistAlloc);
 }
 
 int exprnodetostr
@@ -133,9 +132,7 @@ int exprnodetostr
 
 static void parseradvance
 (ExprParser *p, Arena *tempAlloc, Arena *persistAlloc)
-{
-	nexttoken(&p->cursor, &p->lookahead, tempAlloc, persistAlloc);
-}
+{ nexttoken(&p->cursor, &p->lookahead, tempAlloc, persistAlloc); }
 
 ExprNode *newexprnode
 (ExprOperation op, ExprNodeData left, ExprNodeData right, Arena *arena)

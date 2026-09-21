@@ -1,8 +1,6 @@
 #ifndef PLATFORM_SKIPSPACE_H_
 #define PLATFORM_SKIPSPACE_H_
 
-#include "getnstrlen.h"
-
 /* function with old behavior for legacy compat */
 char *skipspace
 (char *p);

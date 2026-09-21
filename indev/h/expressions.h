@@ -88,7 +88,7 @@ Value parseliteral
 (const char **str, Arena *tempAlloc, Arena *persistAlloc);
 
 void nexttoken
-(const char **str, Token *token, Arena *tempAlloc, Arena *persistAlloc);
+(char **str, Token *token, Arena *tempAlloc, Arena *persistAlloc);
 
 int exprnodetostr
 (char *buf, unsigned long bufsize, ExprNode *node);

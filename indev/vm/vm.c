@@ -542,11 +542,16 @@ unsigned long interpret
 					valuetostr(name, limits_escapes_namesize, 
 							instr->FirstOperand.Data);
 					break;
+
+			default:
+				print("ERROR: INTERPRETER: ESCAPE: ADDRESSING MODE IS UNSUPPORTED!\n");
+				exitproc(1);
 			}
 
 			callEscape(name, ffivars, scratchAlloc, tempAlloc, persistAlloc);
 			break;
 		}
+
 
 		/* internal opcodes */
 		case Opcode_Internal_PRINT: {

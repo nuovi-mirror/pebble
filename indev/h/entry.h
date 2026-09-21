@@ -11,7 +11,7 @@ typedef struct Args
 typedef struct StackFrame 
 {
 	unsigned long return_pc;
-	char *funcname; /* function name this frame belongs to */
+	const char *funcname; /* function name this frame belongs to */
 } StackFrame;
 
 typedef struct Stack 

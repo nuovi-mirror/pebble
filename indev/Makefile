@@ -8,6 +8,7 @@ target = c
 analyzer =
 
 cflags =
+ldflags =
 CPPFLAGS = \
 	   -Ih \
 	   -Iffi
@@ -15,12 +16,17 @@ CPPFLAGS = \
 # - build types - 
 #   standard build 
 BUILD_CFLAGS_default = \
-		       -O2
+	       	     -O2 \
+		     -static \
+		     -flto \
+		     -ffunction-sections \
+		     -fdata-sections
 
 #   debugging builds
 BUILD_CFLAGS_debug = \
 		     -g \
 		     -O0 \
+		     -static \
 		     -Wall \
 		     -Wextra \
 		     -Wpedantic \
@@ -44,13 +50,28 @@ BUILD_CFLAGS_debug = \
 #   for cross-compiling or distributing
 BUILD_CFLAGS_fast = \
 		    -O3 \
+		    -ffunction-sections \
+		    -fdata-sections \
+		    -static \
 		    -flto \
 		    -fno-semantic-interposition \
 		    -ffast-math \
 		    -march=native \
 		    -mtune=native
 
-cflags += -std=c99 -static $(BUILD_CFLAGS_$(build))
+#   smaller builds - not statically linked for size
+BUILD_CFLAGS_small = \
+		     -Oz \
+		     -flto \
+		     -ffunction-sections \
+		     -fdata-sections
+
+cflags += \
+	  -std=c99 \
+	  $(BUILD_CFLAGS_$(build))
+
+ldflags += \
+	   -Wl,--gc-sections
 
 # - platform include paths -
 #   freestanding platform - needs nothing but itself
@@ -162,7 +183,7 @@ all: $(program)
 $(program): $(OBJS)
 	rm -rf bin
 	mkdir bin
-	$(analyzer) $(cc) $(cflags) $(LDFLAGS) -o $@ $(OBJS)
+	$(analyzer) $(cc) $(cflags) $(ldflags) -o $@ $(OBJS)
 
 .c.o:
 	$(analyzer) $(cc) $(CPPFLAGS) $(cflags) -MMD -MP -c -o $@ $<
