@@ -10,7 +10,7 @@ static unsigned long hashVar
 (VarMap *m, const char *str);
 
 VarMap initVars 
-(unsigned long cap);
+(unsigned long cap, Arena *persistAlloc);
 
 void putVar 
 (VarMap *m, const char *key, const void *value, Arena *persistAlloc);

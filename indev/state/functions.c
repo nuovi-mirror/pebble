@@ -6,8 +6,8 @@ unsigned long hasFunc
 (FuncMap *m, const char *str)		
 { return mapHash(m, str); }
 
-FuncMap initFuncs(unsigned long cap)			
-{ return initHashMap(cap); }
+FuncMap initFuncs(unsigned long cap, Arena *persistAlloc)			
+{ return initHashMap(cap, persistAlloc); }
 
 void putFunc
 (FuncMap *m, const char *key, const void *value, Arena *persistAlloc)	

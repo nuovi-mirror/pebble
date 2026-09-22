@@ -1,5 +1,4 @@
 #include "hashmap.h"
-#include "lcalloc.h"
 #include "exitproc.h"
 #include "print.h"
 #include "cmpstr.h"
@@ -17,11 +16,11 @@ unsigned long mapHash(SHashMap *m, const char *str) {
 	return inital & (m->cap - 1); /* must be power of two */
 }
 
-SHashMap initHashMap(unsigned long cap) {
+SHashMap initHashMap(unsigned long cap, Arena *persistAlloc) {
 	SHashMap m;
 	m.size = 0;
 	m.cap = cap;
-	m.buckets = lcalloc(cap, sizeof(HashMapEntry *));
+	m.buckets = alloc(persistAlloc, cap * sizeof(HashMapEntry *));
 
 	if (m.buckets == NULL) {
 		print("ERRORL HASHMAP: FATA: ALLOCATION FAILED!\n");

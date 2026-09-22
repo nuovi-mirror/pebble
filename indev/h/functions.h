@@ -10,7 +10,7 @@ unsigned long hasFunc
 (FuncMap *m, const char *str);
 
 FuncMap initFuncs
-(unsigned long cap);
+(unsigned long cap, Arena *persistAlloc);
 
 void putFunc
 (FuncMap *m, const char *key, const void *value, Arena *persistAlloc);

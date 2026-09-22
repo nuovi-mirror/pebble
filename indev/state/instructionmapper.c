@@ -7,8 +7,8 @@ unsigned long hashInstruction
 { return mapHash(m, str); }
 
 InstructionMap initInstructionMap
-(unsigned long cap)			
-{ return initHashMap(cap); }
+(unsigned long cap, Arena *persistAlloc)			
+{ return initHashMap(cap, persistAlloc); }
 
 void putInstruction
 (InstructionMap *m, const char *key, const void *value, Arena *persistAlloc)	

@@ -22,7 +22,7 @@ unsigned long mapHash
 (SHashMap *m, const char *str);
 
 SHashMap initHashMap
-(unsigned long cap);
+(unsigned long cap, Arena *persistAlloc);
 
 void hashMapPut
 (SHashMap *m, const char *key, const void *value, Arena *persistAlloc);

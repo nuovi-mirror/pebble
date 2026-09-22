@@ -134,10 +134,6 @@ FREESTAND_SRCS = \
 C_SRCS = \
 	 platform/c/entry.c \
 	 platform/c/exitproc.c \
-	 platform/c/lalloc.c \
-	 platform/c/lcalloc.c \
-	 platform/c/lfree.c \
-	 platform/c/lrsize.c \
 	 platform/c/setmem.c \
 	 platform/c/print.c \
 	 platform/c/readfile.c \

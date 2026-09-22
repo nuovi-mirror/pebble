@@ -7,8 +7,8 @@ unsigned long hashVar
 { return mapHash(m, str); }
 
 VarMap initVars
-(unsigned long cap)			
-{ return initHashMap(cap); }
+(unsigned long cap, Arena *persistAlloc)			
+{ return initHashMap(cap, persistAlloc); }
 
 void putVar
 (VarMap *m, const char *key, const void *value, Arena *persistAlloc)		

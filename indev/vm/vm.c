@@ -765,10 +765,11 @@ int vmmain
 	 * persistAlloc may never be freed until the VM exits
 	 */
 
-	VarMap vars = initVars(limits_variables_max);
+	VarMap vars = initVars(limits_variables_max, persistAlloc);
 	FFIvars *ffivars = alloc(persistAlloc, sizeof(FFIvars));
-	FuncMap funcs = initFuncs(limits_functions_max);
-	InstructionMap instructionMap = initInstructionMap(limits_instructions_maxcache);
+	FuncMap funcs = initFuncs(limits_functions_max, persistAlloc);
+	InstructionMap instructionMap = initInstructionMap(
+			limits_instructions_maxcache, persistAlloc);
 
 	ffivars->map = &vars;
 	ffivars->count = 0;
