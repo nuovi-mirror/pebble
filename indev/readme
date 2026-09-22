@@ -65,12 +65,16 @@ Supported Platforms
 	For a list of supported platforms, please go to http://pebblevm.org/platforms.html
 
 	All platforms include:
+
 		freestand 	-> freestanding
 		c 		-> pure C99 + Libc
 		openbsd 	-> c + OpenBSD system calls
 		puredarwin	-> c + PureDarwin shims
 
 	Depreciated platforms include:
+
+		puredarwin
+			Random number generation is currently not provided.
 		
 			
 

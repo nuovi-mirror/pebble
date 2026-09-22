@@ -4,7 +4,8 @@
 cc = cc
 program = bin/vm
 build = default
-target = c
+platform = c
+target += $(platform)
 analyzer =
 graphics = 
 
