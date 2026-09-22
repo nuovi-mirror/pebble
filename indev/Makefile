@@ -102,6 +102,9 @@ PLATFORM_CPPFLAGS_puredarwin = \
 			       -Iplatform/c \
 			       -Iplatform/freestand
 
+#   c + SDL2
+PLATFORM_CPPFLAGS_sdl2 = 
+
 CPPFLAGS += $(PLATFORM_CPPFLAGS_$(target))
 
 #  - VM sources -
@@ -151,19 +154,32 @@ C_FFI_SRCS = \
 	   ffi/platform/c/std/io/print.c \
 	   ffi/platform/c/std/io/printLn.c
 
+SDL2_FFI_SRCS = \
+		ffi/platform/sdl2/gs/2d/window/create.c 
+
+# SDL2 logic
+SDL2_CFLAGS != sdl2-config --cflags
+cflags += $(SDL2_CFLAGS)
+
+SDL2_LDFLAGS != sdl2-config --libs
+ldflags += $(SDL2_LDFLAGS)
+
 # platform inheritance logic
 PLATFORM_SRCS_freestand = $(FREESTAND_SRCS)
 PLATFORM_SRCS_c = $(C_SRCS) $(FREESTAND_SRCS)
+PLATFORM_SRCS_sdl2 = $(C_SRCS) $(FREESTAND_SRCS) # just a shim
 PLATFORM_SRCS_posix = $(POSIX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
 PLATFORM_SRCS_openbsd = $(POSIX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
 PLATFORM_SRCS_puredarwin = $(POSIX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
 
 # FFI inheritance logic
 FFI_SRCS_c = $(BASE_FFI_SRCS) $(C_FFI_SRCS)
+FFI_SRCS_sdl2 = $(BASE_FFI_SRCS) $(SDL2_FFI_SRCS) $(C_FFI_SRCS)
 
 # entry point
 MAIN_freestand = platform/freestand/main.c
 MAIN_c = platform/c/main.c
+MAIN_sdl2 = platform/c/main.c # just a shim
 MAIN_posix = platform/posix/main.c
 MAIN_openbsd = platform/openbsd/main.c
 MAIN_puredarwin = platform/puredarwin/main.c

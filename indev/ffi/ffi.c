@@ -76,9 +76,17 @@ int FFIconvertValueToString
 (char *buff, unsigned long buffsize, FFIValue v)
 { return valuetostr(buff, buffsize, v); }
 
+FFIValue FFIconvertValueToWord
+(FFIValue v, FFIvars *vars, FFIArena *persistAlloc)
+{ return valuetoword(v, vars->map, persistAlloc); }
+
 void FFIstdoutPrint
 (char *msg)
 { return print(msg); }
+
+void FFIexit
+(int stat)
+{ return exitproc(stat); }
 
 void *FFIallocateMemory
 (FFIArena *arena, unsigned long size)

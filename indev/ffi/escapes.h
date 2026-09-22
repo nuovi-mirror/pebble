@@ -3,7 +3,6 @@
 
 #include "sequences.h"
 #include "ffi.h"
-#include "allocator.h"
 
 typedef void (*EscapeEntry)
 	(FFIvars *vars, FFIArena *scratchAlloc, 
@@ -15,9 +14,15 @@ struct EscapeSequence {
 };
 
 static const struct EscapeSequence escapes[] = {
+	/* debug libraries */
 	{ "test.hello", escape_test_hello },
+
+	/* standard libraries */
 	{ "std.io.print", escape_std_io_print },
 	{ "std.io.printLn", escape_std_io_printLn },
+
+	/* graphics libraries */
+	{ "gs.2d.window.create", escape_gs_2d_window_create },
 };
 
 void callEscape

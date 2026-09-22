@@ -13,6 +13,7 @@ typedef enum {
 	type_str,
 	type_expr,
 	type_null, /* debug */
+	type_pointer, /* debug */
 } ValueTypes;
 
 typedef struct Value {
@@ -24,6 +25,7 @@ typedef struct Value {
 		char *str;
 		ExprNode *expr;
 		void *null;
+		void *pointer;
 	}as;
 } Value;
 

@@ -27,8 +27,14 @@ void *FFIreadVariable /* safer wrapper - never returns NULL, aborts instead */
 int FFIconvertValueToString
 (char *buff, unsigned long buffsize, FFIValue v);
 
+FFIValue FFIconvertValueToWord
+(FFIValue v, FFIvars *vars, FFIArena *persistAlloc);
+
 void FFIstdoutPrint
 (char *msg);
+
+void FFIexit
+(int stat);
 
 void *FFIallocateMemory
 (FFIArena *arena, unsigned long size);
