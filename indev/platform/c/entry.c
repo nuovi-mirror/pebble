@@ -3,8 +3,8 @@
 #include "entry.h"
 #include "print.h"
 #include "exitproc.h"
-#include "lalloc.h"
-#include "lfree.h"
+#include "mem.h"
+#include "allocator.h"
 
 /* temporary NULL definition we can use */
 #undef NULL
@@ -70,7 +70,8 @@ Stack *initstack
 (unsigned long capacity) 
 {
 	/* initalize the stack */
-	StackFrame *stack_items = lalloc(capacity * sizeof(*stack_items));
+	/* StackFrame *stack_items = lalloc(capacity * sizeof(*stack_items)); XXX old */
+	StackFrame *stack_item = mem_stack_callStack_size;
 		/* max number of bytes for the stack */
 
 	Stack *stack = lalloc(sizeof(Stack));
@@ -91,8 +92,9 @@ Stack *initstack
 void freestack
 (Stack *stack)
 {
-	lfree(stack->items);
-	lfree(stack);
+	/* lfree(stack->items); */
+	/* lfree(stack); */
+	/* XXX this does nothing now */
 }	
 
 /* remove it */
