@@ -4,7 +4,6 @@
 #include "print.h"
 #include "exitproc.h"
 #include "mem.h"
-#include "allocator.h"
 
 /* temporary NULL definition we can use */
 #undef NULL
@@ -71,11 +70,11 @@ Stack *initstack
 {
 	/* initalize the stack */
 	/* StackFrame *stack_items = lalloc(capacity * sizeof(*stack_items)); XXX old */
-	StackFrame *stack_items = mem_stack_callStack;
+	StackFrame *stack_items = mem_stack_callStack_frames;
 		/* max number of bytes for the stack */
 
 	/* Stack *stack = lalloc(sizeof(Stack)); XXX old */
-	Stack *stack = mem_stack_callStack + sizeof(stack_items);
+	Stack *stack = mem_stack_callStack_stack;
 
 	if (stack == NULL || stack_items == NULL || capacity == 0)
 	{
