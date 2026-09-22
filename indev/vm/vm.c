@@ -600,7 +600,8 @@ unsigned long interpret
 				exitproc(1);
 			}
 
-			callEscape(name, ffivars, scratchAlloc, tempAlloc, persistAlloc);
+			callEscape(name, seed, ffivars, scratchAlloc, 
+					tempAlloc, persistAlloc);
 			break;
 		}
 

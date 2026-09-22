@@ -3,7 +3,7 @@
 #include "sequences.h"
 
 void callEscape
-(const char *name, FFIvars *vars, FFIArena *scratchAlloc, 
+(const char *name, unsigned long long seed, FFIvars *vars, FFIArena *scratchAlloc, 
  FFIArena *tempAlloc, FFIArena *persistAlloc)
 {
 	unsigned long i;
@@ -11,7 +11,8 @@ void callEscape
 	for (i = 0; i < sizeof(escapes) / sizeof(escapes[0]); i++)
 	{
 		if (cmpstr(escapes[i].name, name) == 0) {
-			escapes[i].func(vars, scratchAlloc, tempAlloc, persistAlloc);
+			escapes[i].func(vars, seed, scratchAlloc, 
+					tempAlloc, persistAlloc);
 			return;
 		}
 	}

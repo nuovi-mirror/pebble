@@ -2,7 +2,7 @@
 #include "limits.h"
 
 void escape_std_io_printLn
-(FFIvars *vars, FFIArena *scratchAlloc, 
+(FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc, 
  FFIArena *tempAlloc, FFIArena *persistAlloc) 
 {
 	char *ptrbuff = FFIallocateMemory(tempAlloc, limits_instructions_varnamesize);

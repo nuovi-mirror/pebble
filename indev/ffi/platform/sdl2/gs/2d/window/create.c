@@ -3,7 +3,7 @@
 #include "SDL2/SDL.h"
 
 void escape_gs_2d_window_create
-(FFIvars *vars, FFIArena *scratchAlloc, 
+(FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc, 
  FFIArena *tempAlloc, FFIArena *persistAlloc) 
 {
 	/* get arguments (yes) */
@@ -49,8 +49,6 @@ void escape_gs_2d_window_create
 	}
 	*/
 
-	FFIstdoutPrint("Creating window\n");
-
 	SDL_Window *win = SDL_CreateWindow(
 			wname,
 			arg1w.as.word, 
@@ -65,12 +63,13 @@ void escape_gs_2d_window_create
 		FFIexit(1);
 	}
 
-	FFIstdoutPrint("Created window\n");
+	FFIValue *v = FFIallocateMemory(persistAlloc, sizeof(FFIValue));
+	*v = (Value){ .Type = type_pointer, .as.pointer = win };
 
 	FFIallocateVariable(
 			vars, 
 			"__Escape_gs.2d.window.create_RET0", 
-			win, 
+			v, 
 			persistAlloc);
 
 }

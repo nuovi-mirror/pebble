@@ -5,7 +5,7 @@
 #include "ffi.h"
 
 typedef void (*EscapeEntry)
-	(FFIvars *vars, FFIArena *scratchAlloc, 
+	(FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc, 
 	 FFIArena *tempAlloc, FFIArena *persistAlloc);
 
 struct EscapeSequence {
@@ -28,7 +28,8 @@ static const struct EscapeSequence escapes[] = {
 };
 
 void callEscape
-(const char *name, FFIvars *vars, FFIArena *scratchAlloc, 
+(const char *name, unsigned long long seed, 
+ FFIvars *vars, FFIArena *scratchAlloc, 
  FFIArena *tempAlloc, FFIArena *persistAlloc);
 
 #endif
