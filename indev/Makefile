@@ -6,6 +6,14 @@ program = bin/vm
 build = default
 target = c
 analyzer =
+graphics = 
+
+USER_CC = $(cc)
+USER_PROGRAM = $(program)
+USER_BUILD = $(build)
+USER_TARGET = $(target)
+USER_ANALYZER = $(analyzer)
+USER_GRAPHICS = $(graphics)
 
 cflags =
 ldflags =
@@ -17,7 +25,6 @@ CPPFLAGS = \
 #   standard build 
 BUILD_CFLAGS_default = \
 	       	     -O2 \
-		     -static \
 		     -flto \
 		     -ffunction-sections \
 		     -fdata-sections
@@ -26,7 +33,6 @@ BUILD_CFLAGS_default = \
 BUILD_CFLAGS_debug = \
 		     -g \
 		     -O0 \
-		     -static \
 		     -Wall \
 		     -Wextra \
 		     -Wpedantic \
@@ -52,7 +58,6 @@ BUILD_CFLAGS_fast = \
 		    -O3 \
 		    -ffunction-sections \
 		    -fdata-sections \
-		    -static \
 		    -flto \
 		    -fno-semantic-interposition \
 		    -ffast-math \
@@ -154,35 +159,41 @@ C_FFI_SRCS = \
 	   ffi/platform/c/std/io/print.c \
 	   ffi/platform/c/std/io/printLn.c
 
-SDL2_FFI_SRCS = \
-		ffi/platform/sdl2/gs/2d/window/create.c 
-
-# SDL2 logic
-SDL2_CFLAGS != sdl2-config --cflags
-cflags += $(SDL2_CFLAGS)
-
-SDL2_LDFLAGS != sdl2-config --libs
-ldflags += $(SDL2_LDFLAGS)
-
 # platform inheritance logic
 PLATFORM_SRCS_freestand = $(FREESTAND_SRCS)
 PLATFORM_SRCS_c = $(C_SRCS) $(FREESTAND_SRCS)
-PLATFORM_SRCS_sdl2 = $(C_SRCS) $(FREESTAND_SRCS) # just a shim
 PLATFORM_SRCS_posix = $(POSIX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
 PLATFORM_SRCS_openbsd = $(POSIX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
 PLATFORM_SRCS_puredarwin = $(POSIX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
 
 # FFI inheritance logic
 FFI_SRCS_c = $(BASE_FFI_SRCS) $(C_FFI_SRCS)
-FFI_SRCS_sdl2 = $(BASE_FFI_SRCS) $(SDL2_FFI_SRCS) $(C_FFI_SRCS)
 
 # entry point
 MAIN_freestand = platform/freestand/main.c
 MAIN_c = platform/c/main.c
-MAIN_sdl2 = platform/c/main.c # just a shim
 MAIN_posix = platform/posix/main.c
 MAIN_openbsd = platform/openbsd/main.c
 MAIN_puredarwin = platform/puredarwin/main.c
+
+# logic for SDL2 integration
+sdl2_CFLAGS != sdl2-config --cflags
+sdl2_LDFLAGS != sdl2-config --libs
+
+sdl2_FFI_SRCS = \
+		 ffi/platform/sdl2/gs/2d/window/create.c
+
+GL_CFLAGS += $($(graphics)_CFLAGS)
+GL_LDFLAGS += $($(graphics)_LDFLAGS)
+GL_FFI_SRCS += $($(graphics)_FFI_SRCS)
+
+cflags += $(GL_CFLAGS)
+ldflags += $(GL_LDFLAGS)
+FFI_SRCS_$(target) += $(GL_FFI_SRCS)
+
+# let the program know
+GRAPHICS_CPPFLAGS != test -n "$(graphics)" && echo "-Dgraphics -Dgraphics_$(graphics)" || true
+CPPFLAGS += $(GRAPHICS_CPPFLAGS)
 
 MAIN = $(MAIN_$(target))
 

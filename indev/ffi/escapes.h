@@ -21,8 +21,10 @@ static const struct EscapeSequence escapes[] = {
 	{ "std.io.print", escape_std_io_print },
 	{ "std.io.printLn", escape_std_io_printLn },
 
+#ifdef graphics
 	/* graphics libraries */
 	{ "gs.2d.window.create", escape_gs_2d_window_create },
+#endif
 };
 
 void callEscape
