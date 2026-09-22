@@ -31,6 +31,8 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	/* generate random seed using the OpenBSD-specific library */
+	unsigned long long seed = (unsigned long long)arc4random();
 
 	/* memory management, teletype I/O, subprocess management */
 	if (pledge("stdio rpath tty proc", NULL) == -1) {
@@ -43,7 +45,7 @@ int main(int argc, char **argv) {
 	Args cliargs = initargs(argc, argv);
 	Stack *stack = initstack(1024);
 	
-	int ret = vmmain(cliargs, stack);
+	int ret = vmmain(cliargs, stack, seed);
 	freestack(stack);
 	return ret;
 }

@@ -176,6 +176,7 @@ PLATFORM_SRCS_puredarwin = $(UNIX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
 # FFI inheritance logic
 FFI_SRCS_c = $(BASE_FFI_SRCS) $(C_FFI_SRCS)
 FFI_SRCS_unix = $(BASE_FFI_SRCS) $(C_FFI_SRCS)
+FFI_SRCS_openbsd = $(BASE_FFI_SRCS) $(C_FFI_SRCS)
 
 # entry point
 MAIN_freestand = platform/freestand/main.c
