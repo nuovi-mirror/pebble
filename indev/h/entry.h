@@ -37,7 +37,11 @@ StackFrame popframe
 StackFrame readframe
 (Stack *stack);
 
+/* argument init */
 Args initargs
 (int argc, char **argv);
+
+/* random number generator */
+unsigned long long grandom(void);
 
 #endif

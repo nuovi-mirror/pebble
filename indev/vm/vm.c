@@ -262,7 +262,7 @@ unsigned long resolvefunction
 
 /* instruction interpreter - instruction-by-instruction loop of execution */
 unsigned long interpret
-(Instruction *instr, Instruction *program,  unsigned long instruction_count, VarMap *vars, FFIvars *ffivars, Stack *stack, 
+(Instruction *instr, Instruction *program, unsigned long long seed, unsigned long instruction_count, VarMap *vars, FFIvars *ffivars, Stack *stack, 
  FuncMap *funcs, unsigned long pc, Arena *persistAlloc, Arena *scratchAlloc, Arena *tempAlloc) 
 {
 	switch (instr->Opcode) {
@@ -734,6 +734,14 @@ unsigned long interpret
 			/* we should segfault now */
 			break;
 		}
+
+		case Opcode_Internal_GETSEED: {
+			char buff[32];
+			snprint(buff, sizeof(buff), "%llu", seed);
+			print("_GETSEED (INTERNAL INSTRUCTION): ");
+			print(buff);
+			print("\n");
+		}
 	}
 	
 	/* no fancy control flow needed here - incriment the pc */
@@ -743,7 +751,7 @@ unsigned long interpret
 /* Args and Stack should be defined by the platform entry code 
  * which will include this file */
 int vmmain
-(Args cliargs, Stack *stack) 
+(Args cliargs, Stack *stack, unsigned long long seed) 
 {
 	/* init */
 	struct Arena *tempAlloc = initAlloc(
@@ -833,7 +841,7 @@ int vmmain
 	unsigned long pc = 0;
 	while (pc < current_instruction_count)
 	{
-		pc = interpret(&program[pc], program, current_instruction_count, &vars, ffivars, stack, &funcs, pc, 
+		pc = interpret(&program[pc], program, seed, current_instruction_count, &vars, ffivars, stack, &funcs, pc, 
 				persistAlloc, scratchAlloc, tempAlloc);
 		resetAllocator(scratchAlloc);
 		resetAllocator(tempAlloc);

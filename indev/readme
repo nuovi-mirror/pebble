@@ -16,7 +16,10 @@ Building from source
 	building, such as
 
 	target - target operating system to build for - view the platform support
-		list to know what to place here. The default is 'POSIX'.
+		list to know what to place here. The default is 'c', which uses
+		pure C99 + Libc.
+
+	graphics - graphics library to use. The default is none.
 
 	build - the type of build to use - these include fast, debug, and
 		default. The default is 'default'. Please note fast builds
@@ -60,6 +63,15 @@ Building from source
 
 Supported Platforms
 	For a list of supported platforms, please go to http://pebblevm.org/platforms.html
+
+	All platforms include:
+		freestand 	-> freestanding
+		c 		-> pure C99 + Libc
+		openbsd 	-> c + OpenBSD system calls
+		puredarwin	-> c + PureDarwin shims
+
+	Depreciated platforms include:
+		
 			
 
 Product of The Nuovi Orizzonti Company

@@ -98,6 +98,13 @@ PLATFORM_CPPFLAGS_openbsd = \
 			    -Iplatform/c \
 			    -Iplatform/freestand
 
+#   general UNIX platform
+#   needs c, freestand, and a UNIX kernel
+PLATFORM_CPPFLAGS_unix = \
+			 -Iplatform/unix \
+			 -Iplatform/c \
+			 -Iplatform/freestand
+
 #   PureDarwin platform - needs a Darwin LIBC and Kernel
 #   and the POSIX platform
 #   and the C platform
@@ -162,17 +169,18 @@ C_FFI_SRCS = \
 # platform inheritance logic
 PLATFORM_SRCS_freestand = $(FREESTAND_SRCS)
 PLATFORM_SRCS_c = $(C_SRCS) $(FREESTAND_SRCS)
-PLATFORM_SRCS_posix = $(POSIX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
-PLATFORM_SRCS_openbsd = $(POSIX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
-PLATFORM_SRCS_puredarwin = $(POSIX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
+PLATFORM_SRCS_unix = $(UNIX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
+PLATFORM_SRCS_openbsd = $(UNIX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
+PLATFORM_SRCS_puredarwin = $(UNIX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
 
 # FFI inheritance logic
 FFI_SRCS_c = $(BASE_FFI_SRCS) $(C_FFI_SRCS)
+FFI_SRCS_unix = $(BASE_FFI_SRCS) $(C_FFI_SRCS)
 
 # entry point
 MAIN_freestand = platform/freestand/main.c
 MAIN_c = platform/c/main.c
-MAIN_posix = platform/posix/main.c
+MAIN_unix = platform/unix/main.c
 MAIN_openbsd = platform/openbsd/main.c
 MAIN_puredarwin = platform/puredarwin/main.c
 

@@ -26,6 +26,7 @@ typedef enum {
 	Opcode_Internal_GETMEM,
 	Opcode_Internal_NOP,
 	Opcode_Internal_SEGFAULT,
+	Opcode_Internal_GETSEED,
 
 } InstructionOpcode;
 
@@ -54,6 +55,7 @@ static const InstructionOpcodeEntry InstructionOpcodeEntryTable[] = {
 	{ "_GETMEM", 	Opcode_Internal_GETMEM },
 	{ "_NOP", 	Opcode_Internal_NOP },
 	{ "_SEGFAULT",  Opcode_Internal_SEGFAULT },
+	{ "_GETSEED", 	Opcode_Internal_GETSEED },
 };
 
 #define INSTRUCTION_OPCODE_TABLE_LEN (sizeof(InstructionOpcodeEntryTable) / sizeof(InstructionOpcodeEntryTable[0]))
