@@ -4,7 +4,7 @@
 
 /* there is no 'filesystem' here, so we just load it from 
  * this memory address */
-#define FREESTAND_PROGRAM_ADDR ((const char *)0x00100000UL)
+#define FREESTAND_PROGRAM_ADDR ((const char *)0x00200000UL)
 
 unsigned long getfilesize(const char *path)
 {
