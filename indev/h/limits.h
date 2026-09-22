@@ -18,7 +18,7 @@
 #define limits_instructions_varnamesize 64 /* number of chars for a variable name */
 
 /* stack-related */
-#define limits_stack_callStack_cap 512;
+#define limits_stack_callStack_cap 512
 #define limits_stack_callStack_frameSize (sizeof(StackFrame))
 #define limits_stack_callStack_size (limits_stack_callStack_cap * limits_stack_callStack_frameSize)
 

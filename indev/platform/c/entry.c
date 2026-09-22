@@ -71,10 +71,11 @@ Stack *initstack
 {
 	/* initalize the stack */
 	/* StackFrame *stack_items = lalloc(capacity * sizeof(*stack_items)); XXX old */
-	StackFrame *stack_item = mem_stack_callStack_size;
+	StackFrame *stack_items = mem_stack_callStack;
 		/* max number of bytes for the stack */
 
-	Stack *stack = lalloc(sizeof(Stack));
+	/* Stack *stack = lalloc(sizeof(Stack)); XXX old */
+	Stack *stack = mem_stack_callStack + sizeof(stack_items);
 
 	if (stack == NULL || stack_items == NULL || capacity == 0)
 	{
