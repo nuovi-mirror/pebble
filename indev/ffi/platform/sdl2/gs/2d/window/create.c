@@ -19,12 +19,12 @@ void escape_gs_2d_window_create
 
 	char *parg2ptr = FFIallocateMemory(tempAlloc, limits_instructions_varnamesize);
 	FFIValue *parg2v = FFIreadVariable(vars, "__Escape_gs.2d.window.create_ARG2");
-	FFIconvertValueToString(parg1ptr, limits_instructions_varnamesize, *parg2v);
+	FFIconvertValueToString(parg2ptr, limits_instructions_varnamesize, *parg2v);
 	FFIValue *arg2v = FFIreadVariable(vars, parg2ptr);
 
 	char *parg3ptr = FFIallocateMemory(tempAlloc, limits_instructions_varnamesize);
 	FFIValue *parg3v = FFIreadVariable(vars, "__Escape_gs.2d.window.create_ARG3");
-	FFIconvertValueToString(parg1ptr, limits_instructions_varnamesize, *parg3v);
+	FFIconvertValueToString(parg3ptr, limits_instructions_varnamesize, *parg3v);
 	FFIValue *arg3v = FFIreadVariable(vars, parg3ptr);
 
 	char *parg4ptr = FFIallocateMemory(tempAlloc, limits_instructions_varnamesize);
@@ -42,6 +42,15 @@ void escape_gs_2d_window_create
 	FFIValue arg3w = FFIconvertValueToWord(*arg3v, vars, persistAlloc);
 	FFIValue arg4w = FFIconvertValueToWord(*arg4v, vars, persistAlloc);
 
+	/* XXX should already be done by someone else
+	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+		FFIstdoutPrint(SDL_GetError());
+		FFIexit(1);
+	}
+	*/
+
+	FFIstdoutPrint("Creating window\n");
+
 	SDL_Window *win = SDL_CreateWindow(
 			wname,
 			arg1w.as.word, 
@@ -55,6 +64,8 @@ void escape_gs_2d_window_create
 			("ERROR: FFI: gs.2d.window.create: FAILED TO CREATE WINDOW!\n");
 		FFIexit(1);
 	}
+
+	FFIstdoutPrint("Created window\n");
 
 	FFIallocateVariable(
 			vars, 

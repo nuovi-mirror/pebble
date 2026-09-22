@@ -1,3 +1,6 @@
+New c '0'
+New m '999'
+
 New wname 'ting'
 New x '100'
 New y '100'
@@ -11,3 +14,14 @@ New __Escape_gs.2d.window.create_ARG3 <w>
 New __Escape_gs.2d.window.create_ARG4 <h>
 
 Escape gs.2d.window.create
+
+New msg 'Window created!'
+New __Escape_std.io.print_ARG0 <msg>
+Escape std.io.print
+
+Func loop
+New c "c + 1"
+If loop "c > m"
+End
+
+Call loop

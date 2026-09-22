@@ -15,7 +15,7 @@ void FFIallocateVariable
 		exitproc(1);
 	}
 
-	if (vars->namesize >= getstrlen(varname))
+	if (getstrlen(varname) > vars->namesize)
 	{
 		print("ERROR: FFI: VARIABLE NAME IS TOO LONG!\n");
 		exitproc(1);
