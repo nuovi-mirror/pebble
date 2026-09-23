@@ -223,12 +223,18 @@ unsigned long long grun
 unsigned long long grandom
 (void)
 {
+	int probe;
+	unsigned long long addr_entropy = (unsigned long long)(unsigned long)&probe;
+
 	unsigned long long seed  = grun();
 	int i;
-	int c = 0;
+	int c = 0; /* change this for more mixing */
 
 	for (i = 0; i < c; i++)
 	{ seed  = mix64(seed ^ grun()); }
+
+	seed ^= mix64(addr_entropy);
+
 	return seed;
 }
 
