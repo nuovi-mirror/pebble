@@ -75,7 +75,7 @@ Supported Platforms
 		posix		-> POSIX.1-2008-compliant system + platform c
 					Differences between c:
 					  - Adds kernel-backed random number generation
-					    based on /dev/urandom instead of the software
+					    using rand(3) instead of the software
 					    C algorithm using nondeterministic hardware
 					    behavior
 
@@ -83,8 +83,8 @@ Supported Platforms
 					Differences between posix:
 					  - Adds OpenBSD pledge(2) and unveil(2) system
 					    calls to initialization code
-					  - Uses OpenBSD arc4random(3) instead of the UNIX
-					    /dev/urandom
+					  - Uses OpenBSD arc4random(3) instead of the
+					    posix platform's rand(3)
 
 		puredarwin	-> Darwin/PureDarwin kernel and Libc + platform posix
 					Differences between posix:
