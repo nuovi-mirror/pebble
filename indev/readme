@@ -62,9 +62,7 @@ Building from source
 	https://github.com/rmyorston
 
 Supported Platforms
-	For a list of supported platforms, please go to http://pebblevm.org/platforms.html
-
-	All platforms include:
+	All supported platforms include:
 
 		freestand 	-> freestanding
 					The common denominator
@@ -102,8 +100,9 @@ Supported Platforms
 
 		puredarwin
 			Random number generation is currently not provided.
-		
-			
+
+	For a list of tested environments, please visit 
+		- http://pebblevm.org/platforms.html	
 
 Product of The Nuovi Orizzonti Company
 http://thenuoviorizzonticompany.org
