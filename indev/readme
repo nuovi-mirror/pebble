@@ -177,7 +177,7 @@ FFI Code
 		FFIValue FFIconvertValueToWord(FFIValue v, FFIvars *vars, 
 			FFIArena *persistAlloc); /* convert an FFI type into an FFI
 						  * type word */
-		int FFIConvertValueToString(char *buffer, unsigned long size, FFIValue v);
+		int FFIconvertValueToString(char *buffer, unsigned long size, FFIValue v);
 						 /* convert an FFI value into a string
 						  * and write it into buffer of size size
 						  * - returns nonzero on error */
