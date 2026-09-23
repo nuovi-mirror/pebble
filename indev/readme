@@ -102,20 +102,20 @@ FFI Code
 	Code targetting the CPebble FFI is different from code targetting the FFI
 	used in the older versions of Zig Pebble. FFI code is called as
 
-		void escape_name(FFIVars *vars, unsigned long long random_seed, 
+		void escape_name(FFIvars *vars, unsigned long long random_seed, 
 			FFIArena *scratchAlloc, FFIArena *tempAlloc, 
 			FFIArena *persistAlloc);
 
-	FFIVars is a type used to hold a representation of the VM internal variable
+	FFIvars is a type used to hold a representation of the VM internal variable
 	table suitable for the FFI interface. The layout does not need to be known by
 	the FFI code. 
 
 	Two functions may act on this, being
-		void FFIallocateVariable(FFIVars *variables, const char *variable_name, 
+		void FFIallocateVariable(FFIvars *variables, const char *variable_name, 
 			void *pointer_to_value, FFIArena *persistAlloc);
 
 	and
-		void *FFIreadVariable(FFIVars *variables, const char *variable_name,
+		void *FFIreadVariable(FFIvars *variables, const char *variable_name,
 			const char *varname);
 
 	with FFIallocateVariable used to store a variable and FFIreadVariable to
