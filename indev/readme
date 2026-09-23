@@ -168,7 +168,7 @@ FFI Code
 	to store a numerical value that is negative as a Pebble variable, I need to
 	first format it as this. This could be done as, say
 
-		FFIValue f = (FFIValue){ .Type = type_word, .as.word = -3 };
+		FFIValue f = (FFIValue){ .Type = type_sword, .as.sword = -3 };
 
 	Other functions which may be useful are present, such as
 
