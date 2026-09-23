@@ -74,9 +74,8 @@ Args initargs
 Stack *initstack
 (unsigned long capacity) 
 {
-	StackFrame *stack_items = mem_stack_callStack_frames;
-
-	Stack *stack = mem_stack_callStack_stack;
+	StackFrame *stack_items = (StackFrame *)mem_stack_callStack_frames;
+	Stack *stack = (Stack *)mem_stack_callStack_stack;
 
 	if (stack == NULL || stack_items == NULL || capacity == 0)
 	{
