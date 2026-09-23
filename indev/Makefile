@@ -1,3 +1,5 @@
+.POSIX: 
+
 # variables starting with a lowercase char may be
 # modified by the user
 
