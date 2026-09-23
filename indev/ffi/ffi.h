@@ -36,14 +36,6 @@ void FFIstdoutPrint
 void FFIexit
 (int stat);
 
-/* use this to get a random seed for your library
- * FFImix64(seed ^ some_number);
- * some number should probably be say the last 8
- * characters of your library name 
- * the seed variable is given to you by the VM */
-unsigned long long FFImix64
-(unsigned long long x);
-
 void *FFIallocateMemory
 (FFIArena *arena, unsigned long size);
 

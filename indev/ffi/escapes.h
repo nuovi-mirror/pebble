@@ -16,6 +16,7 @@ struct EscapeSequence {
 static const struct EscapeSequence escapes[] = {
 	/* debug libraries */
 	{ "test.hello", escape_test_hello },
+	{ "test.getseed", escape_test_getseed },
 
 	/* standard libraries */
 	{ "std.io.print", escape_std_io_print },

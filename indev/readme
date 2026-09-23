@@ -98,6 +98,96 @@ Supported Platforms
 	For a list of tested environments, please visit 
 		- http://pebblevm.org/platforms.html	
 
+FFI Code
+	Code targetting the CPebble FFI is different from code targetting the FFI
+	used in the older versions of Zig Pebble. FFI code is called as
+
+		void escape_name(FFIVars *vars, unsigned long long random_seed, 
+			FFIArena *scratchAlloc, FFIArena *tempAlloc, 
+			FFIArena *persistAlloc);
+
+	FFIVars is a type used to hold a representation of the VM internal variable
+	table suitable for the FFI interface. The layout does not need to be known by
+	the FFI code. 
+
+	Two functions may act on this, being
+		void FFIallocateVariable(FFIVars *variables, const char *variable_name, 
+			void *pointer_to_value, FFIArena *persistAlloc);
+
+	and
+		void *FFIreadVariable(FFIVars *variables, const char *variable_name,
+			const char *varname);
+
+	with FFIallocateVariable used to store a variable and FFIreadVariable to
+	read one to/from the internal VM variable table.
+
+	It is important to note FFIreadVariable will exit on an error condition. If you
+	do not want this, use FFIreadvariableUnsafe, which is the same, except it will
+	return a NULL pointer if the variable does not exist. 
+
+	random_seed is a random seed specific to this FFI name. The seed is generated
+	once at VM startup and a seed to be given to the FFI code is generated at
+	calling. This new seed is a derivitave of the main VM seed and the last 8 (or
+	closest to it) characters of the FFI function's name. The seed is unique to each
+	VM startup and FFI call. This means if I run the same FFI call twice in the
+	same VM lifetime, I will get the same seed. This seed is not cryptographically
+	secure.
+
+	FFI sequence names should follow the convention of 'escape_(class(es)_(name))',
+	where classes is the one or more subgroups the FFI call is in, and name is 
+	the name of the FFI call. Eg. for std.io.print, it would be escape_std_io_print.
+	std.io.print is the name that Pebble code calls, while escape_std_io_print is
+	the defined name internally.
+
+	The three allocators, tempAlloc, scratchAlloc, and persistAlloc, are each
+	arena allocator pointers who map to the internal VM allocators. temp may
+	be cleared at instruction boundaries (an FFI call is an instruction), 
+	scratch may be cleared in-between functions, and persist will never be
+	cleared until a VM exit. These can be managed using the function
+
+		void *FFIallocateMemory(FFIArena *arena, unsigned long long size);
+
+	which returns a pointer to a buffer allocated on allocator arena of size size.
+
+	The FFI also provides a simple structure for interfacing with CPebble internal
+	types. This structure can be laid out as
+
+		typedef struct {
+			ValueTypes Type;
+			union {
+				unsigned long word;
+				long sword;
+				double flt;
+				char *str;
+				ExprNode *expr;
+			}as;
+		} FFIValue;
+
+	This is the structure that is used when storing Pebble values and what is
+	returned when reading them. The first entry, Type, defines which type the
+	second, as is. The Type entries map 1:1 to the as entries. Eg. if I wanted
+	to store a numerical value that is negative as a Pebble variable, I need to
+	first format it as this. This could be done as, say
+
+		FFIValue f = (FFIValue){ .Type = type_word, .as.word = -3 };
+
+	Other functions which may be useful are present, such as
+
+		void FFIstdoutPrint(char *msg); /* print to standard output */
+		void FFIexit(int status); /* exit the VM */
+		FFIValue FFIconvertValueToWord(FFIValue v, FFIvars *vars, 
+			FFIArena *persistAlloc); /* convert an FFI type into an FFI
+						  * type word */
+		int FFIConvertValueToString(char *buffer, unsigned long size, FFIValue v);
+						 /* convert an FFI value into a string
+						  * and write it into buffer of size size
+						  * - returns nonzero on error */
+
+	Please note a standard C library cannot be assumed for FFI code. Please use
+	the functions provided in the h/ folder of the source directory.
+
+
+
 Product of The Nuovi Orizzonti Company
 http://thenuoviorizzonticompany.org
 http://pebblevm.org
