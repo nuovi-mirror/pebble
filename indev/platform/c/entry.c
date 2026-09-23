@@ -96,7 +96,11 @@ void freestack
 	/* XXX this does nothing now */
 }
 
-/* random number generation */
+/* random number generation
+ * low entropy, but a lot better than the
+ * alternative, which is nothing. Uses a mix
+ * of ALSA + timing jitter to generate
+ * random 64bit seeds */
 static void
 work(unsigned long long r, unsigned long long s, 
 		unsigned long a, unsigned long b, unsigned long c)
@@ -164,58 +168,46 @@ shuffle(unsigned int order[4], unsigned long long *state)
 unsigned long long grun
 (void)
 {
-	unsigned int wsize = 4;
+	unsigned int wsize = 8;
 	unsigned int order[wsize];
+	unsigned long long work[wsize];
 
 	unsigned long long d[wsize];
 	unsigned long long r;
 	unsigned long long seed;
 	
-	unsigned long long w1 = 0x9E3779B97F4A7C15ULL;
-	unsigned long long w2 = 0xBF58476D1CE4E5B9ULL;
-	unsigned long long w3 = 0x6D2B79F5A5A5A5A5ULL;
-	unsigned long long w4 = 0xFF51AFD7ED558CCDULL;
+	work[0] = 0x9E3779B97F4A7C15ULL;
+	work[1] = 0xBF58476D1CE4E5B9ULL;
+	work[2] = 0x6D2B79F5A5A5A5A5ULL;
+	work[3] = 0xFF51AFD7ED558CCDULL;
+	work[4] = 0x9E3779B97F4A7C15ULL;
+	work[5] = 0xBF58476D1CE4E5B9ULL;
+	work[6] = 0x6D2B79F5A5A5A5A5ULL;
+	work[7] = 0xFF51AFD7ED558CCDULL;
 
-	r = ground(w1, 10000000ULL, 13, 29, 17);
+	r = ground(work[0], 10000000ULL, 13, 29, 17);
 	r = mix64(r);
 	shuffle(order, &r);
 
 	for (unsigned int i = 0; i < wsize; ++i) {
 		switch (order[i]) {
 			case 0:
-				d[i] = ground(w1, 10000000ULL, 13, 29, 17);
+				d[i] = ground(work[i], 10000000ULL, 13, 29, 17);
 				break;
 			case 1:
-				d[i] = ground(w2, 10000000ULL, 21, 37, 11);
+				d[i] = ground(work[i], 10000000ULL, 21, 37, 11);
 				break;
 			case 2:
-				d[i] = ground(w3, 10000000ULL, 31, 23, 41);
+				d[i] = ground(work[i], 10000000ULL, 31, 23, 41);
 				break;
 			case 3:
-				d[i] = ground(w4, 10000000ULL, 43, 19, 27);
+				d[i] = ground(work[i], 10000000ULL, 43, 19, 27);
 				break;
 		}
 	}
 
-	/* XXX debug
-	printf("order %u %u %u %u: ",
-	    order[0], order[1], order[2], order[3]);
-
-	printf("%llu %llu %llu %llu\n",
-	    d[0], d[1], d[2], d[3]);
-
-	printf(
-		"%llu %llu %llu %llu\n",
-		(unsigned long long)d[0],
-	    	(unsigned long long)d[1],
-	    	(unsigned long long)d[2],
-	    	(unsigned long long)d[3]);
-	*/
-
-	seed  = mix64((unsigned long long)d[0] + w1);
-	seed ^= mix64((unsigned long long)d[1] + w2);
-	seed ^= mix64((unsigned long long)d[2] + w3);
-	seed ^= mix64((unsigned long long)d[3] + w4);
+	for (int i = 0; i < wsize; i++)
+		seed  = mix64((unsigned long long)d[i] + work[i]);
 
 	return seed;
 }
@@ -224,16 +216,17 @@ unsigned long long grandom
 (void)
 {
 	int probe;
-	unsigned long long addr_entropy = (unsigned long long)(unsigned long)&probe;
+	unsigned long long alsa_entropy = (unsigned long long)&probe;
 
 	unsigned long long seed  = grun();
 	int i;
 	int c = 0; /* change this for more mixing */
 
 	for (i = 0; i < c; i++)
-	{ seed  = mix64(seed ^ grun()); }
+		seed  = mix64(seed ^ grun());
 
-	seed ^= mix64(addr_entropy);
+	/* mix with the randomization provided by ALSR */
+	seed ^= mix64(seed ^ alsa_entropy);
 
 	return seed;
 }
