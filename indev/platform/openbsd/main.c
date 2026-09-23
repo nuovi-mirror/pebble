@@ -32,9 +32,8 @@ int main(int argc, char **argv) {
 	}
 
 	/* generate random seed using the OpenBSD-specific library */
-	char sbuf[64]; /* safe to assume since it returns uint64_t */
-	arc4random_buf(sbuf, 64);
-	unsigned long long seed = *sbuf;
+	unsigned long long seed;
+	arc4random_buf(&seed, sizeof(seed));
 
 	/* memory management, teletype I/O, subprocess management */
 	if (pledge("stdio rpath tty proc", NULL) == -1) {

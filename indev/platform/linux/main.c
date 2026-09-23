@@ -7,14 +7,12 @@
 #include <unistd.h>
 
 int main(int argc, char **argv) {
-	char rbuf[64];
-	if (getentropy(sizeof(rbuf), rbuf, sizeof(rbuf)) < 0)
+	unsigned long long seed;
+	if (getentropy(sizeof(seed), &seed, sizeof(seed)) < 0)
 	{
 		print("ERROR: INIT: CANNOT GENERATE RANDOM DATA WITH getentropy!\n");
 		exitproc(1);
 	}
-
-	unsigned long long seed = *rbuf;
 
 	Args cliargs = initargs(argc, argv);
 	Stack *stack = initstack(1024);
