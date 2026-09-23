@@ -115,8 +115,7 @@ FFI Code
 			void *pointer_to_value, FFIArena *persistAlloc);
 
 	and
-		void *FFIreadVariable(FFIvars *variables, const char *variable_name,
-			const char *varname);
+		void *FFIreadVariable(FFIvars *variables, const char *varname);
 
 	with FFIallocateVariable used to store a variable and FFIreadVariable to
 	read one to/from the internal VM variable table.
