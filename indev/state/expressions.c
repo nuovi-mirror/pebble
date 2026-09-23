@@ -132,7 +132,7 @@ int exprnodetostr
 
 static void parseradvance
 (ExprParser *p, Arena *tempAlloc, Arena *persistAlloc)
-{ nexttoken(&p->cursor, &p->lookahead, tempAlloc, persistAlloc); }
+{ nexttoken((char **)&p->cursor, &p->lookahead, tempAlloc, persistAlloc); }
 
 ExprNode *newexprnode
 (ExprOperation op, ExprNodeData left, ExprNodeData right, Arena *arena)
