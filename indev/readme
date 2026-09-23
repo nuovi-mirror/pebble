@@ -77,7 +77,7 @@ Supported Platforms
 					  - Adds kernel-backed random number generation
 					    using rand(3) instead of the software
 					    C algorithm using nondeterministic hardware
-					    behavior
+					    behavior and address randomization
 
 		openbsd 	-> OpenBSD kernel and Libc + platform posix
 					Differences between posix:

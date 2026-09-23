@@ -99,7 +99,7 @@ void freestack
 /* random number generation
  * low entropy, but a lot better than the
  * alternative, which is nothing. Uses a mix
- * of ALSA + timing jitter to generate
+ * of ALSR + timing jitter to generate
  * random 64bit seeds */
 static void
 work(unsigned long long r, unsigned long long s, 
@@ -216,7 +216,7 @@ unsigned long long grandom
 (void)
 {
 	int probe;
-	unsigned long long alsa_entropy = (unsigned long long)&probe;
+	unsigned long long alsr_entropy = (unsigned long long)&probe;
 
 	unsigned long long seed  = grun();
 	int i;
@@ -226,7 +226,7 @@ unsigned long long grandom
 		seed  = mix64(seed ^ grun());
 
 	/* mix with the randomization provided by ALSR */
-	seed ^= mix64(seed ^ alsa_entropy);
+	seed ^= mix64(seed ^ alsr_entropy);
 
 	return seed;
 }
