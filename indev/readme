@@ -26,7 +26,7 @@ Building from source
 		are not guaranteed to work on any machine besides the host
 		compiling.
 
-	analyser - the name of the static analyzer to use when building.
+	analyzer - the name of the static analyzer to use when building.
 		No default, not required.
 
 	cc - the selected C compiler to use - defaults to 'cc'.
@@ -67,9 +67,36 @@ Supported Platforms
 	All platforms include:
 
 		freestand 	-> freestanding
-		c 		-> pure C99 + Libc
-		openbsd 	-> c + OpenBSD system calls
-		puredarwin	-> c + PureDarwin shims
+					The common denominator
+
+		c 		-> pure C99 & Libc + platform freestand
+					Differences between freestand:
+					  - Adds extra libraries for core VM 
+					    functionality which use a C99 Libc
+
+		unix		-> UNIX kernel and POSIX Libc + platform c
+					Differences between c:
+					  - Adds kernel-backed random number generation
+					    based on /dev/urandom instead of the software
+					    C algorithm using nondeterministic hardware
+					    behavior
+
+		openbsd 	-> OpenBSD kernel and Libc + platform unix
+					Differences between unix:
+					  - Adds OpenBSD pledge(2) and unveil(2) system
+					    calls to initialization code
+					  - Uses OpenBSD arc4random(3) instead of the UNIX
+					    /dev/urandom
+
+		puredarwin	-> Darwin/PureDarwin kernel and Libc + platform unix
+					Differences between unix:
+					  - Adds PureDarwin-specific Libc shims
+
+		Linux		-> Linux kernel & POSIX Libc + platform unix
+					Differences between unix:
+					  - Adds Linux-specific getentropy(3) random
+					    number generation instead of the /dev/urandom
+					    algorithm Unix uses
 
 	Depreciated platforms include:
 
