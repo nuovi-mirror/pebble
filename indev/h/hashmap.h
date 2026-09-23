@@ -4,7 +4,7 @@
 #include "allocator.h"
 
 typedef struct HashMapEntry {
-	char *key;
+	const char *key;
 	void *value;
 	struct HashMapEntry *next;
 } HashMapEntry;

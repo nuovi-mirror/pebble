@@ -82,11 +82,11 @@ FFIValue FFIconvertValueToWord
 
 void FFIstdoutPrint
 (char *msg)
-{ return print(msg); }
+{ print(msg); }
 
 void FFIexit
 (int stat)
-{ return exitproc(stat); }
+{ exitproc(stat); }
 
 unsigned long long FFImix64
 (unsigned long long x)

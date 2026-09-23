@@ -34,9 +34,6 @@ void pushframe
 StackFrame popframe
 (Stack *stack);
 
-StackFrame readframe
-(Stack *stack);
-
 /* argument init */
 Args initargs
 (int argc, char **argv);

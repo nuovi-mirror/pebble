@@ -6,8 +6,10 @@
 
 typedef	SHashMap VarMap;
 
+/* XXX unused 
 static unsigned long hashVar 
 (VarMap *m, const char *str);
+*/
 
 VarMap initVars 
 (unsigned long cap, Arena *persistAlloc);

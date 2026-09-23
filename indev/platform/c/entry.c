@@ -1,7 +1,6 @@
 /* portable entry point helper (C) */
 
 #include <time.h> /* used for psedo-random helper */
-#include <stdio.h> /* needed for debug */
 
 #include "entry.h"
 #include "print.h"
@@ -43,20 +42,6 @@ StackFrame popframe
 	stack->count--;
 	frame = stack->items[stack->count];
 	
-	return frame;
-}
-
-StackFrame readframe
-(Stack *stack) 
-{
-	StackFrame frame;
-
-	if (stack->count == 0) 
-	{
-		print("ERROR: CALLSTACK: STACK UNDERFLOW!\n");
-		exitproc(1);
-	}
-
 	return frame;
 }
 
@@ -135,8 +120,7 @@ unsigned long long ground
 (unsigned long long w, unsigned long long s, unsigned long a,
  unsigned long b, unsigned long c)
 {	
-	clock_t t1, t2;
-	clock_t d1, d2, d3, d4;
+	clock_t t1, t2, d1;
 
 	t1 = clock();
 	work(w, s, a, b, c);
@@ -225,9 +209,6 @@ unsigned long long grun
 unsigned long long grandom
 (void)
 {
-	int probe;
-	unsigned long long alsr_entropy = (unsigned long long)&probe;
-
 	unsigned long long seed  = grun();
 	int i;
 	int c = 0; /* change this for more mixing */
@@ -236,7 +217,14 @@ unsigned long long grandom
 		seed  = mix64(seed ^ grun());
 
 	/* mix with the randomization provided by ALSR */
-	/* seed ^= mix64(seed ^ alsr_entropy); XXX add this in */
+	/* XXX add this in maybe; more portable without it and
+	 * it seems to be fine just with timing jitter
+
+	int probe;
+	unsigned long long alsr_entropy = (unsigned long long)&probe;
+	seed ^= mix64(seed ^ alsr_entropy);
+
+	*/
 
 	return seed;
 }

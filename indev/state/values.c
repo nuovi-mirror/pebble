@@ -41,7 +41,7 @@ Value valuetoword(Value v, VarMap *vars, Arena *persistAlloc) {
 		case type_expr:  
 			return evalexprnode(v.as.expr, vars, persistAlloc);
 		default:	 
-			return (struct Value){ type_word, -1 }; /* should never be hit */
+			return (struct Value){ type_sword, -1 }; /* should never be hit */
 	}
 }
 

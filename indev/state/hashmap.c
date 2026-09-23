@@ -37,7 +37,7 @@ void hashMapPut
 	HashMapEntry *e = m->buckets[idx];
 	while (e != NULL) {
 		if (cmpstr(e->key, key) == 0) {
-			e->value = value;
+			e->value = (void *)value;
 			return;
 		}
 
@@ -53,7 +53,7 @@ void hashMapPut
 	}
 
 	entry->key = key;
-	entry->value = value;
+	entry->value = (void *)value;
 	entry->next = m->buckets[idx];
 	m->buckets[idx] = entry;
 	m->size++;

@@ -24,32 +24,27 @@ typedef enum
 	ExprOp_StringConcat,
 } ExprOperation;
 
-typedef enum 
-{
+typedef enum {
 	ExprDataVal,
 	ExprDataNode,
 } ExprNodeDataType;
 
-typedef struct 
-{
+typedef struct ExprNodeData {
 	ExprNodeDataType Type;
-	union 
-	{
+	union {
 		Value value;
 		ExprNode *Node;
 	};
 } ExprNodeData;
 
-struct ExprNode
-{
+struct ExprNode {
 	ExprOperation Op;
 	char *Source;
 	ExprNodeData left;
 	ExprNodeData right;
 };
 
-typedef struct
-{
+typedef struct{
 	const char *Sym;
 	ExprOperation Op;
 	int Pres; /* eval order - lower = sooner */
@@ -58,8 +53,7 @@ typedef struct
 extern const 
 ExprOperator ExprOperators[];
 
-typedef enum
-{
+typedef enum {
 	Token_End,
 	Token_Value,
 	Token_Operator,
@@ -67,15 +61,13 @@ typedef enum
 	Token_RightParent,
 } TokenType;
 
-typedef struct 
-{
+typedef struct {
 	TokenType Type;
 	const ExprOperator *Op; /* set if Type == Token_Operator */
 	Value Value; /* set if Type = Token_Value */
 } Token;
 
-typedef struct 
-{
+typedef struct {
 	const char *cursor;
 	Token lookahead;
 	int error; /* = 1 if parser error */
