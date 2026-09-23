@@ -101,6 +101,8 @@ void freestack
  * alternative, which is nothing. Uses a mix
  * of ALSR + timing jitter to generate
  * random 64bit seeds */
+#define wsize 8
+
 static void
 work(unsigned long long r, unsigned long long s, 
 		unsigned long a, unsigned long b, unsigned long c)
@@ -144,17 +146,17 @@ unsigned long long ground
 	return d1;
 }
 
-static void
-shuffle(unsigned int order[4], unsigned long long *state)
+static void shuffle
+(unsigned int order[wsize], unsigned long long *state)
 {
     unsigned int i;
     unsigned int j;
     unsigned int tmp;
 
-    for (i = 0; i < 4; ++i)
+    for (i = 0; i < wsize; ++i)
         order[i] = i;
 
-    for (i = 3; i > 0; --i) {
+    for (i = wsize - 1; i > 0; --i) {
         *state = mix64(*state);
 
         j = (unsigned int)(*state % (i + 1));
@@ -168,9 +170,9 @@ shuffle(unsigned int order[4], unsigned long long *state)
 unsigned long long grun
 (void)
 {
-	unsigned int wsize = 8;
 	unsigned int order[wsize];
 	unsigned long long work[wsize];
+	unsigned long long times[wsize];
 
 	unsigned long long d[wsize];
 	unsigned long long r;
@@ -185,29 +187,37 @@ unsigned long long grun
 	work[6] = 0x6D2B79F5A5A5A5A5ULL;
 	work[7] = 0xFF51AFD7ED558CCDULL;
 
-	r = ground(work[0], 10000000ULL, 13, 29, 17);
+	unsigned long long workloads[wsize][3] = {
+		{13, 29, 17},
+		{21, 37, 11},
+		{31, 23, 41},
+		{43, 19, 47},
+		{13, 29, 17},
+		{21, 37, 11},
+		{31, 23, 41},
+		{43, 19, 47},
+	};
+
+	seed = ground(work[0], 10000001ULL, 
+			workloads[0][0], workloads[1][1], workloads[2][2]);
+
+
+	for (unsigned int i = 0; i < wsize; i++)
+		times[i] = 5000000ULL + (mix64(seed + i) % 10000001ULL);
+
+	r = ground(work[0], times[0], 
+			workloads[0][0], workloads[0][1], workloads[0][2]);
 	r = mix64(r);
 	shuffle(order, &r);
 
-	for (unsigned int i = 0; i < wsize; ++i) {
-		switch (order[i]) {
-			case 0:
-				d[i] = ground(work[i], 10000000ULL, 13, 29, 17);
-				break;
-			case 1:
-				d[i] = ground(work[i], 10000000ULL, 21, 37, 11);
-				break;
-			case 2:
-				d[i] = ground(work[i], 10000000ULL, 31, 23, 41);
-				break;
-			case 3:
-				d[i] = ground(work[i], 10000000ULL, 43, 19, 27);
-				break;
-		}
-	}
+	for (unsigned int i = 0; i < wsize; ++i)
+		d[i] = ground(work[order[i]], times[i], 
+				workloads[order[i]][0], 
+				workloads[order[i]][1], 
+				workloads[order[i]][2]);
 
 	for (int i = 0; i < wsize; i++)
-		seed  = mix64((unsigned long long)d[i] + work[i]);
+		seed  = mix64((seed ^ d[i]) + work[i]);
 
 	return seed;
 }
@@ -226,7 +236,7 @@ unsigned long long grandom
 		seed  = mix64(seed ^ grun());
 
 	/* mix with the randomization provided by ALSR */
-	seed ^= mix64(seed ^ alsr_entropy);
+	/* seed ^= mix64(seed ^ alsr_entropy); XXX add this in */
 
 	return seed;
 }
