@@ -90,12 +90,6 @@ Supported Platforms
 					Differences between unix:
 					  - Adds PureDarwin-specific Libc shims
 
-		Linux		-> Linux kernel & POSIX Libc + platform unix
-					Differences between unix:
-					  - Adds Linux-specific getentropy(3) random
-					    number generation instead of the /dev/urandom
-					    algorithm Unix uses
-
 	Depreciated platforms include:
 
 		puredarwin

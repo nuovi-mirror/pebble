@@ -85,7 +85,6 @@ PLATFORM_CPPFLAGS_c = -Iplatform/c -Iplatform/freestand
 PLATFORM_CPPFLAGS_openbsd = -Iplatform/openbsd -Iplatform/c -Iplatform/freestand
 PLATFORM_CPPFLAGS_unix = -Iplatform/unix -Iplatform/c -Iplatform/freestand
 PLATFORM_CPPFLAGS_puredarwin = -Iplatform/puredarwin -Iplatform/c -Iplatform/freestand
-PLATFORM_CPPFLAGS_linux = -Iplatform/linux -Iplatform/c -Iplatform/freestand
 PLATFORM_CPPFLAGS_sdl2 = 
 
 CPPFLAGS += $(PLATFORM_CPPFLAGS_$(target))
@@ -143,7 +142,6 @@ PLATFORM_SRCS_c = $(C_SRCS) $(FREESTAND_SRCS)
 PLATFORM_SRCS_unix = $(UNIX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
 PLATFORM_SRCS_openbsd = $(UNIX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
 PLATFORM_SRCS_puredarwin = $(UNIX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
-PLATFORM_SRCS_linux = $(LINUX_SRCS) $(C_SRCS) $(FREESTAND_SRCS)
 
 # FFI inheritance logic
 FFI_SRCS_c = $(BASE_FFI_SRCS) $(C_FFI_SRCS)
@@ -154,7 +152,6 @@ FFI_SRCS_openbsd = $(BASE_FFI_SRCS) $(C_FFI_SRCS)
 MAIN_freestand = platform/freestand/main.c
 MAIN_c = platform/c/main.c
 MAIN_unix = platform/unix/main.c
-MAIN_linux = platform/linux/main.c
 MAIN_openbsd = platform/openbsd/main.c
 MAIN_puredarwin = platform/puredarwin/main.c
 
