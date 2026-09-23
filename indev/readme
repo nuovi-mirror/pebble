@@ -72,22 +72,22 @@ Supported Platforms
 					  - Adds extra libraries for core VM 
 					    functionality which use a C99 Libc
 
-		unix		-> UNIX kernel and POSIX Libc + platform c
+		posix		-> POSIX.1-2008-compliant system + platform c
 					Differences between c:
 					  - Adds kernel-backed random number generation
 					    based on /dev/urandom instead of the software
 					    C algorithm using nondeterministic hardware
 					    behavior
 
-		openbsd 	-> OpenBSD kernel and Libc + platform unix
-					Differences between unix:
+		openbsd 	-> OpenBSD kernel and Libc + platform posix
+					Differences between posix:
 					  - Adds OpenBSD pledge(2) and unveil(2) system
 					    calls to initialization code
 					  - Uses OpenBSD arc4random(3) instead of the UNIX
 					    /dev/urandom
 
-		puredarwin	-> Darwin/PureDarwin kernel and Libc + platform unix
-					Differences between unix:
+		puredarwin	-> Darwin/PureDarwin kernel and Libc + platform posix
+					Differences between posix:
 					  - Adds PureDarwin-specific Libc shims
 
 	Depreciated platforms include:
