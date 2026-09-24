@@ -10,6 +10,6 @@ extern char mem_arena_IRAlloc_backing[limits_instructions_maxbuffersize];
 
 /* stack backings */
 extern char mem_stack_callStack_stack[limits_stack_callStack_size];
-extern char
-	mem_stack_callStack_frames[limits_stack_callStack_frameSize * limits_stack_callStack_cap];
+extern char mem_stack_callStack_frames[limits_stack_callStack_frameSize *
+				       limits_stack_callStack_cap];
 #endif

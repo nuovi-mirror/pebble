@@ -74,7 +74,8 @@ const ExprOperator *strtooperator (const char *str);
 Value parseliteral (const char **str, Arena *tempAlloc, Arena *persistAlloc);
 void nexttoken (char **str, Token *token, Arena *tempAlloc, Arena *persistAlloc);
 int exprnodetostr (char *buf, unsigned long bufsize, ExprNode *node);
-ExprNode *newexprnode (ExprOperation op, ExprNodeData left, ExprNodeData right, Arena *arena);
+ExprNode *newexprnode (ExprOperation op, ExprNodeData left, ExprNodeData right,
+	Arena *arena);
 ExprNodeData parseexpr (ExprParser *p, int maxPrec, Arena *tempAlloc, Arena *persistAlloc);
 ExprNodeData parseprimary (ExprParser *p, Arena *tempAlloc, Arena *persistAlloc);
 

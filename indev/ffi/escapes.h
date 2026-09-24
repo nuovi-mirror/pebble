@@ -27,7 +27,7 @@ static const struct EscapeSequence escapes[] = {
 #endif
 };
 
-void callEscape (const char *name, unsigned long long seed, FFIvars *vars, FFIArena *scratchAlloc,
-	FFIArena *tempAlloc, FFIArena *persistAlloc);
+void callEscape (const char *name, unsigned long long seed, FFIvars *vars,
+	FFIArena *scratchAlloc, FFIArena *tempAlloc, FFIArena *persistAlloc);
 
 #endif

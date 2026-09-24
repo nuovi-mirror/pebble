@@ -6,18 +6,22 @@
 
 /* allocator-related */
 #define limits_allocator_temp_maxmem 8 * 1024 * 1024	 /* max mem in temp allocator */
-#define limits_allocator_persist_maxmem 32 * 1024 * 1024 /* max mem in persist allocator */
+#define limits_allocator_persist_maxmem 32 * 1024 * 1024 /* max mem in persist allocator \
+							  */
 #define limits_allocator_scratch_maxmem 6 * 1024 * 1024	 /* max mem in scratch allocator */
 
 /* instruction-related */
-#define limits_instructions_max 500000 /* max number of instructions that can be executed */
-#define limits_instructions_maxbuffersize                                                      \
-	limits_instructions_max * sizeof(Instruction) /* max size of instruction memory buffer \
-						       */
+#define limits_instructions_max 500000 /* max number of instructions that can be executed \
+					*/
+#define limits_instructions_maxbuffersize                                    \
+	limits_instructions_max *                                            \
+		sizeof(Instruction) /* max size of instruction memory buffer \
+				     */
 #define limits_instructions_initbuffersize \
-	(512 * sizeof(Instruction))	 /* inital buffer size for instruction buffer */
-#define limits_instructions_maxcache 512 /* max number of instructions in the instruction cache \
-					  */
+	(512 * sizeof(Instruction)) /* inital buffer size for instruction buffer */
+#define limits_instructions_maxcache                               \
+	512 /* max number of instructions in the instruction cache \
+	     */
 #define limits_instructions_varnamesize 64 /* number of chars for a variable name */
 
 /* stack-related */
