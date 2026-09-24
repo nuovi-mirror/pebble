@@ -1,22 +1,19 @@
 #include "functions.h"
-#include "hashmap.h"
+
 #include "allocator.h"
+#include "hashmap.h"
 
-unsigned long hasFunc
-(FuncMap *m, const char *str)		
-{ return mapHash(m, str); }
+unsigned long hasFunc(FuncMap* m, const char* str) { return mapHash(m, str); }
 
-FuncMap initFuncs(unsigned long cap, Arena *persistAlloc)			
-{ return initHashMap(cap, persistAlloc); }
+FuncMap initFuncs(unsigned long cap, Arena* persistAlloc) {
+  return initHashMap(cap, persistAlloc);
+}
 
-void putFunc
-(FuncMap *m, const char *key, const void *value, Arena *persistAlloc)	
-{ hashMapPut(m, key, value, persistAlloc); }
+void putFunc(FuncMap* m, const char* key, const void* value,
+             Arena* persistAlloc) {
+  hashMapPut(m, key, value, persistAlloc);
+}
 
-void *getFunc
-(FuncMap *m, const char *key)		
-{ return hashMapGet(m, key); }
+void* getFunc(FuncMap* m, const char* key) { return hashMapGet(m, key); }
 
-void freeFuncs
-(FuncMap *m)				
-{ hashMapFreeMap(m); }
+void freeFuncs(FuncMap* m) { hashMapFreeMap(m); }

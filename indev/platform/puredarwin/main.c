@@ -1,37 +1,36 @@
 #include "main.h"
-#include <unistd.h>
+
 #include <stdlib.h>
+#include <unistd.h>
 
 /* at the time of writting this, PureDarwin has
  * a few unfinished bits, so we need to alias
  * these to avoid linking errors. */
 
 /* we need to define symbols from the wierd
- * MacOS compat stuff 
+ * MacOS compat stuff
  * it is important to note an underscore is usually
  * placed infront of it */
 
-long read$UNIX2003
-(int fd, void *buf, unsigned long nbyte)
-{ return read(fd, buf, nbyte); }
+long read$UNIX2003(int fd, void* buf, unsigned long nbyte) {
+  return read(fd, buf, nbyte);
+}
 
-int close$UNIX2003
-(int fd)
-{ return close(fd); }
+int close$UNIX2003(int fd) { return close(fd); }
 
-double strtod$UNIX2003
-(const char *nptr, char **endptr)
-{ return strtod(nptr, endptr); }
+double strtod$UNIX2003(const char* nptr, char** endptr) {
+  return strtod(nptr, endptr);
+}
 
 /* and now it is just POSIX code */
 
 #include "entry.h"
 #include "vm.h"
 
-int main(int argc, char **argv) {
-	Args cliargs = initargs(argc, argv);
-	Stack *stack = initstack(1024);
-	int ret = vmmain(cliargs, stack);
-	freestack(stack);
-	return ret;
+int main(int argc, char** argv) {
+  Args cliargs = initargs(argc, argv);
+  Stack* stack = initstack(1024);
+  int ret = vmmain(cliargs, stack);
+  freestack(stack);
+  return ret;
 }

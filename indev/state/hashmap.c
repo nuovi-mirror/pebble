@@ -1,115 +1,114 @@
 #include "hashmap.h"
-#include "exitproc.h"
-#include "print.h"
-#include "cmpstr.h"
-#include "main.h"
+
 #include "allocator.h"
+#include "cmpstr.h"
+#include "exitproc.h"
+#include "main.h"
+#include "print.h"
 
-unsigned long mapHash(SHashMap *m, const char *str) {
-	unsigned long inital = HASHMAPBASE;
+unsigned long mapHash(SHashMap* m, const char* str) {
+  unsigned long inital = HASHMAPBASE;
 
-	while (*str) {
-		inital ^= (unsigned char)*str++;
-		inital *= HASHMAPPRIME;
-	}
+  while (*str) {
+    inital ^= (unsigned char)*str++;
+    inital *= HASHMAPPRIME;
+  }
 
-	return inital & (m->cap - 1); /* must be power of two */
+  return inital & (m->cap - 1); /* must be power of two */
 }
 
-SHashMap initHashMap(unsigned long cap, Arena *persistAlloc) {
-	SHashMap m;
-	m.size = 0;
-	m.cap = cap;
-	m.buckets = alloc(persistAlloc, cap * sizeof(HashMapEntry *));
+SHashMap initHashMap(unsigned long cap, Arena* persistAlloc) {
+  SHashMap m;
+  m.size = 0;
+  m.cap = cap;
+  m.buckets = alloc(persistAlloc, cap * sizeof(HashMapEntry*));
 
-	if (m.buckets == NULL) {
-		print("ERRORL HASHMAP: FATA: ALLOCATION FAILED!\n");
-		exitproc(1);
-	}
+  if (m.buckets == NULL) {
+    print("ERRORL HASHMAP: FATA: ALLOCATION FAILED!\n");
+    exitproc(1);
+  }
 
-	return m;
+  return m;
 }
 
-void hashMapPut
-(SHashMap *m, const char *key, const void *value, Arena *persistAlloc) 
-{
-	unsigned long idx = mapHash(m, key);
-	HashMapEntry *e = m->buckets[idx];
-	while (e != NULL) {
-		if (cmpstr(e->key, key) == 0) {
-			e->value = (void *)value;
-			return;
-		}
+void hashMapPut(SHashMap* m, const char* key, const void* value,
+                Arena* persistAlloc) {
+  unsigned long idx = mapHash(m, key);
+  HashMapEntry* e = m->buckets[idx];
+  while (e != NULL) {
+    if (cmpstr(e->key, key) == 0) {
+      e->value = (void*)value;
+      return;
+    }
 
-		e = e->next;
-	}
+    e = e->next;
+  }
 
-	/* not found - prep new entry */
-	HashMapEntry *entry = alloc(persistAlloc, sizeof(HashMapEntry));
+  /* not found - prep new entry */
+  HashMapEntry* entry = alloc(persistAlloc, sizeof(HashMapEntry));
 
-	if (entry == NULL) {
-		print("ERROR: HASHMAP: FATAL: ALLOCATION FAILED!\n");
-		exitproc(1);
-	}
+  if (entry == NULL) {
+    print("ERROR: HASHMAP: FATAL: ALLOCATION FAILED!\n");
+    exitproc(1);
+  }
 
-	entry->key = key;
-	entry->value = (void *)value;
-	entry->next = m->buckets[idx];
-	m->buckets[idx] = entry;
-	m->size++;
+  entry->key = key;
+  entry->value = (void*)value;
+  entry->next = m->buckets[idx];
+  m->buckets[idx] = entry;
+  m->size++;
 }
 
-void *hashMapGet(SHashMap *m, const char *key) {
-	HashMapEntry *e = m->buckets[mapHash(m, key)];
+void* hashMapGet(SHashMap* m, const char* key) {
+  HashMapEntry* e = m->buckets[mapHash(m, key)];
 
-	while (e != NULL) {
-		if (cmpstr(e->key, key) == 0)
-			return e->value;
-		
-		e = e->next;
-	}
-	
-	return NULL;
+  while (e != NULL) {
+    if (cmpstr(e->key, key) == 0) return e->value;
+
+    e = e->next;
+  }
+
+  return NULL;
 }
 
-int hashMapRemove(SHashMap *m, const char *key) {
-	unsigned long idx = mapHash(m, key);
+int hashMapRemove(SHashMap* m, const char* key) {
+  unsigned long idx = mapHash(m, key);
 
-	HashMapEntry *e = m->buckets[idx];
-	HashMapEntry *prev = NULL;
+  HashMapEntry* e = m->buckets[idx];
+  HashMapEntry* prev = NULL;
 
-	while (e != NULL) {
-		if (cmpstr(e->key, key) == 0) {
-			if (prev == NULL)
-				m->buckets[idx] = e->next;
-			else
-				prev->next = e->next;
+  while (e != NULL) {
+    if (cmpstr(e->key, key) == 0) {
+      if (prev == NULL)
+        m->buckets[idx] = e->next;
+      else
+        prev->next = e->next;
 
-			/* lfree(e); XXX hack */
-			m->size--;
-			return 1;
-		}
+      /* lfree(e); XXX hack */
+      m->size--;
+      return 1;
+    }
 
-		prev = e;
-		e = e->next;
-	}
+    prev = e;
+    e = e->next;
+  }
 
-	return 0;
+  return 0;
 }
 
-void hashMapFreeMap(SHashMap *m) {
-	for (unsigned long i = 0; i < m->cap; i++) {
-		HashMapEntry *e = m->buckets[i];
+void hashMapFreeMap(SHashMap* m) {
+  for (unsigned long i = 0; i < m->cap; i++) {
+    HashMapEntry* e = m->buckets[i];
 
-		while (e != NULL) {
-			HashMapEntry *next = e->next;
-			/* lfree(e); XXX hack */
-			e = next;
-		}
-	}
+    while (e != NULL) {
+      HashMapEntry* next = e->next;
+      /* lfree(e); XXX hack */
+      e = next;
+    }
+  }
 
-	/* lfree(m->buckets); XXX hack */
-	m->buckets = NULL;
-	m->size = 0;
-	m->cap = 0;
+  /* lfree(m->buckets); XXX hack */
+  m->buckets = NULL;
+  m->size = 0;
+  m->cap = 0;
 }
