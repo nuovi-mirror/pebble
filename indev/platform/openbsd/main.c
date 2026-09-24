@@ -19,7 +19,8 @@ int main (int argc, char **argv)
 		unveil(NULL, NULL); /* no access */
 	} else {
 		if (access(argv[1], F_OK) == 0) { /* file exists */
-			/* RO to the file containing the bytecode to execute, nothing else */
+			/* RO to the file containing the bytecode to execute, nothing else
+			 */
 			if (unveil(argv[1], "r") == -1) {
 				print("ERROR: INIT: OPENBSD: UNVEIL FAILED!\n");
 				exitproc(1);

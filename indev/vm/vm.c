@@ -34,7 +34,8 @@
 
 /* used to parse an instruction operand - guesses the type
  * and addressing mode */
-int parseoperand (char **cursor, InstructionOperand *out, Arena *tempAlloc, Arena *persistAlloc)
+int parseoperand (char **cursor, InstructionOperand *out, Arena *tempAlloc,
+	Arena *persistAlloc)
 {
 	char *p = skipspace(*cursor);
 	if (p == NULL)
@@ -158,7 +159,8 @@ Instruction makeIR (char *line, Arena *tempAlloc, Arena *persistAlloc,
 }
 
 /* helper to find the end of a function during definition */
-unsigned long findend (Instruction *program, unsigned long instruction_count, unsigned long start)
+unsigned long findend (Instruction *program, unsigned long instruction_count,
+	unsigned long start)
 {
 	unsigned long depth = 1;
 	unsigned long pc = start + 1;
@@ -271,35 +273,36 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 						instr->FirstOperand.Data);
 					break;
 				case addrmode_literal: {
-					char *buf =
-						alloc(tempAlloc, limits_instructions_varnamesize);
+					char *buf = alloc(tempAlloc,
+						limits_instructions_varnamesize);
 					val = resolve_literal(buf,
 						limits_instructions_varnamesize,
 						&instr->FirstOperand.Data, vars, tempAlloc,
 						persistAlloc);
-					valuetostr(dest, limits_instructions_varnamesize, val);
+					valuetostr(dest, limits_instructions_varnamesize,
+						val);
 					break;
 				}
 				case addrmode_forced_eval: {
-					char *buf =
-						alloc(tempAlloc, limits_instructions_varnamesize);
+					char *buf = alloc(tempAlloc,
+						limits_instructions_varnamesize);
 					val = resolve_forced_eval(buf,
 						limits_instructions_varnamesize,
 						&instr->FirstOperand.Data, vars, tempAlloc,
 						persistAlloc);
-					valuetostr(dest, limits_instructions_varnamesize, val);
+					valuetostr(dest, limits_instructions_varnamesize,
+						val);
 					break;
 				}
 
 				case addrmode_pointer: {
-					char *buf =
-						alloc(tempAlloc, limits_instructions_varnamesize);
+					char *buf = alloc(tempAlloc,
+						limits_instructions_varnamesize);
 					valuetostr(buf, limits_instructions_varnamesize,
 						instr->FirstOperand.Data);
 					Value *valptr = getVar(vars, buf);
 					if (valptr == NULL) {
-						print("ERROR: VM: NEW: VARIABLE DOES NOT " "EXIST"
-											   "!\n");
+						print("ERROR: VM: NEW: VARIABLE DOES NOT EXIST" "!\n");
 						exitproc(1);
 					}
 
@@ -310,7 +313,7 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 				}
 
 				default:
-					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING " "MODE ON OPERAND " "ONE\n");
+					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING MODE ON OPERAND ONE\n");
 					exitproc(1);
 					break;
 			}
@@ -320,8 +323,8 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 					val = instr->SecondOperand.Data;
 					break;
 				case addrmode_literal: {
-					char *buf =
-						alloc(tempAlloc, limits_instructions_varnamesize);
+					char *buf = alloc(tempAlloc,
+						limits_instructions_varnamesize);
 					val = resolve_literal(buf,
 						limits_instructions_varnamesize,
 						&instr->SecondOperand.Data, vars, tempAlloc,
@@ -330,8 +333,8 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 				}
 
 				case addrmode_forced_eval: {
-					char *buf =
-						alloc(tempAlloc, limits_instructions_varnamesize);
+					char *buf = alloc(tempAlloc,
+						limits_instructions_varnamesize);
 					val = resolve_forced_eval(buf,
 						limits_instructions_varnamesize,
 						&instr->SecondOperand.Data, vars, tempAlloc,
@@ -346,8 +349,7 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 						instr->SecondOperand.Data);
 					Value *check = getVar(vars, buf);
 					if (check == NULL) {
-						print(
-							"ERROR: VM: INTERPRETER: NEW: VARIABLE " "DOES NOT EXIST!\n");
+						print("ERROR: VM: INTERPRETER: NEW: VARIABLE DOES NOT EXIST!\n");
 						exitproc(1);
 					}
 
@@ -362,8 +364,7 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 						instr->SecondOperand.Data);
 					Value *valptr = getVar(vars, buf);
 					if (valptr == NULL) {
-						print("ERROR: VM: NEW: VARIABLE DOES NOT " "EXIST"
-											   "!\n");
+						print("ERROR: VM: NEW: VARIABLE DOES NOT EXIST!\n");
 						exitproc(1);
 					}
 
@@ -373,7 +374,7 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 				}
 
 				default:
-					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING " "MODE ON OPERAND " "TWO\n");
+					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING MODE ON OPERAND TWO\n");
 					exitproc(1);
 					break;
 			}
@@ -414,45 +415,46 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 				}
 
 				case addrmode_literal: {
-					char *buff =
-						alloc(scratchAlloc, limits_functions_namesize);
-					Value vptr =
-						resolve_literal(buff, limits_functions_namesize,
-							&instr->FirstOperand.Data, vars,
-							tempAlloc, persistAlloc);
-					valuetostr(funcname, limits_functions_namesize, vptr);
+					char *buff = alloc(scratchAlloc,
+						limits_functions_namesize);
+					Value vptr = resolve_literal(buff,
+						limits_functions_namesize,
+						&instr->FirstOperand.Data, vars, tempAlloc,
+						persistAlloc);
+					valuetostr(funcname, limits_functions_namesize,
+						vptr);
 					break;
 				}
 
 				case addrmode_forced_eval: {
-					char *buff =
-						alloc(scratchAlloc, limits_functions_namesize);
+					char *buff = alloc(scratchAlloc,
+						limits_functions_namesize);
 					Value vptr = resolve_forced_eval(buff,
 						limits_functions_namesize,
 						&instr->FirstOperand.Data, vars, tempAlloc,
 						persistAlloc);
-					valuetostr(funcname, limits_functions_namesize, vptr);
+					valuetostr(funcname, limits_functions_namesize,
+						vptr);
 					break;
 				}
 
 				case addrmode_pointer: {
-					char *vstr =
-						alloc(scratchAlloc, limits_functions_namesize);
+					char *vstr = alloc(scratchAlloc,
+						limits_functions_namesize);
 					valuetostr(vstr, limits_functions_namesize,
 						instr->FirstOperand.Data);
 					Value *vptr = getVar(vars, vstr);
 					if (vptr == NULL) {
-						print("ERROR: INTERPERTER: FUNC: VARIABLE DOES " "NOT EXIST!\n");
+						print("ERROR: INTERPERTER: FUNC: VARIABLE DOES NOT EXIST!\n");
 						exitproc(1);
 					}
-					valuetostr(funcname, limits_functions_namesize, *vptr);
+					valuetostr(funcname, limits_functions_namesize,
+						*vptr);
 					break;
 				}
 
 				default:
-					print(
-						"ERROR: INTERPRETER: FUNC: UNSUPPORTED "
-						"ADDRESSING " "MODE!\n");
+					print("ERROR: INTERPRETER: FUNC: UNSUPPORTED " "ADDRESSING MODE!\n");
 					exitproc(1);
 					break;
 			}
@@ -481,58 +483,64 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 					break;
 
 				case addrmode_literal: {
-					char *buff =
-						alloc(scratchAlloc, limits_functions_namesize);
-					Value vptr =
-						resolve_literal(buff, limits_functions_namesize,
-							&instr->FirstOperand.Data, vars,
-							tempAlloc, persistAlloc);
-					valuetostr(funcname, limits_functions_namesize, vptr);
+					char *buff = alloc(scratchAlloc,
+						limits_functions_namesize);
+					Value vptr = resolve_literal(buff,
+						limits_functions_namesize,
+						&instr->FirstOperand.Data, vars, tempAlloc,
+						persistAlloc);
+					valuetostr(funcname, limits_functions_namesize,
+						vptr);
 					break;
 				}
 
 				case addrmode_forced_eval: {
-					char *buff =
-						alloc(scratchAlloc, limits_functions_namesize);
+					char *buff = alloc(scratchAlloc,
+						limits_functions_namesize);
 					Value vptr = resolve_forced_eval(buff,
 						limits_functions_namesize,
 						&instr->FirstOperand.Data, vars, tempAlloc,
 						persistAlloc);
-					valuetostr(funcname, limits_functions_namesize, vptr);
+					valuetostr(funcname, limits_functions_namesize,
+						vptr);
 					break;
 				}
 
 				case addrmode_pointer: {
-					char *vstr =
-						alloc(scratchAlloc, limits_functions_namesize);
+					char *vstr = alloc(scratchAlloc,
+						limits_functions_namesize);
 					valuetostr(vstr, limits_functions_namesize,
 						instr->FirstOperand.Data);
 					Value *vptr = getVar(vars, vstr);
 					if (vptr == NULL) {
-						print("ERROR: INTERPERTER: FUNC: VARIABLE DOES " "NOT EXIST!\n");
+						print("ERROR: INTERPERTER: FUNC: VARIABLE DOES NOT EXIST!\n");
 						exitproc(1);
 					}
-					valuetostr(funcname, limits_functions_namesize, *vptr);
+					valuetostr(funcname, limits_functions_namesize,
+						*vptr);
 					break;
 				}
 
 				default:
-					print("ERROR: INTERPRETER: IF: UNSUPPORTED ADDRESSING " "MODE!\n");
+					print("ERROR: INTERPRETER: IF: UNSUPPORTED ADDRESSING MODE!\n");
 					exitproc(1);
 					break;
 			}
 
 			switch (instr->SecondOperand.Addressing) {
 				case addrmode_literal: {
-					char *buff = alloc(tempAlloc, limits_functions_namesize);
-					result = resolve_literal(buff, limits_functions_namesize,
+					char *buff =
+						alloc(tempAlloc, limits_functions_namesize);
+					result = resolve_literal(buff,
+						limits_functions_namesize,
 						&instr->SecondOperand.Data, vars, tempAlloc,
 						persistAlloc);
 					break;
 				}
 
 				case addrmode_forced_eval: {
-					char *buff = alloc(tempAlloc, limits_functions_namesize);
+					char *buff =
+						alloc(tempAlloc, limits_functions_namesize);
 					result = resolve_forced_eval(buff,
 						limits_functions_namesize,
 						&instr->SecondOperand.Data, vars, tempAlloc,
@@ -540,11 +548,12 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 					break;
 				}
 
-				/* in this case, a pointer refers to a pointer to an expression,
-				 * which is compatable with the forced_eavl addressing mode, so we
-				 * can just copy that */
+				/* in this case, a pointer refers to a pointer to an
+				 * expression, which is compatable with the forced_eavl
+				 * addressing mode, so we can just copy that */
 				case addrmode_pointer: {
-					char *buff = alloc(tempAlloc, limits_functions_namesize);
+					char *buff =
+						alloc(tempAlloc, limits_functions_namesize);
 					result = resolve_forced_eval(buff,
 						limits_functions_namesize,
 						&instr->SecondOperand.Data, vars, tempAlloc,
@@ -563,13 +572,13 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 				}
 
 				default:
-					print("ERROR: INTERPRETER: IF: UNSUPPORTED ADDRESSING " "MODE!\n");
+					print("ERROR: INTERPRETER: IF: UNSUPPORTED ADDRESSING MODE!\n");
 					exitproc(1);
 					break;
 			}
 			if (valuetoword(result, vars, persistAlloc).as.word == 0)
-				return resolvefunction(pc, funcs, stack, program, scratchAlloc,
-					funcname, instruction_count);
+				return resolvefunction(pc, funcs, stack, program,
+					scratchAlloc, funcname, instruction_count);
 			else
 				return pc + 1;
 
@@ -591,55 +600,53 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 					break;
 
 				case addrmode_literal: {
-					char *buff =
-						alloc(scratchAlloc, limits_functions_namesize);
-					Value val =
-						resolve_literal(buff, limits_functions_namesize,
-							&instr->FirstOperand.Data, vars,
-							tempAlloc, persistAlloc);
-					valuetostr(funcname, limits_functions_namesize, val);
+					char *buff = alloc(scratchAlloc,
+						limits_functions_namesize);
+					Value val = resolve_literal(buff,
+						limits_functions_namesize,
+						&instr->FirstOperand.Data, vars, tempAlloc,
+						persistAlloc);
+					valuetostr(funcname, limits_functions_namesize,
+						val);
 					break;
 				}
 
 				case addrmode_forced_eval: {
-					char *buff =
-						alloc(scratchAlloc, limits_functions_namesize);
+					char *buff = alloc(scratchAlloc,
+						limits_functions_namesize);
 					Value val = resolve_forced_eval(buff,
 						limits_functions_namesize,
 						&instr->FirstOperand.Data, vars, tempAlloc,
 						persistAlloc);
-					valuetostr(funcname, limits_functions_namesize, val);
+					valuetostr(funcname, limits_functions_namesize,
+						val);
 					break;
 				}
 
 				case addrmode_pointer: {
-					char *buf =
-						alloc(tempAlloc, limits_instructions_varnamesize);
+					char *buf = alloc(tempAlloc,
+						limits_instructions_varnamesize);
 					valuetostr(buf, limits_instructions_varnamesize,
 						instr->FirstOperand.Data);
 					Value *valptr = getVar(vars, buf);
 					if (valptr == NULL) {
-						print("ERROR: VM: CALL: VARIABLE DOES NOT " "EXIS"
-											    "T!"
-											    "\n");
+						print("ERROR: VM: CALL: VARIABLE DOES NOT EXIST!\n");
 						exitproc(1);
 					}
 
-					valuetostr(funcname, limits_instructions_varnamesize,
-						*valptr);
+					valuetostr(funcname,
+						limits_instructions_varnamesize, *valptr);
 
 					break;
 				}
 
 				default:
-					print(
-						"ERROR: INTERPRETER: CALL: UNSUPPORTED "
-						"ADDRESSING " "MODE!\n");
+					print("ERROR: INTERPRETER: CALL: UNSUPPORTED " "ADDRESSING MODE!\n");
 					exitproc(1);
 					break;
 			}
-			return resolvefunction(pc, funcs, stack, program, scratchAlloc, funcname,
-				instruction_count);
+			return resolvefunction(pc, funcs, stack, program, scratchAlloc,
+				funcname, instruction_count);
 			break;
 		}
 
@@ -666,11 +673,12 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 					break;
 
 				default:
-					print("ERROR: INTERPRETER: ESCAPE: ADDRESSING MODE IS " "UNSUPPORTED!\n");
+					print("ERROR: INTERPRETER: ESCAPE: ADDRESSING MODE IS UNSUPPORTED!\n");
 					exitproc(1);
 			}
 
-			callEscape(name, seed, ffivars, scratchAlloc, tempAlloc, persistAlloc);
+			callEscape(name, seed, ffivars, scratchAlloc, tempAlloc,
+				persistAlloc);
 			break;
 		}
 
@@ -684,11 +692,13 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 			switch (instr->FirstOperand.Data.Type) {
 				case type_word:
 					print("WORD,  DATA: ");
-					valuetostr(buf, sizeof(buf), instr->FirstOperand.Data);
+					valuetostr(buf, sizeof(buf),
+						instr->FirstOperand.Data);
 					break;
 				case type_sword:
 					print("SWORD, DATA: ");
-					valuetostr(buf, sizeof(buf), instr->FirstOperand.Data);
+					valuetostr(buf, sizeof(buf),
+						instr->FirstOperand.Data);
 					break;
 				case type_str:
 					print("STR,   DATA: ");
@@ -696,7 +706,8 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 					break;
 				case type_flt:
 					print("FLT,   DATA: ");
-					valuetostr(buf, sizeof(buf), instr->FirstOperand.Data);
+					valuetostr(buf, sizeof(buf),
+						instr->FirstOperand.Data);
 					break;
 				case type_expr:
 					print("ERROR: THIS CANNOT HANDLE EXPRESSIONS!\n");
@@ -708,9 +719,7 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 					break;
 			}
 			if (getstrlen(buf) >= 32) {
-				print(
-					"\nERROR: INTERPRETER: _PRINT (INTERNAL INSTRUCTION): "
-					"DATA " "TOO " "LONG!\n");
+				print("\nERROR: INTERPRETER: _PRINT (INTERNAL INSTRUCTION): " "DATA TOO LONG!\n");
 				exitproc(1);
 			}
 
@@ -728,9 +737,7 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 			Value *stored = getVar(vars, buf);
 
 			if (stored == NULL) {
-				print("ERROR: VM: INTERPRETER: _PRINT2: VARIABLE DOES NOT " "EXIS"
-											    "T!"
-											    "\n");
+				print("ERROR: VM: INTERPRETER: _PRINT2: VARIABLE DOES NOT EXIST!\n");
 				exitproc(1);
 			}
 
@@ -742,11 +749,13 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 			switch (data.Type) {
 				case type_word:
 					print("WORD,  DATA: ");
-					valuetostr(buf, limits_instructions_varnamesize, data);
+					valuetostr(buf, limits_instructions_varnamesize,
+						data);
 					break;
 				case type_sword:
 					print("SWORD, DATA: ");
-					valuetostr(buf, limits_instructions_varnamesize, data);
+					valuetostr(buf, limits_instructions_varnamesize,
+						data);
 					break;
 				case type_str:
 					print("STR,   DATA: ");
@@ -754,7 +763,8 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 					break;
 				case type_flt:
 					print("FLT,   DATA: ");
-					valuetostr(buf, limits_instructions_varnamesize, data);
+					valuetostr(buf, limits_instructions_varnamesize,
+						data);
 					break;
 				case type_expr:
 					print("ERROR: THIS CANNOT HANDLE EXPRESSIONS!\n");
@@ -777,12 +787,14 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 			print("_GETMEM (INTERNAL INSTRUCTION)\n");
 
 			print("  PERMALLOC: USED: ");
-			snprint(buf, sizeof(buf), "%lu", getAllocatorSizeUsed(persistAlloc));
+			snprint(buf, sizeof(buf), "%lu",
+				getAllocatorSizeUsed(persistAlloc));
 			print(buf);
 			setmem(buf, 0, sizeof(buf));
 
 			print(", REMAIN: ");
-			snprint(buf, sizeof(buf), "%lu", getAllocatorSizeRemaining(persistAlloc));
+			snprint(buf, sizeof(buf), "%lu",
+				getAllocatorSizeRemaining(persistAlloc));
 			print(buf);
 			setmem(buf, 0, sizeof(buf));
 
@@ -799,7 +811,8 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 			setmem(buf, 0, sizeof(buf));
 
 			print(", REMAIN: ");
-			snprint(buf, sizeof(buf), "%lu", getAllocatorSizeRemaining(tempAlloc));
+			snprint(buf, sizeof(buf), "%lu",
+				getAllocatorSizeRemaining(tempAlloc));
 			print(buf);
 			setmem(buf, 0, sizeof(buf));
 
@@ -811,12 +824,14 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 			print("\n");
 
 			print("  SCRATCH: USED: ");
-			snprint(buf, sizeof(buf), "%lu", getAllocatorSizeUsed(scratchAlloc));
+			snprint(buf, sizeof(buf), "%lu",
+				getAllocatorSizeUsed(scratchAlloc));
 			print(buf);
 			setmem(buf, 0, sizeof(buf));
 
 			print(", REMAIN: ");
-			snprint(buf, sizeof(buf), "%lu", getAllocatorSizeRemaining(scratchAlloc));
+			snprint(buf, sizeof(buf), "%lu",
+				getAllocatorSizeRemaining(scratchAlloc));
 			print(buf);
 			setmem(buf, 0, sizeof(buf));
 
@@ -901,8 +916,8 @@ int vmmain (Args cliargs, Stack *stack, unsigned long long seed)
 		exitproc(1);
 	}
 
-	char *file =
-		alloc(tempAlloc, filesize + 1); /* +1 for null terminator readfile() appends */
+	char *file = alloc(tempAlloc,
+		filesize + 1); /* +1 for null terminator readfile() appends */
 	char *filedata = readfile(cliargs.values[1], file, filesize + 1);
 
 	if (filedata == NULL) {
@@ -938,8 +953,9 @@ int vmmain (Args cliargs, Stack *stack, unsigned long long seed)
 	/* execution */
 	unsigned long pc = 0;
 	while (pc < current_instruction_count) {
-		pc = interpret(&program[pc], program, seed, current_instruction_count, &vars,
-			ffivars, stack, &funcs, pc, persistAlloc, scratchAlloc, tempAlloc);
+		pc = interpret(&program[pc], program, seed, current_instruction_count,
+			&vars, ffivars, stack, &funcs, pc, persistAlloc, scratchAlloc,
+			tempAlloc);
 		resetAllocator(scratchAlloc);
 		resetAllocator(tempAlloc);
 	}

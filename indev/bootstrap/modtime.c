@@ -38,7 +38,8 @@ static time_t arsearch (FILE *fd, const char *member)
 	do {
 	top:
 		len = fread(&hdr, 1, sizeof(hdr), fd);
-		if (len < sizeof(hdr) || memcmp(hdr.ar_fmag, ARFMAG, sizeof(hdr.ar_fmag)) != 0) {
+		if (len < sizeof(hdr) ||
+			memcmp(hdr.ar_fmag, ARFMAG, sizeof(hdr.ar_fmag)) != 0) {
 			if (feof(fd))
 				break;
 			error("invalid archive");

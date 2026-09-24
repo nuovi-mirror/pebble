@@ -81,7 +81,7 @@ BraceWrapping:
 Cpp11BracedListStyle: true
 RemoveBracesLLVM: false
 
-ColumnLimit: 98
+ColumnLimit: 92
 
 BreakAfterAttributes: Leave
 BreakAfterReturnType: None
@@ -114,9 +114,9 @@ ExperimentalAutoDetectBinPacking: false
 PackConstructorInitializers: NextLine
 
 BreakAdjacentStringLiterals: false
-BreakStringLiterals: true
+BreakStringLiterals: false
 
-PenaltyBreakString: 10000000
+PenaltyBreakString: 1000
 
 PointerAlignment: Right
 ReferenceAlignment: Pointer

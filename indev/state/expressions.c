@@ -28,7 +28,8 @@ const ExprOperator ExprOperators[] = {
 
 const ExprOperator *strtooperator (const char *str)
 {
-	for (unsigned long i = 0; i < sizeof(ExprOperators) / sizeof(ExprOperators[1]); i++) {
+	for (unsigned long i = 0; i < sizeof(ExprOperators) / sizeof(ExprOperators[1]);
+		i++) {
 		if (cmpstr(ExprOperators[i].Sym, str) == 0) {
 			return &ExprOperators[i];
 			break;
@@ -43,7 +44,8 @@ Value parseliteral (const char **str, Arena *tempAlloc, Arena *persistAlloc)
 	const char *start = *str;
 	const char *p = start;
 
-	while (*p != '\0' && *p != ' ' && *p != '\t' && *p != '\n' && *p != '(' && *p != ')')
+	while (*p != '\0' && *p != ' ' && *p != '\t' && *p != '\n' && *p != '(' &&
+		*p != ')')
 		p++;
 
 	unsigned long len = (unsigned long)(p - start);
@@ -81,7 +83,8 @@ void nexttoken (char **str, Token *token, Arena *tempAlloc, Arena *persistAlloc)
 	const ExprOperator *best = NULL;
 	unsigned long bestlen = 0;
 
-	for (unsigned long i = 0; i < sizeof(ExprOperators) / sizeof(ExprOperators[0]); i++) {
+	for (unsigned long i = 0; i < sizeof(ExprOperators) / sizeof(ExprOperators[0]);
+		i++) {
 		unsigned long len = getstrlen(ExprOperators[i].Sym);
 		if (cmpstrn(*str, ExprOperators[i].Sym, len) == 0) {
 			best = &ExprOperators[i];
@@ -114,7 +117,8 @@ static void parseradvance (ExprParser *p, Arena *tempAlloc, Arena *persistAlloc)
 	nexttoken((char **)&p->cursor, &p->lookahead, tempAlloc, persistAlloc);
 }
 
-ExprNode *newexprnode (ExprOperation op, ExprNodeData left, ExprNodeData right, Arena *arena)
+ExprNode *newexprnode (ExprOperation op, ExprNodeData left, ExprNodeData right,
+	Arena *arena)
 {
 	ExprNode *n = alloc(arena, sizeof(ExprNode));
 
@@ -222,8 +226,8 @@ int isexpression (const char *str)
 		unsigned long bestlen = 0;
 
 		/* longest match at this position, same rule nexttoken uses */
-		for (unsigned long i = 0; i < sizeof(ExprOperators) / sizeof(ExprOperators[0]);
-			i++) {
+		for (unsigned long i = 0;
+			i < sizeof(ExprOperators) / sizeof(ExprOperators[0]); i++) {
 			unsigned long len = getstrlen(ExprOperators[i].Sym);
 			if (cmpstrn(p, ExprOperators[i].Sym, len) == 0 && len > bestlen) {
 				best = &ExprOperators[i];
@@ -234,13 +238,14 @@ int isexpression (const char *str)
 		if (best) {
 			unsigned long i = (unsigned long)(p - str);
 
-			/* need exactly one space to the left: str[i-1]==' ' and str[i-2]!=' ' */
+			/* need exactly one space to the left: str[i-1]==' ' and str[i-2]!='
+			 * ' */
 			int leftok = (i >= 2) && (str[i - 1] == ' ') && (str[i - 2] != ' ');
 
 			/* need exactly one space to the right, followed by a real char */
 			const char *after = p + bestlen;
-			int rightok =
-				(after[0] == ' ') && (after[1] != '\0') && (after[1] != ' ');
+			int rightok = (after[0] == ' ') && (after[1] != '\0') &&
+				      (after[1] != ' ');
 
 			if (leftok && rightok)
 				return 1;

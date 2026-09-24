@@ -15,8 +15,8 @@ static unsigned long long mix64 (unsigned long long x)
 	return x;
 }
 
-void callEscape (const char *name, unsigned long long seed, FFIvars *vars, FFIArena *scratchAlloc,
-	FFIArena *tempAlloc, FFIArena *persistAlloc)
+void callEscape (const char *name, unsigned long long seed, FFIvars *vars,
+	FFIArena *scratchAlloc, FFIArena *tempAlloc, FFIArena *persistAlloc)
 {
 	unsigned long i;
 
@@ -33,7 +33,8 @@ void callEscape (const char *name, unsigned long long seed, FFIvars *vars, FFIAr
 				nseed = (nseed << sizeof(unsigned long) | lname[e]);
 
 			unsigned long long ffiseed = mix64(seed ^ nseed);
-			escapes[i].func(vars, ffiseed, scratchAlloc, tempAlloc, persistAlloc);
+			escapes[i].func(vars, ffiseed, scratchAlloc, tempAlloc,
+				persistAlloc);
 			return;
 		}
 	}

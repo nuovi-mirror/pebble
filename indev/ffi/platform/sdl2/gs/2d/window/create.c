@@ -2,8 +2,8 @@
 #include "ffi.h"
 #include "limits.h"
 
-void escape_gs_2d_window_create (FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc,
-	FFIArena *tempAlloc, FFIArena *persistAlloc)
+void escape_gs_2d_window_create (FFIvars *vars, unsigned long long seed,
+	FFIArena *scratchAlloc, FFIArena *tempAlloc, FFIArena *persistAlloc)
 {
 	/* get arguments (yes) */
 	char *parg0ptr = FFIallocateMemory(tempAlloc, limits_instructions_varnamesize);
@@ -48,10 +48,11 @@ void escape_gs_2d_window_create (FFIvars *vars, unsigned long long seed, FFIAren
 	}
 	*/
 
-	SDL_Window *win = SDL_CreateWindow(wname, arg1w.as.word, arg2w.as.word, arg3w.as.word,
-		arg4w.as.word, 0);
+	SDL_Window *win = SDL_CreateWindow(wname, arg1w.as.word, arg2w.as.word,
+		arg3w.as.word, arg4w.as.word, 0);
 	if (win == NULL) {
-		FFIstdoutPrint("ERROR: FFI: gs.2d.window.create: FAILED TO CREATE WINDOW!\n");
+		FFIstdoutPrint(
+			"ERROR: FFI: gs.2d.window.create: FAILED TO CREATE WINDOW!\n");
 		FFIexit(1);
 	}
 

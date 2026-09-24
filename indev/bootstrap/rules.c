@@ -69,7 +69,8 @@ retry:
 					modtime(ip);
 
 				if (!chain) {
-					got_ip = ip->n_tim.tv_sec || (ip->n_flag & N_TARGET);
+					got_ip =
+						ip->n_tim.tv_sec || (ip->n_flag & N_TARGET);
 				}
 #if ENABLE_FEATURE_MAKE_EXTENSIONS
 				else {
@@ -193,11 +194,8 @@ struct name *dyndep (struct name *np, struct rule *infrule, const char **ptsuff)
 
 #define RULES_2024 ".SUFFIXES:.o .c .y .l .a .sh\n"
 
-#define MACROS                                                                                   \
-	"CFLAGS=-O1\n" "YACC=yacc\n" "YFLAGS=\n" "LEX=lex\n" "LFLAGS=\n" "AR=ar\n" "ARFLAGS=-"   \
-										   "rv\n" "LDFL" \
-											  "AGS=" \
-											  "\n"
+#define MACROS \
+	"CFLAGS=-O1\n" "YACC=yacc\n" "YFLAGS=\n" "LEX=lex\n" "LFLAGS=\n" "AR=ar\n" "ARFLAGS=-" "rv\n" "LDFL" "AGS=" "\n"
 
 #define MACROS_2017 "CC=c99\n" "FC=fort77\n" "FFLAGS=-O1\n"
 

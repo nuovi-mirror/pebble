@@ -7,7 +7,8 @@
 #include "values.h"
 #include "variables.h"
 
-void FFIallocateVariable (FFIvars *vars, const char *varname, void *value, FFIArena *persistAlloc)
+void FFIallocateVariable (FFIvars *vars, const char *varname, void *value,
+	FFIArena *persistAlloc)
 {
 	if (vars->count >= vars->max) {
 		print("ERROR: FFI: TOO MANY VARIABLES USED!\n");

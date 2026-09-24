@@ -146,9 +146,13 @@ static int h_NumericCmp (Value l, Value r)
 		case type_flt:
 			return numflt(l) > numflt(r) ? 1 : numflt(l) < numflt(r) ? -1 : 0;
 		case type_sword:
-			return numsword(l) > numsword(r) ? 1 : numsword(l) < numsword(r) ? -1 : 0;
+			return numsword(l) > numsword(r)   ? 1
+			       : numsword(l) < numsword(r) ? -1
+							   : 0;
 		default:
-			return numword(l) > numword(r) ? 1 : numword(l) < numword(r) ? -1 : 0;
+			return numword(l) > numword(r)	 ? 1
+			       : numword(l) < numword(r) ? -1
+							 : 0;
 	}
 }
 
@@ -203,8 +207,8 @@ Value evalexprnode (ExprNode *node, VarMap *vars, Arena *persistAlloc)
 			return mkbool(cmp != 0);
 
 		case ExprOp_StringEqualTo:
-			return mkbool(
-				cmpstr(asstr(l, lb, sizeof(lb)), asstr(r, rb, sizeof(rb))) == 0);
+			return mkbool(cmpstr(asstr(l, lb, sizeof(lb)),
+					      asstr(r, rb, sizeof(rb))) == 0);
 
 		case ExprOp_StringContains:
 		case ExprOp_StringStartsWith:
@@ -262,7 +266,8 @@ Value evalexprdata (ExprNodeData data, VarMap *vars, Arena *persistAlloc)
 	return evalexprnode(data.Node, vars, persistAlloc);
 }
 
-Value evalstr (const char *str, int *ok, VarMap *vars, Arena *tempAlloc, Arena *persistAlloc)
+Value evalstr (const char *str, int *ok, VarMap *vars, Arena *tempAlloc,
+	Arena *persistAlloc)
 {
 	return evalexprdata(str2expr(str, ok, tempAlloc, persistAlloc), vars, persistAlloc);
 }

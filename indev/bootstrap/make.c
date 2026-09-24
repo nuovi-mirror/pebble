@@ -126,8 +126,10 @@ static int docmds (struct name *np, struct cmd *cp)
 
 					if (!quest || err_value == 127) {
 						if (err_type)
-							diagnostic("failed to build '%s' %s %d",
-								np->n_name, err_type, err_value);
+							diagnostic(
+								"failed to build '%s' %s %d",
+								np->n_name, err_type,
+								err_value);
 						else
 							diagnostic("failed to build '%s'",
 								np->n_name);
@@ -275,7 +277,8 @@ static int timespec_le (const struct timespec *t, const struct timespec *p)
 /*
  * Return the greater of two struct timespecs
  */
-static const struct timespec *timespec_max (const struct timespec *t, const struct timespec *p)
+static const struct timespec *timespec_max (const struct timespec *t,
+	const struct timespec *p)
 {
 	return timespec_le(t, p) ? p : t;
 }
@@ -461,7 +464,8 @@ int make (struct name *np, int level)
 		((np->n_flag & N_PHONY) || (timespec_le(&np->n_tim, &dtim)))) {
 		if (!(estat & MAKE_FAILURE)) {
 			if (sc_cmd)
-				estat |= make1(np, sc_cmd, oodate, allsrc, dedup, impdep, tsuff);
+				estat |= make1(np, sc_cmd, oodate, allsrc, dedup, impdep,
+					tsuff);
 			else if (!doinclude && level == 0 && !(estat & MAKE_DIDSOMETHING))
 				warning("nothing to be done for %s", np->n_name);
 		} else if (!doinclude && !quest) {

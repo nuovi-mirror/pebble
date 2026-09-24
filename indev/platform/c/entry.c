@@ -80,8 +80,8 @@ void freestack (Stack *stack)
  * random 64bit seeds */
 #define wsize 8
 
-static void work (unsigned long long r, unsigned long long s, unsigned long a, unsigned long b,
-	unsigned long c)
+static void work (unsigned long long r, unsigned long long s, unsigned long a,
+	unsigned long b, unsigned long c)
 {
 	unsigned long long x = r;
 
@@ -169,7 +169,8 @@ unsigned long long grun (void)
 		{43, 19, 47},
 	};
 
-	seed = ground(work[0], 10000001ULL, workloads[0][0], workloads[1][1], workloads[2][2]);
+	seed = ground(work[0], 10000001ULL, workloads[0][0], workloads[1][1],
+		workloads[2][2]);
 
 	for (unsigned int i = 0; i < wsize; i++)
 		times[i] = 5000000ULL + (mix64(seed + i) % 10000001ULL);

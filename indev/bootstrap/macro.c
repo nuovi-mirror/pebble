@@ -94,8 +94,9 @@ void setmacro (const char *name, const char *val, int level)
 				return;
 #if ENABLE_FEATURE_MAKE_EXTENSIONS
 			error("invalid macro name '%s'%s", name,
-				potentially_valid_macro(name) ? ": allow with pragma macro_name"
-							      : "");
+				potentially_valid_macro(name)
+					? ": allow with pragma macro_name"
+					: "");
 #else
 			error("invalid macro name '%s'", name);
 #endif

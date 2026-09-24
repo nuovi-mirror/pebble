@@ -106,7 +106,8 @@ static char *modify_words (const char *val, int modifier, size_t lenf, size_t le
 				word = sep + 1;
 			}
 		}
-		if (IF_FEATURE_MAKE_POSIX_2024(find_pref != NULL ||) lenf != 0 || lenr != 0) {
+		if (IF_FEATURE_MAKE_POSIX_2024(find_pref != NULL ||) lenf != 0 ||
+			lenr != 0) {
 			size_t lenw = strlen(word);
 #if ENABLE_FEATURE_MAKE_POSIX_2024
 			// This code implements pattern macro expansions:
@@ -122,7 +123,8 @@ static char *modify_words (const char *val, int modifier, size_t lenf, size_t le
 				// If prefix and suffix of word match find_pref and
 				// find_suff, then do substitution.
 				if (strncmp(word, find_pref, find_pref_len) == 0 &&
-					strcmp(word + lenw - find_suff_len, find_suff) == 0) {
+					strcmp(word + lenw - find_suff_len, find_suff) ==
+						0) {
 					// replace: <prefix>[%<suffix>]
 					// example: build/%.o or build/all.o (notice no %)
 					// If repl_suff is NULL, replace whole word with
@@ -137,7 +139,8 @@ static char *modify_words (const char *val, int modifier, size_t lenf, size_t le
 				}
 			} else
 #endif
-				if (lenw >= lenf && strcmp(word + lenw - lenf, find_suff) == 0) {
+				if (lenw >= lenf &&
+					strcmp(word + lenw - lenf, find_suff) == 0) {
 				word[lenw - lenf] = '\0';
 				word = newword = xconcat3(word, repl_suff, "");
 			}
@@ -244,7 +247,8 @@ char *expand_macros (const char *str, int except_dollar)
 					*replace++ = '\0';
 					lenf = strlen(expfind);
 #if ENABLE_FEATURE_MAKE_POSIX_2024
-					if (!POSIX_2017 && (find_suff = strchr(expfind, '%'))) {
+					if (!POSIX_2017 &&
+						(find_suff = strchr(expfind, '%'))) {
 						find_pref = expfind;
 						repl_pref = replace;
 						*find_suff++ = '\0';
@@ -260,8 +264,7 @@ char *expand_macros (const char *str, int except_dollar)
 							error("empty suffix%s",
 								!ENABLE_FEATURE_MAKE_EXTENSIONS
 									? ""
-									: ": allow with pragma "
-									  "empty_suffix");
+									: ": allow with pragma " "empty_suffix");
 						find_suff = expfind;
 						repl_suff = replace;
 						lenr = strlen(repl_suff);
@@ -325,8 +328,8 @@ char *expand_macros (const char *str, int except_dollar)
 #endif
 					expval = expand_macros(mp->m_val, FALSE);
 				mp->m_flag = FALSE;
-				modified = modify_words(expval, modifier, lenf, lenr, find_pref,
-					repl_pref, find_suff, repl_suff);
+				modified = modify_words(expval, modifier, lenf, lenr,
+					find_pref, repl_pref, find_suff, repl_suff);
 				if (modified)
 					free(expval);
 				else
@@ -1352,7 +1355,8 @@ void input (FILE *fd, int ilevel)
 					// Enforce prerequisites/commands in POSIX mode
 					if (IF_FEATURE_MAKE_EXTENSIONS(posix &&) 1) {
 						if ((ttype & T_NOPREREQ) && dp)
-							error_not_allowed("prerequisites", p);
+							error_not_allowed("prerequisites",
+								p);
 						if ((ttype & T_INFERENCE)) {
 							if (semicolon_cmd)
 								error_in_inference_rule(
@@ -1362,7 +1366,8 @@ void input (FILE *fd, int ilevel)
 						if ((ttype & T_COMMAND) && !cp &&
 							!((ttype & T_INFERENCE) &&
 								!semicolon_cmd))
-							error("commands required for %s", p);
+							error("commands required for %s",
+								p);
 						if (!(ttype & T_COMMAND) && cp)
 							error_not_allowed("commands", p);
 					}

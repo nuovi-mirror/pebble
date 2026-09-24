@@ -179,8 +179,9 @@ struct name *newname (const char *name)
 		if (!is_valid_target(name))
 #if ENABLE_FEATURE_MAKE_EXTENSIONS
 			error("invalid target name '%s'%s", name,
-				potentially_valid_target(name) ? ": allow with pragma target_name"
-							       : "");
+				potentially_valid_target(name)
+					? ": allow with pragma target_name"
+					: "");
 #else
 			error("invalid target name '%s'", name);
 #endif
@@ -256,7 +257,8 @@ static void *inc_ref (void *vp)
 #if ENABLE_FEATURE_MAKE_EXTENSIONS
 // Order must match constants in make.h
 // POSIX levels must be last and in increasing order
-static const char *p_name[] = {"macro_name", "target_name", "command_comment", "empty_suffix",
+static const char *p_name[] = {"macro_name", "target_name", "command_comment",
+	"empty_suffix",
 #if defined(__CYGWIN__)
 	"windows",
 #endif

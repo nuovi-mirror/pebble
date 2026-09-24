@@ -41,31 +41,27 @@ static void usage (int exit_code)
 	FILE *fp = ENABLE_FEATURE_MAKE_EXTENSIONS && exit_code == 0 ? stdout : stderr;
 
 	fprintf(fp,
-		"Usage: %s" IF_FEATURE_MAKE_EXTENSIONS(
-			" [--posix] [-C path]") " [-f makefile]" IF_FEATURE_MAKE_POSIX_2024(" [-"
-											    "j "
-											    "num"
-											    "]")
-			IF_FEATURE_MAKE_EXTENSIONS(" [-x pragma]") IF_FEATURE_MAKE_EXTENSIONS(
-				"\n\t") IF_NOT_FEATURE_MAKE_EXTENSIONS(" [-eiknpqrsSt] ")
-				IF_FEATURE_MAKE_EXTENSIONS(" [-ehiknpqrsSt] ")
-					IF_NOT_FEATURE_MAKE_POSIX_2024(
-						IF_FEATURE_MAKE_EXTENSIONS("[macro[:]=val ...]")
+		"Usage: %s" IF_FEATURE_MAKE_EXTENSIONS(" [--posix] [-C path]") " [-f makefile]" IF_FEATURE_MAKE_POSIX_2024(
+			" [-" "j " "num" "]") IF_FEATURE_MAKE_EXTENSIONS(" [-x pragma]")
+			IF_FEATURE_MAKE_EXTENSIONS("\n\t") IF_NOT_FEATURE_MAKE_EXTENSIONS(
+				" [-eiknpqrsSt] ") IF_FEATURE_MAKE_EXTENSIONS(" [-ehiknpqrsSt] ")
+				IF_NOT_FEATURE_MAKE_POSIX_2024(
+					IF_FEATURE_MAKE_EXTENSIONS("[macro[:]=val ...]")
+						IF_NOT_FEATURE_MAKE_EXTENSIONS(
+							"[macro=val ...]"))
+					IF_FEATURE_MAKE_POSIX_2024(
+						IF_FEATURE_MAKE_EXTENSIONS(
+							"[macro[:[:[:]]]=val ...]")
 							IF_NOT_FEATURE_MAKE_EXTENSIONS(
-								"[macro=val ...]"))
-						IF_FEATURE_MAKE_POSIX_2024(
-							IF_FEATURE_MAKE_EXTENSIONS(
-								"[macro[:[:[:]]]=val ...]")
-								IF_NOT_FEATURE_MAKE_EXTENSIONS(
-									"[macro[::[:]]=val ...]")) " [target ...]\n",
+								"[macro[::[:]]=val ...]")) " [target ...]\n",
 		myname);
 
-	fprintf(fp,
-		"\nThis build supports:" IF_FEATURE_MAKE_EXTENSIONS(
-			" non-POSIX extensions," IF_FEATURE_MAKE_POSIX_2024(
-				" POSIX 2024,") " POSIX 2017\n")
-			IF_NOT_FEATURE_MAKE_EXTENSIONS(IF_FEATURE_MAKE_POSIX_2024(" POSIX 2024")
-					IF_NOT_FEATURE_MAKE_POSIX_2024(" POSIX 2017")));
+	fprintf(fp, "\nThis build supports:" IF_FEATURE_MAKE_EXTENSIONS(
+			    " non-POSIX extensions," IF_FEATURE_MAKE_POSIX_2024(
+				    " POSIX 2024,") " POSIX 2017\n")
+			    IF_NOT_FEATURE_MAKE_EXTENSIONS(
+				    IF_FEATURE_MAKE_POSIX_2024(" POSIX 2024")
+					    IF_NOT_FEATURE_MAKE_POSIX_2024(" POSIX 2017")));
 #if ENABLE_FEATURE_MAKE_EXTENSIONS && ENABLE_FEATURE_MAKE_POSIX_2024
 	fprintf(fp, "In strict POSIX mode the %s standard is enforced by default.\n",
 		DEFAULT_POSIX_LEVEL == STD_POSIX_2017 ? "2017" : "2024");
@@ -73,12 +69,10 @@ static void usage (int exit_code)
 #if !ENABLE_FEATURE_MAKE_EXTENSIONS
 #if ENABLE_FEATURE_MAKE_POSIX_2024
 	fprintf(fp,
-		"\nFor details see:\n" "  " "https://pubs.opengroup.org/onlinepubs/"
-					    "9799919799.2024edition/" "utilities/make.html\n");
+		"\nFor details see:\n" "  " "https://pubs.opengroup.org/onlinepubs/" "9799919799.2024edition/" "utilities/make.html\n");
 #else
 	fprintf(fp,
-		"\nFor details see:\n" "  " "https://pubs.opengroup.org/onlinepubs/"
-					    "9699919799.2018edition/" "utilities/make.html\n");
+		"\nFor details see:\n" "  " "https://pubs.opengroup.org/onlinepubs/" "9699919799.2018edition/" "utilities/make.html\n");
 #endif
 #endif
 	exit(exit_code);
@@ -328,7 +322,8 @@ static char **process_macros (char **argv, int level)
 		if (!((level & M_ENVIRON) &&
 			    (strcmp(*argv, "MAKEFLAGS") == 0 || strcmp(*argv, "SHELL") == 0
 #if ENABLE_FEATURE_MAKE_POSIX_2024
-				    || (strcmp(*argv, "CURDIR") == 0 && !useenv && !POSIX_2017)
+				    ||
+				    (strcmp(*argv, "CURDIR") == 0 && !useenv && !POSIX_2017)
 #endif
 
 					    ))) {
@@ -390,7 +385,8 @@ static void update_makeflags (void)
 		for (mp = macrohead[i]; mp; mp = mp->m_next) {
 			if ((mp->m_level == 1 || mp->m_level == 2) &&
 				strcmp(mp->m_name, "MAKEFLAGS") != 0) {
-				macro = xmalloc(strlen(mp->m_name) + 2 * strlen(mp->m_val) + 1);
+				macro = xmalloc(
+					strlen(mp->m_name) + 2 * strlen(mp->m_val) + 1);
 				s = stpcpy(macro, mp->m_name);
 				*s++ = '=';
 				for (t = mp->m_val; *t; t++) {
@@ -532,7 +528,8 @@ int main (int argc, char **argv)
 			// Make relative path absolute
 			path = newpath = realpath(argv[0], NULL);
 			if (!path) {
-				error("can't resolve path for %s: %s", argv[0], strerror(errno));
+				error("can't resolve path for %s: %s", argv[0],
+					strerror(errno));
 			}
 		}
 	} else {

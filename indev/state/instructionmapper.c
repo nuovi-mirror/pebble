@@ -13,7 +13,8 @@ InstructionMap initInstructionMap (unsigned long cap, Arena *persistAlloc)
 	return initHashMap(cap, persistAlloc);
 }
 
-void putInstruction (InstructionMap *m, const char *key, const void *value, Arena *persistAlloc)
+void putInstruction (InstructionMap *m, const char *key, const void *value,
+	Arena *persistAlloc)
 {
 	hashMapPut(m, key, value, persistAlloc);
 }
