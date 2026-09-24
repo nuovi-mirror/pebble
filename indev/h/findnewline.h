@@ -1,6 +1,4 @@
-#ifndef PLATFORM_FINDNEWLINE_H_
-#define PLATFORM_FINDNEWLINE_H_
-
-char* findnewline(char** cursor);
-
+#ifndef h_findend_
+#define h_findend_
+char *findnewline (char **cursor);
 #endif

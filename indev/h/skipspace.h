@@ -1,10 +1,8 @@
-#ifndef PLATFORM_SKIPSPACE_H_
-#define PLATFORM_SKIPSPACE_H_
-
+#ifndef h_skipspace_
+#define h_skipspace_
 /* function with old behavior for legacy compat */
-char* skipspace(char* p);
+char *skipspace (char *p);
 
 /* wrapper that is a bit more useful */
-char* tskipspace(char* p);
-
+char *tskipspace (char *p);
 #endif

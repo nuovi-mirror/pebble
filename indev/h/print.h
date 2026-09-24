@@ -1,6 +1,4 @@
-#ifndef PLATFORM_PRINT_H_
-#define PLATFORM_PRINT_H_
-
-void print(char* msg);
-
+#ifndef h_print_
+#define h_print_
+void print (char *msg);
 #endif

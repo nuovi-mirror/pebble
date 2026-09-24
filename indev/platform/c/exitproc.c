@@ -2,4 +2,7 @@
 
 #include <stdlib.h>
 
-void exitproc(int status) { exit(status); }
+void exitproc (int status)
+{
+	exit(status);
+}

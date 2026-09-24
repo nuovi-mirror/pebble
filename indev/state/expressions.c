@@ -11,254 +11,266 @@
 #include "values.h"
 
 const ExprOperator ExprOperators[] = {
-    {"+", ExprOp_NumericAdd, 1},         {"-", ExprOp_NumericSub, 1},
-    {"*", ExprOp_NumericMul, 0},         {"/", ExprOp_NumericDiv, 0},
-    {">", ExprOp_NumericGreaterThan, 2}, {"<", ExprOp_NumericLessThan, 2},
-    {"==", ExprOp_NumericEqualTo, 2},    {"!=", ExprOp_NumericNotEqualTo, 2},
-    {"?=", ExprOp_StringEqualTo, 4},     {"-?=", ExprOp_StringContains, 4},
-    {"e?=", ExprOp_StringEndsWith, 4},   {"s?=", ExprOp_StringStartsWith, 4},
-    {"s++", ExprOp_StringConcat, 3},
+	{"+", ExprOp_NumericAdd, 1},
+	{"-", ExprOp_NumericSub, 1},
+	{"*", ExprOp_NumericMul, 0},
+	{"/", ExprOp_NumericDiv, 0},
+	{">", ExprOp_NumericGreaterThan, 2},
+	{"<", ExprOp_NumericLessThan, 2},
+	{"==", ExprOp_NumericEqualTo, 2},
+	{"!=", ExprOp_NumericNotEqualTo, 2},
+	{"?=", ExprOp_StringEqualTo, 4},
+	{"-?=", ExprOp_StringContains, 4},
+	{"e?=", ExprOp_StringEndsWith, 4},
+	{"s?=", ExprOp_StringStartsWith, 4},
+	{"s++", ExprOp_StringConcat, 3},
 };
 
-const ExprOperator* strtooperator(const char* str) {
-  for (unsigned long i = 0;
-       i < sizeof(ExprOperators) / sizeof(ExprOperators[1]); i++) {
-    if (cmpstr(ExprOperators[i].Sym, str) == 0) {
-      return &ExprOperators[i];
-      break;
-    }
-  }
+const ExprOperator *strtooperator (const char *str)
+{
+	for (unsigned long i = 0; i < sizeof(ExprOperators) / sizeof(ExprOperators[1]); i++) {
+		if (cmpstr(ExprOperators[i].Sym, str) == 0) {
+			return &ExprOperators[i];
+			break;
+		}
+	}
 
-  return NULL;
+	return NULL;
 }
 
-Value parseliteral(const char** str, Arena* tempAlloc, Arena* persistAlloc) {
-  const char* start = *str;
-  const char* p = start;
+Value parseliteral (const char **str, Arena *tempAlloc, Arena *persistAlloc)
+{
+	const char *start = *str;
+	const char *p = start;
 
-  while (*p != '\0' && *p != ' ' && *p != '\t' && *p != '\n' && *p != '(' &&
-         *p != ')')
-    p++;
+	while (*p != '\0' && *p != ' ' && *p != '\t' && *p != '\n' && *p != '(' && *p != ')')
+		p++;
 
-  unsigned long len = (unsigned long)(p - start);
-  char* buf = alloc(tempAlloc, len + 1);
-  copymem(start, buf, len);
-  buf[len] = '\0';
+	unsigned long len = (unsigned long)(p - start);
+	char *buf = alloc(tempAlloc, len + 1);
+	copymem(start, buf, len);
+	buf[len] = '\0';
 
-  *str = p;
+	*str = p;
 
-  return guessvaluetype(buf, persistAlloc);
+	return guessvaluetype(buf, persistAlloc);
 }
 
-void nexttoken(char** str, Token* token, Arena* tempAlloc,
-               Arena* persistAlloc) {
-  *str = tskipspace(*str);
+void nexttoken (char **str, Token *token, Arena *tempAlloc, Arena *persistAlloc)
+{
+	*str = tskipspace(*str);
 
-  if (**str == '\0') {
-    token->Type = Token_End;
-    return;
-  }
+	if (**str == '\0') {
+		token->Type = Token_End;
+		return;
+	}
 
-  if (**str == '(') {
-    (*str)++;
-    token->Type = Token_LeftParent;
-    return;
-  }
+	if (**str == '(') {
+		(*str)++;
+		token->Type = Token_LeftParent;
+		return;
+	}
 
-  if (**str == ')') {
-    (*str)++;
-    token->Type = Token_RightParent;
-    return;
-  }
+	if (**str == ')') {
+		(*str)++;
+		token->Type = Token_RightParent;
+		return;
+	}
 
-  /* try matching an operator symbol */
-  const ExprOperator* best = NULL;
-  unsigned long bestlen = 0;
+	/* try matching an operator symbol */
+	const ExprOperator *best = NULL;
+	unsigned long bestlen = 0;
 
-  for (unsigned long i = 0;
-       i < sizeof(ExprOperators) / sizeof(ExprOperators[0]); i++) {
-    unsigned long len = getstrlen(ExprOperators[i].Sym);
-    if (cmpstrn(*str, ExprOperators[i].Sym, len) == 0) {
-      best = &ExprOperators[i];
-      bestlen = len;
-    }
-  }
+	for (unsigned long i = 0; i < sizeof(ExprOperators) / sizeof(ExprOperators[0]); i++) {
+		unsigned long len = getstrlen(ExprOperators[i].Sym);
+		if (cmpstrn(*str, ExprOperators[i].Sym, len) == 0) {
+			best = &ExprOperators[i];
+			bestlen = len;
+		}
+	}
 
-  if (best) {
-    *str += bestlen;
-    token->Type = Token_Operator;
-    token->Op = best;
-    return;
-  }
+	if (best) {
+		*str += bestlen;
+		token->Type = Token_Operator;
+		token->Op = best;
+		return;
+	}
 
-  /* value literal from here */
-  token->Type = Token_Value;
-  token->Value = parseliteral((const char**)str, tempAlloc, persistAlloc);
+	/* value literal from here */
+	token->Type = Token_Value;
+	token->Value = parseliteral((const char **)str, tempAlloc, persistAlloc);
 }
 
-int exprnodetostr(char* buf, unsigned long bufsize, ExprNode* node) {
-  if (node->Source == NULL) return -1;
+int exprnodetostr (char *buf, unsigned long bufsize, ExprNode *node)
+{
+	if (node->Source == NULL)
+		return -1;
 
-  return snprint(buf, bufsize, "%s", node->Source);
+	return snprint(buf, bufsize, "%s", node->Source);
 }
 
-static void parseradvance(ExprParser* p, Arena* tempAlloc,
-                          Arena* persistAlloc) {
-  nexttoken((char**)&p->cursor, &p->lookahead, tempAlloc, persistAlloc);
+static void parseradvance (ExprParser *p, Arena *tempAlloc, Arena *persistAlloc)
+{
+	nexttoken((char **)&p->cursor, &p->lookahead, tempAlloc, persistAlloc);
 }
 
-ExprNode* newexprnode(ExprOperation op, ExprNodeData left, ExprNodeData right,
-                      Arena* arena) {
-  ExprNode* n = alloc(arena, sizeof(ExprNode));
+ExprNode *newexprnode (ExprOperation op, ExprNodeData left, ExprNodeData right, Arena *arena)
+{
+	ExprNode *n = alloc(arena, sizeof(ExprNode));
 
-  n->Op = op;
-  n->left = left;
-  n->right = right;
+	n->Op = op;
+	n->left = left;
+	n->right = right;
 
-  return n;
+	return n;
 }
 
-ExprNodeData parseprimary(ExprParser* p, Arena* tempAlloc,
-                          Arena* persistAlloc) {
-  ExprNodeData data;
+ExprNodeData parseprimary (ExprParser *p, Arena *tempAlloc, Arena *persistAlloc)
+{
+	ExprNodeData data;
 
-  if (p->lookahead.Type == Token_LeftParent) {
-    parseradvance(p, tempAlloc, persistAlloc); /* consume '(' */
-    /* set that to whatever the currest loosest tier is */
-    ExprNodeData inner = parseexpr(p, 2, tempAlloc, persistAlloc);
+	if (p->lookahead.Type == Token_LeftParent) {
+		parseradvance(p, tempAlloc, persistAlloc); /* consume '(' */
+		/* set that to whatever the currest loosest tier is */
+		ExprNodeData inner = parseexpr(p, 2, tempAlloc, persistAlloc);
 
-    if (p->lookahead.Type != Token_RightParent)
-      p->error = 1;
-    else
-      parseradvance(p, tempAlloc, persistAlloc); /* consume ')' */
-    return inner;
-  }
+		if (p->lookahead.Type != Token_RightParent)
+			p->error = 1;
+		else
+			parseradvance(p, tempAlloc, persistAlloc); /* consume ')' */
+		return inner;
+	}
 
-  if (p->lookahead.Type == Token_Value) {
-    data.Type = ExprDataVal;
-    data.value = p->lookahead.Value;
-    parseradvance(p, tempAlloc, persistAlloc);
-    return data;
-  }
+	if (p->lookahead.Type == Token_Value) {
+		data.Type = ExprDataVal;
+		data.value = p->lookahead.Value;
+		parseradvance(p, tempAlloc, persistAlloc);
+		return data;
+	}
 
-  /* malformed input */
-  p->error = 1;
-  data.Type = ExprDataVal;
-  data.value.Type = type_word;
-  data.value.as.word = 0;
-  return data;
+	/* malformed input */
+	p->error = 1;
+	data.Type = ExprDataVal;
+	data.value.Type = type_word;
+	data.value.as.word = 0;
+	return data;
 }
 
-ExprNodeData parseexpr(ExprParser* p, int maxPrec, Arena* tempAlloc,
-                       Arena* persistAlloc) {
-  ExprNodeData left = parseprimary(p, tempAlloc, persistAlloc);
+ExprNodeData parseexpr (ExprParser *p, int maxPrec, Arena *tempAlloc, Arena *persistAlloc)
+{
+	ExprNodeData left = parseprimary(p, tempAlloc, persistAlloc);
 
-  while (!p->error && p->lookahead.Type == Token_Operator &&
-         p->lookahead.Op->Pres <= maxPrec) {
-    const ExprOperator* op = p->lookahead.Op;
-    parseradvance(p, tempAlloc, persistAlloc); /* consume operator */
+	while (!p->error && p->lookahead.Type == Token_Operator &&
+		p->lookahead.Op->Pres <= maxPrec) {
+		const ExprOperator *op = p->lookahead.Op;
+		parseradvance(p, tempAlloc, persistAlloc); /* consume operator */
 
-    /* op->Pres - 1: left-associative */
-    /* next call may only take operators
-     * strictly tigher than this one */
-    ExprNodeData right = parseexpr(p, op->Pres - 1, tempAlloc, persistAlloc);
+		/* op->Pres - 1: left-associative */
+		/* next call may only take operators
+		 * strictly tigher than this one */
+		ExprNodeData right = parseexpr(p, op->Pres - 1, tempAlloc, persistAlloc);
 
-    ExprNode* node = newexprnode(op->Op, left, right, tempAlloc);
+		ExprNode *node = newexprnode(op->Op, left, right, tempAlloc);
 
-    ExprNodeData wrapped;
-    wrapped.Type = ExprDataNode;
-    wrapped.Node = node;
-    left = wrapped;
-  }
+		ExprNodeData wrapped;
+		wrapped.Type = ExprDataNode;
+		wrapped.Node = node;
+		left = wrapped;
+	}
 
-  return left;
+	return left;
 }
 
 /* entry point */
-ExprNodeData str2expr(const char* str, int* ok, Arena* tempAlloc,
-                      Arena* persistAlloc) {
-  ExprParser p;
-  p.cursor = str;
-  p.error = 0;
-  parseradvance(&p, tempAlloc, persistAlloc); /* prime lookahead */
+ExprNodeData str2expr (const char *str, int *ok, Arena *tempAlloc, Arena *persistAlloc)
+{
+	ExprParser p;
+	p.cursor = str;
+	p.error = 0;
+	parseradvance(&p, tempAlloc, persistAlloc); /* prime lookahead */
 
-  int maxLevel = 4;
-  for (unsigned long i = 0;
-       i < sizeof(ExprOperators) / sizeof(ExprOperators[0]); i++)
-    if (ExprOperators[i].Pres > maxLevel) maxLevel = ExprOperators[i].Pres;
+	int maxLevel = 4;
+	for (unsigned long i = 0; i < sizeof(ExprOperators) / sizeof(ExprOperators[0]); i++)
+		if (ExprOperators[i].Pres > maxLevel)
+			maxLevel = ExprOperators[i].Pres;
 
-  ExprNodeData result = parseexpr(&p, maxLevel, tempAlloc, persistAlloc);
+	ExprNodeData result = parseexpr(&p, maxLevel, tempAlloc, persistAlloc);
 
-  if (p.lookahead.Type != Token_End) p.error = 1; /* trailing garbage */
+	if (p.lookahead.Type != Token_End)
+		p.error = 1; /* trailing garbage */
 
-  if (!p.error && result.Type == ExprDataNode) {
-    unsigned long len = getstrlen(str);
-    char* copy = alloc(tempAlloc, len + 1);
-    copymem(str, copy, len + 1);
-    result.Node->Source = copy;
-  }
+	if (!p.error && result.Type == ExprDataNode) {
+		unsigned long len = getstrlen(str);
+		char *copy = alloc(tempAlloc, len + 1);
+		copymem(str, copy, len + 1);
+		result.Node->Source = copy;
+	}
 
-  if (ok != NULL) *ok = !p.error;
+	if (ok != NULL)
+		*ok = !p.error;
 
-  return result;
+	return result;
 }
 
 /* type guesser infa */
-int isexpression(const char* str) {
-  const char* p = str;
+int isexpression (const char *str)
+{
+	const char *p = str;
 
-  while (*p != '\0') {
-    const ExprOperator* best = NULL;
-    unsigned long bestlen = 0;
+	while (*p != '\0') {
+		const ExprOperator *best = NULL;
+		unsigned long bestlen = 0;
 
-    /* longest match at this position, same rule nexttoken uses */
-    for (unsigned long i = 0;
-         i < sizeof(ExprOperators) / sizeof(ExprOperators[0]); i++) {
-      unsigned long len = getstrlen(ExprOperators[i].Sym);
-      if (cmpstrn(p, ExprOperators[i].Sym, len) == 0 && len > bestlen) {
-        best = &ExprOperators[i];
-        bestlen = len;
-      }
-    }
+		/* longest match at this position, same rule nexttoken uses */
+		for (unsigned long i = 0; i < sizeof(ExprOperators) / sizeof(ExprOperators[0]);
+			i++) {
+			unsigned long len = getstrlen(ExprOperators[i].Sym);
+			if (cmpstrn(p, ExprOperators[i].Sym, len) == 0 && len > bestlen) {
+				best = &ExprOperators[i];
+				bestlen = len;
+			}
+		}
 
-    if (best) {
-      unsigned long i = (unsigned long)(p - str);
+		if (best) {
+			unsigned long i = (unsigned long)(p - str);
 
-      /* need exactly one space to the left: str[i-1]==' ' and str[i-2]!=' ' */
-      int leftok = (i >= 2) && (str[i - 1] == ' ') && (str[i - 2] != ' ');
+			/* need exactly one space to the left: str[i-1]==' ' and str[i-2]!=' ' */
+			int leftok = (i >= 2) && (str[i - 1] == ' ') && (str[i - 2] != ' ');
 
-      /* need exactly one space to the right, followed by a real char */
-      const char* after = p + bestlen;
-      int rightok =
-          (after[0] == ' ') && (after[1] != '\0') && (after[1] != ' ');
+			/* need exactly one space to the right, followed by a real char */
+			const char *after = p + bestlen;
+			int rightok =
+				(after[0] == ' ') && (after[1] != '\0') && (after[1] != ' ');
 
-      if (leftok && rightok) return 1;
+			if (leftok && rightok)
+				return 1;
 
-      /* not a valid flanked operator here - keep scanning past it */
-      p += bestlen;
-      continue;
-    }
+			/* not a valid flanked operator here - keep scanning past it */
+			p += bestlen;
+			continue;
+		}
 
-    p++;
-  }
+		p++;
+	}
 
-  return 0;
+	return 0;
 }
 
 /* wrapper */
-Value guessvaluetypeorexpr(char* data, Arena* tempAlloc, Arena* persistAlloc) {
-  if (isexpression(data)) {
-    int ok;
-    ExprNodeData tree = str2expr(data, &ok, tempAlloc, persistAlloc);
+Value guessvaluetypeorexpr (char *data, Arena *tempAlloc, Arena *persistAlloc)
+{
+	if (isexpression(data)) {
+		int ok;
+		ExprNodeData tree = str2expr(data, &ok, tempAlloc, persistAlloc);
 
-    if (ok && tree.Type == ExprDataNode && tree.Node != NULL) {
-      Value v;
-      v.Type = type_expr;
-      v.as.expr = tree.Node;
-      return v;
-    }
-    /* isexpression is heuristic and may parse a string as an expression */
-  }
+		if (ok && tree.Type == ExprDataNode && tree.Node != NULL) {
+			Value v;
+			v.Type = type_expr;
+			v.as.expr = tree.Node;
+			return v;
+		}
+		/* isexpression is heuristic and may parse a string as an expression */
+	}
 
-  return guessvaluetype(data, persistAlloc);
+	return guessvaluetype(data, persistAlloc);
 }

@@ -3,17 +3,27 @@
 #include "allocator.h"
 #include "hashmap.h"
 
-unsigned long hashVar(VarMap* m, const char* str) { return mapHash(m, str); }
-
-VarMap initVars(unsigned long cap, Arena* persistAlloc) {
-  return initHashMap(cap, persistAlloc);
+unsigned long hashVar (VarMap *m, const char *str)
+{
+	return mapHash(m, str);
 }
 
-void putVar(VarMap* m, const char* key, const void* value,
-            Arena* persistAlloc) {
-  hashMapPut(m, key, value, persistAlloc);
+VarMap initVars (unsigned long cap, Arena *persistAlloc)
+{
+	return initHashMap(cap, persistAlloc);
 }
 
-void* getVar(VarMap* m, const char* key) { return hashMapGet(m, key); }
+void putVar (VarMap *m, const char *key, const void *value, Arena *persistAlloc)
+{
+	hashMapPut(m, key, value, persistAlloc);
+}
 
-void freeVars(VarMap* m) { hashMapFreeMap(m); }
+void *getVar (VarMap *m, const char *key)
+{
+	return hashMapGet(m, key);
+}
+
+void freeVars (VarMap *m)
+{
+	hashMapFreeMap(m);
+}

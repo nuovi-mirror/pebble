@@ -1,6 +1,4 @@
-#ifndef PLATFORM_GETSTRLEN_H_
-#define PLATFORM_GETSTRLEN_H_
-
-unsigned long getstrlen(const char* s);
-
+#ifndef h_getstrlen_
+#define h_getstrlen_
+unsigned long getstrlen (const char *s);
 #endif

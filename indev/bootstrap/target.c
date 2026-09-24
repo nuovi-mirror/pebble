@@ -7,282 +7,308 @@
  * Add a prerequisite to the end of the supplied list.
  * Return the new head pointer for that list.
  */
-struct depend* newdep(struct name* np, struct depend* dphead) {
-  struct depend* dpnew;
-  struct depend* dp;
+struct depend *newdep (struct name *np, struct depend *dphead)
+{
+	struct depend *dpnew;
+	struct depend *dp;
 
-  dpnew = xmalloc(sizeof(struct depend));
-  dpnew->d_next = NULL;
-  dpnew->d_name = np;
-  dpnew->d_refcnt = 0;
+	dpnew = xmalloc(sizeof(struct depend));
+	dpnew->d_next = NULL;
+	dpnew->d_name = np;
+	dpnew->d_refcnt = 0;
 
-  if (dphead == NULL) return dpnew;
+	if (dphead == NULL)
+		return dpnew;
 
-  for (dp = dphead; dp->d_next; dp = dp->d_next);
+	for (dp = dphead; dp->d_next; dp = dp->d_next)
+		;
 
-  dp->d_next = dpnew;
+	dp->d_next = dpnew;
 
-  return dphead;
+	return dphead;
 }
 
-void freedeps(struct depend* dp) {
-  struct depend* nextdp;
+void freedeps (struct depend *dp)
+{
+	struct depend *nextdp;
 
-  if (dp && --dp->d_refcnt <= 0) {
-    for (; dp; dp = nextdp) {
-      nextdp = dp->d_next;
-      free(dp);
-    }
-  }
+	if (dp && --dp->d_refcnt <= 0) {
+		for (; dp; dp = nextdp) {
+			nextdp = dp->d_next;
+			free(dp);
+		}
+	}
 }
 
 /*
  * Add a command to the end of the supplied list of commands.
  * Return the new head pointer for that list.
  */
-struct cmd* newcmd(char* str, struct cmd* cphead) {
-  struct cmd* cpnew;
-  struct cmd* cp;
+struct cmd *newcmd (char *str, struct cmd *cphead)
+{
+	struct cmd *cpnew;
+	struct cmd *cp;
 
-  while (isspace(*str)) str++;
+	while (isspace(*str))
+		str++;
 
-  cpnew = xmalloc(sizeof(struct cmd));
-  cpnew->c_next = NULL;
-  cpnew->c_cmd = xstrdup(str);
-  cpnew->c_refcnt = 0;
-  cpnew->c_makefile = xstrdup(makefile);
-  cpnew->c_dispno = dispno;
+	cpnew = xmalloc(sizeof(struct cmd));
+	cpnew->c_next = NULL;
+	cpnew->c_cmd = xstrdup(str);
+	cpnew->c_refcnt = 0;
+	cpnew->c_makefile = xstrdup(makefile);
+	cpnew->c_dispno = dispno;
 
-  if (cphead == NULL) return cpnew;
+	if (cphead == NULL)
+		return cpnew;
 
-  for (cp = cphead; cp->c_next; cp = cp->c_next);
+	for (cp = cphead; cp->c_next; cp = cp->c_next)
+		;
 
-  cp->c_next = cpnew;
+	cp->c_next = cpnew;
 
-  return cphead;
+	return cphead;
 }
 
-void freecmds(struct cmd* cp) {
-  struct cmd* nextcp;
+void freecmds (struct cmd *cp)
+{
+	struct cmd *nextcp;
 
-  if (cp && --cp->c_refcnt <= 0) {
-    for (; cp; cp = nextcp) {
-      nextcp = cp->c_next;
-      free(cp->c_cmd);
-      free((void*)cp->c_makefile);
-      free(cp);
-    }
-  }
+	if (cp && --cp->c_refcnt <= 0) {
+		for (; cp; cp = nextcp) {
+			nextcp = cp->c_next;
+			free(cp->c_cmd);
+			free((void *)cp->c_makefile);
+			free(cp);
+		}
+	}
 }
 
-struct name* namehead[HTABSIZE];
-struct name* firstname;
+struct name *namehead[HTABSIZE];
+struct name *firstname;
 
-struct name* findname(const char* name) {
-  struct name* np;
+struct name *findname (const char *name)
+{
+	struct name *np;
 
-  for (np = namehead[getbucket(name)]; np; np = np->n_next) {
-    if (strcmp(name, np->n_name) == 0) return np;
-  }
-  return NULL;
+	for (np = namehead[getbucket(name)]; np; np = np->n_next) {
+		if (strcmp(name, np->n_name) == 0)
+			return np;
+	}
+	return NULL;
 }
 
-static int check_name(const char* name) {
-  const char* s;
+static int check_name (const char *name)
+{
+	const char *s;
 
 #if ENABLE_FEATURE_MAKE_EXTENSIONS
 #if defined(__CYGWIN__)
-  if (!posix || (pragma & P_WINDOWS)) {
-    if (isalpha(name[0]) && name[1] == ':' && name[2] == '/') {
-      name += 3;
-    }
-  }
+	if (!posix || (pragma & P_WINDOWS)) {
+		if (isalpha(name[0]) && name[1] == ':' && name[2] == '/') {
+			name += 3;
+		}
+	}
 #endif
-  if (!posix) {
-    for (s = name; *s; ++s) {
-      if (*s == '=') return FALSE;
-    }
-    return TRUE;
-  }
+	if (!posix) {
+		for (s = name; *s; ++s) {
+			if (*s == '=')
+				return FALSE;
+		}
+		return TRUE;
+	}
 #endif
 
-  for (s = name; *s; ++s) {
-    if ((
+	for (s = name; *s; ++s) {
+		if ((
 #if ENABLE_FEATURE_MAKE_EXTENSIONS
-            (pragma & P_TARGET_NAME) ||
+			    (pragma & P_TARGET_NAME) ||
 #endif
 #if ENABLE_FEATURE_MAKE_POSIX_2024
-            !POSIX_2017
+			    !POSIX_2017
 #else
-            FALSE
+			    FALSE
 #endif
-            )
-            ? !(isfname(*s) || *s == '/')
-            : !ispname(*s))
-      return FALSE;
-  }
-  return TRUE;
+			    )
+				? !(isfname(*s) || *s == '/')
+				: !ispname(*s))
+			return FALSE;
+	}
+	return TRUE;
 }
 
-int is_valid_target(const char* name) {
-  char *archive, *member = NULL;
-  int ret;
+int is_valid_target (const char *name)
+{
+	char *archive, *member = NULL;
+	int ret;
 
-  /* Names of the form 'lib(member)' are referred to as 'expressions'
-   * in POSIX and are subjected to special treatment.  The 'lib'
-   * and 'member' elements must each be a valid target name. */
-  archive = splitlib(name, &member);
-  ret = check_name(archive) && (member == NULL || check_name(member));
-  free(archive);
+	/* Names of the form 'lib(member)' are referred to as 'expressions'
+	 * in POSIX and are subjected to special treatment.  The 'lib'
+	 * and 'member' elements must each be a valid target name. */
+	archive = splitlib(name, &member);
+	ret = check_name(archive) && (member == NULL || check_name(member));
+	free(archive);
 
-  return ret;
+	return ret;
 }
 
 #if ENABLE_FEATURE_MAKE_EXTENSIONS
-static int potentially_valid_target(const char* name) {
-  int ret = FALSE;
+static int potentially_valid_target (const char *name)
+{
+	int ret = FALSE;
 
-  if (!(pragma & P_TARGET_NAME)) {
-    pragma |= P_TARGET_NAME;
-    ret = is_valid_target(name);
-    pragma &= ~P_TARGET_NAME;
-  }
-  return ret;
+	if (!(pragma & P_TARGET_NAME)) {
+		pragma |= P_TARGET_NAME;
+		ret = is_valid_target(name);
+		pragma &= ~P_TARGET_NAME;
+	}
+	return ret;
 }
 #endif
 
 /*
  * Intern a name.  Return a pointer to the name struct
  */
-struct name* newname(const char* name) {
-  struct name* np = findname(name);
+struct name *newname (const char *name)
+{
+	struct name *np = findname(name);
 
-  if (np == NULL) {
-    unsigned int bucket;
+	if (np == NULL) {
+		unsigned int bucket;
 
-    if (!is_valid_target(name))
+		if (!is_valid_target(name))
 #if ENABLE_FEATURE_MAKE_EXTENSIONS
-      error("invalid target name '%s'%s", name,
-            potentially_valid_target(name) ? ": allow with pragma target_name"
-                                           : "");
+			error("invalid target name '%s'%s", name,
+				potentially_valid_target(name) ? ": allow with pragma target_name"
+							       : "");
 #else
-      error("invalid target name '%s'", name);
+			error("invalid target name '%s'", name);
 #endif
 
-    bucket = getbucket(name);
-    np = xmalloc(sizeof(struct name));
-    np->n_next = namehead[bucket];
-    namehead[bucket] = np;
-    np->n_name = xstrdup(name);
-    np->n_rule = NULL;
-    np->n_tim = (struct timespec){0, 0};
-    np->n_flag = 0;
-  }
-  return np;
+		bucket = getbucket(name);
+		np = xmalloc(sizeof(struct name));
+		np->n_next = namehead[bucket];
+		namehead[bucket] = np;
+		np->n_name = xstrdup(name);
+		np->n_rule = NULL;
+		np->n_tim = (struct timespec){0, 0};
+		np->n_flag = 0;
+	}
+	return np;
 }
 
 /*
  * Return the commands on the first rule that has them or NULL.
  */
-struct cmd* getcmd(struct name* np) {
-  struct rule* rp;
+struct cmd *getcmd (struct name *np)
+{
+	struct rule *rp;
 
-  if (np == NULL) return NULL;
+	if (np == NULL)
+		return NULL;
 
-  for (rp = np->n_rule; rp; rp = rp->r_next)
-    if (rp->r_cmd) return rp->r_cmd;
-  return NULL;
+	for (rp = np->n_rule; rp; rp = rp->r_next)
+		if (rp->r_cmd)
+			return rp->r_cmd;
+	return NULL;
 }
 
 #if ENABLE_FEATURE_CLEAN_UP
-void freenames(void) {
-  int i;
-  struct name *np, *nextnp;
+void freenames (void)
+{
+	int i;
+	struct name *np, *nextnp;
 
-  for (i = 0; i < HTABSIZE; i++) {
-    for (np = namehead[i]; np; np = nextnp) {
-      nextnp = np->n_next;
-      free(np->n_name);
-      freerules(np->n_rule);
-      free(np);
-    }
-  }
+	for (i = 0; i < HTABSIZE; i++) {
+		for (np = namehead[i]; np; np = nextnp) {
+			nextnp = np->n_next;
+			free(np->n_name);
+			freerules(np->n_rule);
+			free(np);
+		}
+	}
 }
 #endif
 
-void freerules(struct rule* rp) {
-  struct rule* nextrp;
+void freerules (struct rule *rp)
+{
+	struct rule *nextrp;
 
-  for (; rp; rp = nextrp) {
-    nextrp = rp->r_next;
-    freedeps(rp->r_dep);
-    freecmds(rp->r_cmd);
-    free(rp);
-  }
+	for (; rp; rp = nextrp) {
+		nextrp = rp->r_next;
+		freedeps(rp->r_dep);
+		freecmds(rp->r_cmd);
+		free(rp);
+	}
 }
 
-static void* inc_ref(void* vp) {
-  if (vp) {
-    struct depend* dp = vp;
-    if (dp->d_refcnt == INT_MAX) error("out of memory");
-    dp->d_refcnt++;
-  }
-  return vp;
+static void *inc_ref (void *vp)
+{
+	if (vp) {
+		struct depend *dp = vp;
+		if (dp->d_refcnt == INT_MAX)
+			error("out of memory");
+		dp->d_refcnt++;
+	}
+	return vp;
 }
 
 #if ENABLE_FEATURE_MAKE_EXTENSIONS
 // Order must match constants in make.h
 // POSIX levels must be last and in increasing order
-static const char* p_name[] = {"macro_name",   "target_name", "command_comment",
-                               "empty_suffix",
+static const char *p_name[] = {"macro_name", "target_name", "command_comment", "empty_suffix",
 #if defined(__CYGWIN__)
-                               "windows",
+	"windows",
 #endif
-                               "posix_2017",   "posix_2024",  "posix_202x"};
+	"posix_2017", "posix_2024", "posix_202x"};
 
-void set_pragma(const char* name) {
-  int i;
+void set_pragma (const char *name)
+{
+	int i;
 
-  // posix_202x is an alias for posix_2024
-  for (i = 0; i < sizeof(p_name) / sizeof(p_name[0]); ++i) {
-    if (strcmp(name, p_name[i]) == 0) {
+	// posix_202x is an alias for posix_2024
+	for (i = 0; i < sizeof(p_name) / sizeof(p_name[0]); ++i) {
+		if (strcmp(name, p_name[i]) == 0) {
 #if !ENABLE_FEATURE_MAKE_POSIX_2024
-      if (i == BIT_POSIX_2024 || i == BIT_POSIX_202X) {
-        break;
-      }
+			if (i == BIT_POSIX_2024 || i == BIT_POSIX_202X) {
+				break;
+			}
 #endif
-      if (i >= BIT_POSIX_2017) {
-        // POSIX level is stored in a separate variable.
-        // No bits in 'pragma' are used.
-        if (posix_level == DEFAULT_POSIX_LEVEL) {
-          posix_level = i - BIT_POSIX_2017;
-          if (posix_level > STD_POSIX_2024) posix_level = STD_POSIX_2024;
-        } else if (posix_level != i - BIT_POSIX_2017)
-          warning("unable to change POSIX level");
-      } else {
-        pragma |= 1 << i;
-      }
-      return;
-    }
-  }
-  warning("invalid pragma '%s'", name);
+			if (i >= BIT_POSIX_2017) {
+				// POSIX level is stored in a separate variable.
+				// No bits in 'pragma' are used.
+				if (posix_level == DEFAULT_POSIX_LEVEL) {
+					posix_level = i - BIT_POSIX_2017;
+					if (posix_level > STD_POSIX_2024)
+						posix_level = STD_POSIX_2024;
+				} else if (posix_level != i - BIT_POSIX_2017)
+					warning("unable to change POSIX level");
+			} else {
+				pragma |= 1 << i;
+			}
+			return;
+		}
+	}
+	warning("invalid pragma '%s'", name);
 }
 
-void pragmas_to_env(void) {
-  int i;
-  char* val = NULL;
+void pragmas_to_env (void)
+{
+	int i;
+	char *val = NULL;
 
-  for (i = 0; i < BIT_POSIX_2017; ++i) {
-    if ((pragma & (1 << i))) val = xappendword(val, p_name[i]);
-  }
+	for (i = 0; i < BIT_POSIX_2017; ++i) {
+		if ((pragma & (1 << i)))
+			val = xappendword(val, p_name[i]);
+	}
 
-  if (posix_level != DEFAULT_POSIX_LEVEL)
-    val = xappendword(val, p_name[BIT_POSIX_2017 + posix_level]);
+	if (posix_level != DEFAULT_POSIX_LEVEL)
+		val = xappendword(val, p_name[BIT_POSIX_2017 + posix_level]);
 
-  if (val) {
-    setenv("PDPMAKE_PRAGMAS", val, 1);
-    free(val);
-  }
+	if (val) {
+		setenv("PDPMAKE_PRAGMAS", val, 1);
+		free(val);
+	}
 }
 #endif
 
@@ -297,70 +323,74 @@ void pragmas_to_env(void) {
  * ii) If name is a special target and has commands, replace them.
  *     This is for redefining commands for an inference rule.
  */
-void addrule(struct name* np, struct depend* dp, struct cmd* cp, int flag) {
-  struct rule* rp;
-  struct rule** rpp;
-  struct cmd* old_cp;
+void addrule (struct name *np, struct depend *dp, struct cmd *cp, int flag)
+{
+	struct rule *rp;
+	struct rule **rpp;
+	struct cmd *old_cp;
 
 #if ENABLE_FEATURE_MAKE_EXTENSIONS
-  // Can't mix single-colon and double-colon rules
-  if (!posix && (np->n_flag & N_TARGET)) {
-    if (!(np->n_flag & N_DOUBLE) != !flag)  // like xor
-      error("inconsistent rules for target %s", np->n_name);
-  }
+	// Can't mix single-colon and double-colon rules
+	if (!posix && (np->n_flag & N_TARGET)) {
+		if (!(np->n_flag & N_DOUBLE) != !flag)	// like xor
+			error("inconsistent rules for target %s", np->n_name);
+	}
 #endif
 
-  // Clear out prerequisites and commands
-  if ((np->n_flag & N_SPECIAL) && !dp && !cp) {
+	// Clear out prerequisites and commands
+	if ((np->n_flag & N_SPECIAL) && !dp && !cp) {
 #if ENABLE_FEATURE_MAKE_POSIX_2024
-    if (strcmp(np->n_name, ".PHONY") == 0) return;
+		if (strcmp(np->n_name, ".PHONY") == 0)
+			return;
 #endif
-    freerules(np->n_rule);
-    np->n_rule = NULL;
-    return;
-  }
+		freerules(np->n_rule);
+		np->n_rule = NULL;
+		return;
+	}
 
-  if (cp && !(np->n_flag & N_DOUBLE) && (old_cp = getcmd(np))) {
-    // Handle the inference rule redefinition case
-    // .DEFAULT rule can also be redefined (as an extension).
-    if ((np->n_flag & N_INFERENCE)
+	if (cp && !(np->n_flag & N_DOUBLE) && (old_cp = getcmd(np))) {
+		// Handle the inference rule redefinition case
+		// .DEFAULT rule can also be redefined (as an extension).
+		if ((np->n_flag & N_INFERENCE)
 #if ENABLE_FEATURE_MAKE_EXTENSIONS
-        && !(posix && (np->n_flag & N_SPECIAL))
+			&& !(posix && (np->n_flag & N_SPECIAL))
 #endif
-    ) {
-      freerules(np->n_rule);
-      np->n_rule = NULL;
-    } else {
-      // We're adding commands to a single colon rule which
-      // already has some.  Clear the old ones first.
-      warning("overriding rule for target %s", np->n_name);
-      curr_cmd = old_cp;
-      warning("previous rule for target %s", np->n_name);
-      curr_cmd = NULL;
+		) {
+			freerules(np->n_rule);
+			np->n_rule = NULL;
+		} else {
+			// We're adding commands to a single colon rule which
+			// already has some.  Clear the old ones first.
+			warning("overriding rule for target %s", np->n_name);
+			curr_cmd = old_cp;
+			warning("previous rule for target %s", np->n_name);
+			curr_cmd = NULL;
 
-      for (rp = np->n_rule; rp; rp = rp->r_next) {
-        freecmds(rp->r_cmd);
-        rp->r_cmd = NULL;
-      }
-    }
-  }
+			for (rp = np->n_rule; rp; rp = rp->r_next) {
+				freecmds(rp->r_cmd);
+				rp->r_cmd = NULL;
+			}
+		}
+	}
 
-  rpp = &np->n_rule;
-  while (*rpp) rpp = &(*rpp)->r_next;
+	rpp = &np->n_rule;
+	while (*rpp)
+		rpp = &(*rpp)->r_next;
 
-  *rpp = rp = xmalloc(sizeof(struct rule));
-  rp->r_next = NULL;
-  rp->r_dep = inc_ref(dp);
-  rp->r_cmd = inc_ref(cp);
+	*rpp = rp = xmalloc(sizeof(struct rule));
+	rp->r_next = NULL;
+	rp->r_dep = inc_ref(dp);
+	rp->r_cmd = inc_ref(cp);
 
-  np->n_flag |= N_TARGET;
-  if (flag) np->n_flag |= N_DOUBLE;
+	np->n_flag |= N_TARGET;
+	if (flag)
+		np->n_flag |= N_DOUBLE;
 #if ENABLE_FEATURE_MAKE_EXTENSIONS
-  if (strcmp(np->n_name, ".PRAGMA") == 0) {
-    for (; dp; dp = dp->d_next) {
-      set_pragma(dp->d_name->n_name);
-    }
-    pragmas_to_env();
-  }
+	if (strcmp(np->n_name, ".PRAGMA") == 0) {
+		for (; dp; dp = dp->d_next) {
+			set_pragma(dp->d_name->n_name);
+		}
+		pragmas_to_env();
+	}
 #endif
 }

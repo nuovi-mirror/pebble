@@ -2,4 +2,7 @@
 
 #include <stdio.h>
 
-void print(char* msg) { printf("%s", msg); }
+void print (char *msg)
+{
+	printf("%s", msg);
+}
