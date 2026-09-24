@@ -88,6 +88,13 @@ New quux <foo>
 # quux = foo
 _PRINT2 quux
 
+Func indirect
+_PRINT indirect
+End
+
+New indirect2 'indirect'
+Call <indirect2>
+
 _GETMEM
 
 New msg 'This will segfault now'
