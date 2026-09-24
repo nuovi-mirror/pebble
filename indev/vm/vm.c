@@ -180,7 +180,6 @@ unsigned long findend (Instruction *program, unsigned long instruction_count,
 }
 
 /* helpers to resolve addressing modes */
-/* XXX audit this */
 Value resolve_literal (char *buff, unsigned long buffsize, Value *val, VarMap *vars,
 	Arena *tempAlloc, Arena *persistAlloc)
 {
@@ -671,6 +670,49 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 					valuetostr(name, limits_escapes_namesize,
 						instr->FirstOperand.Data);
 					break;
+
+				case addrmode_true_literal:
+					valuetostr(name, limits_escapes_namesize,
+						instr->FirstOperand.Data);
+					break;
+
+				case addrmode_literal: {
+					char *buff =
+						alloc(tempAlloc, limits_escapes_namesize);
+					Value val = resolve_literal(buff,
+						limits_escapes_namesize,
+						&instr->FirstOperand.Data, vars, tempAlloc,
+						persistAlloc);
+					valuetostr(name, limits_escapes_namesize, val);
+					break;
+				}
+
+				case addrmode_forced_eval: {
+					char *buff =
+						alloc(tempAlloc, limits_escapes_namesize);
+					Value val = resolve_forced_eval(buff,
+						limits_escapes_namesize,
+						&instr->FirstOperand.Data, vars, tempAlloc,
+						persistAlloc);
+					valuetostr(name, limits_escapes_namesize, val);
+					break;
+				}
+
+				case addrmode_pointer: {
+					char *buf = alloc(tempAlloc,
+						limits_instructions_varnamesize);
+					valuetostr(buf, limits_instructions_varnamesize,
+						instr->FirstOperand.Data);
+					Value *valptr = getVar(vars, buf);
+					if (valptr == NULL) {
+						print("ERROR: VM: NEW: VARIABLE DOES NOT EXIST!\n");
+						exitproc(1);
+					}
+
+					valuetostr(name, limits_escapes_namesize, *valptr);
+
+					break;
+				}
 
 				default:
 					print("ERROR: INTERPRETER: ESCAPE: ADDRESSING MODE IS UNSUPPORTED!\n");
