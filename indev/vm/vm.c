@@ -302,7 +302,7 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 						instr->FirstOperand.Data);
 					Value *valptr = getVar(vars, buf);
 					if (valptr == NULL) {
-						print("ERROR: VM: NEW: VARIABLE DOES NOT EXIST" "!\n");
+						print("ERROR: VM: NEW: VARIABLE DOES NOT EXIST!\n");
 						exitproc(1);
 					}
 
@@ -454,7 +454,7 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 				}
 
 				default:
-					print("ERROR: INTERPRETER: FUNC: UNSUPPORTED " "ADDRESSING MODE!\n");
+					print("ERROR: INTERPRETER: FUNC: UNSUPPORTED ADDRESSING MODE!\n");
 					exitproc(1);
 					break;
 			}
@@ -641,7 +641,7 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 				}
 
 				default:
-					print("ERROR: INTERPRETER: CALL: UNSUPPORTED " "ADDRESSING MODE!\n");
+					print("ERROR: INTERPRETER: CALL: UNSUPPORTED ADDRESSING MODE!\n");
 					exitproc(1);
 					break;
 			}
@@ -719,7 +719,7 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 					break;
 			}
 			if (getstrlen(buf) >= 32) {
-				print("\nERROR: INTERPRETER: _PRINT (INTERNAL INSTRUCTION): " "DATA TOO LONG!\n");
+				print("\nERROR: INTERPRETER: _PRINT (INTERNAL INSTRUCTION): DATA TOO LONG!\n");
 				exitproc(1);
 			}
 

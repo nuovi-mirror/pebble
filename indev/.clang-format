@@ -116,7 +116,7 @@ PackConstructorInitializers: NextLine
 BreakAdjacentStringLiterals: false
 BreakStringLiterals: false
 
-PenaltyBreakString: 1000
+PenaltyBreakString: 100000
 
 PointerAlignment: Right
 ReferenceAlignment: Pointer
