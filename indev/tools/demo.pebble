@@ -1,0 +1,15 @@
+# the demo program from the website
+New calculation 'name s++ base'
+New name 'func'
+New base '0'
+Func {calculation}
+New a '1'
+New msg a
+New __Escape_std.io.print_ARG0 <a>
+Escape std.io.print
+End
+Call {calculation}
+If {calculation} '0'
+If {calculation} "1 > 0"
+
+# should print 1<newline>1<newline>1<newline>

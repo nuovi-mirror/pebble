@@ -91,11 +91,9 @@ Value guessvaluetype(char* data, Arena* persistAlloc) {
     if (data[i] < '0' || data[i] > '9') goto string;
   }
 
-  /*
-   * Leading zero without a decimal point is a string.
-   * This makes things like "01" usable as identifiers.
-   */
-  if (data[0] == '0' && !dot) goto string;
+  /* leading 0 with no decimal is a string so things
+   * like '01' are preserved. */
+  if (data[0] == '0' && !dot && i > 1) goto string;
 
   /* decimal number */
   if (dot) {

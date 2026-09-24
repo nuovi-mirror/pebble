@@ -519,12 +519,12 @@ unsigned long interpret(Instruction* instr, Instruction* program,
         }
 
         case addrmode_bare: {
-          result = instr->FirstOperand.Data;
+          result = instr->SecondOperand.Data;
           break;
         }
 
         case addrmode_true_literal: {
-          result = instr->FirstOperand.Data;
+          result = instr->SecondOperand.Data;
           break;
         }
 
