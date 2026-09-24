@@ -186,6 +186,9 @@ FFI Code
 	the functions provided in the h/ folder of the source directory.
 
 
+Please make sure all code follows the standards defined by the .clang-format file before
+attempting to push a commit.
+
 
 Product of The Nuovi Orizzonti Company
 http://thenuoviorizzonticompany.org
