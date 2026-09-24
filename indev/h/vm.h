@@ -4,7 +4,6 @@
 #include "entry.h"
 
 /* call this to enter the VM code */
-int vmmain
-(Args cliargs, Stack *stack, unsigned long long seed); 
+int vmmain(Args cliargs, Stack* stack, unsigned long long seed);
 
 #endif
