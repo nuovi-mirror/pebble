@@ -5,7 +5,6 @@
  */
 
 #include "vm.h"
-
 #include "allocator.h"
 #include "cmpstr.h"
 #include "copymem.h"

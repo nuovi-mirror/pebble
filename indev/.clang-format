@@ -81,7 +81,7 @@ BraceWrapping:
 Cpp11BracedListStyle: true
 RemoveBracesLLVM: false
 
-ColumnLimit: 92
+ColumnLimit: 72
 
 BreakAfterAttributes: Leave
 BreakAfterReturnType: None

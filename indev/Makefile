@@ -85,7 +85,7 @@ ldflags += \
 PLATFORM_CPPFLAGS_freestand = -Iplatform/freestand
 PLATFORM_CPPFLAGS_c = -Iplatform/c -Iplatform/freestand
 PLATFORM_CPPFLAGS_openbsd = -Iplatform/openbsd -Iplatform/c -Iplatform/freestand
-PLATFORM_CPPFLAGS_unix = -Iplatform/unix -Iplatform/c -Iplatform/freestand
+PLATFORM_CPPFLAGS_posix = -Iplatform/unix -Iplatform/c -Iplatform/freestand
 PLATFORM_CPPFLAGS_puredarwin = -Iplatform/puredarwin -Iplatform/c -Iplatform/freestand
 PLATFORM_CPPFLAGS_sdl2 = 
 
@@ -105,7 +105,7 @@ VM_SRCS = \
 	  state/variables.c \
 	  vm/vm.c
 
-#  - freestand platform sources -
+#  - freestand (C99, no Libc) platform sources -
 FREESTAND_SRCS = \
 		 platform/freestand/cmpstr.c \
 		 platform/freestand/cmpstrn.c \
@@ -117,7 +117,7 @@ FREESTAND_SRCS = \
 		 platform/freestand/copymem.c \
 		 platform/freestand/strsplit.c
 
-#  - C platform sources -
+#  - C (hosted C99 Libc) platform sources -
 C_SRCS = \
 	 platform/c/entry.c \
 	 platform/c/exitproc.c \
@@ -126,6 +126,10 @@ C_SRCS = \
 	 platform/c/readfile.c \
 	 platform/c/str2ul.c \
 	 platform/c/snprint.c
+
+#  - POSIX (POSIX.1-2008) platform sources -
+POSIX_SRCS = \
+	     platform/posix/inputn.c
 
 # main FFI sources
 BASE_FFI_SRCS = \
