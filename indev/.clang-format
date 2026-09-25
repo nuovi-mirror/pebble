@@ -109,14 +109,14 @@ AllowShortLoopsOnASingleLine: false
 
 BinPackArguments: true
 BinPackLongBracedList: true
-BinPackParameters: BinPack
+BinPackParameters: true
 ExperimentalAutoDetectBinPacking: false
 PackConstructorInitializers: NextLine
 
 BreakAdjacentStringLiterals: false
 BreakStringLiterals: false
 
-PenaltyBreakString: 100000
+PenaltyBreakString: 0
 
 PointerAlignment: Right
 ReferenceAlignment: Pointer
@@ -261,11 +261,11 @@ RemoveParentheses: Leave
 RemoveSemicolon: false
 
 PenaltyBreakAssignment: 2
-PenaltyBreakBeforeFirstCallParameter: 1
+PenaltyBreakBeforeFirstCallParameter: 1000
 PenaltyBreakBeforeMemberAccess: 150
 PenaltyBreakComment: 300
 PenaltyBreakFirstLessLess: 120
-PenaltyBreakOpenParenthesis: 0
+PenaltyBreakOpenParenthesis: 1000
 PenaltyBreakScopeResolution: 500
 PenaltyBreakTemplateDeclaration: 10
 PenaltyExcessCharacter: 1000000

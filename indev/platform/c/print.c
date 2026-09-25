@@ -2,5 +2,5 @@
 #include <stdio.h>
 
 void print (char *msg) {
-	puts(msg);
+	fputs(msg, stdout);
 }

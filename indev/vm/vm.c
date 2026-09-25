@@ -225,6 +225,21 @@ Value resolve_forced_eval (char *buff, unsigned long buffsize, Value *val, VarMa
 	return resolve_literal(buff, buffsize, val, vars, tempAlloc, persistAlloc);
 }
 
+Value resolve_pointer (char *buff, unsigned long buffsize, Value *val, VarMap *vars,
+	Arena *tempAlloc, Arena *persistAlloc) /* extras added to make it match the
+						* schematics of the other helpers */
+{
+	valuetostr(buff, buffsize, *val);
+	Value *valptr = getVar(vars, buff);
+	
+	if (valptr == NULL) {
+		print("ERROR: : HELPER RESOLVE_POINTER: VARIABLE DOES NOT EXIST!\n");
+		exitproc(1);
+	}
+
+	return *valptr;
+}
+
 unsigned long resolvefunction (unsigned long pc, FuncMap *funcs, Stack *stack,
 	Instruction *program, Arena *scratchAlloc, const char *funcname,
 	unsigned long instruction_count)
@@ -294,19 +309,9 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 				}
 
 				case addrmode_pointer: {
-					char *buf = alloc(tempAlloc,
-						limits_instructions_varnamesize);
-					valuetostr(buf, limits_instructions_varnamesize,
-						instr->FirstOperand.Data);
-					Value *valptr = getVar(vars, buf);
-					if (valptr == NULL) {
-						print("ERROR: VM: NEW: VARIABLE DOES NOT EXIST!\n");
-						exitproc(1);
-					}
-
-					valuetostr(dest, limits_instructions_varnamesize,
-						*valptr);
-
+					char *buff = alloc(tempAlloc, limits_instructions_varnamesize);
+					Value v = resolve_pointer(buff, limits_instructions_varnamesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
+					valuetostr(dest, limits_instructions_varnamesize, v);
 					break;
 				}
 
@@ -356,18 +361,9 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 				}
 
 				case addrmode_pointer: {
-					char *buf = alloc(persistAlloc,
-						limits_instructions_varnamesize);
-					valuetostr(buf, limits_instructions_varnamesize,
-						instr->SecondOperand.Data);
-					Value *valptr = getVar(vars, buf);
-					if (valptr == NULL) {
-						print("ERROR: VM: NEW: VARIABLE DOES NOT EXIST!\n");
-						exitproc(1);
-					}
-
-					val = (Value){.Type = type_str, .as.str = buf};
-
+					char *buff = alloc(persistAlloc, limits_instructions_varnamesize);
+					valuetostr(buff, limits_instructions_varnamesize, instr->SecondOperand.Data);
+					val = (Value){ .Type = type_str, .as.str = buff };
 					break;
 				}
 
@@ -437,17 +433,9 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 				}
 
 				case addrmode_pointer: {
-					char *vstr = alloc(scratchAlloc,
-						limits_functions_namesize);
-					valuetostr(vstr, limits_functions_namesize,
-						instr->FirstOperand.Data);
-					Value *vptr = getVar(vars, vstr);
-					if (vptr == NULL) {
-						print("ERROR: INTERPERTER: FUNC: VARIABLE DOES NOT EXIST!\n");
-						exitproc(1);
-					}
-					valuetostr(funcname, limits_functions_namesize,
-						*vptr);
+					char *buff = alloc(tempAlloc, limits_instructions_varnamesize);
+					Value v = resolve_pointer(buff, limits_functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
+					valuetostr(funcname, limits_functions_namesize, v);
 					break;
 				}
 
@@ -495,27 +483,15 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 				case addrmode_forced_eval: {
 					char *buff = alloc(scratchAlloc,
 						limits_functions_namesize);
-					Value vptr = resolve_forced_eval(buff,
-						limits_functions_namesize,
-						&instr->FirstOperand.Data, vars, tempAlloc,
-						persistAlloc);
-					valuetostr(funcname, limits_functions_namesize,
-						vptr);
+					Value vptr = resolve_forced_eval(buff, limits_functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
+					valuetostr(funcname, limits_functions_namesize, vptr);
 					break;
 				}
 
 				case addrmode_pointer: {
-					char *vstr = alloc(scratchAlloc,
-						limits_functions_namesize);
-					valuetostr(vstr, limits_functions_namesize,
-						instr->FirstOperand.Data);
-					Value *vptr = getVar(vars, vstr);
-					if (vptr == NULL) {
-						print("ERROR: INTERPERTER: FUNC: VARIABLE DOES NOT EXIST!\n");
-						exitproc(1);
-					}
-					valuetostr(funcname, limits_functions_namesize,
-						*vptr);
+					char *buff = alloc(tempAlloc, limits_functions_namesize);
+					Value v = resolve_pointer(buff, limits_functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
+					valuetostr(funcname, limits_functions_namesize, v);
 					break;
 				}
 
@@ -610,7 +586,7 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 				}
 
 				case addrmode_forced_eval: {
-					char *buff = alloc(scratchAlloc,
+					char *buff = alloc(tempAlloc,
 						limits_functions_namesize);
 					Value val = resolve_forced_eval(buff,
 						limits_functions_namesize,
@@ -622,19 +598,9 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 				}
 
 				case addrmode_pointer: {
-					char *buf = alloc(tempAlloc,
-						limits_instructions_varnamesize);
-					valuetostr(buf, limits_instructions_varnamesize,
-						instr->FirstOperand.Data);
-					Value *valptr = getVar(vars, buf);
-					if (valptr == NULL) {
-						print("ERROR: VM: CALL: VARIABLE DOES NOT EXIST!\n");
-						exitproc(1);
-					}
-
-					valuetostr(funcname,
-						limits_instructions_varnamesize, *valptr);
-
+					char *buff = alloc(tempAlloc, limits_functions_namesize);
+					Value v = resolve_pointer(buff, limits_functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
+					valuetostr(funcname, limits_functions_namesize, v);
 					break;
 				}
 
@@ -698,17 +664,9 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 				}
 
 				case addrmode_pointer: {
-					char *buf = alloc(tempAlloc,
-						limits_instructions_varnamesize);
-					valuetostr(buf, limits_instructions_varnamesize,
-						instr->FirstOperand.Data);
-					Value *valptr = getVar(vars, buf);
-					if (valptr == NULL) {
-						print("ERROR: VM: NEW: VARIABLE DOES NOT EXIST!\n");
-						exitproc(1);
-					}
-
-					valuetostr(name, limits_escapes_namesize, *valptr);
+					char *buff = alloc(tempAlloc, limits_instructions_varnamesize);
+					Value v = resolve_pointer(buff, limits_instructions_varnamesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
+					valuetostr(name, limits_escapes_namesize, v);
 
 					break;
 				}
