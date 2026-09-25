@@ -1,3 +1,0 @@
-#!/usr/bin/pebble
-
-Escape std.proc.exit
