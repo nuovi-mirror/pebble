@@ -2,8 +2,9 @@ CPebble
 	CPebble is an experiment at a modern and de-cluttered re-write of
     	Pebble in C. At some point this will be re-named to Pebble once
     	it is deemed stable enough to replace the current Zig version.
-	The older Zig version can be viewed at ../../old/ relative to
-	this current path.
+	The older Zig version has recently been removed from the indev
+	tree, but may still be viewed at http://pebblevm.org/downloads/
+	under the file name deprecated.tar.
 	Please note this does not fully implement pebble schematics
 	yet and is a work-in-progress, unlike the Zig version, which
 	is feature-complete.
