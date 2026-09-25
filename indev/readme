@@ -11,9 +11,10 @@ CPebble
 	http://thenuoviorizzonticompany.org/license/openlicense/3.txt
 
 Building from source
-	Building from source requires only a C99 libc, a C99 compiler,
-	and a POSIX make build system. Various variables can be used during
-	building, such as
+	Building from source only requires a small subset of a C99 hosted Libc
+	and a standard C99 compiler. CPebble uses it's own build system, which
+	has the same requirements. The interface to this build system is simular
+	to Make. The build system accepts arguments
 
 	target - target operating system to build for - view the platform support
 		list to know what to place here. The default is 'c', which uses
@@ -37,29 +38,13 @@ Building from source
 	cflags - the C compiler flags to use before adding the build-specific
 		compiler flags. The default is '-std=c99'.
 
-	By default, CPebble builds as a static binary, meaning it requires
-	no runtime dependencies.
-
-	If you do not have a POSIX make system, one was provided under the
-	bootstrap/ directory. The software from said directory was not written
-	by us, but instead by Ron Yorston as part of the pdpmake project. 
-
-	To bootstrap the build system, run the command
-
-	$ cc -o make bootstrap/*.c
 	
-	from the current directory. 
+	To build from source, simply run
 
-	The readme file in the bootstrap/ directory may provide more information
-	on this software.
-
-	Software provided in this directory has been re-licensed under the same 
-	license as this project, as it was previously released to the public 
-	domain. All pieces of code that could not be re-licensed have been 
-	removed from the tree in this copy. 
-
-	Give a big thanks to him, he does some great work. Check him out at
-	https://github.com/rmyorston
+		$ cc -o build build.c # build the building tool
+		$ ./build # build the VM
+		$ ./bin/vm tools/test.pebble # test suite one
+		$ ./bin/vm tools/test-new.pebble # test suite two
 
 Supported Platforms
 	All supported platforms include:

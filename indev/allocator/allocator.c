@@ -1,11 +1,9 @@
 #include "allocator.h"
-
 #include "exitproc.h"
 #include "main.h"
 #include "print.h"
 
-struct Arena *initAlloc (void *backing, unsigned long size)
-{
+struct Arena *initAlloc (void *backing, unsigned long size) {
 	/* char *srt_ptr = lalloc(size); XXX this */
 	char *srt_ptr; /* XXX hack */
 
@@ -32,18 +30,11 @@ struct Arena *initAlloc (void *backing, unsigned long size)
 			 allocated arena */
 }
 
-void *alloc (struct Arena *arena, unsigned long size)
-{
-	/* function to allocate data on an arena
-	   takes the arena to allocate against and
-	   the size of the data to allocate
-	   returns a pointer to the area usable */
+void *alloc (struct Arena *arena, unsigned long size) {
 	unsigned long used = (unsigned long)(arena->curr_ptr - arena->arena_ptr);
-	/* get the size used */
 	unsigned long misalign = used % ARENA_ALIGNMENT;
 	unsigned long padding = misalign ? (ARENA_ALIGNMENT - misalign) : 0;
-	/* bytes needed to bring curr_ptr up to
-	 * an aligned address */
+	
 	if (used + padding + size > arena->size) {
 		print("ERROR: ALLOCATOR: FATAL: OUT OF MEMORY!\n");
 		exitproc(1); /* exit with OOM error */
@@ -55,19 +46,11 @@ void *alloc (struct Arena *arena, unsigned long size)
 	return result;
 }
 
-void freeAllocator (struct Arena *arena)
-{
-	if (arena == NULL)
-		return;
-
-	/* XXX hack
-	lfree(arena->arena_ptr);
-	lfree(arena);
-	*/
+void freeAllocator (struct Arena *arena) {
+	/* XXX does nothing now since these are allocated on BSS */
 }
 
-void resetAllocator (struct Arena *arena)
-{
+void resetAllocator (struct Arena *arena) {
 	if (arena == NULL)
 		return;
 
@@ -75,12 +58,8 @@ void resetAllocator (struct Arena *arena)
 	return;
 }
 
-unsigned long getAllocatorSizeUsed (struct Arena *arena)
-{
-	return (unsigned long)(arena->curr_ptr - arena->arena_ptr);
-}
+unsigned long getAllocatorSizeUsed (struct Arena *arena) 
+{ return (unsigned long)(arena->curr_ptr - arena->arena_ptr); }
 
-unsigned long getAllocatorSizeRemaining (struct Arena *arena)
-{
-	return arena->size - getAllocatorSizeUsed(arena);
-}
+unsigned long getAllocatorSizeRemaining (struct Arena *arena) 
+{ return arena->size - getAllocatorSizeUsed(arena); }
