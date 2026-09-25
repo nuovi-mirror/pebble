@@ -1,4 +1,4 @@
-#ifndef h_input_
-#define h_input_
-char *inputn (char *buff, unsigned long size);
+#ifndef h_inputn_
+#define h_inputn_
+unsigned long inputn (char *buff, unsigned long size);
 #endif

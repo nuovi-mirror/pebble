@@ -41,6 +41,7 @@ static char *platform_freestand_srcs[] = {
 	"platform/freestand/skipspace.c",
 	"platform/freestand/copymem.c",
 	"platform/freestand/strsplit.c",
+	"platform/freestand/inputl.c",
 
 	NULL
 };
