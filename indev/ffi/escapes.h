@@ -1,5 +1,5 @@
-#ifndef FFI_ESCAPES_H_
-#define FFI_ESCAPES_H_
+#ifndef ffi_escapes_h_
+#define ffi_escapes_h_
 
 #include "ffi.h"
 #include "sequences.h"

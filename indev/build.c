@@ -14,6 +14,8 @@ struct Config {
 };
 
 static char *vm_srcs[] = {
+	"vm/vm.c",
+
 	"allocator/allocator.c",
 	"allocator/mem.c",
 	
@@ -25,8 +27,6 @@ static char *vm_srcs[] = {
 	"state/instructions.c",
 	"state/values.c",
 	"state/variables.c",
-
-	"vm/vm.c",
 
 	NULL
 };
@@ -104,7 +104,7 @@ static void usage (void) {
 			"  graphics=graphics\n"
 			"  cflags=cflags\n"
 			"  ldflags=ldflags\n"
-		);
+	);
 
 	exit(0);
 }
