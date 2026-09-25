@@ -76,6 +76,7 @@ static char *ffi_c_srcs[] = {
 	"ffi/platform/c/test/getseed.c",
 	"ffi/platform/c/std/io/print.c",
 	"ffi/platform/c/std/io/printLn.c",
+	"ffi/platform/c/std/io/input.c",
 
 	NULL
 };

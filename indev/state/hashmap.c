@@ -6,8 +6,7 @@
 #include "main.h"
 #include "print.h"
 
-unsigned long mapHash (SHashMap *m, const char *str)
-{
+unsigned long mapHash (SHashMap *m, const char *str) {
 	unsigned long inital = HASHMAPBASE;
 
 	while (*str) {
@@ -18,8 +17,7 @@ unsigned long mapHash (SHashMap *m, const char *str)
 	return inital & (m->cap - 1); /* must be power of two */
 }
 
-SHashMap initHashMap (unsigned long cap, Arena *persistAlloc)
-{
+SHashMap initHashMap (unsigned long cap, Arena *persistAlloc) {
 	SHashMap m;
 	m.size = 0;
 	m.cap = cap;
@@ -33,8 +31,7 @@ SHashMap initHashMap (unsigned long cap, Arena *persistAlloc)
 	return m;
 }
 
-void hashMapPut (SHashMap *m, const char *key, const void *value, Arena *persistAlloc)
-{
+void hashMapPut (SHashMap *m, const char *key, const void *value, Arena *persistAlloc) {
 	unsigned long idx = mapHash(m, key);
 	HashMapEntry *e = m->buckets[idx];
 	while (e != NULL) {
@@ -61,8 +58,7 @@ void hashMapPut (SHashMap *m, const char *key, const void *value, Arena *persist
 	m->size++;
 }
 
-void *hashMapGet (SHashMap *m, const char *key)
-{
+void *hashMapGet (SHashMap *m, const char *key) {
 	HashMapEntry *e = m->buckets[mapHash(m, key)];
 
 	while (e != NULL) {
@@ -75,8 +71,7 @@ void *hashMapGet (SHashMap *m, const char *key)
 	return NULL;
 }
 
-int hashMapRemove (SHashMap *m, const char *key)
-{
+int hashMapRemove (SHashMap *m, const char *key) {
 	unsigned long idx = mapHash(m, key);
 
 	HashMapEntry *e = m->buckets[idx];
@@ -101,8 +96,7 @@ int hashMapRemove (SHashMap *m, const char *key)
 	return 0;
 }
 
-void hashMapFreeMap (SHashMap *m)
-{
+void hashMapFreeMap (SHashMap *m) {
 	for (unsigned long i = 0; i < m->cap; i++) {
 		HashMapEntry *e = m->buckets[i];
 
