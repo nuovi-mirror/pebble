@@ -1,5 +1,9 @@
 <a href="http://pebblevm.org">Pebble</a> is a small and simple virtual machine language
-written in Zig.
+written in C.
+
+[ NOTE ] - The old implimentation of Pebble, which was written in Zig, has become
+depreciated. If, for some reason, you still wish to use this, it can be downloaded
+at our main site <a href="http://pebblevm.org/downloads/old/">here</a>
 
 Pebble is a highly portable, ultralight, and fully host-safe
 virtual machine executing the Pebble bytecode language. Pebble
