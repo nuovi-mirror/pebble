@@ -18,10 +18,13 @@ void error (int err, const char *msg) {
 
 char *readfile (const char *path, char *buff, unsigned long size) {
 	if (path == NULL) error(1, "no file specified");
+	
 	FILE *file = fopen(path, "rb");
 	if (!file) error(1, "cannot open file");
+	
 	unsigned long read = fread(buff, size, 1, file);
 	if (read == 0) return NULL;
+	
 	((char *)buff)[read] = '\0';
 	return buff;
 }
