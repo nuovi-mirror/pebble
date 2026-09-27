@@ -42,10 +42,21 @@ Building from source
 	
 	To build from source, simply run
 
-		$ cc -o build build.c # build the building tool
-		$ ./build # build the VM
+		$ cc -o make build/*.c # build the building tool
+		$ ./make # build the VM
 		$ ./bin/vm tools/test.pebble # test suite one
 		$ ./bin/vm tools/test-new.pebble # test suite two
+
+	Plase note for the sdl2 graphics backend, the file sdl2.conf must exist
+	in the same folder as the resulting binary from the build system. This file
+	should contain two lines; the first should contain the linker flags, and
+	the second the compiler flags, needed to be added for sdl2 to compile. This
+	file can be generated simply by
+
+		$ sdl2-config --libs >sdl2.conf
+		$ sdl2-config --cflags >>sdl2.conf
+
+	on a UNIX-like system with the sdl2-config utility.
 
 Supported Platforms
 	All supported platforms include:
