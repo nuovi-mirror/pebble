@@ -20,6 +20,7 @@ static const struct EscapeSequence escapes[] = {
 	/* standard libraries */
 	{"std.io.print", escape_std_io_print},
 	{"std.io.printLn", escape_std_io_printLn},
+	{"std.io.input", escape_std_io_input},
 
 #ifdef graphics
 	/* graphics libraries */

@@ -3,11 +3,17 @@
 
 #define MAX 512
 
-void escape_std_io_input (FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc, 
-	FFIArena *tempAlloc, FFIArena *persistAlloc) 
+void escape_std_io_input 
+(FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc, FFIArena *tempAlloc, FFIArena *persistAlloc) 
 {
 	char *chars = FFIallocateMemory(persistAlloc, MAX);
 	inputl(chars, MAX);
 
-	FFIallocateVariable(vars, "__Escape_std.io.input_RET0", &chars, persistAlloc);
+	FFIValue *val = alloc(persistAlloc, sizeof(FFIValue));
+	*val = (FFIValue){ .Type = type_str, .as.str = chars };
+
+	FFIstdoutPrint(val->as.str);
+	FFIstdoutPrint("\n");
+	
+	FFIallocateVariable(vars, "__Escape_std.io.input_RET0", val, persistAlloc);
 }

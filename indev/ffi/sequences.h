@@ -5,6 +5,7 @@
 /* standard libraries */
 #include "libs/std/io/print.h"
 #include "libs/std/io/printLn.h"
+#include "libs/std/io/input.h"
 
 #ifdef graphics
 /* graphis libraries */

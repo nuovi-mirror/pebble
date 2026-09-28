@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-int main(int argc, char **argv) {
+int main (int argc, char **argv) {
 	struct Config config;
 	char *src[1024], *objs[1024];
 	unsigned int srccount, cleanreq = 0;
@@ -52,8 +52,10 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 
+	/* XXX debug
 	printf("cflags  : %s\n", config.cflags);
 	printf("ldflags : %s\n", config.ldflags);
+	*/
 
 	compile(&config, src, srccount, objs);
 	link(&config, objs, srccount);

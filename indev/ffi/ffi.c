@@ -7,25 +7,29 @@
 #include "values.h"
 #include "variables.h"
 
-void FFIallocateVariable (FFIvars *vars, const char *varname, void *value,
-	FFIArena *persistAlloc)
+void FFIallocateVariable 
+(FFIvars *vars, const char *varname, void *value, FFIArena *persistAlloc)
 {
-	if (vars->count >= vars->max) {
+	if (vars->count >= vars->max) 
+	{
 		print("ERROR: FFI: TOO MANY VARIABLES USED!\n");
 		exitproc(1);
 	}
 
-	if (getstrlen(varname) > vars->namesize) {
+	if (getstrlen(varname) > vars->namesize) 
+	{
 		print("ERROR: FFI: VARIABLE NAME IS TOO LONG!\n");
 		exitproc(1);
 	}
 
-	if (value == NULL) {
+	if (value == NULL) 
+	{
 		print("ERROR: FFI: VALUE IS NULL!\n");
 		exitproc(1);
 	}
 
-	if (getstrlen(varname) == 0) {
+	if (getstrlen(varname) == 0) 
+	{
 		print("ERROR: FFI: NO VARIABLE NAME GIVEN!\n");
 		exitproc(1);
 	}
@@ -33,14 +37,17 @@ void FFIallocateVariable (FFIvars *vars, const char *varname, void *value,
 	putVar(vars->map, varname, value, persistAlloc);
 }
 
-void *FFIreadVariableUnsafe (FFIvars *vars, const char *varname)
+void *FFIreadVariableUnsafe 
+(FFIvars *vars, const char *varname)
 {
-	if (getstrlen(varname) == 0) {
+	if (getstrlen(varname) == 0) 
+	{
 		print("ERROR: FFI: NO VARIABLE NAME GIVEN!\n");
 		exitproc(1);
 	}
 
-	if (getstrlen(varname) > vars->namesize) {
+	if (getstrlen(varname) > vars->namesize) 
+	{
 		print("ERROR: FFI: VARIABLE NAME IS TOO LONG!\n");
 		exitproc(1);
 	}
@@ -52,7 +59,7 @@ void *FFIreadVariableUnsafe (FFIvars *vars, const char *varname)
 }
 
 void *FFIreadVariable /* safer wrapper */
-	(FFIvars *vars, const char *varname)
+(FFIvars *vars, const char *varname)
 {
 	void *uvar = FFIreadVariableUnsafe(vars, varname);
 
@@ -65,20 +72,16 @@ void *FFIreadVariable /* safer wrapper */
 	return uvar;
 }
 
-int FFIconvertValueToString (char *buff, unsigned long buffsize, FFIValue v)
-{
-	return valuetostr(buff, buffsize, v);
-}
+int FFIconvertValueToString 
+(char *buff, unsigned long buffsize, FFIValue v)
+{ return valuetostr(buff, buffsize, v); }
 
-FFIValue FFIconvertValueToWord (FFIValue v, FFIvars *vars, FFIArena *persistAlloc)
-{
-	return valuetoword(v, vars->map, persistAlloc);
-}
+FFIValue FFIconvertValueToWord 
+(FFIValue v, FFIvars *vars, FFIArena *persistAlloc)
+{ return valuetoword(v, vars->map, persistAlloc); }
 
 void FFIstdoutPrint (char *msg)
-{
-	print(msg);
-}
+{ print(msg); }
 
 void FFIexit (int stat)
 {

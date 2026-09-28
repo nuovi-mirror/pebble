@@ -55,7 +55,7 @@ void link (Config *config, char **objs, unsigned int count) {
 		offset = strlen(cmd);
 	}
 
-	printf("LD: %s\n", config->program);
+	printf("LD %s\n", config->program);
 
 	if (system(cmd) != 0) error("linker failed");
 }
@@ -72,7 +72,10 @@ void clean (Config *config, char **srcs, unsigned int count) {
 		sprintf(deps, "%s", objs);
 		deps[strlen(deps) - 1] = 'd'; /* same logic as before */
 
+		printf("RM %s\n", objs);
 		remove(objs);
+		
+		printf("RM %s\n", deps);
 		remove(deps);
 	}
 }
