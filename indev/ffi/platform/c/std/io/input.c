@@ -12,8 +12,5 @@ void escape_std_io_input
 	FFIValue *val = alloc(persistAlloc, sizeof(FFIValue));
 	*val = (FFIValue){ .Type = type_str, .as.str = chars };
 
-	FFIstdoutPrint(val->as.str);
-	FFIstdoutPrint("\n");
-	
 	FFIallocateVariable(vars, "__Escape_std.io.input_RET0", val, persistAlloc);
 }

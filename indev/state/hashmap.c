@@ -28,6 +28,9 @@ SHashMap initHashMap (unsigned long cap, Arena *persistAlloc) {
 		exitproc(1);
 	}
 
+	for (unsigned long i = 0; i < cap; i++)
+		m.buckets[i] = NULL;
+
 	return m;
 }
 
