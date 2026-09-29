@@ -1,10 +1,12 @@
 #include "ffi.h"
 #include "inputl.h"
+#include "limits.h"
 
 #define MAX 512
 
 void escape_std_io_input 
-(FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc, FFIArena *tempAlloc, FFIArena *persistAlloc) 
+(FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc, 
+	FFIArena *tempAlloc, FFIArena *persistAlloc, struct Limits *limits) 
 {
 	char *chars = FFIallocateMemory(persistAlloc, MAX);
 	inputl(chars, MAX);

@@ -1,15 +1,16 @@
 #ifndef h_mem_
 #define h_mem_
-#include "limits.h"
 
-/* arena allocator backings */
-extern char mem_arena_tempAlloc_backing[limits_allocator_temp_maxmem];
-extern char mem_arena_scratchAlloc_backing[limits_allocator_scratch_maxmem];
-extern char mem_arena_persistAlloc_backing[limits_allocator_persist_maxmem];
-extern char mem_arena_IRAlloc_backing[limits_instructions_maxbuffersize];
+struct Memory {
+	/* arena allocator backings */
+	char *arena_tempAlloc_backing;
+	char *arena_scratchAlloc_backing;
+	char *arena_persistAlloc_backing;
+	char *arena_IRAlloc_backing;
 
-/* stack backings */
-extern char mem_stack_callStack_stack[limits_stack_callStack_size];
-extern char mem_stack_callStack_frames[limits_stack_callStack_frameSize *
-				       limits_stack_callStack_cap];
+	/* stack backings */
+	char *stack_callStack_stack;
+	char *stack_callStack_frames;
+};
+
 #endif

@@ -1,8 +1,8 @@
 #include "escapes.h"
-
 #include "cmpstr.h"
 #include "getstrlen.h"
 #include "sequences.h"
+#include "limits.h"
 
 static unsigned long long mix64 (unsigned long long x)
 {
@@ -16,7 +16,8 @@ static unsigned long long mix64 (unsigned long long x)
 }
 
 void callEscape (const char *name, unsigned long long seed, FFIvars *vars,
-	FFIArena *scratchAlloc, FFIArena *tempAlloc, FFIArena *persistAlloc)
+	FFIArena *scratchAlloc, FFIArena *tempAlloc, FFIArena *persistAlloc,
+	struct Limits *limits)
 {
 	unsigned long i;
 
@@ -34,7 +35,7 @@ void callEscape (const char *name, unsigned long long seed, FFIvars *vars,
 
 			unsigned long long ffiseed = mix64(seed ^ nseed);
 			escapes[i].func(vars, ffiseed, scratchAlloc, tempAlloc,
-				persistAlloc);
+				persistAlloc, limits);
 			return;
 		}
 	}

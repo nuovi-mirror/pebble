@@ -1,10 +1,6 @@
 #include "main.h"
-
-#include <fcntl.h>
-#include <unistd.h>
-
-#include "entry.h"
 #include "vm.h"
+#include <stdlib.h>
 
 int main (int argc, char **argv)
 {

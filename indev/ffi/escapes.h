@@ -3,9 +3,10 @@
 
 #include "ffi.h"
 #include "sequences.h"
+#include "limits.h"
 
 typedef void (*EscapeEntry)(FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc,
-	FFIArena *tempAlloc, FFIArena *persistAlloc);
+	FFIArena *tempAlloc, FFIArena *persistAlloc, struct Limits *limits);
 
 struct EscapeSequence {
 	const char *name;
@@ -29,6 +30,7 @@ static const struct EscapeSequence escapes[] = {
 };
 
 void callEscape (const char *name, unsigned long long seed, FFIvars *vars,
-	FFIArena *scratchAlloc, FFIArena *tempAlloc, FFIArena *persistAlloc);
+	FFIArena *scratchAlloc, FFIArena *tempAlloc, FFIArena *persistAlloc,
+	struct Limits *limits);
 
 #endif

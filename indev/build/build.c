@@ -3,8 +3,11 @@
 /* VM source code */
 const char *vm_srcs[] = {
 	"vm/vm.c",
+	"vm/vmmain.c",
+	
 	"allocator/allocator.c",
-	"allocator/mem.c",
+/*	"allocator/mem.c", */
+	
 	"state/evaluator.c",
 	"state/expressions.c",
 	"state/functions.c",

@@ -9,22 +9,18 @@
 #include "cmpstr.h"
 #include "copymem.h"
 #include "copystr.h"
-#include "entry.h"
 #include "escapes.h"
 #include "evaluator.h"
 #include "exitproc.h"
 #include "expressions.h"
 #include "ffi.h"
-#include "findnewline.h"
 #include "functions.h"
 #include "getstrlen.h"
 #include "instructionmapper.h"
 #include "instructions.h"
 #include "limits.h"
 #include "main.h"
-#include "mem.h"
 #include "print.h"
-#include "readfile.h"
 #include "setmem.h"
 #include "skipspace.h"
 #include "snprint.h"
@@ -101,7 +97,7 @@ int parseoperand (char **cursor, InstructionOperand *out, Arena *tempAlloc,
 
 /* used to generate and optimize instruction intermediate
  * representation (IR) */
-Instruction makeIR (char *line, Arena *tempAlloc, Arena *persistAlloc,
+Instruction makeIR (char *line, struct Limits *limits, Arena *tempAlloc, Arena *persistAlloc,
 	InstructionMap *instructionMap)
 {
 	if (*line == '/' || *line == '#')
@@ -148,7 +144,7 @@ Instruction makeIR (char *line, Arena *tempAlloc, Arena *persistAlloc,
 	 * so we map it for future use */
 
 	/* but only if we did not hit the max */
-	if (current_instruction_cachesize <= limits_instructions_maxcache) {
+	if (current_instruction_cachesize <= limits->instructions_maxcache) {
 		char *buf = alloc(persistAlloc, sizeof(Instruction));
 		copymem(&instr, buf, sizeof(instr));
 		putInstruction(instructionMap, line, buf, persistAlloc);
@@ -267,51 +263,52 @@ unsigned long resolvefunction (unsigned long pc, FuncMap *funcs, Stack *stack,
 
 /* instruction interpreter - instruction-by-instruction loop of execution */
 unsigned long interpret (Instruction *instr, Instruction *program, unsigned long long seed,
-	unsigned long instruction_count, VarMap *vars, FFIvars *ffivars, Stack *stack,
+	unsigned long instruction_count, struct Limits *limits, VarMap *vars, FFIvars *ffivars, Stack *stack,
 	FuncMap *funcs, unsigned long pc, Arena *persistAlloc, Arena *scratchAlloc,
 	Arena *tempAlloc)
 {
 	switch (instr->Opcode) {
 		case Opcode_New: {
-			char *dest = alloc(tempAlloc, limits_instructions_varnamesize);
+			char *dest = alloc(tempAlloc, limits->instructions_varnamesize);
 			Value val;
 
 			switch (instr->FirstOperand.Addressing) {
 				case addrmode_bare:
-					valuetostr(dest, limits_instructions_varnamesize,
+					valuetostr(dest, limits->instructions_varnamesize,
 						instr->FirstOperand.Data);
 					break;
 				case addrmode_true_literal:
-					valuetostr(dest, limits_instructions_varnamesize,
+					valuetostr(dest, limits->instructions_varnamesize,
 						instr->FirstOperand.Data);
 					break;
 				case addrmode_literal: {
 					char *buf = alloc(tempAlloc,
-						limits_instructions_varnamesize);
+						limits->instructions_varnamesize);
 					val = resolve_literal(buf,
-						limits_instructions_varnamesize,
+						limits->instructions_varnamesize,
 						&instr->FirstOperand.Data, vars, tempAlloc,
 						persistAlloc);
-					valuetostr(dest, limits_instructions_varnamesize,
+					valuetostr(dest, limits->instructions_varnamesize,
 						val);
 					break;
 				}
 				case addrmode_forced_eval: {
 					char *buf = alloc(tempAlloc,
-						limits_instructions_varnamesize);
+						limits->instructions_varnamesize);
 					val = resolve_forced_eval(buf,
-						limits_instructions_varnamesize,
+						limits->instructions_varnamesize,
 						&instr->FirstOperand.Data, vars, tempAlloc,
 						persistAlloc);
-					valuetostr(dest, limits_instructions_varnamesize,
+					valuetostr(dest, limits->instructions_varnamesize,
 						val);
 					break;
 				}
 
 				case addrmode_pointer: {
-					char *buff = alloc(tempAlloc, limits_instructions_varnamesize);
-					Value v = resolve_pointer(buff, limits_instructions_varnamesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
-					valuetostr(dest, limits_instructions_varnamesize, v);
+					char *buff = alloc(tempAlloc, limits->instructions_varnamesize);
+					Value v = resolve_pointer(buff, limits->instructions_varnamesize, 
+						&instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
+					valuetostr(dest, limits->instructions_varnamesize, v);
 					break;
 				}
 
@@ -327,9 +324,9 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 					break;
 				case addrmode_literal: {
 					char *buf = alloc(tempAlloc,
-						limits_instructions_varnamesize);
+						limits->instructions_varnamesize);
 					val = resolve_literal(buf,
-						limits_instructions_varnamesize,
+						limits->instructions_varnamesize,
 						&instr->SecondOperand.Data, vars, tempAlloc,
 						persistAlloc);
 					break;
@@ -337,9 +334,9 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 
 				case addrmode_forced_eval: {
 					char *buf = alloc(tempAlloc,
-						limits_instructions_varnamesize);
+						limits->instructions_varnamesize);
 					val = resolve_forced_eval(buf,
-						limits_instructions_varnamesize,
+						limits->instructions_varnamesize,
 						&instr->SecondOperand.Data, vars, tempAlloc,
 						persistAlloc);
 					break;
@@ -347,8 +344,8 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 
 				case addrmode_bare: {
 					char *buf = alloc(scratchAlloc,
-						limits_instructions_varnamesize);
-					valuetostr(buf, limits_instructions_varnamesize,
+						limits->instructions_varnamesize);
+					valuetostr(buf, limits->instructions_varnamesize,
 						instr->SecondOperand.Data);
 					Value *check = getVar(vars, buf);
 					if (check == NULL) {
@@ -361,8 +358,8 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 				}
 
 				case addrmode_pointer: {
-					char *buff = alloc(persistAlloc, limits_instructions_varnamesize);
-					valuetostr(buff, limits_instructions_varnamesize, instr->SecondOperand.Data);
+					char *buff = alloc(persistAlloc, limits->instructions_varnamesize);
+					valuetostr(buff, limits->instructions_varnamesize, instr->SecondOperand.Data);
 					val = (Value){ .Type = type_str, .as.str = buff };
 					break;
 				}
@@ -393,49 +390,50 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 		}
 
 		case Opcode_Func: {
-			char *funcname = alloc(scratchAlloc, limits_functions_namesize);
+			char *funcname = alloc(scratchAlloc, limits->functions_namesize);
 			unsigned long *lpc = alloc(persistAlloc, sizeof(long));
 			switch (instr->FirstOperand.Addressing) {
 				case addrmode_bare: {
-					valuetostr(funcname, limits_functions_namesize,
+					valuetostr(funcname, limits->functions_namesize,
 						instr->FirstOperand.Data);
 					break;
 				}
 
 				case addrmode_true_literal: {
-					valuetostr(funcname, limits_functions_namesize,
+					valuetostr(funcname, limits->functions_namesize,
 						instr->FirstOperand.Data);
 					break;
 				}
 
 				case addrmode_literal: {
 					char *buff = alloc(scratchAlloc,
-						limits_functions_namesize);
+						limits->functions_namesize);
 					Value vptr = resolve_literal(buff,
-						limits_functions_namesize,
+						limits->functions_namesize,
 						&instr->FirstOperand.Data, vars, tempAlloc,
 						persistAlloc);
-					valuetostr(funcname, limits_functions_namesize,
+					valuetostr(funcname, limits->functions_namesize,
 						vptr);
 					break;
 				}
 
 				case addrmode_forced_eval: {
 					char *buff = alloc(scratchAlloc,
-						limits_functions_namesize);
+						limits->functions_namesize);
 					Value vptr = resolve_forced_eval(buff,
-						limits_functions_namesize,
+						limits->functions_namesize,
 						&instr->FirstOperand.Data, vars, tempAlloc,
 						persistAlloc);
-					valuetostr(funcname, limits_functions_namesize,
+					valuetostr(funcname, limits->functions_namesize,
 						vptr);
 					break;
 				}
 
 				case addrmode_pointer: {
-					char *buff = alloc(tempAlloc, limits_instructions_varnamesize);
-					Value v = resolve_pointer(buff, limits_functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
-					valuetostr(funcname, limits_functions_namesize, v);
+					char *buff = alloc(tempAlloc, limits->instructions_varnamesize);
+					Value v = resolve_pointer(buff, limits->functions_namesize, 
+						&instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
+					valuetostr(funcname, limits->functions_namesize, v);
 					break;
 				}
 
@@ -454,44 +452,46 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 		}
 
 		case Opcode_If: {
-			char *funcname = alloc(scratchAlloc, limits_functions_namesize);
+			char *funcname = alloc(scratchAlloc, limits->functions_namesize);
 			Value result;
 
 			switch (instr->FirstOperand.Addressing) {
 				case addrmode_bare:
-					valuetostr(funcname, limits_functions_namesize,
+					valuetostr(funcname, limits->functions_namesize,
 						instr->FirstOperand.Data);
 					break;
 
 				case addrmode_true_literal:
-					valuetostr(funcname, limits_functions_namesize,
+					valuetostr(funcname, limits->functions_namesize,
 						instr->FirstOperand.Data);
 					break;
 
 				case addrmode_literal: {
 					char *buff = alloc(scratchAlloc,
-						limits_functions_namesize);
+						limits->functions_namesize);
 					Value vptr = resolve_literal(buff,
-						limits_functions_namesize,
+						limits->functions_namesize,
 						&instr->FirstOperand.Data, vars, tempAlloc,
 						persistAlloc);
-					valuetostr(funcname, limits_functions_namesize,
+					valuetostr(funcname, limits->functions_namesize,
 						vptr);
 					break;
 				}
 
 				case addrmode_forced_eval: {
 					char *buff = alloc(scratchAlloc,
-						limits_functions_namesize);
-					Value vptr = resolve_forced_eval(buff, limits_functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
-					valuetostr(funcname, limits_functions_namesize, vptr);
+						limits->functions_namesize);
+					Value vptr = resolve_forced_eval(buff, limits->functions_namesize, 
+						&instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
+					valuetostr(funcname, limits->functions_namesize, vptr);
 					break;
 				}
 
 				case addrmode_pointer: {
-					char *buff = alloc(tempAlloc, limits_functions_namesize);
-					Value v = resolve_pointer(buff, limits_functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
-					valuetostr(funcname, limits_functions_namesize, v);
+					char *buff = alloc(tempAlloc, limits->functions_namesize);
+					Value v = resolve_pointer(buff, limits->functions_namesize, 
+						&instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
+					valuetostr(funcname, limits->functions_namesize, v);
 					break;
 				}
 
@@ -504,9 +504,9 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 			switch (instr->SecondOperand.Addressing) {
 				case addrmode_literal: {
 					char *buff =
-						alloc(tempAlloc, limits_functions_namesize);
+						alloc(tempAlloc, limits->functions_namesize);
 					result = resolve_literal(buff,
-						limits_functions_namesize,
+						limits->functions_namesize,
 						&instr->SecondOperand.Data, vars, tempAlloc,
 						persistAlloc);
 					break;
@@ -514,9 +514,9 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 
 				case addrmode_forced_eval: {
 					char *buff =
-						alloc(tempAlloc, limits_functions_namesize);
+						alloc(tempAlloc, limits->functions_namesize);
 					result = resolve_forced_eval(buff,
-						limits_functions_namesize,
+						limits->functions_namesize,
 						&instr->SecondOperand.Data, vars, tempAlloc,
 						persistAlloc);
 					break;
@@ -527,9 +527,9 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 				 * addressing mode, so we can just copy that */
 				case addrmode_pointer: {
 					char *buff =
-						alloc(tempAlloc, limits_functions_namesize);
+						alloc(tempAlloc, limits->functions_namesize);
 					result = resolve_forced_eval(buff,
-						limits_functions_namesize,
+						limits->functions_namesize,
 						&instr->SecondOperand.Data, vars, tempAlloc,
 						persistAlloc);
 					break;
@@ -560,47 +560,48 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 		}
 
 		case Opcode_Call: {
-			char *funcname = alloc(scratchAlloc, limits_functions_namesize);
+			char *funcname = alloc(scratchAlloc, limits->functions_namesize);
 
 			switch (instr->FirstOperand.Addressing) {
 				case addrmode_bare:
-					valuetostr(funcname, limits_functions_namesize,
+					valuetostr(funcname, limits->functions_namesize,
 						instr->FirstOperand.Data);
 					break;
 
 				case addrmode_true_literal:
-					valuetostr(funcname, limits_functions_namesize,
+					valuetostr(funcname, limits->functions_namesize,
 						instr->FirstOperand.Data);
 					break;
 
 				case addrmode_literal: {
 					char *buff = alloc(scratchAlloc,
-						limits_functions_namesize);
+						limits->functions_namesize);
 					Value val = resolve_literal(buff,
-						limits_functions_namesize,
+						limits->functions_namesize,
 						&instr->FirstOperand.Data, vars, tempAlloc,
 						persistAlloc);
-					valuetostr(funcname, limits_functions_namesize,
+					valuetostr(funcname, limits->functions_namesize,
 						val);
 					break;
 				}
 
 				case addrmode_forced_eval: {
 					char *buff = alloc(tempAlloc,
-						limits_functions_namesize);
+						limits->functions_namesize);
 					Value val = resolve_forced_eval(buff,
-						limits_functions_namesize,
+						limits->functions_namesize,
 						&instr->FirstOperand.Data, vars, tempAlloc,
 						persistAlloc);
-					valuetostr(funcname, limits_functions_namesize,
+					valuetostr(funcname, limits->functions_namesize,
 						val);
 					break;
 				}
 
 				case addrmode_pointer: {
-					char *buff = alloc(tempAlloc, limits_functions_namesize);
-					Value v = resolve_pointer(buff, limits_functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
-					valuetostr(funcname, limits_functions_namesize, v);
+					char *buff = alloc(tempAlloc, limits->functions_namesize);
+					Value v = resolve_pointer(buff, limits->functions_namesize, 
+						&instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
+					valuetostr(funcname, limits->functions_namesize, v);
 					break;
 				}
 
@@ -628,45 +629,46 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 			break;
 
 		case Opcode_Escape: {
-			char *name = alloc(scratchAlloc, limits_escapes_namesize);
+			char *name = alloc(scratchAlloc, limits->escapes_namesize);
 
 			switch (instr->FirstOperand.Addressing) {
 				case addrmode_bare:
-					valuetostr(name, limits_escapes_namesize,
+					valuetostr(name, limits->escapes_namesize,
 						instr->FirstOperand.Data);
 					break;
 
 				case addrmode_true_literal:
-					valuetostr(name, limits_escapes_namesize,
+					valuetostr(name, limits->escapes_namesize,
 						instr->FirstOperand.Data);
 					break;
 
 				case addrmode_literal: {
 					char *buff =
-						alloc(tempAlloc, limits_escapes_namesize);
+						alloc(tempAlloc, limits->escapes_namesize);
 					Value val = resolve_literal(buff,
-						limits_escapes_namesize,
+						limits->escapes_namesize,
 						&instr->FirstOperand.Data, vars, tempAlloc,
 						persistAlloc);
-					valuetostr(name, limits_escapes_namesize, val);
+					valuetostr(name, limits->escapes_namesize, val);
 					break;
 				}
 
 				case addrmode_forced_eval: {
 					char *buff =
-						alloc(tempAlloc, limits_escapes_namesize);
+						alloc(tempAlloc, limits->escapes_namesize);
 					Value val = resolve_forced_eval(buff,
-						limits_escapes_namesize,
+						limits->escapes_namesize,
 						&instr->FirstOperand.Data, vars, tempAlloc,
 						persistAlloc);
-					valuetostr(name, limits_escapes_namesize, val);
+					valuetostr(name, limits->escapes_namesize, val);
 					break;
 				}
 
 				case addrmode_pointer: {
-					char *buff = alloc(tempAlloc, limits_instructions_varnamesize);
-					Value v = resolve_pointer(buff, limits_instructions_varnamesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
-					valuetostr(name, limits_escapes_namesize, v);
+					char *buff = alloc(tempAlloc, limits->instructions_varnamesize);
+					Value v = resolve_pointer(buff, limits->instructions_varnamesize, 
+						&instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
+					valuetostr(name, limits->escapes_namesize, v);
 
 					break;
 				}
@@ -677,7 +679,7 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 			}
 
 			callEscape(name, seed, ffivars, scratchAlloc, tempAlloc,
-				persistAlloc);
+				persistAlloc, limits);
 			break;
 		}
 
@@ -729,9 +731,9 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 		}
 
 		case Opcode_Internal_PRINT2: {
-			char *buf = alloc(scratchAlloc, limits_instructions_varnamesize);
+			char *buf = alloc(scratchAlloc, limits->instructions_varnamesize);
 
-			valuetostr(buf, limits_instructions_varnamesize,
+			valuetostr(buf, limits->instructions_varnamesize,
 				instr->FirstOperand.Data);
 			Value *stored = getVar(vars, buf);
 
@@ -748,12 +750,12 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 			switch (data.Type) {
 				case type_word:
 					print("WORD,  DATA: ");
-					valuetostr(buf, limits_instructions_varnamesize,
+					valuetostr(buf, limits->instructions_varnamesize,
 						data);
 					break;
 				case type_sword:
 					print("SWORD, DATA: ");
-					valuetostr(buf, limits_instructions_varnamesize,
+					valuetostr(buf, limits->instructions_varnamesize,
 						data);
 					break;
 				case type_str:
@@ -762,7 +764,7 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 					break;
 				case type_flt:
 					print("FLT,   DATA: ");
-					valuetostr(buf, limits_instructions_varnamesize,
+					valuetostr(buf, limits->instructions_varnamesize,
 						data);
 					break;
 				case type_expr:
@@ -865,109 +867,4 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 
 	/* no fancy control flow needed here - incriment the pc */
 	return pc + 1;
-}
-
-/* Args and Stack should be defined by the platform entry code
- * which will include this file */
-int vmmain (Args cliargs, Stack *stack, unsigned long long seed)
-{
-	/* init */
-	struct Arena *tempAlloc =
-		initAlloc(mem_arena_tempAlloc_backing, limits_allocator_temp_maxmem);
-	struct Arena *persistAlloc =
-		initAlloc(mem_arena_persistAlloc_backing, limits_allocator_persist_maxmem);
-	struct Arena *scratchAlloc =
-		initAlloc(mem_arena_scratchAlloc_backing, limits_allocator_scratch_maxmem);
-	struct Arena *IRAlloc =
-		initAlloc(mem_arena_IRAlloc_backing, limits_instructions_maxbuffersize);
-
-	/* XXX read this pls
-	 * tempAlloc may be freed once after every instruction
-	 * scratchAlloc may be freed in-between function calls
-	 * persistAlloc may never be freed until the VM exits
-	 */
-
-	VarMap vars = initVars(limits_variables_max, persistAlloc);
-	FFIvars *ffivars = alloc(persistAlloc, sizeof(FFIvars));
-	FuncMap funcs = initFuncs(limits_functions_max, persistAlloc);
-	InstructionMap instructionMap =
-		initInstructionMap(limits_instructions_maxcache, persistAlloc);
-
-	ffivars->map = &vars;
-	ffivars->count = 0;
-	ffivars->max = limits_variables_max;
-	ffivars->namesize = limits_instructions_varnamesize;
-
-	/* XXX remove this
-	char *file = alloc(tempAlloc, limits_misc_maxfilebuffersize);
-	char *filedata = readfile(cliargs.values[1], file,
-	limits_misc_maxfilebuffersize);
-	*/
-
-	unsigned long filesize = getfilesize(cliargs.values[1]);
-	if (filesize == 0) {
-		print("ERROR: VM: INIT: CANNOT OPEN SPECIFIED FILE!\n");
-		exitproc(1);
-	}
-
-	if (filesize + 1 > limits_misc_maxfilebuffersize) {
-		print("ERROR: VM: INIT: FILE IS TOO LARGE!\n");
-		exitproc(1);
-	}
-
-	char *file = alloc(tempAlloc,
-		filesize + 1); /* +1 for null terminator readfile() appends */
-	char *filedata = readfile(cliargs.values[1], file, filesize + 1);
-
-	if (filedata == NULL) {
-		print("ERROR: VM: INIT: CANNOT OPEN SPECIFIED FILE!\n");
-		exitproc(1);
-	}
-
-	char *line;
-	unsigned long current_instruction_count = 0;
-	unsigned long current_instruction_buffersize = limits_instructions_initbuffersize;
-	Instruction *program = alloc(IRAlloc, limits_instructions_maxbuffersize);
-
-	/* startup */
-	while ((line = findnewline(&filedata)) != NULL) {
-		if (current_instruction_count >= limits_instructions_max) {
-			print("ERROR: LIMITS: INSTRUCTION CAP REACHED!\n");
-			exitproc(1);
-		}
-
-		char *p = skipspace(line);
-
-		if (p == NULL)
-			continue;
-
-		program[current_instruction_count] =
-			makeIR(line, tempAlloc, persistAlloc, &instructionMap);
-		current_instruction_count++;
-	}
-
-	/* free buffer holding file */
-	resetAllocator(tempAlloc);
-
-	/* execution */
-	unsigned long pc = 0;
-	while (pc < current_instruction_count) {
-		pc = interpret(&program[pc], program, seed, current_instruction_count,
-			&vars, ffivars, stack, &funcs, pc, persistAlloc, scratchAlloc,
-			tempAlloc);
-		resetAllocator(scratchAlloc);
-		resetAllocator(tempAlloc);
-	}
-
-	/* clean-up */
-	freeAllocator(persistAlloc);
-	freeAllocator(tempAlloc);
-	freeAllocator(scratchAlloc);
-	freeAllocator(IRAlloc);
-	/* lfree(ffivars); XXX hack */
-	freeVars(&vars);
-	freeInstructionMap(&instructionMap);
-	freeFuncs(&funcs);
-
-	return 0;
 }

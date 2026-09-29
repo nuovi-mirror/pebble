@@ -1,12 +1,12 @@
 /* portable entry point helper (C) */
 
 #include "entry.h"
-
-#include <time.h> /* used for psedo-random helper */
-
 #include "exitproc.h"
+#include "main.h"
+#include "limits.h"
 #include "mem.h"
 #include "print.h"
+#include <time.h> /* used for psedo-random helper */
 
 /* temporary NULL definition we can use */
 #undef NULL
@@ -16,7 +16,8 @@
 static volatile unsigned long sink;
 
 /* stack helpers */
-void pushframe (Stack *stack, StackFrame *frame)
+void pushframe 
+(Stack *stack, StackFrame *frame)
 {
 	if (stack->count >= stack->capacity) {
 		print("ERROR: CALLSTACK: STACK OVERFLOW!\n");
@@ -27,7 +28,8 @@ void pushframe (Stack *stack, StackFrame *frame)
 	stack->count++;
 }
 
-StackFrame popframe (Stack *stack)
+StackFrame popframe 
+(Stack *stack)
 {
 	StackFrame frame;
 
@@ -42,7 +44,8 @@ StackFrame popframe (Stack *stack)
 	return frame;
 }
 
-Args initargs (int argc, char **argv)
+Args initargs 
+(int argc, char **argv)
 {
 	Args cliargs;
 
@@ -52,10 +55,11 @@ Args initargs (int argc, char **argv)
 	return cliargs;
 }
 
-Stack *initstack (unsigned long capacity)
+Stack *initstack 
+(unsigned long capacity, struct Memory *mem)
 {
-	StackFrame *stack_items = (StackFrame *)mem_stack_callStack_frames;
-	Stack *stack = (Stack *)mem_stack_callStack_stack;
+	StackFrame *stack_items = (StackFrame *)*mem->stack_callStack_frames;
+	Stack *stack = (Stack *)*mem->stack_callStack_stack;
 
 	if (stack == NULL || stack_items == NULL || capacity == 0) {
 		print("ERROR: INIT: CANNOT ALLOCATE A CALL STACK!\n");
@@ -69,7 +73,8 @@ Stack *initstack (unsigned long capacity)
 	return stack;
 }
 
-void freestack (Stack *stack)
+void freestack 
+(Stack *stack)
 { /* XXX this does nothing now */
 }
 
@@ -80,8 +85,8 @@ void freestack (Stack *stack)
  * random 64bit seeds */
 #define wsize 8
 
-static void work (unsigned long long r, unsigned long long s, unsigned long a,
-	unsigned long b, unsigned long c)
+static void work 
+(unsigned long long r, unsigned long long s, unsigned long a, unsigned long b, unsigned long c)
 {
 	unsigned long long x = r;
 
@@ -95,7 +100,8 @@ static void work (unsigned long long r, unsigned long long s, unsigned long a,
 	sink ^= x;
 }
 
-static unsigned long long mix64 (unsigned long long x)
+static unsigned long long mix64 
+(unsigned long long x)
 {
 	x ^= x >> 30;
 	x *= 0xBF58476D1CE4E5B9ULL;
@@ -106,8 +112,8 @@ static unsigned long long mix64 (unsigned long long x)
 	return x;
 }
 
-unsigned long long ground (unsigned long long w, unsigned long long s, unsigned long a,
-	unsigned long b, unsigned long c)
+unsigned long long ground 
+(unsigned long long w, unsigned long long s, unsigned long a, unsigned long b, unsigned long c)
 {
 	clock_t t1, t2, d1;
 
@@ -119,7 +125,8 @@ unsigned long long ground (unsigned long long w, unsigned long long s, unsigned 
 	return d1;
 }
 
-static void shuffle (unsigned int order[wsize], unsigned long long *state)
+static void shuffle 
+(unsigned int order[wsize], unsigned long long *state)
 {
 	unsigned int i;
 	unsigned int j;
@@ -139,7 +146,8 @@ static void shuffle (unsigned int order[wsize], unsigned long long *state)
 	}
 }
 
-unsigned long long grun (void)
+unsigned long long grun 
+(void)
 {
 	unsigned int order[wsize];
 	unsigned long long work[wsize];
@@ -189,7 +197,8 @@ unsigned long long grun (void)
 	return seed;
 }
 
-unsigned long long grandom (void)
+unsigned long long grandom 
+(void)
 {
 	unsigned long long seed = grun();
 	int i;
@@ -212,3 +221,4 @@ unsigned long long grandom (void)
 }
 
 #undef NULL
+
