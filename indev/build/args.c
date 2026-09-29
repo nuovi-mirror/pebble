@@ -8,6 +8,7 @@ void parseargs (Config *config, char *argument) {
 
 	if (strcmp(argument, "cc") == 0) config->compiler = equals;
 	else if (strcmp(argument, "program") == 0) config->program = equals;
+	else if (strcmp(argument, "precc") == 0) config->precompiler = equals;
 	else if (strcmp(argument, "build") == 0) config->build = equals;
 	else if (strcmp(argument, "platform") == 0) config->platform = equals;
 	else if (strcmp(argument, "analyzer") == 0) config->precompiler = equals;

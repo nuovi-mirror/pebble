@@ -17,8 +17,8 @@
 
 /* Args and Stack should be defined by the platform entry code
  * which will include this file */
-int vmmain (Args cliargs, Stack *stack, unsigned long long seed, 
-	struct Memory *mem, struct Limits *limits)
+int vmmain 
+(Args cliargs, Stack *stack, unsigned long long seed, struct Memory *mem, struct Limits *limits)
 {
 	/* init */
 	struct Arena *tempAlloc = initAlloc(mem->arena_tempAlloc_backing, limits->allocator_temp_maxmem);
