@@ -58,8 +58,8 @@ Args initargs
 Stack *initstack 
 (unsigned long capacity, struct Memory *mem)
 {
-	StackFrame *stack_items = (StackFrame *)*mem->stack_callStack_frames;
-	Stack *stack = (Stack *)*mem->stack_callStack_stack;
+	StackFrame *stack_items = (StackFrame *)mem->stack_callStack_frames;
+	Stack *stack = (Stack *)mem->stack_callStack_stack;
 
 	if (stack == NULL || stack_items == NULL || capacity == 0) {
 		print("ERROR: INIT: CANNOT ALLOCATE A CALL STACK!\n");

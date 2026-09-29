@@ -1,9 +1,9 @@
 #include "main.h"
-
 #include "entry.h"
 #include "mem.h"
 #include "limits.h"
 #include "vm.h"
+#include <stdlib.h>
 
 int main 
 (int argc, char **argv)
@@ -30,19 +30,19 @@ int main
 	limits.instruction_new_destsize = 32;
 	limits.instruction_new_datasize = 32;
 
-	char mem_arena_tempAlloc_backing[limits.allocator_temp_maxmem];
-	char mem_arena_scratchAlloc_backing[limits.allocator_scratch_maxmem];
-	char mem_arena_persistAlloc_backing[limits.allocator_persist_maxmem];
-	char mem_arena_IRAlloc_backing[limits.instructions_maxbuffersize];
-	char mem_stack_callStack_stack[limits.stack_callStack_size];
-	char mem_stack_callStack_frames[limits.stack_callStack_frameSize * limits.stack_callStack_cap];
+	char *mem_arena_tempAlloc_backing = malloc(limits.allocator_temp_maxmem);
+	char *mem_arena_scratchAlloc_backing = malloc(limits.allocator_scratch_maxmem);
+	char *mem_arena_persistAlloc_backing = malloc(limits.allocator_persist_maxmem);
+	char *mem_arena_IRAlloc_backing = malloc(limits.instructions_maxbuffersize);
+	Stack *mem_stack_callStack_stack = malloc(limits.stack_callStack_size);
+	StackFrame *mem_stack_callStack_frames = malloc(limits.stack_callStack_frameSize * limits.stack_callStack_cap);
 
-	mem.arena_tempAlloc_backing = (char *)&mem_arena_tempAlloc_backing;
-	mem.arena_scratchAlloc_backing = (char *)&mem_arena_scratchAlloc_backing;
-	mem.arena_persistAlloc_backing = (char *)&mem_arena_persistAlloc_backing;
-	mem.arena_IRAlloc_backing = (char *)&mem_arena_IRAlloc_backing;
-	mem.stack_callStack_stack = (char *)&mem_stack_callStack_stack;
-	mem.stack_callStack_frames = (char *)&mem_stack_callStack_frames;
+	mem.arena_tempAlloc_backing = mem_arena_tempAlloc_backing;
+	mem.arena_scratchAlloc_backing = mem_arena_scratchAlloc_backing;
+	mem.arena_persistAlloc_backing = mem_arena_persistAlloc_backing;
+	mem.arena_IRAlloc_backing = mem_arena_IRAlloc_backing;
+	mem.stack_callStack_stack = mem_stack_callStack_stack;
+	mem.stack_callStack_frames = mem_stack_callStack_frames;
 
 	volatile unsigned long long seed = grandom();
 	Args cliargs = initargs(argc, argv);
