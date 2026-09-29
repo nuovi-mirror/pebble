@@ -29,7 +29,7 @@ int main (int argc, char **argv) {
 	strcpy(config.compiler, "cc");
 	strcpy(config.program, "bin/vm");
 	strcpy(config.build, "default");
-	strcpy(config.platform, "c");
+	strcpy(config.platform, "posix");
 	strcpy(config.precompiler, "");
 	strcpy(config.graphics, "");
 	strcpy(config.cflags, "-Ih -Iffi -std=c99 ");
