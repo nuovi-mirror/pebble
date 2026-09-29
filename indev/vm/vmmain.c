@@ -42,8 +42,7 @@ int vmmain
 	ffivars->max = limits->variables_max;
 	ffivars->namesize = limits->instructions_varnamesize;
 
-	char *filedata = alloc(tempAlloc, limits->misc_maxfilebuffersize);
-	getprogram(filedata, limits->misc_maxfilebuffersize, &cliargs);
+	char *filedata = getprogram(tempAlloc, limits->misc_maxfilebuffersize, &cliargs);
 
 	char *line;
 	unsigned long current_instruction_count = 0;
@@ -64,6 +63,9 @@ int vmmain
 		program[current_instruction_count] = makeIR(line, limits, tempAlloc, persistAlloc, &instructionMap);
 		current_instruction_count++;
 	}
+
+	/* clean the file backing buffer */
+	resetAllocator(tempAlloc);
 
 	/* execution */
 	unsigned long pc = 0;

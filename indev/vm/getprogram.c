@@ -2,9 +2,10 @@
 #include "main.h"
 #include "print.h"
 #include "exitproc.h"
+#include "allocator.h"
 
-unsigned long getprogram
-(char *file, unsigned long maxsize, Args *cliargs)
+char *getprogram
+(Arena *allocator, unsigned long maxsize, Args *cliargs)
 {
 	unsigned long filesize = getfilesize(cliargs->values[1]);
 	if (filesize == 0) {
@@ -17,6 +18,7 @@ unsigned long getprogram
 		exitproc(1);
 	}
 
+	char *file = alloc(allocator, filesize + 1);
 	char *filedata = readfile(cliargs->values[1], file, filesize + 1);
 
 	if (filedata == NULL) {
@@ -24,5 +26,5 @@ unsigned long getprogram
 		exitproc(1);
 	}
 
-	return filesize;
+	return file;
 }
