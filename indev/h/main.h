@@ -4,7 +4,7 @@
 #undef NULL
 #define NULL ((void *)0)
 
-#include "mem.h"
+struct Memory;
 
 typedef struct Args {
         unsigned long count;

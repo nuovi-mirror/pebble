@@ -1,6 +1,8 @@
 #ifndef h_mem_
 #define h_mem_
 
+#include "main.h"
+
 struct Memory {
 	/* arena allocator backings */
 	char *arena_tempAlloc_backing;
@@ -9,8 +11,8 @@ struct Memory {
 	char *arena_IRAlloc_backing;
 
 	/* stack backings */
-	char *stack_callStack_stack;
-	char *stack_callStack_frames;
+	Stack *stack_callStack_stack;
+	StackFrame *stack_callStack_frames;
 };
 
 #endif

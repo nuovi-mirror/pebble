@@ -391,7 +391,7 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 
 		case Opcode_Func: {
 			char *funcname = alloc(scratchAlloc, limits->functions_namesize);
-			unsigned long *lpc = alloc(persistAlloc, sizeof(long));
+			unsigned long *lpc = alloc(persistAlloc, 64);
 			switch (instr->FirstOperand.Addressing) {
 				case addrmode_bare: {
 					valuetostr(funcname, limits->functions_namesize,
@@ -783,7 +783,7 @@ unsigned long interpret (Instruction *instr, Instruction *program, unsigned long
 			break;
 		}
 		case Opcode_Internal_GETMEM: {
-			char buf[sizeof(long)];
+			char buf[64];
 
 			print("_GETMEM (INTERNAL INSTRUCTION)\n");
 

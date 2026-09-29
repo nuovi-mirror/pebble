@@ -15,7 +15,7 @@ int main
 	limits.allocator_persist_maxmem = 32 * 1024 * 1024;
 	limits.allocator_scratch_maxmem = 6 * 1024 * 1024;
 	limits.instructions_max = 500000;
-	limits.instructions_maxbuffersize = limits.instructions_max * sizeof(Instruction);
+	limits.instructions_maxbuffersize = (limits.instructions_max * sizeof(Instruction));
 	limits.instructions_initbuffersize = (512 * sizeof(Instruction));
 	limits.instructions_maxcache = 512;
 	limits.instructions_varnamesize = 64;
