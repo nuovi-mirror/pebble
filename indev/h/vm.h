@@ -19,6 +19,8 @@ unsigned long interpret(Instruction *instr, Instruction *program, unsigned long 
 Instruction makeIR (char *line, struct Limits *limits, Arena *tempAlloc, Arena *persistAlloc,
         InstructionMap *instructionMap);
 
+unsigned long getprogram (char *file, unsigned long maxsize, Args *cliargs);
+
 /* call this to enter the VM code */
 int vmmain (Args cliargs, Stack *stack, unsigned long long seed, 
 	struct Memory *mem, struct Limits *limits);

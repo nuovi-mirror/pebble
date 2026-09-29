@@ -4,6 +4,7 @@
 const char *vm_srcs[] = {
 	"vm/vm.c",
 	"vm/vmmain.c",
+	"vm/getprogram.c",
 	
 	"allocator/allocator.c",
 /*	"allocator/mem.c", */

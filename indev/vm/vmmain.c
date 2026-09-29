@@ -10,7 +10,6 @@
 #include "instructions.h"
 #include "main.h"
 #include "print.h"
-#include "readfile.h"
 #include "skipspace.h"
 #include "variables.h"
 #include "mem.h"
@@ -48,35 +47,11 @@ int vmmain (Args cliargs, Stack *stack, unsigned long long seed,
 	ffivars->max = limits->variables_max;
 	ffivars->namesize = limits->instructions_varnamesize;
 
-	/* XXX remove this
-	char *file = alloc(tempAlloc, limits_misc_maxfilebuffersize);
-	char *filedata = readfile(cliargs.values[1], file,
-	limits_misc_maxfilebuffersize);
-	*/
-
-	unsigned long filesize = getfilesize(cliargs.values[1]);
-	if (filesize == 0) {
-		print("ERROR: VM: INIT: CANNOT OPEN SPECIFIED FILE!\n");
-		exitproc(1);
-	}
-
-	if (filesize + 1 > limits->misc_maxfilebuffersize) {
-		print("ERROR: VM: INIT: FILE IS TOO LARGE!\n");
-		exitproc(1);
-	}
-
-	char *file = alloc(tempAlloc,
-		filesize + 1); /* +1 for null terminator readfile() appends */
-	char *filedata = readfile(cliargs.values[1], file, filesize + 1);
-
-	if (filedata == NULL) {
-		print("ERROR: VM: INIT: CANNOT OPEN SPECIFIED FILE!\n");
-		exitproc(1);
-	}
+	char *filedata = alloc(tempAlloc, limits->misc_maxfilebuffersize);
+	getprogram(filedata, limits->misc_maxfilebuffersize, &cliargs);
 
 	char *line;
 	unsigned long current_instruction_count = 0;
-	unsigned long current_instruction_buffersize = limits->instructions_initbuffersize;
 	Instruction *program = alloc(IRAlloc, limits->instructions_maxbuffersize);
 
 	/* startup */
