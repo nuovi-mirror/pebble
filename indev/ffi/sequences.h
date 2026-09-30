@@ -7,6 +7,8 @@
 #include "libs/std/io/printLn.h"
 #include "libs/std/io/input.h"
 
+#include "libs/std/misc/random.h"
+
 #ifdef graphics
 /* graphis libraries */
 #include "libs/gs/2d/window/create.h"

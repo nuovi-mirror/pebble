@@ -1,6 +1,7 @@
 #ifndef FFI_H_
 #define FFI_H_
 
+#include "main.h" /* needed for null definition */
 #include "allocator.h"
 #include "values.h"
 #include "variables.h"

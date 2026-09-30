@@ -71,9 +71,12 @@ const char *ffi_base_srcs[] = {
 const char *ffi_c_srcs[] = {
 	"ffi/platform/c/test/hello.c",
 	"ffi/platform/c/test/getseed.c",
+
 	"ffi/platform/c/std/io/print.c",
 	"ffi/platform/c/std/io/printLn.c",
 	"ffi/platform/c/std/io/input.c",
+
+	"ffi/platform/c/std/misc/random.c",
 
 	NULL
 };

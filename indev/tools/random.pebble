@@ -1,0 +1,7 @@
+Escape std.misc.random
+_PRINT2 __Escape_std.misc.random_RET0
+_PRINT2 __Escape_std.misc.random_seed
+
+Escape std.misc.random
+_PRINT2 __Escape_std.misc.random_RET0
+_PRINT2 __Escape_std.misc.random_seed

@@ -15,18 +15,16 @@ static unsigned long long mix64 (unsigned long long x)
 	return x;
 }
 
-void callEscape (const char *name, unsigned long long seed, FFIvars *vars,
-	FFIArena *scratchAlloc, FFIArena *tempAlloc, FFIArena *persistAlloc,
-	struct Limits *limits)
+void callEscape 
+(const char *name, unsigned long long seed, FFIvars *vars, FFIArena *scratchAlloc, FFIArena *tempAlloc, 
+ FFIArena *persistAlloc, struct Limits *limits)
 {
 	unsigned long i;
 
 	for (i = 0; i < sizeof(escapes) / sizeof(escapes[0]); i++) {
 		if (cmpstr(escapes[i].name, name) == 0) {
 			unsigned long len = getstrlen(name);
-			unsigned long n = len < sizeof(unsigned long long)
-						  ? len
-						  : sizeof(unsigned long long);
+			unsigned long n = len < sizeof(unsigned long long) ? len : sizeof(unsigned long long);
 			const unsigned char *lname = (const unsigned char *)name + len - n;
 			unsigned long nseed = 0;
 
