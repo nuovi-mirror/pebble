@@ -847,6 +847,9 @@ unsigned long interpret
 
 		case Opcode_Internal_SEGFAULT: 
 		{
+			print("\n");
+			print("WARNING: _SEGFAULT INSTRUCTION USED: THIS PROGRAM WILL CRASH!\n");
+			print("\n");
 			*(volatile int *)0 = 0;
 			/* we should segfault now */
 			break;

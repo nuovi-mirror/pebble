@@ -3,10 +3,11 @@ New c '1'
 New m '9999999'
 
 Func l
-_PRINT2 c
+#_PRINT2 c
 New c "c + 1"
 If l "c < m"
 End
 
 Call l
 _PRINT2 c
+_GETMEM
