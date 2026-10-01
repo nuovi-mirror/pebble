@@ -24,6 +24,7 @@ static const struct EscapeSequence escapes[] = {
 	{"std.io.input", escape_std_io_input},
 
 	{"std.misc.random", escape_std_misc_random},
+	{"std.misc.sleep", escape_std_misc_sleep},
 
 #ifdef graphics
 	/* graphics libraries */

@@ -1,0 +1,17 @@
+New msg 'we should sleep for 2 seconds'
+New __Escape_std.io.print_ARG0 <msg>
+Escape std.io.print
+
+New time '2000'
+New __Escape_std.misc.sleep_ARG0 <time>
+Escape std.misc.sleep
+
+New msg 'Slept for: '
+New __Escape_std.io.printLn_ARG0 <msg>
+Escape std.io.printLn
+
+New msg __Escape_std.misc.sleep_RET0
+Escape std.io.printLn
+
+New msg 'ms'
+Escape std.io.print

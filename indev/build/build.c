@@ -55,6 +55,7 @@ const char *platform_c_srcs[] = {
 /* posix platform source code */
 const char *platform_posix_srcs[] = {
 	"platform/posix/inputn.c",
+	"platform/posix/snooze.c",
 
 	NULL
 };
@@ -77,6 +78,7 @@ const char *ffi_c_srcs[] = {
 	"ffi/platform/c/std/io/input.c",
 
 	"ffi/platform/c/std/misc/random.c",
+	"ffi/platform/c/std/misc/sleep.c",
 
 	NULL
 };

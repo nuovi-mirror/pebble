@@ -8,6 +8,7 @@
 #include "libs/std/io/input.h"
 
 #include "libs/std/misc/random.h"
+#include "libs/std/misc/sleep.h"
 
 #ifdef graphics
 /* graphis libraries */
