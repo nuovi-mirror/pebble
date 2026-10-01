@@ -15,13 +15,12 @@ unsigned long interpret(Instruction *instr, Instruction *program, unsigned long 
 	unsigned long instruction_count, struct Limits *limits, VarMap *vars, FFIvars *ffivars, 
 	Stack *stack, FuncMap *funcs, unsigned long pc, Arena *persistAlloc, 
 	Arena *scratchAlloc, Arena *tempAlloc);
-
 Instruction makeIR (char *line, struct Limits *limits, Arena *tempAlloc, Arena *persistAlloc,
-        InstructionMap *instructionMap);
-
+	InstructionMap *instructionMap);
 char *getprogram (Arena *allocator, unsigned long maxsize, Args *cliargs);
+Instruction *optimizeIR (Instruction *program, unsigned long *instruction_count, Arena *tempAlloc,
+	Arena *persistAlloc);
 
 /* call this to enter the VM code */
-int vmmain (Args cliargs, Stack *stack, unsigned long long seed, 
-	struct Memory *mem, struct Limits *limits);
+int vmmain (Args cliargs, Stack *stack, unsigned long long seed, struct Memory *mem, struct Limits *limits);
 #endif

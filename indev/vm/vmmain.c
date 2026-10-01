@@ -64,6 +64,8 @@ int vmmain
 		current_instruction_count++;
 	}
 
+	optimizeIR(program, &current_instruction_count, tempAlloc, persistAlloc);
+
 	/* clean the file backing buffer */
 	resetAllocator(tempAlloc);
 

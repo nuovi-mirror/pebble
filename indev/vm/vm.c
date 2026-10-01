@@ -94,6 +94,27 @@ int parseoperand
 	return 1;
 }
 
+Instruction *optimizeIR
+(Instruction *program, unsigned long *instruction_count, Arena *tempAlloc, Arena *persistAlloc)
+{
+	/* remove nop instructions */
+	unsigned long write = 0;
+	for (unsigned long read = 0; read < *instruction_count; read++) 
+	{
+		if (program[read].Opcode == Opcode_Internal_NOP) continue;
+	
+		if (write != read)
+			program[write] = program[read];
+
+		write++;
+	}
+
+	*instruction_count = write;
+
+	/* return optimized program */
+	return program;
+}
+
 /* used to generate and optimize instruction intermediate representation (IR) */
 Instruction makeIR 
 (char *line, struct Limits *limits, Arena *tempAlloc, Arena *persistAlloc, InstructionMap *instructionMap)
