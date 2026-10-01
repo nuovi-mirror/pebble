@@ -14,6 +14,7 @@
 #include "variables.h"
 #include "mem.h"
 #include "limits.h"
+#include "cli.h"
 
 /* Args and Stack should be defined by the platform entry code
  * which will include this file */
@@ -42,6 +43,7 @@ int vmmain
 	ffivars->max = limits->variables_max;
 	ffivars->namesize = limits->instructions_varnamesize;
 
+	cli(&cliargs);
 	char *filedata = getprogram(tempAlloc, limits->misc_maxfilebuffersize, &cliargs);
 
 	char *line;
