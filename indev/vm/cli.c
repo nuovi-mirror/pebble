@@ -1,7 +1,7 @@
+#include "main.h"
 #include "print.h"
 #include "exitproc.h"
 #include "cmpstr.h"
-#include "version.h"
 #include "cli.h"
 
 void cli
@@ -16,8 +16,20 @@ void cli
 	if (cmpstr(args->values[1], "logo") == 0) {
 		print(logo);
 		exitproc(0);
+	} else if (cmpstr(args->values[1], "help") == 0) {
+		print(help);
+		exitproc(0);
 	}
 }
+
+const char help[144] =
+"cpebble [help|logo]\n"
+"	 (file)\n"
+"\n"
+"  help     - print this message\n"
+"  logo     - print our great logo\n"
+"  (file)   - path to bytecode file to execute\n"
+"\0";
 
 const char logo[1832] = 
 "............................................................\n"
