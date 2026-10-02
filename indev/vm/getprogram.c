@@ -7,13 +7,21 @@
 char *getprogram
 (Arena *allocator, unsigned long maxsize, Args *cliargs)
 {
+	if (cliargs->count < 1) 
+	{
+		print("ERROR: VM: NO BYTECODE FILE SPECIFIED!\n");
+		exitproc(1);
+	}
+
 	unsigned long filesize = getfilesize(cliargs->values[1]);
-	if (filesize == 0) {
+	if (filesize == 0) 
+	{
 		print("ERROR: VM: INIT: CANNOT OPEN SPECIFIED FILE!\n");
 		exitproc(1);
 	}
 
-	if (filesize + 1 > maxsize) {
+	if (filesize + 1 > maxsize) 
+	{
 		print("ERROR: VM: INIT: FILE IS TOO LARGE!\n");
 		exitproc(1);
 	}
@@ -21,7 +29,8 @@ char *getprogram
 	char *file = alloc(allocator, filesize + 1);
 	char *filedata = readfile(cliargs->values[1], file, filesize + 1);
 
-	if (filedata == NULL) {
+	if (filedata == NULL) 
+	{
 		print("ERROR: VM: INIT: CANNOT OPEN SPECIFIED FILE!\n");
 		exitproc(1);
 	}

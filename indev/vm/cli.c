@@ -7,7 +7,7 @@
 void cli
 (Args *args)
 {
-	if (args->count < 1) 
+	if (args->count <= 0 || args->values[0] == NULL || args->values[0] == NULL) 
 	{
 		print("ERROR: CLI: NO ARGUMENTS PROVIDED!\n");
 		exitproc(1);

@@ -1,0 +1,168 @@
+Writing FFI code
+
+CPebble provides a simple FFI for interacting with Pebble code and the runtime using the C programming language. 
+This is known as the CPebble Standard C FFI. Please note this FFI differs heavily from the older FFI used in
+the Zig implementation of Pebble. This guide is for writing C code using the CPebble C FFI, nothing more.
+
+The CPebble FFI defines two standards, one being used internally by the VM itself, and one being exposed
+externally to applications using the FFI. Only the second will be described in this document.
+
+FFI code should always include the file ffi.h; This is used to define the core FFI components needed to use the
+FFI itself. This should at least include the structures FFIValue, FFIvars and FFIArena. All of these besides
+FFIValue are not to be known to the FFI code, but instead just passed around to helper function defined by ffi.h.
+The structure FFIValue should look something like
+
+	typedef enum {
+		type_word,
+		type_sword,
+		type_float,
+		type_str,
+		type_expr,
+	} FFIType;
+
+	typedef struct {
+		FFIType Type;
+		union {
+			unsigned long word;
+			long sword;
+			double flt;
+			char *str;
+			ExprNode *expr;
+		} as;
+	}
+
+Structures FFIType may not be defined under that name, but should have those values in it. The type expr is
+opaque and should not be known by the FFI code, but is just some representation of a VM expression tree. This
+is also just to be passed around to helper functions.
+
+As a piece of FFI code, I could do something like
+
+	FFIValue v = (FFIValue){ .Type = type_word, .as.word = 42 };
+
+to create a CPebble value who contains the word type 42. FFI code may allocate variables using the interface
+FFIallocateVariable, which should be defined as
+
+	void *FFIallocateVariable (FFIvars *vars, const char *varname, void *value, FFIArena *persistAlloc);
+
+where vars is a pointer to the opaque variable table object given to the FFI code, value is a pointer to the
+FFIValue defined previously, which in most cases should be allocated using persistAlloc, varname is the name
+of the Pebble variable to store it under, and persistAlloc is a pointer to the opaque object representing
+one of the FFI allocators.
+
+FFIArena is an opaque structure representing an arena model allocator. Three of these are given to FFI code, being
+scratcAlloc, which may be cleared in-between function calls, tempAlloc, which may be cleared in between the
+instruction boundary (it is important to note one FFI call counts as one instruction in CPebble), and persistAlloc,
+which lasts until the VM dies. These can be used via the FFIallocateMemory helper, which should be defined as
+
+	void *FFIallocateMemory (FFIArena *arena, unsigned long size);
+
+where arena is a pointer to the opaque FFI allocator object and size is the size of the region to allocate. Freeing
+memory allocated by FFI code is done by the VM itself, so FFI code does not have to worry about this.
+
+FFI code should also be given a pointer to the VM limits structure, a structure that defines several limits to
+certain operations. These should be respected by FFI code, otherwise it is considered malicious usage. This
+structure can be viewed by reading h/limits.h, and will not be defined here. Please go read that.
+
+Yes, this does imply FFI code should include limits.h as well.
+
+FFI code is called expected to be
+
+	void some_sequence_using_the_ffi (FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc, 
+		FFIArena *tempAlloc, FFIArena *persistAlloc, Limits *limits);
+
+The name of the FFI sequence (known as an Escape Sequence) should follow the registered name that is exposed
+to Pebble. This naming convention exposed to Pebble follows (group).(subgroup(s)).(name), and the equivalent
+C function should add escape_ to the start and replace the . character with the _ character. An example could
+be the Pebble FFI sequence
+
+	std.io.print
+
+should be defined as the C function
+
+	void escape_std_io_print (FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc, 
+		FFIArena *tempAlloc, FFIArena *persistAlloc, Limits *limits);
+
+The seed variable is a random 64bit seed provided by the virtual machine, which is unique to every VM instance
+and FFI sequence. This means if I was to call the same FFI sequence twice within the same VM lifetime, they
+would both be given the same random seed. Please keep in mind this seed is not guaranteed to have a full 64bits
+of entropy, nor is it to be used for cryptographic purposes.
+
+Arguments given to FFI code are simply stored as normal Pebble variables, which can be read using the
+FFIreadVariable and FFIreadVariableUnsafe interfaces. FFIreadVariable will error and fault if the variable does
+not exist, while FFIreadVariableUnsafe will return a NULL pointer. These should be defined as
+
+	void *FFIreadVariable (FFIvars *vars, const char *varname);
+	void *FFIreadVariableUnsafe (FFIvars *vars, const char *varname);
+
+It is tradition to give FFI arguments under the names of __Escape_, followed by the Pebble Escape sequence name,
+followed by _Argon, where n is the argument number, starting at 0 being the first argument. These should contain
+pointers to Pebble variables that contain the real argument data. Pointers in FFI code should simply be strings
+who's value is a Pebble variable to be looked up. A simple helper was made to make conversion easier, being
+
+	int FFIconvertValueToString (char *buff, unsigned long buffsize, FFIValue v);
+
+where buff is a pointer to the buffer to write the string data to, buffsize is the size of the buffer, and v is
+the value to convert. 
+
+The FFI interface also provides a few more useful helpers, including but not limited to
+
+	FFIValue FFIconvertValueToWord (FFIValue v, FFIvars *vars, FFIArena *persistAlloc); - convert an FFIValue
+		of any type to an FFIValue of type word (unsigned long)
+	void FFIstdoutPrint (char *msg); - print data to standard output with basic formatting such as newline 
+		handling
+	void FFIexit (int status); - error and abort the virtual machine
+	
+To see the full list, please view ffi/ffi.h
+
+A simple example, take an argument and print it to standard output, may be something like
+
+
+#include "ffi.h"
+#include "limits.h"
+
+	void escape_std_io_print (FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc,
+		FFIArena *tempAlloc, FFIArena *persistAlloc, struct Limits *limits)
+	{
+		char *ptrbuff = FFIallocateMemory(tempAlloc, limits->instructions_varnamesize);
+		char *msgbuff = FFIallocateMemory(tempAlloc, limits->instructions_varnamesize);
+
+		FFIValue *ptr = FFIreadVariable(vars, "__Escape_std.io.print_ARG0");
+		FFIconvertValueToString(ptrbuff, limits->instructions_varnamesize, *ptr);
+
+		FFIValue *msg = FFIreadVariable(vars, ptrbuff);
+		FFIconvertValueToString(msgbuff, limits->instructions_varnamesize, *msg);
+
+		FFIstdoutPrint(msgbuff);
+		FFIstdoutPrint("\n");
+	}
+
+which takes one argument and prints it to standard output.
+
+FFI code should be compiled into the VM and cannot be removed after this. You can add your FFI code to the
+VM by adding
+
+	- a registry entry to ffi/escapes.h, which maps the Pebble sequence to the C function
+	- an include line in ffi/sequences.h importing your FFI code
+	- a .h file defining your FFI sequence in libs/(group)/(subgroup(s))/(name).h
+	- a .c file defining the FFI code in platform/(platform)/(group)/(subgroup(s))/(name).c - it is usually
+		fine to just put c as the platform
+	- and an entry in build/build.c adding your FFI .c file to be built into the VM
+
+eg. the previous example would add the line
+
+	{ "std.io.print", escape_std_io_print }; - onto ffi/escapes.h into the escapes structure
+	#include "libs/std/io/print.h" - onto ffi/sequences.h
+	the C code into ffi/platform/c/std/io/print.c
+	a .h file with the previously stated definition in ffi/libs/std/io/print.h
+	"ffi/platform/c/std/io/print.c", - onto build/build.c into the ffi_c_srcs struct
+
+And then just re-compile the build tool and the VM using that and your FFI sequence should be callable via
+Pebble using the code
+
+	New msg 'Hello, World!'
+	New __Escape_std.io.print_ARG0 <msg>
+	Escape std.io.print
+
+and that should be all you need to get started writing FFI code! If you have any more questions, please look
+over the source code. Also, it is important to note FFI code cannot assume a Libc is present, and should
+instead use the VM provided wrappers in h/ - please read over those!	

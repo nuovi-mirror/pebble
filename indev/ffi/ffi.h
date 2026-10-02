@@ -16,22 +16,15 @@ typedef struct {
 typedef Value FFIValue;
 typedef Arena FFIArena;
 
-void FFIallocateVariable (FFIvars *vars, const char *varname, void *value,
-	FFIArena *persistAlloc);
-
+void *FFIallocateMemory (FFIArena *arena, unsigned long size);
+void FFIallocateVariable (FFIvars *vars, const char *varname, void *value, FFIArena *persistAlloc);
 void *FFIreadVariableUnsafe (FFIvars *vars, const char *varname);
-
-void *FFIreadVariable /* safer wrapper - never returns NULL, aborts instead */
-	(FFIvars *vars, const char *varname);
+void *FFIreadVariable (FFIvars *vars, const char *varname); /* wrapper - aborts instead of returning NULL */
 
 int FFIconvertValueToString (char *buff, unsigned long buffsize, FFIValue v);
-
 FFIValue FFIconvertValueToWord (FFIValue v, FFIvars *vars, FFIArena *persistAlloc);
-
 void FFIstdoutPrint (char *msg);
-
 void FFIexit (int stat);
 
-void *FFIallocateMemory (FFIArena *arena, unsigned long size);
 
 #endif
