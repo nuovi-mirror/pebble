@@ -1,6 +1,37 @@
-fn main ( ) result {
-	result = 'Hello, World!'
-	call std.io.print ( result )
+fn add ( a b ) result {
+	result = "a + b"
 }
 
-call main ( )
+fn main ( ) result {
+	x = '0'
+	total = '0'
+
+	while ( "x < 3" ) {
+		y = '0'
+
+		while ( "y < 3" ) {
+			sum = call add ( x y )
+
+			if ( "sum == 0" ) {
+				call std.io.print ( 'zero' )
+			} else if ( "sum == 1" ) {
+				call std.io.print ( 'one' )
+			} else if ( "sum == 2" ) {
+				call std.io.print ( 'two' )
+			} else {
+				call std.io.print ( sum )
+			}
+
+			updated_total = call add ( total sum )
+			total = updated_total
+
+			y = "y + 1"
+		}
+
+		x = "x + 1"
+	}
+
+	call std.io.print ( total )
+
+	result = 'all-tests-done'
+}
