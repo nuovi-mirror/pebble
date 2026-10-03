@@ -7,12 +7,6 @@
 void cli
 (Args *args)
 {
-	if (args->count <= 0 || args->values[0] == NULL || args->values[0] == NULL) 
-	{
-		print("ERROR: CLI: NO ARGUMENTS PROVIDED!\n");
-		exitproc(1);
-	}
-
 	if (cmpstr(args->values[1], "logo") == 0) {
 		print(logo);
 		exitproc(0);
@@ -22,13 +16,13 @@ void cli
 	}
 }
 
-const char help[144] =
-"cpebble [help|logo]\n"
-"	 (file)\n"
+const char help[159] =
+"usage: cpebble { help | logo }\n"
+"       (path)\n"
 "\n"
 "  help     - print this message\n"
 "  logo     - print our great logo\n"
-"  (file)   - path to bytecode file to execute\n"
+"  (path)   - path to bytecode file to execute\n"
 "\0";
 
 const char logo[1832] = 
