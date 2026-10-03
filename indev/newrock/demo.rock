@@ -1,3 +1,6 @@
-fn thing ( ) x {
-	x = "1 + 2"
+fn main ( ) result {
+	result = 'Hello, World!'
+	export result
 }
+
+call main ( )

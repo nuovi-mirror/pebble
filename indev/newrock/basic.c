@@ -289,6 +289,16 @@ static void compile_fn(void)
 	printf("End\n");
 }
 
+static void compile_top_stmt(void)
+{
+	if (try_keyword("call")) {
+		compile_call("", NULL);
+		return;
+	}
+
+	fail("expected 'fn' or 'call' at top level");
+}
+
 int main(void)
 {
 	len = (long)fread(src, 1, sizeof src - 1, stdin);
@@ -296,10 +306,14 @@ int main(void)
 	pos = 0;
 
 	skipws();
+
 	while (pos < len) {
-		if (!try_keyword("fn"))
-			fail("expected 'fn' at top level");
-		compile_fn();
+		if (try_keyword("fn")) {
+			compile_fn();
+		} else {
+			compile_top_stmt();
+		}
+
 		skipws();
 	}
 
