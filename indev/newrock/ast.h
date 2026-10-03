@@ -1,11 +1,11 @@
 enum Statements {
-	statements_statement_assiagn,
+	statements_statement_assign,
 };
 
 struct Statement {
 	enum Statements type;
 	enum As {
-		statement_assiagn,
+		statement_assign,
 	}as;
 };
 
