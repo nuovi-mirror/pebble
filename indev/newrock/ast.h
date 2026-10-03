@@ -9,7 +9,8 @@ struct Statement {
 	}as;
 };
 
-struct statement_assiagn {
-	char *variable;
-	char *expression;
+struct statement_assign {
+	char *variable; /* the variable to assiagn */
+	char *expression; /* the expression being assiagned to the variable */
+	char *funcname; /* name of function we are in - NULL if we are not in one */
 };

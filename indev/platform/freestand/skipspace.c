@@ -6,8 +6,7 @@
 /* function with old behavior for legacy compat */
 char *skipspace (char *p)
 {
-	while (*p == ' ' || *p == '\t')
-		p++;
+	while (*p == ' ' || *p == '\t') p++;
 	return (*p == '\0' ? NULL : p);
 }
 
