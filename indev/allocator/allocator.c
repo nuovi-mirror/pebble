@@ -1,4 +1,5 @@
 #include "allocator.h"
+#include "ffillmem.h"
 #include "exitproc.h"
 #include "main.h"
 #include "print.h"
@@ -8,21 +9,26 @@ struct Arena *initAlloc
 {
 	/* platform layer gives us backing memory */
 	if (backing == NULL) {
-		print("ERROR: ALLOCATOR: NONFATAL: GIVEN NULL BACKING POINTER\n");
-		return NULL;
+		print("ERROR: ALLOCATOR: GIVEN NULL BACKING POINTER\n");
+		exitproc(1);
 	}
 
 	struct Arena *arena = (struct Arena *)backing;
 	char *srt_ptr = (char *)backing + sizeof(struct Arena);
 
-	if (arena == NULL) { /* if we cannot allocate the area */
-		print("ERROR: ALLOCATOR: ALLOCATOR INIT FAILED\n");
-		return NULL; /* return null */
+	if (size < sizeof(struct Arena)) 
+	{
+		print("ERROR: ALLOCATOR: BACKING IS TOO SMALL!\n");
+		exitproc(1);
 	}
+
 	/* create the arena */
-	arena->size = size;	    /* set the size */
+	arena->size = size; 	/* set the size */
 	arena->curr_ptr = srt_ptr;  /* set the current pointer */
 	arena->arena_ptr = srt_ptr; /* set the start of the arena */
+
+	/* initalize the memory to 0 */
+	ffillmem(0, (volatile void *)arena->arena_ptr, arena->size);
 
 	return arena; /* return a pointer to the new allocated arena */
 }

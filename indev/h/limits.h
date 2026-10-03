@@ -6,6 +6,7 @@ struct Limits {
 	unsigned long allocator_temp_maxmem; /* max mem in temp allocator */
 	unsigned long allocator_persist_maxmem; /* max mem in persist allocator */
 	unsigned long allocator_scratch_maxmem; /* max mem in scratch allocator */
+	unsigned long allocator_IRAlloc_maxmem; /* max mem in scratch allocator */
 
 	/* instruction-related */
 	unsigned long instructions_max; /* max number of instructions that can be executed */

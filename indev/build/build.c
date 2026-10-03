@@ -36,6 +36,7 @@ const char *platform_freestand_srcs[] = {
 	"platform/freestand/copymem.c",
 	"platform/freestand/strsplit.c",
 	"platform/freestand/inputl.c",
+	"platform/freestand/ffillmem.c",
 
 	NULL
 };

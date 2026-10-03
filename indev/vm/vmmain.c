@@ -25,7 +25,7 @@ int vmmain
 	struct Arena *tempAlloc = initAlloc(mem->arena_tempAlloc_backing, limits->allocator_temp_maxmem);
 	struct Arena *persistAlloc = initAlloc(mem->arena_persistAlloc_backing, limits->allocator_persist_maxmem);
 	struct Arena *scratchAlloc = initAlloc(mem->arena_scratchAlloc_backing, limits->allocator_scratch_maxmem);
-	struct Arena *IRAlloc = initAlloc(mem->arena_IRAlloc_backing, limits->instructions_maxbuffersize);
+	struct Arena *IRAlloc = initAlloc(mem->arena_IRAlloc_backing, limits->allocator_IRAlloc_maxmem);
 
 	/* XXX read this pls
 	 * tempAlloc may be freed once after every instruction
@@ -48,7 +48,7 @@ int vmmain
 
 	char *line;
 	unsigned long current_instruction_count = 0;
-	Instruction *program = alloc(IRAlloc, limits->instructions_maxbuffersize);
+	Instruction *program = alloc(IRAlloc, limits->allocator_IRAlloc_maxmem);
 
 	/* startup */
 	while ((line = findnewline(&filedata)) != NULL) 
