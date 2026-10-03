@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "stdlib-ported.h"
 
 #define MAX_SRC      (1 << 20)
 #define MAX_LOCALS   64
@@ -438,7 +439,25 @@ static void compile_top_stmt(void)
 
 int main(void)
 {
-	len = (long)fread(src, 1, sizeof src - 1, stdin);
+	size_t stdlib_len = strlen(stdlib);
+
+	if (stdlib_len + 1 >= sizeof src)
+		fail("stdlib is too large");
+
+	memcpy(src, stdlib, stdlib_len);
+
+	src[stdlib_len++] = '\n';
+
+	size_t remaining = sizeof src - stdlib_len - 1;
+
+	size_t input_len = fread(
+		src + stdlib_len,
+		1,
+		remaining,
+		stdin
+	);
+
+	len = (long)(stdlib_len + input_len);
 	src[len] = '\0';
 	pos = 0;
 

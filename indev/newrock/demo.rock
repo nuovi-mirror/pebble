@@ -1,8 +1,6 @@
 fn main ( ) result {
 	result = 'Hello, World!'
-	export result
+	call std.io.print ( result )
 }
 
 call main ( )
-
-. New x '1'
