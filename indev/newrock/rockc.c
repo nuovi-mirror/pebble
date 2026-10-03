@@ -7,7 +7,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdarg.h>
-#include "stdlib-ported.h"
+#include "stdlib.h"
 
 #define MAX_SRC       (1 << 20)
 #define MAX_LOCALS    64

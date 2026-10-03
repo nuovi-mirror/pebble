@@ -2,7 +2,7 @@ fn add ( a b ) result {
 	result = "a + b"
 }
 
-fn main ( ) result {
+fn main ( ) total {
 	x = '0'
 	total = '0'
 
@@ -30,8 +30,8 @@ fn main ( ) result {
 
 		x = "x + 1"
 	}
-
+	
+	number = call std.misc.random ( )
+	call std.io.print ( number )
 	call std.io.print ( total )
-
-	result = 'all-tests-done'
 }
