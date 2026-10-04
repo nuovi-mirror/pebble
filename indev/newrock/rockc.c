@@ -129,14 +129,16 @@ static int try_raw_line
 static void skipws
 (void)
 {
-	for (;;) 
+	for (;;)
 	{
-		while (pos < len && isspace((unsigned char)src[pos])) pos++;
+		while (pos < len && isspace((unsigned char)src[pos]))
+			pos++;
 
-		if (pos + 1 < len && src[pos] == '/' && src[pos + 1] == '/') 
+		if (pos < len && (src[pos] == '#' || src[pos] == '/'))
 		{
+			while (pos < len && src[pos] != '\n')
+				pos++;
 
-			while (pos < len && src[pos] != '\n') pos++;
 			continue;
 		}
 
@@ -686,8 +688,9 @@ static void compile_top_stmt
 }
 
 int main
-(void)
+(int argc, char **argv)
 {
+	if (argc > 2) fail("no file provided");
 	size_t stdlib_len = strlen(stdlib);
 
 	if (stdlib_len + 1 >= sizeof src) fail("stdlib is too large");
@@ -697,7 +700,8 @@ int main
 
 	size_t remaining = sizeof src - stdlib_len - 1;
 
-	size_t input_len = fread(src + stdlib_len, 1, remaining, stdin);
+	FILE *file = fopen(argv[1], "r");
+	size_t input_len = fread(src + stdlib_len, 1, remaining, file);
 
 	len = (long)(stdlib_len + input_len);
 	src[len] = '\0';
