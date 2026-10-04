@@ -206,6 +206,16 @@ Value evalexprnode
 			cmp = h_NumericCmp(l, r);
 			return mkbool(cmp < 0);
 
+		case ExprOp_NumericGreaterThanOrEqualTo:
+			cmp = h_NumericCmp(l, r);
+			return mkbool(cmp >= 0);
+	
+		case ExprOp_NumericLessThanOrEqualTo:
+			cmp = h_NumericCmp(l, r);
+			return mkbool(cmp <= 0);
+
+		return mkbool(cmp >= 0);
+
 		case ExprOp_NumericEqualTo:
 			cmp = h_NumericCmp(l, r);
 			return mkbool(cmp == 0);

@@ -13,6 +13,8 @@ typedef enum {
 	ExprOp_NumericDiv,
 	ExprOp_NumericGreaterThan,
 	ExprOp_NumericLessThan,
+	ExprOp_NumericGreaterThanOrEqualTo,
+	ExprOp_NumericLessThanOrEqualTo,
 	ExprOp_NumericEqualTo,
 	ExprOp_NumericNotEqualTo,
 	ExprOp_StringEqualTo,
