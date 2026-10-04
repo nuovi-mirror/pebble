@@ -15,4 +15,17 @@ to generate one rockc binary. Running this without arguments should
 tell you how to use it
 
 rockpkg is a small package manager for the New Rock language, which can
-be found in the rockpkg/ directory.
+be found in the rockpkg/ directory. This program accepts the path of the
+.rockpkg file (a description of how to install the package) as the first
+argument and nothing else. It expects the command 'rockc' and 'pblvm' to
+be available, being the New Rock compiler and Pebble VM binaries. You can
+get .rockpkg files from the central repo
+
+	http://pebblevm.org/rockpkg/
+
+this is further sorted into <group>/<name>.rockpkg, eg. if I wanted to
+install the program 'demos/one', I could fetch
+
+	http://pebblevm.org/rockpkg/demos/basic.rockpkg
+
+and install it using the rockpkg package manager
