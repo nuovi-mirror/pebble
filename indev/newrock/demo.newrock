@@ -1,6 +1,4 @@
-fn add ( a b ) result {
-	result = "a + b"
-}
+include add.newrock
 
 fn main ( ) total {
 	x = '0'
