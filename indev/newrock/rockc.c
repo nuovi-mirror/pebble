@@ -61,14 +61,11 @@ static void emitf
 	if (current_helper)
 	{
 		size_t available = HELPER_BUFSZ - current_helper->body_len;
-
 		if (available == 0) fail("generated helper is too large");
 
-		int n = vsnprintf(current_helper->body + current_helper->body_len,
-			available, fmt, ap);
+		int n = vsnprintf(current_helper->body + current_helper->body_len, available, fmt, ap);
 
 		if (n < 0) fail("failed to generate output");
-
 		if ((size_t)n >= available) fail("generated helper is too large");
 
 		current_helper->body_len += (size_t)n;
@@ -101,17 +98,14 @@ static void emit_helper
 	printf("Func %s\n", h->name);
 	fputs(h->body, stdout);
 
-	if (h->body_len == 0 || h->body[h->body_len - 1] != '\n')
-		putchar('\n');
-
+	if (h->body_len == 0 || h->body[h->body_len - 1] != '\n') putchar('\n');
 	printf("End\n");
 }
 
 static void emit_helpers_from
 (int first)
 {
-	for (int i = first; i < nhelpers; i++)
-		emit_helper(&helpers[i]);
+	for (int i = first; i < nhelpers; i++) emit_helper(&helpers[i]);
 }
 
 static int try_raw_line
@@ -139,14 +133,10 @@ static void skipws
 {
 	for (;;)
 	{
-		while (pos < len && isspace((unsigned char)src[pos]))
-			pos++;
-
+		while (pos < len && isspace((unsigned char)src[pos])) pos++;
 		if (pos < len && (src[pos] == '#' || src[pos] == '/'))
 		{
-			while (pos < len && src[pos] != '\n')
-				pos++;
-
+			while (pos < len && src[pos] != '\n') pos++;
 			continue;
 		}
 
@@ -174,9 +164,7 @@ static void read_ident
 
 	while (pos < len && is_ident_char((unsigned char)src[pos]))
 	{
-		if (n + 1 >= cap)
-			fail("identifier too long");
-
+		if (n + 1 >= cap) fail("identifier too long");
 		out[n++] = src[pos++];
 	}
 
@@ -188,9 +176,7 @@ static void expect_char
 {
 	skipws();
 
-	if (peekch() != c)
-		fail("unexpected character");
-
+	if (peekch() != c) fail("unexpected character");
 	pos++;
 }
 
@@ -198,27 +184,22 @@ static int try_keyword
 (const char *kw)
 {
 	skipws();
-
 	long save = pos;
 
-	if (!is_ident_start(peekch()))
-		return 0;
+	if (!is_ident_start(peekch())) return 0;
 
 	char buf[MAX_NAME];
 	size_t n = 0;
 
 	while (pos < len && is_ident_char((unsigned char)src[pos]))
 	{
-		if (n + 1 < sizeof buf)
-			buf[n++] = src[pos];
-
+		if (n + 1 < sizeof buf) buf[n++] = src[pos];
 		pos++;
 	}
 
 	buf[n] = '\0';
 
-	if (strcmp(buf, kw) == 0)
-		return 1;
+	if (strcmp(buf, kw) == 0) return 1;
 
 	pos = save;
 	return 0;
@@ -231,14 +212,11 @@ static void read_delimited
 
 	while (pos < len && src[pos] != close)
 	{
-		if (n + 1 >= cap)
-			fail("quoted text too long");
-
+		if (n + 1 >= cap) fail("quoted text too long");
 		out[n++] = src[pos++];
 	}
 
-	if (pos >= len)
-		fail("unterminated quote");
+	if (pos >= len) fail("unterminated quote");
 
 	out[n] = '\0';
 	pos++;
@@ -247,21 +225,15 @@ static void read_delimited
 static int is_local
 (const char *name)
 {
-	for (int i = 0; i < nlocals; i++)
-		if (strcmp(locals[i], name) == 0)
-			return 1;
-
+	for (int i = 0; i < nlocals; i++) if (strcmp(locals[i], name) == 0) return 1;
 	return 0;
 }
 
 static void add_local
 (const char *name)
 {
-	if (is_local(name))
-		return;
-
-	if (nlocals >= MAX_LOCALS)
-		fail("too many locals in one function");
+	if (is_local(name)) return;
+	if (nlocals >= MAX_LOCALS) fail("too many locals in one function");
 
 	strncpy(locals[nlocals++], name, MAX_NAME - 1);
 	locals[nlocals - 1][MAX_NAME - 1] = '\0';
@@ -270,10 +242,8 @@ static void add_local
 static void mangle
 (const char *fn, const char *name, char *out, size_t cap)
 {
-	if (is_local(name))
-		snprintf(out, cap, "__Func_%s_%s", fn, name);
-	else
-		snprintf(out, cap, "%s", name);
+	if (is_local(name)) snprintf(out, cap, "__Func_%s_%s", fn, name);
+	else snprintf(out, cap, "%s", name);
 }
 
 static void subst_expr
@@ -286,23 +256,18 @@ static void subst_expr
 	{
 		while (*p == ' ')
 		{
-			if (oi + 1 < cap)
-				out[oi++] = *p;
-
+			if (oi + 1 < cap) out[oi++] = *p;
 			p++;
 		}
 
-		if (!*p)
-			break;
+		if (!*p) break;
 
 		char word[MAX_NAME];
 		size_t wi = 0;
 
 		while (*p && *p != ' ')
 		{
-			if (wi + 1 < sizeof word)
-				word[wi++] = *p;
-
+			if (wi + 1 < sizeof word) word[wi++] = *p;
 			p++;
 		}
 
@@ -310,31 +275,15 @@ static void subst_expr
 
 		char mangled[MAX_NAME];
 
-		if (is_local(word))
-			snprintf(mangled, sizeof mangled,
-				"__Func_%s_%s", fn, word);
-		else
-			snprintf(mangled, sizeof mangled, "%s", word);
+		if (is_local(word)) snprintf(mangled, sizeof mangled, "__Func_%s_%s", fn, word);
+		else snprintf(mangled, sizeof mangled, "%s", word);
 
-		for (size_t k = 0; mangled[k] && oi + 1 < cap; k++)
-			out[oi++] = mangled[k];
+		for (size_t k = 0; mangled[k] && oi + 1 < cap; k++) out[oi++] = mangled[k];
 	}
 
 	out[oi] = '\0';
 }
 
-/*
- * Insert an included file into the source buffer at the current
- * parser position.
- *
- * Example:
- *
- *     rockc thing.newrock libs/
- *
- *     include foo.newrock
- *
- * causes libs/foo.newrock to be inserted at src[pos].
- */
 static void include_file
 (const char *name)
 {
@@ -342,13 +291,27 @@ static void include_file
 	size_t path_len = strlen(include_path);
 	size_t name_len = strlen(name);
 
-	if (path_len + 1 + name_len + 1 > sizeof path)
-		fail("include path is too long");
+	if (pos < len && src[pos] == '\n') pos++;
 
-	if (path_len > 0 && include_path[path_len - 1] == '/')
-		snprintf(path, sizeof path, "%s%s", include_path, name);
-	else
-		snprintf(path, sizeof path, "%s/%s", include_path, name);
+	if (strcmp(name, "stdlib") == 0)
+	{
+		size_t stdlib_len = strlen(stdlib);
+
+		if (stdlib_len + 1 > MAX_SRC - len - 1) fail("source buffer is too small for standard library");
+
+		memmove(src + pos + stdlib_len + 1, src + pos, (size_t)(len - pos) + 1);
+		memcpy(src + pos, stdlib, stdlib_len);
+		src[pos + stdlib_len] = '\n';
+
+		len += stdlib_len + 1;
+
+		return;
+	}
+
+	if (path_len + 1 + name_len + 1 > sizeof path) fail("include path is too long");
+
+	if (path_len > 0 && include_path[path_len - 1] == '/') snprintf(path, sizeof path, "%s%s", include_path, name);
+	else snprintf(path, sizeof path, "%s/%s", include_path, name);
 
 	FILE *file = fopen(path, "r");
 
@@ -356,9 +319,7 @@ static void include_file
 	{
 		char msg[MAX_PATH + 32];
 
-		snprintf(msg, sizeof msg,
-			"could not open include file '%s'", path);
-
+		snprintf(msg, sizeof msg, "could not open include file '%s'", path);
 		fail(msg);
 	}
 
@@ -389,23 +350,11 @@ static void include_file
 		fail("source buffer is too small for included file");
 	}
 
-	/*
-	 * Make room for the included source.
-	 *
-	 * len - pos is the existing source after the include
-	 * directive. Move it forward so the new file can occupy
-	 * the space beginning at pos.
-	 */
-	memmove(src + pos + file_len,
-		src + pos,
-		(size_t)(len - pos) + 1);
-
+	memmove(src + pos + file_len, src + pos, (size_t)(len - pos) + 1);
 	size_t got = fread(src + pos, 1, (size_t)file_len, file);
-
 	fclose(file);
 
-	if (got != (size_t)file_len)
-		fail("could not read include file");
+	if (got != (size_t)file_len) fail("could not read include file");
 
 	len += file_len;
 }
@@ -659,8 +608,7 @@ static void compile_while
 	expect_char(')');
 	expect_char('{');
 
-	snprintf(while_fn, sizeof while_fn,
-		"__RockWhile_%u", next_control_id++);
+	snprintf(while_fn, sizeof while_fn, "__RockWhile_%u", next_control_id++);
 
 	Helper *old_helper = current_helper;
 	Helper *loop = new_helper(while_fn);
@@ -670,19 +618,15 @@ static void compile_while
 
 	while (peekch() != '}')
 	{
-		if (peekch() < 0)
-			fail("unterminated while block");
-
+		if (peekch() < 0) fail("unterminated while block");
 		compile_stmt(fn);
 		skipws();
 	}
 
 	expect_char('}');
-
 	emitf("If %s %s\n", while_fn, condition);
 
 	current_helper = old_helper;
-
 	emitf("If %s %s\n", while_fn, condition);
 }
 
@@ -719,9 +663,7 @@ static void compile_stmt
 		char name[MAX_NAME];
 
 		read_ident(name, sizeof name);
-		emitf("New %s __Func_%s_%s\n",
-			name, fn, name);
-
+		emitf("New %s __Func_%s_%s\n", name, fn, name);
 		return;
 	}
 
@@ -760,8 +702,7 @@ static void compile_fn
 
 	read_ident(fn, sizeof fn);
 
-	if (strcmp(fn, "main") == 0)
-		has_main = 1;
+	if (strcmp(fn, "main") == 0) has_main = 1;
 
 	nlocals = 0;
 
@@ -774,8 +715,7 @@ static void compile_fn
 
 	while (peekch() != ')')
 	{
-		if (nparams >= MAX_LOCALS)
-			fail("too many parameters");
+		if (nparams >= MAX_LOCALS) fail("too many parameters");
 
 		read_ident(params[nparams], sizeof params[nparams]);
 		add_local(params[nparams]);
@@ -800,26 +740,20 @@ static void compile_fn
 
 	printf("Func %s\n", fn);
 
-	for (int i = 0; i < nparams; i++)
-		printf("New __Func_%s_%s __Func_%s_ARG%d\n",
-			fn, params[i], fn, i);
+	for (int i = 0; i < nparams; i++) printf("New __Func_%s_%s __Func_%s_ARG%d\n", fn, params[i], fn, i);
 
 	skipws();
 
 	while (peekch() != '}')
 	{
-		if (peekch() < 0)
-			fail("unterminated function");
-
+		if (peekch() < 0) fail("unterminated function");
 		compile_stmt(fn);
 		skipws();
 	}
 
 	expect_char('}');
 
-	printf("New __Func_%s_RET0 __Func_%s_%s\n",
-		fn, fn, result);
-
+	printf("New __Func_%s_RET0 __Func_%s_%s\n", fn, fn, result);
 	printf("End\n");
 
 	current_helper = old_helper;
@@ -857,54 +791,34 @@ int main
 {
 	if (argc != 3)
 	{
-		fprintf(stderr,
-			"usage: %s source search-path\n",
-			argv[0]);
-
+		fprintf(stderr, "usage: %s source search-path\n", argv[0]);
 		return 1;
 	}
 
-	if (strlen(argv[2]) >= sizeof include_path)
-		fail("include search path is too long");
+	if (strlen(argv[2]) >= sizeof include_path) fail("include search path is too long");
 
 	strcpy(include_path, argv[2]);
-
-	size_t stdlib_len = strlen(stdlib);
-
-	if (stdlib_len + 1 >= sizeof src)
-		fail("stdlib is too large");
-
-	memcpy(src, stdlib, stdlib_len);
-	src[stdlib_len++] = '\n';
-
-	size_t remaining = sizeof src - stdlib_len - 1;
 
 	FILE *file = fopen(argv[1], "r");
 
 	if (!file)
 	{
-		fprintf(stderr,
-			"rockc: error: could not open source file '%s'\n",
-			argv[1]);
-
+		fprintf(stderr, "rockc: error: could not open source file '%s'\n", argv[1]);
 		return 1;
 	}
 
-	size_t input_len = fread(src + stdlib_len, 1, remaining, file);
+	size_t input_len = fread(src, 1, sizeof src - 1, file);
 
 	if (ferror(file))
 	{
 		fclose(file);
-		fprintf(stderr,
-			"rockc: error: could not read source file '%s'\n",
-			argv[1]);
-
+		fprintf(stderr, "rockc: error: could not read source file '%s'\n", argv[1]);
 		return 1;
 	}
 
 	fclose(file);
 
-	len = (long)(stdlib_len + input_len);
+	len = (long)input_len;
 	src[len] = '\0';
 	pos = 0;
 
@@ -912,19 +826,13 @@ int main
 
 	while (pos < len)
 	{
-		if (try_raw_line())
-			continue;
-
-		if (try_keyword("fn"))
-			compile_fn();
-		else
-			compile_top_stmt();
+		if (try_raw_line()) continue;
+		if (try_keyword("fn")) compile_fn();
+		else compile_top_stmt();
 
 		skipws();
 	}
 
-	if (has_main)
-		printf("Call main\n");
-
+	if (has_main) printf("Call main\n");
 	return 0;
 }
