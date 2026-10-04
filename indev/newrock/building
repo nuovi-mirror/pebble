@@ -1,0 +1,12 @@
+To compile the New Rock compiler, run
+
+	cc -o stdlib.o -c stdlib.c
+	cc -o rockc rockc.c stdlib.o
+
+The New Rock compiler reads from argument one as the
+New Rock source code file to compile and argument
+two as the include path. The include path specifies
+the directory to search for files imported using the
+include keyword - to compile the demo program, run
+
+	./rockc demo.newrock . >demo.pebble
