@@ -1,0 +1,18 @@
+New Rock is a subdialect of the Rock language, a simple C-like language
+compiling down to Pebble. New rock adds many extra featues, but it
+mainly adds proper Pebble addressing support to the language to allow
+all of the advanced concepts that can be expressed by Pebble AAE to also
+be expressed by the Rock language. This does mean New Rock removed the
+older Rock marker symbols, meaning code written in Rock will not compile
+with a New Rock compiler.
+
+The New Rock compiler can be found in the rockc/ folder relative to here
+and can be compiled simply with
+
+	cc -o rockc rockc/*.c
+
+to generate one rockc binary. Running this without arguments should
+tell you how to use it
+
+rockpkg is a small package manager for the New Rock language, which can
+be found in the rockpkg/ directory.
