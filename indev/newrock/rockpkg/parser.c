@@ -81,7 +81,6 @@ void parsefile
 	                	else if (strcmp(key, "contacttype") == 0) contacttype = value;
         	        	else if (strcmp(key, "program") == 0) program = value;
                 		else if (strcmp(key, "includedir") == 0) includedir = value;
-                		else if (strcmp(key, "output") == 0) output = value;
 			}
 		}
 

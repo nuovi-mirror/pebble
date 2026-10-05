@@ -466,6 +466,8 @@ int main
 
 	skipws();
 
+	printf("#!/usr/bin/pblvm\n");
+
 	while (pos < len)
 	{
 		if (try_raw_line()) continue;
