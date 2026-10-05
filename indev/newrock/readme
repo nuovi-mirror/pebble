@@ -16,10 +16,10 @@ tell you how to use it
 
 rockpkg is a small package manager for the New Rock language, which can
 be found in the rockpkg/ directory. This program accepts the path of the
-.rockpkg file (a description of how to install the package) as the first
-argument and nothing else. It expects the command 'rockc' and 'pblvm' to
-be available, being the New Rock compiler and Pebble VM binaries. You can
-get .rockpkg files from the central repo
+.rockpkg file (a description of how to install the package) as the second
+argument and 'install' as the first. It expects the command 'rockc' and 
+'pblvm' to be available, being the New Rock compiler and Pebble VM 
+binaries. You can get .rockpkg files from the central repo
 
 	http://pebblevm.org/rockpkg/
 
