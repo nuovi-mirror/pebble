@@ -7,6 +7,7 @@
 void cli
 (Args *args)
 {
+	if (args->count == 0) return;
 	if (cmpstr(args->values[1], "logo") == 0) {
 		print(logo);
 		exitproc(0);

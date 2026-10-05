@@ -49,7 +49,7 @@ Args initargs
 {
 	Args cliargs;
 
-	cliargs.count = (unsigned long)argc;
+	cliargs.count = (unsigned long)argc - 1;
 	cliargs.values = argv;
 
 	return cliargs;

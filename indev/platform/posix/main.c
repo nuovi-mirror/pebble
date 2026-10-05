@@ -36,10 +36,8 @@ int main
 	char *mem_arena_persistAlloc_backing = malloc(limits.allocator_persist_maxmem);
 	char *mem_arena_IRAlloc_backing = malloc(limits.allocator_IRAlloc_maxmem);
 	Stack *mem_stack_callStack_stack = malloc(limits.stack_callStack_size);
-	StackFrame *mem_stack_callStack_frames = malloc(limits.stack_callStack_frameSize 
+	StackFrame *mem_stack_callStack_frames = malloc(limits.stack_callStack_frameSize  
 		* limits.stack_callStack_cap);
-
-
 
 	mem.arena_tempAlloc_backing = mem_arena_tempAlloc_backing;
 	mem.arena_scratchAlloc_backing = mem_arena_scratchAlloc_backing;
