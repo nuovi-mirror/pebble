@@ -11,6 +11,8 @@ void error
 void usage 
 (void)
 {
-	printf("put usage data here");
+	printf("usage: rockc [ install | remove ] (pkg)\n");
+	printf("    install - install package from package file (pkg)\n");
+	printf("    remove  - remove installed package (pkg)\n");
 	exit(1);
 }
