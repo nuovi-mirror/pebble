@@ -5,7 +5,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#define PATH_MAX 32
+#define PATH_MAX 512
 
 void error 
 (char *msg)

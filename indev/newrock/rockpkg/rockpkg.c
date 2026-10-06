@@ -60,7 +60,7 @@ int main
 
 	parsefile(filedata, filesize);
 
-	snprintf(appdir, sizeof(bappdir), "%s/%s/%s/", pkgdir, version, name);
+	snprintf(appdir, sizeof(bappdir), "%s/%s/%s/", pkgdir, name, version);
 
 	if (strcmp(argv[1], "install") == 0)
 	{

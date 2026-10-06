@@ -42,6 +42,36 @@ void compile_value
 		return;
 	}
 
+	if (c == '{')
+	{
+		pos++;
+
+		char text[MAX_VALUE];
+		char subst[MAX_VALUE];
+
+		read_delimited('}', text, sizeof text);
+		subst_expr(fn, text, subst, sizeof subst);
+
+		snprintf(out, cap, "{%s}", subst);
+
+		return;
+	}
+	
+	if (c == '<')
+	{
+		pos++;
+
+		char text[MAX_VALUE];
+		char subst[MAX_VALUE];
+
+		read_delimited('>', text, sizeof text);
+		subst_expr(fn, text, subst, sizeof subst);
+
+		snprintf(out, cap, "<%s>", subst);
+
+		return;
+	}
+
 	if (is_ident_start(c))
 	{
 		char name[MAX_NAME];

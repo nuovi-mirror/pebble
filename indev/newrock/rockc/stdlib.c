@@ -13,7 +13,7 @@ const char stdlib[] = {
 	". New __Escape_std.io.printLn_ARG0 <__Func_std.io.printLn_data>\n"
 	". Escape std.io.printLn\n"
 	"}\n"
-
+	
 	"fn std.io.input ( ) input {\n"
 	". Escape std.io.input\n"
 	". New __Func_std.io.input_input __Escape_std.io.input_RET0\n"
