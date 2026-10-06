@@ -76,17 +76,11 @@ int vmmain
 	for (unsigned long i = 0; i < cliargs.count; i++)
 	{
 		char *buff = alloc(persistAlloc, limits->misc_vmargmaxdigits + 5);
-		snprint((char *)&buff, sizeof(buff), "VMARG%u", i);
-
-		print("Added argument ");
-		print((char *)&buff);
-		print(" as ");
-		print(cliargs.values[i]);
-		print("\n");
+		snprint(buff, sizeof(buff), "VMARG%u", i);
 
 		Value *arg = alloc(persistAlloc, sizeof(Value));
 		*arg = (Value){ .Type = type_str, .as.str = cliargs.values[i] };
-		putVar(&vars, (char *)&buff, arg, persistAlloc);
+		putVar(&vars, buff, arg, persistAlloc);
 		
 	}
 
