@@ -22,6 +22,19 @@ void setflags (Config *config) {
 			"-mtune=native "
 		);
 
+	else if (strcmp(config->build, "xray") == 0) {
+		strcat(config->cflags, 
+			"-O2 "
+			"-g "
+			"-fxray-instrument "
+			"-fxray-instruction-threshold=1 "
+			"-fxray-link-deps "
+		);
+
+		strcat(config->ldflags, "-fxray-instrument");
+	}
+
+
 	else if (strcmp(config->build, "small") == 0)
 		strcat(config->cflags, 
 			"-Oz "
@@ -40,6 +53,8 @@ void setflags (Config *config) {
 			"-Wshadow "
 			"-Wconversion "
 			"-Wsign-conversion "
+			"-fno-omit-frame-pointer "
+			"-fno-optimize-sibling-calls "
 			"-Wformat=2 "
 			"-Wundef "
 			"-Wcast-qual "
