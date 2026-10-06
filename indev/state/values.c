@@ -47,18 +47,18 @@ Value valuetoword (Value v, VarMap *vars, Arena *persistAlloc)
 		case type_word:
 			return v;
 		case type_sword:
-			return (struct Value){type_word, (unsigned long)v.as.sword};
+			return (struct Value){ .Type = type_word, .as.word = (unsigned long)v.as.sword };
 		case type_flt:
-			return (struct Value){type_word, (unsigned long)v.as.flt};
+			return (struct Value){ .Type = type_word, .as.word = (unsigned long)v.as.flt };
 		case type_str:
-			return (struct Value){type_word, str2ul(v.as.str, NULL, 10)};
+			return (struct Value){ .Type = type_word, .as.word = str2ul(v.as.str, NULL, 10) };
 		case type_null:
-			return (struct Value){type_word, 0};
-			/* XXX  ¯\_(°▽°)_/¯  idk what to put here ngl */
+			return (struct Value){ .Type = type_word, .as.word = 0 };
+			/* XXX idk what to put here ngl */
 		case type_expr:
 			return evalexprnode(v.as.expr, vars, persistAlloc);
 		default:
-			return (struct Value){type_sword, -1}; /* should never be hit */
+			return (struct Value){ .Type = type_word, .as.word = 0 }; /* should never be hit */
 	}
 }
 
@@ -72,6 +72,15 @@ Value guessvaluetype (char *data, Arena *persistAlloc)
 	/* empty string */
 	if (data[0] == '\0')
 		goto string;
+
+	/* check if contains valid numeric chars */
+	char *p = data;
+
+	while (*p)
+	{
+		unsigned char c = (unsigned char)*p++;
+		if (!((c >= '0' && c <= '9') || c == '-' || c == '.')) goto string;
+	}
 
 	/* optional negative sign */
 	if (data[0] == '-') {
