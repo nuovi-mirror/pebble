@@ -10,6 +10,7 @@
 #include "instructions.h"
 #include "main.h"
 #include "print.h"
+#include "snprint.h"
 #include "skipspace.h"
 #include "variables.h"
 #include "mem.h"
@@ -70,6 +71,24 @@ int vmmain
 
 	/* clean the file backing buffer */
 	resetAllocator(tempAlloc);
+
+	/* initalize VM CLI arguments */
+	for (unsigned long i = 0; i < cliargs.count; i++)
+	{
+		char *buff = alloc(persistAlloc, limits->misc_vmargmaxdigits + 5);
+		snprint((char *)&buff, sizeof(buff), "VMARG%u", i);
+
+		print("Added argument ");
+		print((char *)&buff);
+		print(" as ");
+		print(cliargs.values[i]);
+		print("\n");
+
+		Value *arg = alloc(persistAlloc, sizeof(Value));
+		*arg = (Value){ .Type = type_str, .as.str = cliargs.values[i] };
+		putVar(&vars, (char *)&buff, arg, persistAlloc);
+		
+	}
 
 	/* execution */
 	unsigned long pc = 0;

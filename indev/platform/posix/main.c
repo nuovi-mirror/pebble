@@ -23,6 +23,7 @@ int main
 	limits.variables_max = 512;
 	limits.escapes_namesize = 32;
 	limits.misc_maxfilebuffersize = (6 * 1024 * 1024);
+	limits.misc_vmargmaxdigits = 2;
 	limits.instruction_new_destsize = 32;
 	limits.instruction_new_datasize = 32;
 

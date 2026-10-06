@@ -32,6 +32,7 @@ struct Limits {
 
 	/* misc */
 	unsigned long misc_maxfilebuffersize; /* max buffer size for the bytecode file */
+	unsigned long misc_vmargmaxdigits; /* max number of arg digits, eg '2' for up to '99' args */
 
 	/* specific instructions */
 	unsigned long instruction_new_destsize; /* size in bytes of the new opcode dest buffer */
