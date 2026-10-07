@@ -70,7 +70,6 @@ const char *ffi_base_srcs[] = {
 	NULL
 };
 
-/* library code */
 const char *ffi_c_srcs[] = {
 	"ffi/platform/c/test/hello.c",
 	"ffi/platform/c/test/getseed.c",
@@ -84,6 +83,12 @@ const char *ffi_c_srcs[] = {
 
 	NULL
 };
+
+const char *ffi_posix_srcs[] = {
+
+	NULL
+};
+
 
 const char *ffi_sdl2_srcs[] = {
 	"ffi/platform/sdl2/gs/2d/window/create.c",

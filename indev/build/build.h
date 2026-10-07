@@ -29,6 +29,7 @@ extern const char *platform_posix_srcs[];
 extern const char *ffi_base_srcs[];
 
 /* library code */
+extern const char *ffi_posix_srcs[];
 extern const char *ffi_c_srcs[];
 extern const char *ffi_sdl2_srcs[];
 
