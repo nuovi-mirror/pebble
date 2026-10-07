@@ -30,6 +30,11 @@ static const struct EscapeSequence escapes[] = {
 	/* graphics libraries */
 	{"gs.2d.window.create", escape_gs_2d_window_create},
 #endif
+
+#ifdef terminal
+	/* terminal libraries */
+	{"std.term.color.basic.fore", escape_std_term_color_basic_fore},
+#endif
 };
 
 void callEscape (const char *name, unsigned long long seed, FFIvars *vars,

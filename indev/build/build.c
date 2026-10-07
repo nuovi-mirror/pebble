@@ -71,6 +71,7 @@ const char *ffi_base_srcs[] = {
 };
 
 const char *ffi_asni_srcs[] = {
+	"ffi/plaform/asni/std/term/color/basic/fore.c",
 
 	NULL
 };

@@ -55,10 +55,8 @@ int main (int argc, char **argv) {
 		return 0;
 	}
 
-	/* XXX debug
 	printf("cflags  : %s\n", config.cflags);
 	printf("ldflags : %s\n", config.ldflags);
-	*/
 
 	compile(&config, src, srccount, objs);
 	link(&config, objs, srccount);

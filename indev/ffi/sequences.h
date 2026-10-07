@@ -10,7 +10,13 @@
 #include "libs/std/misc/random.h"
 #include "libs/std/misc/sleep.h"
 
-#ifdef graphics
+#if graphics == sdl2
 /* graphis libraries */
 #include "libs/gs/2d/window/create.h"
+
+#if terminal == asni
+/* terminal libraries */
+#include "libs/std/term/color/basic/fore.h"
+#endif
+
 #endif
