@@ -1,3 +1,6 @@
+#define _POSIX_C_SOURCE 200809L
+/* needed for Linux */
+
 #include "snooze.h"
 #include <time.h>
 

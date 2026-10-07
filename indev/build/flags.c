@@ -3,24 +3,30 @@
 
 void setflags (Config *config) {
 	if (strcmp(config->build, "default") == 0)
+	{
 		strcat(config->cflags, 
 			"-O2 "
-			"-flto "
 			"-ffunction-sections "
 			"-fdata-sections "
 		);
 
+		strcat(config->ldflags, "-flto ");
+	}
+
 	else if (strcmp(config->build, "fast") == 0)
+	{
 		strcat(config->cflags, 
 			"-O3 "
 			"-ffunction-sections "
 			"-fdata-sections "
-			"-flto "
 			"-fno-semantic-interposition "
 			"-ffast-math "
 			"-march=native "
 			"-mtune=native "
 		);
+
+		strcat(config->ldflags, "-flto ");
+	}
 
 	else if (strcmp(config->build, "xray") == 0) {
 		strcat(config->cflags, 
@@ -36,12 +42,15 @@ void setflags (Config *config) {
 
 
 	else if (strcmp(config->build, "small") == 0)
+	{
 		strcat(config->cflags, 
 			"-Oz "
-			"-flto "
 			"-ffunction-sections "
 			"-fdata-sections "
 		);
+
+		strcat(config->ldflags, "-flto ");
+	}
 
 	else if (strcmp(config->build, "debug") == 0)
 		strcat(config->cflags, 
