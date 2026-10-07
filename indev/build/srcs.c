@@ -49,7 +49,7 @@ unsigned int mksrclist (Config *config, char **srcs) {
 		addsrcs(ffi_posix_srcs, srcs, &count);
 		addsrcs(ffi_c_srcs, srcs, &count);
 
-		strcat(config->cflags, "-Dterminal=ansi ");
+		strcat(config->cflags, "-Dterminal -Dterminal_ansi ");
 	}
 
 	if (strcmp(config->terminal, "ansi") == 0)
@@ -86,7 +86,7 @@ unsigned int mksrclist (Config *config, char **srcs) {
 		strcat(config->ldflags, sdl2_ldflags);
 		strcat(config->cflags, sdl2_cflags);
 
-		strcat(config->cflags, "-Dgraphics=sdl2 ");
+		strcat(config->cflags, "-Dgraphics -Dgraphics-sdl2 ");
 	}
 
 	srcs[count++] = getmain(config);
