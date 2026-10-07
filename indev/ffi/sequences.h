@@ -13,10 +13,9 @@
 #if graphics == sdl2
 /* graphis libraries */
 #include "libs/gs/2d/window/create.h"
+#endif
 
 #if terminal == asni
 /* terminal libraries */
 #include "libs/std/term/color/basic/fore.h"
-#endif
-
 #endif
