@@ -49,11 +49,11 @@ unsigned int mksrclist (Config *config, char **srcs) {
 		addsrcs(ffi_posix_srcs, srcs, &count);
 		addsrcs(ffi_c_srcs, srcs, &count);
 
-		strcat(config->cflags, "-Dterminal=asni ");
+		strcat(config->cflags, "-Dterminal=ansi ");
 	}
 
-	if (strcmp(config->terminal, "asni") == 0)
-		addsrcs(ffi_asni_srcs, srcs, &count);
+	if (strcmp(config->terminal, "ansi") == 0)
+		addsrcs(ffi_ansi_srcs, srcs, &count);
 
 	if (strcmp(config->graphics, "sdl2") == 0) {
 		addsrcs(ffi_sdl2_srcs, srcs, &count);

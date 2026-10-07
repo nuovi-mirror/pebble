@@ -70,8 +70,8 @@ const char *ffi_base_srcs[] = {
 	NULL
 };
 
-const char *ffi_asni_srcs[] = {
-	"ffi/platform/asni/std/term/color/basic/fore.c",
+const char *ffi_ansi_srcs[] = {
+	"ffi/platform/ansi/std/term/color/basic/fore.c",
 
 	NULL
 };
