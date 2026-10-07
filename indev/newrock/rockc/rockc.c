@@ -496,7 +496,7 @@ int main
 
 	skipws();
 
-	printf("#!/usr/bin/pblvm\n");
+	printf("#!/usr/bin/env pblvm\n");
 
 	while (pos < len)
 	{
