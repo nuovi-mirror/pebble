@@ -48,12 +48,12 @@ unsigned int mksrclist (Config *config, char **srcs) {
 	    strcmp(config->platform, "puredarwin")) {
 		addsrcs(ffi_posix_srcs, srcs, &count);
 		addsrcs(ffi_c_srcs, srcs, &count);
-
-		strcat(config->cflags, "-Dterminal -Dterminal_ansi ");
 	}
 
-	if (strcmp(config->terminal, "ansi") == 0)
+	if (strcmp(config->terminal, "ansi") == 0) {
 		addsrcs(ffi_ansi_srcs, srcs, &count);
+		strcat(config->cflags, "-Dterminal -Dterminal_ansi ");
+	}
 
 	if (strcmp(config->graphics, "sdl2") == 0) {
 		addsrcs(ffi_sdl2_srcs, srcs, &count);
@@ -86,7 +86,7 @@ unsigned int mksrclist (Config *config, char **srcs) {
 		strcat(config->ldflags, sdl2_ldflags);
 		strcat(config->cflags, sdl2_cflags);
 
-		strcat(config->cflags, "-Dgraphics -Dgraphics-sdl2 ");
+		strcat(config->cflags, "-Dgraphics -Dgraphics_sdl2 ");
 	}
 
 	srcs[count++] = getmain(config);
