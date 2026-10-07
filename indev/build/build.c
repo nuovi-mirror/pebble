@@ -70,6 +70,12 @@ const char *ffi_base_srcs[] = {
 	NULL
 };
 
+const char *ffi_asni_srcs[] = {
+
+	NULL
+};
+
+
 const char *ffi_c_srcs[] = {
 	"ffi/platform/c/test/hello.c",
 	"ffi/platform/c/test/getseed.c",

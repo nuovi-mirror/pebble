@@ -50,6 +50,8 @@ unsigned int mksrclist (Config *config, char **srcs) {
 		addsrcs(ffi_c_srcs, srcs, &count);
 	}
 
+	if (strcmp(config->terminal, "asni") == 0)
+		addsrcs(ffi_asni_srcs, srcs, &count);
 
 	if (strcmp(config->graphics, "sdl2") == 0) {
 		addsrcs(ffi_sdl2_srcs, srcs, &count);

@@ -15,6 +15,7 @@ typedef struct Config {
 	char *build; /* build type */
 	char *platform; /* platform to build for */
 	char *graphics; /* optional graphics backend */
+	char *terminal; /* optional terminal backend */
 } Config;
 
 /* VM source code */
@@ -32,6 +33,7 @@ extern const char *ffi_base_srcs[];
 extern const char *ffi_posix_srcs[];
 extern const char *ffi_c_srcs[];
 extern const char *ffi_sdl2_srcs[];
+extern const char *ffi_asni_srcs[];
 
 /* helper.c */
 void error (const char *msg);

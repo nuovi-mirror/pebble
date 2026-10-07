@@ -13,6 +13,7 @@ void parseargs (Config *config, char *argument) {
 	else if (strcmp(argument, "platform") == 0) config->platform = equals;
 	else if (strcmp(argument, "analyzer") == 0) config->precompiler = equals;
 	else if (strcmp(argument, "graphics") == 0) config->graphics = equals;
+	else if (strcmp(argument, "terminal") == 0) config->terminal = equals;
 	else if (strcmp(argument, "cflags") == 0) config->cflags = equals;
 	else if (strcmp(argument, "ldflags") == 0) config->ldflags = equals;
 

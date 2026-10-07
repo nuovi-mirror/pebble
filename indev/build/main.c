@@ -14,6 +14,7 @@ int main (int argc, char **argv) {
 	char platform[32];
 	char precompiler[32];
 	char graphics[32];
+	char terminal[32];
 	char cflags[1024];
 	char ldflags[1024];
 
@@ -23,6 +24,7 @@ int main (int argc, char **argv) {
 	config.platform = (char *)&platform;
 	config.precompiler = (char *)&precompiler;
 	config.graphics = (char *)&graphics;
+	config.terminal = (char *)&terminal;
 	config.cflags = (char *)&cflags;
 	config.ldflags = (char *)&ldflags;
 
@@ -32,6 +34,7 @@ int main (int argc, char **argv) {
 	strcpy(config.platform, "posix");
 	strcpy(config.precompiler, "");
 	strcpy(config.graphics, "");
+	strcpy(config.terminal, "");
 	strcpy(config.cflags, "-Ih -Iffi -std=c99 ");
 	strcpy(config.ldflags, "-Wl,--gc-sections ");
 
