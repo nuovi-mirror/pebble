@@ -27,7 +27,7 @@ int main (int argc, char **argv) {
 	config.ldflags = (char *)&ldflags;
 
 	strcpy(config.compiler, "cc");
-	strcpy(config.program, "bin/vm");
+	strcpy(config.program, "bin/cpebble");
 	strcpy(config.build, "default");
 	strcpy(config.platform, "posix");
 	strcpy(config.precompiler, "");

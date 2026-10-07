@@ -34,7 +34,7 @@ Building from source
 	cc - the selected C compiler to use - defaults to 'cc'.
 
 	program - the path to place the finished binary - defaults to
-		'./bin/vm'.
+		'./bin/cpebble'.
 
 	cflags - the C compiler flags to use before adding the build-specific
 		compiler flags. The default is '-std=c99'.

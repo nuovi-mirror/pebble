@@ -9,10 +9,13 @@ with a New Rock compiler.
 The New Rock compiler can be found in the rockc/ folder relative to here
 and can be compiled simply with
 
-	cc -o ../bin/rockc rockc/*.c
+	cc -o bin/rockc newrock/rockc/*.c
 
 from the current directory to generate one rockc binary. Running this 
 without arguments should tell you how to use it.
+
+(keep in mind, the current directory is assumed to be the root of the
+indev tree)
 
 rockpkg is a small pkgsrc-like package manager and build system for
 the New Rock language. It reads .rockpkg build configuration files
@@ -33,6 +36,6 @@ and install it using the rockpkg package manager
 
 The package manager can be built by running
 
-	cc -o ../bin/rockpkg rockpkg/*.c $(curl-config --libs)
+	cc -o bin/rockpkg newrock/rockpkg/*.c $(curl-config --libs)
 
 from the current directory.
