@@ -12,28 +12,24 @@
 #include "str2ul.h"
 #include "variables.h"
 
-int valuetostr (char *buff, unsigned long buffsize, Value v)
+int valuetostr 
+(char *buff, unsigned long buffsize, Value v)
 {
-	switch (v.Type) {
-		case type_word:
-			return snprint(buff, buffsize, "%lu", v.as.word);
-		case type_sword:
-			return snprint(buff, buffsize, "%ld", v.as.sword);
-		case type_flt:
-			return snprint(buff, buffsize, "%lf", v.as.flt);
-		case type_str:
-			return snprint(buff, buffsize, "%s", v.as.str);
-		case type_null:
-			if (buffsize)
-				copystr(buff, "NULL");
-			return 0;
+	switch (v.Type) 
+	{
+		case type_word: return snprint(buff, buffsize, "%lu", v.as.word);
+		case type_sword: return snprint(buff, buffsize, "%ld", v.as.sword);
+		case type_flt: return snprint(buff, buffsize, "%lf", v.as.flt);
+		case type_str: return snprint(buff, buffsize, "%s", v.as.str);
+		case type_null: if (buffsize) copystr(buff, "NULL"); return 0;
+		case type_pointer: if (buffsize) copystr(buff, "NULL"); return 0;
 		case type_expr:
 			if (v.as.expr == NULL || v.as.expr->Source == NULL) {
-				if (buffsize)
-					buff[0] = '\0'; /* never leave buff unterminated */
+				if (buffsize) buff[0] = '\0'; /* never leave buff unterminated */
 				return -1;
 			}
 			return snprint(buff, buffsize, "%s", v.as.expr->Source);
+
 		default:
 			if (buffsize)
 				buff[0] = '\0'; /* never leave buff unterminated */
@@ -55,6 +51,9 @@ Value valuetoword (Value v, VarMap *vars, Arena *persistAlloc)
 		case type_null:
 			return (struct Value){ .Type = type_word, .as.word = 0 };
 			/* XXX idk what to put here ngl */
+		case type_pointer:
+			return (struct Value){ .Type = type_word, .as.word = 0 };
+			/* XXX shim */
 		case type_expr:
 			return evalexprnode(v.as.expr, vars, persistAlloc);
 		default:
@@ -69,9 +68,7 @@ Value guessvaluetype (char *data, Arena *persistAlloc)
 	int negative = 0;
 	int dot = 0;
 
-	/* empty string */
-	if (data[0] == '\0')
-		goto string;
+	if (data[0] == '\0') goto string; /* empty string */
 
 	/* check if contains valid numeric chars */
 	char *p = data;
@@ -87,44 +84,36 @@ Value guessvaluetype (char *data, Arena *persistAlloc)
 		negative = 1;
 		i++;
 
-		/* '-' by itself */
-		if (data[i] == '\0')
-			goto string;
-
-		if (data[1] == '0')
-			goto string;
+		if (data[i] == '\0') goto string; /* '-' by itself */
+		if (data[1] == '0') goto string; /* -0 */
 	}
 
 	/* validate the numeric form */
 	for (; data[i] != '\0'; i++) {
 		if (data[i] == '.') {
-			/* only one decimal point */
-			if (dot)
-				goto string;
+			if (dot) goto string;
 
 			dot = 1;
 			continue;
 		}
 
-		/* anything other than a digit */
-		if (data[i] < '0' || data[i] > '9')
-			goto string;
+		if (data[i] < '0' || data[i] > '9') goto string;
 	}
 
-	/* leading 0 with no decimal is a string so things
-	 * like '01' are preserved. */
-	if (data[0] == '0' && !dot && i > 1)
-		goto string;
+	/* leading 0 with no decimal is a string so things like '01' are preserved. */
+	if (data[0] == '0' && !dot && i > 1) goto string;
 
 	/* decimal number */
-	if (dot) {
+	if (dot) 
+	{
 		out.Type = type_flt;
 		out.as.flt = strtod(data, NULL);
 		return out;
 	}
 
 	/* negative integer */
-	if (negative) {
+	if (negative) 
+	{
 		out.Type = type_sword;
 		out.as.sword = strtol(data, NULL, 10);
 		return out;

@@ -1,5 +1,4 @@
 #include "expressions.h"
-
 #include "allocator.h"
 #include "cmpstr.h"
 #include "cmpstrn.h"
@@ -28,11 +27,19 @@ const ExprOperator ExprOperators[] = {
 	{"s++", ExprOp_StringConcat, 3},
 };
 
+static int startsnumericliteral
+(const char *str)
+{
+    if (str[0] == '-' || str[0] == '+') return (str[1] >= '0' && str[1] <= '9') || str[1] == '.';
+    return (str[0] >= '0' && str[0] <= '9') || str[0] == '.';
+}
+
 const ExprOperator *strtooperator (const char *str)
 {
-	for (unsigned long i = 0; i < sizeof(ExprOperators) / sizeof(ExprOperators[1]);
-		i++) {
-		if (cmpstr(ExprOperators[i].Sym, str) == 0) {
+	for (unsigned long i = 0; i < sizeof(ExprOperators) / sizeof(ExprOperators[1]); i++) 
+	{
+		if (cmpstr(ExprOperators[i].Sym, str) == 0) 
+		{
 			return &ExprOperators[i];
 			break;
 		}
@@ -60,24 +67,36 @@ Value parseliteral (const char **str, Arena *tempAlloc, Arena *persistAlloc)
 	return guessvaluetype(buf, persistAlloc);
 }
 
-void nexttoken (char **str, Token *token, Arena *tempAlloc, Arena *persistAlloc)
+void nexttoken 
+(char **str, Token *token, Arena *tempAlloc, Arena *persistAlloc)
 {
 	*str = tskipspace(*str);
 
-	if (**str == '\0') {
+	if (**str == '\0') 
+	{
 		token->Type = Token_End;
 		return;
 	}
 
-	if (**str == '(') {
+	if (**str == '(') 
+	{
 		(*str)++;
 		token->Type = Token_LeftParent;
 		return;
 	}
 
-	if (**str == ')') {
+	if (**str == ')') 
+	{
 		(*str)++;
 		token->Type = Token_RightParent;
+		return;
+	}
+
+	/* signed/numeric literals get priority over operators so things like '1 + -1' work */
+	if (startsnumericliteral(*str))
+	{
+		token->Type = Token_Value;
+		token->Value = parseliteral((const char **)str, tempAlloc, persistAlloc);
 		return;
 	}
 
@@ -85,8 +104,8 @@ void nexttoken (char **str, Token *token, Arena *tempAlloc, Arena *persistAlloc)
 	const ExprOperator *best = NULL;
 	unsigned long bestlen = 0;
 
-	for (unsigned long i = 0; i < sizeof(ExprOperators) / sizeof(ExprOperators[0]);
-		i++) {
+	for (unsigned long i = 0; i < sizeof(ExprOperators) / sizeof(ExprOperators[0]); i++) 
+	{
 		unsigned long len = getstrlen(ExprOperators[i].Sym);
 		if (cmpstrn(*str, ExprOperators[i].Sym, len) == 0) {
 			best = &ExprOperators[i];
@@ -94,7 +113,8 @@ void nexttoken (char **str, Token *token, Arena *tempAlloc, Arena *persistAlloc)
 		}
 	}
 
-	if (best) {
+	if (best) 
+	{
 		*str += bestlen;
 		token->Type = Token_Operator;
 		token->Op = best;
