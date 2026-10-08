@@ -98,8 +98,29 @@ End
 New indirect2 'indirect'
 Call <indirect2>
 
+# a bug was recently patched, where if you performed
+# a numeric operation on a string, it would leak
+# the address of where that result was placed. Since
+# on some platform targets memory regions may be
+# predictable if the attacker knows the limits file
+# and arguments used to build the interpreter, then
+# they may be able to derrive other regions, such as
+# the location of the IR buffer and language level
+# stack. If this is combined with some other vul
+# allowing arbitrary memory writes (which at the
+# time of this, none is known), then an attacker
+# would be able to create and execute arbitrary
+# Pebble statements. Please note this is not 
+# arbitrary machine code, but Pebble statements.
+
+# If the next few lines below me print what
+# looks like an address, your build may be
+# vulnerable to this information leakage bug
+
 New jlb "1 + h"
 _PRINT2 jlb
+
+# those above me
 
 _GETMEM
 
