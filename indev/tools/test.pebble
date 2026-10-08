@@ -49,6 +49,9 @@ New k '1'
 New l k
 _PRINT2 l
 
+New jlb "1 + h"
+_PRINT2 jlb
+
 Func 'a'
 _PRINT funca
 End
@@ -94,6 +97,9 @@ End
 
 New indirect2 'indirect'
 Call <indirect2>
+
+New jlb "1 + h"
+_PRINT2 jlb
 
 _GETMEM
 

@@ -1,11 +1,12 @@
 #include "evaluator.h"
-
 #include "cmpstr.h"
 #include "cmpstrn.h"
 #include "copymem.h"
 #include "expressions.h"
 #include "getnstrlen.h"
 #include "getstrlen.h"
+#include "str2d.h"
+#include "str2ul.h"
 #include "main.h"
 #include "values.h"
 #include "variables.h"
@@ -36,7 +37,14 @@ static long numsword
 static unsigned long numword 
 (Value v)
 {
-	return v.as.word;
+	switch (v.Type)
+	{
+		case type_word: return v.as.word; break;
+		case type_sword: return (unsigned long)v.as.word; break;
+		case type_flt: return (unsigned long)v.as.flt; break;
+		case type_str: return str2ul(v.as.str, (char **)(v.as.str + getstrlen(v.as.str)), 10); break;
+		default: return 0; /* XXX error case */
+	}
 }
 
 static double numflt 
@@ -44,9 +52,10 @@ static double numflt
 {
 	switch (v.Type) 
 	{
-		case type_flt: return v.as.flt;
-		case type_sword: return (double)v.as.sword;
-		default: return (double)v.as.word;
+		case type_flt: return v.as.flt; break;
+		case type_sword: return (double)v.as.sword; break;
+		case type_word: return (double)v.as.word; break;
+		case type_str: return str2d(v.as.str, (char **)(v.as.str + getstrlen(v.as.str))); break;
 	}
 }
 
