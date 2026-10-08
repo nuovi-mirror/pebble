@@ -37,12 +37,14 @@ static long numsword
 static unsigned long numword 
 (Value v)
 {
+	char *end;
+
 	switch (v.Type)
 	{
 		case type_word: return v.as.word; break;
 		case type_sword: return (unsigned long)v.as.word; break;
 		case type_flt: return (unsigned long)v.as.flt; break;
-		case type_str: return str2ul(v.as.str, (char **)(v.as.str + getstrlen(v.as.str)), 10); break;
+		case type_str: return str2ul(v.as.str, &end, 10); break;
 		default: return 0; /* XXX error case */
 	}
 }
@@ -50,12 +52,15 @@ static unsigned long numword
 static double numflt 
 (Value v)
 {
+	char *end;
+
 	switch (v.Type) 
 	{
 		case type_flt: return v.as.flt; break;
 		case type_sword: return (double)v.as.sword; break;
 		case type_word: return (double)v.as.word; break;
-		case type_str: return str2d(v.as.str, (char **)(v.as.str + getstrlen(v.as.str))); break;
+		case type_str: return str2d(v.as.str, &end); break;
+		default: return 0.0; /* XXX error case */
 	}
 }
 
