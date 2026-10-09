@@ -23,7 +23,7 @@ void usage
 	printf("    install - install package from package file (pkg)\n");
 	printf("    remove  - remove installed package file (pkg)\n");
 	printf("\n");
-	printf("    (pkg)   - path to New Rock Package File (.rockpkg) file");
+	printf("    (pkg)   - path to New Rock Package File (.rockpkg) file\n");
 	exit(1);
 }
 
