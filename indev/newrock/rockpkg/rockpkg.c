@@ -135,7 +135,22 @@ int main
 
 	} else if (strcmp(argv[1], "remove") == 0)
 	{
-		printf("remove function not implimented yet :(\n");
-		exit(0);
+		printf("Removing package %s; are you sure you wish to do this? (y/n): ", name);
+
+		char input;
+		scanf(" %c", &input);
+		if (input != 'y') error("Aboted!");
+
+		char rmdir[sizeof(bappdir)];
+		strcpy(rmdir, appdir);
+
+		unsigned long len = strlen(rmdir);
+		while (len > 1 && rmdir[len - 1] == '/') rmdir[--len] = '\0';
+		char *slash = strchr(rmdir, '/');
+		if (slash && slash != rmdir) *slash = '\0';
+
+		int rm = rmdir_p(rmdir);
+		printf("Removed %i files\n", rm);
+		
 	} else usage();
 }
