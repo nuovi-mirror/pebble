@@ -100,7 +100,7 @@ Call <indirect2>
 
 # a bug was recently patched, where if you performed
 # a numeric operation on a string, it would leak
-# the address of where that result was placed. Since
+# the address of where that string was placed. Since
 # on some platform targets memory regions may be
 # predictable if the attacker knows the limits file
 # and arguments used to build the interpreter, then
