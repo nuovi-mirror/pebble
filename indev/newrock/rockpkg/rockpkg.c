@@ -85,7 +85,7 @@ int main
 
 		if ((chdir(chdirbuff)) == -1) error("cannot enter dir");
 		mkdir_p("bin", 0755);
-		mkdir_p("../../../bin", 0755);
+		mkdir_p("../../../bin", 0755); /* XXX $HOME/.rock/bin/ - maybe make this less hacky */
 
 		for (unsigned long i = 0; i < srccount; i++)
 		{
@@ -150,6 +150,8 @@ int main
 		if (slash && slash != rmdir) *slash = '\0';
 
 		int rm = rmdir_p(rmdir);
+
+		printf("Uninstalled package %s\n", name);
 		printf("Removed %i files\n", rm);
 		
 	} else usage();

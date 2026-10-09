@@ -21,7 +21,9 @@ void usage
 {
 	printf("usage: rockc [ install | remove ] (pkg)\n");
 	printf("    install - install package from package file (pkg)\n");
-	printf("    remove  - remove installed package (pkg)\n");
+	printf("    remove  - remove installed package file (pkg)\n");
+	printf("\n");
+	printf("    (pkg)   - path to New Rock Package File (.rockpkg) file");
 	exit(1);
 }
 
@@ -29,23 +31,19 @@ int mkdir_p
 (const char *path, mode_t mode)
 {
 	char tmp[PATH_MAX];
-	size_t len = strlen(path);
 
+	size_t len = strlen(path);
 	if (len >= sizeof tmp) return -1;
 
 	memcpy(tmp, path, len + 1);
+	while (len > 1 && tmp[len - 1] == '/') tmp[--len] = '\0';
 
-	while (len > 1 && tmp[len - 1] == '/') {
-		tmp[--len] = '\0';
-	}
-
-	for (char *p = tmp + 1; *p; p++) {
+	for (char *p = tmp + 1; *p; p++) 
+	{
 		if (*p != '/') continue;
-
         	*p = '\0';
 
         	if (mkdir(tmp, mode) == -1 && errno != EEXIST) return -1;
-
         	*p = '/';
     	}
 
@@ -71,14 +69,12 @@ int rmdir_p(const char *path)
 
     while ((entry = readdir(dir)) != NULL) 
     {
-        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) continue;
-
         struct stat st;
 
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) continue;
         snprintf(tmp, sizeof(tmp), "%s/%s", path, entry->d_name);
 
         if (stat(tmp, &st) == -1) continue;
-
         if (S_ISDIR(st.st_mode)) 
 	{
             int n = rmdir_p(tmp);
@@ -90,9 +86,11 @@ int rmdir_p(const char *path)
             }
 
             removed += n;
-        } else {
+        } else 
+	{
             if (unlink(tmp) == 0) removed++;
-            else {
+            else 
+	    {
                 closedir(dir);
                 return -1;
             }
