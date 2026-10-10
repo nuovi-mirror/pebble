@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include "helpers.h"
 #include "globals.h"
 #include "stuff.h"
@@ -116,12 +117,32 @@ int main
 		}
 
 		char outpath[512];
-		char buff[512 + sizeof(outpath)];
 		snprintf((char *)&outpath, sizeof(outpath), "bin/%s", name);
-		snprintf((char *)&buff, 512, "rockc %s %s >%s", program, includedir, (char *)&outpath);
+		pid_t proc = fork();
 
-		printf("rockc: %s\n", buff);
-		if ((system(buff)) != 0) error("compiling failed");
+		/* child process */
+		if (proc == 0)
+		{
+			int fd = open(outpath, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+			if (fd == -1) error("cannot open output binary");
+
+			if (dup2(fd, 1) == -1) error("cannot redirect stdout");
+
+			close(fd);
+
+			char *args[] = { "rockc", program, includedir, NULL };
+			execvp(args[0], args);
+
+			/* only reached if execvp failed */
+			error("execvp failed");
+		}
+
+		/* parent process */
+		int status;
+		if (waitpid(proc, &status, 0) == -1) error("waitpid failed");
+
+		if (WIFEXITED(status)) printf("Compiler exited with %d\n", WEXITSTATUS(status));
+		else if (WIFSIGNALED(status)) printf("Compiler killed with signal %d\n", WTERMSIG(status));
 
 		if (chmod((char *)&outpath, 0555) == -1) error("cannot make program executable");
 
