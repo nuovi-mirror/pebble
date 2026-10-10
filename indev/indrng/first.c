@@ -1,4 +1,4 @@
-#include "indrng.h" /* replaced from api.h - same file */
+#include "indrng.h"
 #include <time.h>
 
 volatile unsigned long long sink;
@@ -43,18 +43,6 @@ static void work
 	sink ^= x;
 }
 
-unsigned long long mix64 
-(unsigned long long x)
-{
-	x ^= x >> 30;
-	x *= 0xBF58476D1CE4E5B9ULL;
-	x ^= x >> 27;
-	x *= 0x94D049BB133111EBULL;
-	x ^= x >> 31;
-
-	return x;
-}
-
 static unsigned long long ground 
 (unsigned long long w, unsigned long long s, unsigned long a, unsigned long b, unsigned long c)
 {
@@ -66,27 +54,6 @@ static unsigned long long ground
 	d1 = t2 - t1;
 
 	return (unsigned long long)d1; /* XXX please be safe */
-}
-
-void shuffle 
-(unsigned int order[wsize], unsigned long long *state)
-{
-	unsigned int i;
-	unsigned int j;
-	unsigned int tmp;
-
-	for (i = 0; i < wsize; ++i)
-		order[i] = i;
-
-	for (i = wsize - 1; i > 0; --i) {
-		*state = mix64(*state);
-
-		j = (unsigned int)(*state % (i + 1));
-
-		tmp = order[i];
-		order[i] = order[j];
-		order[j] = tmp;
-	}
 }
 
 static unsigned long long grun 

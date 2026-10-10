@@ -51,7 +51,11 @@ const char *platform_c_srcs[] = {
 	"platform/c/str2ul.c",
 	"platform/c/str2d.c",
 	"platform/c/snprint.c",
+
+	/* indrng randomization stuff */
 	"indrng/first.c",
+	"indrng/shuffle.c",
+	"indrng/mix64.c",
 
 	NULL
 };
