@@ -1,0 +1,13 @@
+indrng is a small independent random number generator designed to
+allow generation of a random seed with real entropy without needing
+to be dependent on a specific ISA or OS backend. This is imported
+for the generic c backend's randomization primitive.
+
+This project was pulled from 
+
+	https://codeberg.org/vantheman/indrng
+
+and is licensed under same license as this project (which is PD).
+
+I would like to give thanks to the creator of this project, who
+is me.

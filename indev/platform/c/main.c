@@ -44,7 +44,7 @@ int main
 	mem.stack_callStack_stack = mem_stack_callStack_stack;
 	mem.stack_callStack_frames = mem_stack_callStack_frames;
 
-	volatile unsigned long long seed = grandom();
+	volatile unsigned long long seed = getrandom();
 	Args cliargs = initargs(argc, argv);
 	Stack *stack = initstack(1024, &mem);
 	int ret = vmmain(cliargs, stack, seed, &mem, &limits);
