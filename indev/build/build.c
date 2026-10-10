@@ -73,6 +73,7 @@ const char *ffi_base_srcs[] = {
 
 const char *ffi_ansi_srcs[] = {
 	"ffi/platform/ansi/std/term/color/basic/fore.c",
+	"ffi/platform/ansi/std/term/screen/clear.c",
 
 	NULL
 };
