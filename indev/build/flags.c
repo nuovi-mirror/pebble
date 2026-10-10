@@ -72,7 +72,7 @@ void setflags (Config *config) {
 			"-Wswitch-enum "
 			"-Wvla "
 			"-Wdouble-promotion "
-			"-Wfloat-equal"
+			"-Wfloat-equal "
 		);
 
 	else

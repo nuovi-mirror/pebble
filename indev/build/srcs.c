@@ -31,6 +31,8 @@ unsigned int mksrclist (Config *config, char **srcs) {
 	else if (strcmp(config->platform, "c") == 0) {
 		addsrcs(platform_c_srcs, srcs, &count);
 		addsrcs(platform_freestand_srcs, srcs, &count);
+		addsrcs(indrng_srcs, srcs, &count);
+		strcat(config->cflags, "-Dindrng -Dnoinput -Dnosnooze ");
 	} else if (strcmp(config->platform, "posix") == 0 ||
 		 strcmp(config->platform, "openbsd") == 0 ||
 		 strcmp(config->platform, "puredarwin") == 0)
@@ -43,9 +45,10 @@ unsigned int mksrclist (Config *config, char **srcs) {
 	addsrcs(ffi_base_srcs, srcs, &count);
 	
 	if (strcmp(config->platform, "c") == 0) addsrcs(ffi_c_srcs, srcs, &count);
-	if (strcmp(config->platform, "posix") ||
-	    strcmp(config->platform, "openbsd") ||
-	    strcmp(config->platform, "puredarwin")) {
+	if (strcmp(config->platform, "posix")  == 0 ||
+	    strcmp(config->platform, "openbsd") == 0 ||
+	    strcmp(config->platform, "puredarwin") == 0)
+	{
 		addsrcs(ffi_posix_srcs, srcs, &count);
 		addsrcs(ffi_c_srcs, srcs, &count);
 	}

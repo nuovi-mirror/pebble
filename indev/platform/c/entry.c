@@ -76,13 +76,17 @@ void freestack
 { /* XXX this does nothing now */
 }
 
+#ifdef indrng
 /* shim for the psedorandom helper */
 unsigned long long getrandom
 (void)
 {
-	struct seed seed = grandom();
+	struct seed seed;
+	volatile unsigned long long sink = 0;
 	unsigned long long temp[scount];
 	unsigned long count = ecount;
+
+	grandom(&seed, &sink);
 
 	for (unsigned long i = 0; i < ecount; i++) temp[i] = seed.value[i];
 	while (count > 1)
@@ -97,3 +101,4 @@ unsigned long long getrandom
 
 	return mix64(temp[0]);
 }
+#endif

@@ -24,6 +24,7 @@ extern const char *vm_srcs[];
 /* platform-specific sources */
 extern const char *platform_freestand_srcs[];
 extern const char *platform_c_srcs[];
+extern const char *indrng_srcs[];
 extern const char *platform_posix_srcs[];
 
 /* ffi source code */

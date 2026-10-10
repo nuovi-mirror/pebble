@@ -5,10 +5,16 @@
 /* standard libraries */
 #include "libs/std/io/print.h"
 #include "libs/std/io/printLn.h"
+
+#ifndef noinput
 #include "libs/std/io/input.h"
+#endif
 
 #include "libs/std/misc/random.h"
+
+#ifndef nosnooze
 #include "libs/std/misc/sleep.h"
+#endif
 
 #ifdef graphics
 /* graphis libraries */

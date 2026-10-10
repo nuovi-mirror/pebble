@@ -21,10 +21,16 @@ static const struct EscapeSequence escapes[] = {
 	/* standard libraries */
 	{"std.io.print", escape_std_io_print},
 	{"std.io.printLn", escape_std_io_printLn},
+
+#ifndef noinput
 	{"std.io.input", escape_std_io_input},
+#endif
 
 	{"std.misc.random", escape_std_misc_random},
+
+#ifndef nosnooze
 	{"std.misc.sleep", escape_std_misc_sleep},
+#endif
 
 #ifdef graphics
 	/* graphics libraries */

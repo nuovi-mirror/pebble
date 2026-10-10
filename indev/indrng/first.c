@@ -1,8 +1,6 @@
 #include "indrng.h"
 #include <time.h>
 
-volatile unsigned long long sink;
-
 static unsigned long long winit[] = {
 	0x243F6A8885A308D3ULL,
 	0x13198A2E03707344ULL,
@@ -29,7 +27,8 @@ static unsigned long long wlinit[][3] = {
 #define wlicount (sizeof(wlinit) / sizeof(wlinit[0]))
 
 static void work 
-(unsigned long long r, unsigned long long s, unsigned long a, unsigned long b, unsigned long c)
+(unsigned long long r, unsigned long long s, unsigned long a, unsigned long b, unsigned long c,
+ volatile unsigned long long *sink)
 {
 	unsigned long long x = r;
 
@@ -40,16 +39,17 @@ static void work
 		x += i;
 	}
 
-	sink ^= x;
+	*sink ^= x; /* force the work to be done */
 }
 
 static unsigned long long ground 
-(unsigned long long w, unsigned long long s, unsigned long a, unsigned long b, unsigned long c)
+(unsigned long long w, unsigned long long s, unsigned long a, unsigned long b, unsigned long c,
+ volatile unsigned long long *sink)
 {
 	clock_t t1, t2, d1;
 
 	t1 = clock();
-	work(w, s, a, b, c);
+	work(w, s, a, b, c, sink);
 	t2 = clock();
 	d1 = t2 - t1;
 
@@ -57,7 +57,7 @@ static unsigned long long ground
 }
 
 static unsigned long long grun 
-(void)
+(volatile unsigned long long *sink)
 {
 	unsigned int order[wsize];
 	unsigned long long work[wsize];
@@ -77,45 +77,36 @@ static unsigned long long grun
 		workloads[i][2] = wlinit[i % wlicount][2];
 	}
 
-	seed = ground(work[0], 10000001ULL, workloads[0][0], workloads[1][1],
-		workloads[2][2]);
+	seed = ground(work[0], 10000001ULL, workloads[0][0], workloads[1][1], workloads[2][2], sink);
 
-	for (unsigned int i = 0; i < wsize; i++)
-		times[i] = 1000000ULL + (mix64(seed+i) % 20000000ULL);
+	for (unsigned int i = 0; i < wsize; i++) times[i] = 1000000ULL + (mix64(seed+i) % 20000000ULL);
 
-	r = ground(work[0], times[0], workloads[0][0], workloads[0][1], workloads[0][2]);
+	r = ground(work[0], times[0], workloads[0][0], workloads[0][1], workloads[0][2], sink);
 	r = mix64(r);
 	shuffle(order, &r);
 
 	for (unsigned int i = 0; i < wsize; ++i)
-		d[i] = ground(work[order[i]], times[i], workloads[order[i]][0],
-			workloads[order[i]][1], workloads[order[i]][2]);
+		d[i] = ground(work[order[i]], times[i], workloads[order[i]][0], 
+			workloads[order[i]][1], workloads[order[i]][2], sink);
 
-	for (int i = 0; i < wsize; i++)
-		seed = mix64((seed ^ d[i]) + work[i]);
-
+	for (int i = 0; i < wsize; i++) seed = mix64((seed ^ d[i]) + work[i]);
 	return seed;
 }
 
-struct seed grandom 
-(void)
+void grandom 
+(struct seed *seed, volatile unsigned long long *sink)
 {
 	unsigned long long seeds[scount];
-	struct seed seed = { 0 };
-
 	/* generate seeds */
-	for (unsigned long i = 0; i < scount; i++)
-		seeds[i] = grun();
+	for (unsigned long i = 0; i < scount; i++) seeds[i] = grun(sink);
 
 	/* mix seeds */
 	for (unsigned long i = 0; i < mcount; i++)
-		seeds[i % scount] = mix64(seeds[i % scount] ^ grun());
+		seeds[i % scount] = mix64(seeds[i % scount] ^ grun(sink));
 
 	for (unsigned long i = 0; i < ecount; i++)
-		seed.value[i] = 0;
+		seed->value[i] = 0;
 
 	for (unsigned long i = 0; i < scount; i++)
-		seed.value[i % ecount] = mix64(seed.value[i % ecount] ^ seeds[i]);
-
-	return seed;
+		seed->value[i % ecount] = mix64(seed->value[i % ecount] ^ seeds[i]);
 }

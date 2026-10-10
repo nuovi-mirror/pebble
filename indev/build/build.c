@@ -52,7 +52,11 @@ const char *platform_c_srcs[] = {
 	"platform/c/str2d.c",
 	"platform/c/snprint.c",
 
-	/* indrng randomization stuff */
+	NULL
+};
+
+/* indrng randomization stuff */
+const char *indrng_srcs[] = {
 	"indrng/first.c",
 	"indrng/shuffle.c",
 	"indrng/mix64.c",
