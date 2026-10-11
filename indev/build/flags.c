@@ -25,7 +25,7 @@ void setflags (Config *config) {
 			"-mtune=native "
 		);
 
-		strcat(config->ldflags, "-flto ");
+		strcat(config->ldflags, "-flto -Dnozeromem ");
 	}
 
 	else if (strcmp(config->build, "xray") == 0) {
@@ -51,6 +51,13 @@ void setflags (Config *config) {
 
 		strcat(config->ldflags, "-flto ");
 	}
+
+	else if (strcmp(config->build, "bad") == 0)
+		strcat(config->cflags,
+			"-O0 "
+			"-Wall "
+			"-Wextra "
+			"-Wuninitialized ");
 
 	else if (strcmp(config->build, "debug") == 0)
 		strcat(config->cflags, 

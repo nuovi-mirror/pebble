@@ -27,8 +27,10 @@ struct Arena *initAlloc
 	arena->curr_ptr = srt_ptr;  /* set the current pointer */
 	arena->arena_ptr = srt_ptr; /* set the start of the arena */
 
+#ifdef nozeromem
 	/* initalize the memory to 0 */
 	ffillmem(0, (volatile void *)arena->arena_ptr, arena->size);
+#endif
 
 	return arena; /* return a pointer to the new allocated arena */
 }
