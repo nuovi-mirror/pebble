@@ -41,6 +41,7 @@ static const struct EscapeSequence escapes[] = {
 	/* terminal libraries */
 	{"std.term.color.basic.fore", escape_std_term_color_basic_fore},
 	{"std.term.color.basic.back", escape_std_term_color_basic_back},
+	{"std.term.color.basic.reset", escape_std_term_color_basic_reset},
 	{"std.term.screen.clear", escape_std_term_screen_clear},
 #endif
 };

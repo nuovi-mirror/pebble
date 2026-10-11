@@ -7,3 +7,9 @@ Escape std.term.color.basic.fore
 New color 'red'
 New __Escape_std.term.color.basic.fore_ARG0 <color>
 Escape std.term.color.basic.fore
+
+New msg 'this should be red'
+New __Escape_std.io.print_ARG0 <msg>
+Escape std.io.print
+
+Escape std.term.color.basic.reset
