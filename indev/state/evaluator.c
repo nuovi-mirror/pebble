@@ -45,7 +45,10 @@ static unsigned long numword
 		case type_sword: return (unsigned long)v.as.word; break;
 		case type_flt: return (unsigned long)v.as.flt; break;
 		case type_str: return str2ul(v.as.str, &end, 10); break;
-		default: return 0; /* XXX error case */
+		case type_expr: return 0; break; /* XXX should never be hit */
+		case type_pointer: return 0; break; /* XXX should never be hit */
+		case type_null: return 0; break; /* XXX should never be hit */
+		default: return 0; break; /* XXX should never be hit */
 	}
 }
 
@@ -60,6 +63,9 @@ static double numflt
 		case type_sword: return (double)v.as.sword; break;
 		case type_word: return (double)v.as.word; break;
 		case type_str: return str2d(v.as.str, &end); break;
+		case type_null: return 0; break; /* XXX should never be hit */
+		case type_pointer: return 0; break; /* XXX should never be hit */
+		case type_expr: return 0; break; /* XXX should never be hit */
 		default: return 0.0; /* XXX error case */
 	}
 }
@@ -71,20 +77,9 @@ static Value h_NumericAdd
 
 	switch (numtype(l, r)) 
 	{
-		case type_flt:
-			v.Type = type_flt;
-			v.as.flt = numflt(l) + numflt(r);
-			break;
-	
-		case type_sword:
-			v.Type = type_sword;
-			v.as.sword = numsword(l) + numsword(r);
-			break;
-	
-		default:
-			v.Type = type_word;
-			v.as.word = numword(l) + numword(r);
-			break;
+		case type_flt: v = (Value){ .Type = type_flt, .as.flt = numflt(l) + numflt(r) }; break;
+		case type_sword: v = (Value){ .Type = type_sword, .as.sword = numsword(l) + numsword(r) }; break;
+		default: v = (Value){ .Type = type_word, .as.word = numword(l) + numword(r) }; break;
 	}
 
 	return v;
@@ -97,20 +92,9 @@ static Value h_NumericSub
 
 	switch (numtype(l, r)) 
 	{
-		case type_flt:
-			v.Type = type_flt;
-			v.as.flt = numflt(l) - numflt(r);
-			break;
-	
-		case type_sword:
-			v.Type = type_sword;
-			v.as.sword = numsword(l) - numsword(r);
-			break;
-	
-		default:
-			v.Type = type_word;
-			v.as.word = numword(l) - numword(r);
-			break;
+		case type_flt: v = (Value){ .Type = type_flt, .as.flt = numflt(l) - numflt(r) }; break;	
+		case type_sword: v = (Value){ .Type = type_sword, .as.sword = numsword(l) - numsword(r) }; break;
+		default: v = (Value){ .Type = type_word, .as.word = numword(l) - numword(r) }; break;
 	}
 
 	return v;
@@ -123,20 +107,9 @@ static Value h_NumericMul
 
 	switch (numtype(l, r)) 
 	{
-		case type_flt:
-			v.Type = type_flt;
-			v.as.flt = numflt(l) * numflt(r);
-			break;
-	
-		case type_sword:
-			v.Type = type_sword;
-			v.as.sword = numsword(l) * numsword(r);
-			break;
-	
-		default:
-			v.Type = type_word;
-			v.as.word = numword(l) * numword(r);
-			break;
+		case type_flt: v = (Value){ .Type = type_flt, .as.flt = numflt(l) * numflt(r) }; break;
+		case type_sword: v = (Value){ .Type = type_sword, .as.sword = numsword(l) * numsword(r) }; break;
+		default: v = (Value){ .Type = type_word, .as.word = numword(l) * numword(r) }; break;
 	}
 
 	return v;
@@ -250,8 +223,7 @@ Value evalexprnode
 			unsigned long ll = getstrlen(ls);
 			unsigned long rl = getstrlen(rs);
 
-			if (rl > ll)
-				return mkbool(0);
+			if (rl > ll) return mkbool(0);
 
 			unsigned long start = 0;
 			unsigned long end = ll - rl;
@@ -260,8 +232,7 @@ Value evalexprnode
 			if (node->Op == ExprOp_StringEndsWith) start = end;
 
 			for (unsigned long i = start; i <= end; i++)
-				if (cmpstrn(ls + i, rs, rl) == 0)
-					return mkbool(1);
+				if (cmpstrn(ls + i, rs, rl) == 0) return mkbool(1);
 
 			return mkbool(0);
 		}
@@ -297,6 +268,4 @@ Value evalexprdata
 
 Value evalstr 
 (const char *str, int *ok, VarMap *vars, Arena *tempAlloc, Arena *persistAlloc)
-{
-	return evalexprdata(str2expr(str, ok, tempAlloc, persistAlloc), vars, persistAlloc);
-}
+{ return evalexprdata(str2expr(str, ok, tempAlloc, persistAlloc), vars, persistAlloc); }
