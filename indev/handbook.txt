@@ -3,9 +3,10 @@
             | The Pebble Virtual Machine Systems' Programmer's Handbook |                                         |
             | Version 2, Revision 0 ! UNFINISHED !                      |                                         |
             |                                                           |                                         |
-            | Bytecode Specification Version 2 (B2)                      |                                         |
+            | Bytecode Specification Version 2 (B2)                     |                                         |
             | Advanced Addressing Extension (AAE)                       |                                         |
             | Recursive Function Definition Extension (RFDE)            |                                         |
+            | Advanced Numeric Extension One (ANE1)                    |                                         |
             |                                                           |                                         |
             | By vantheman                                              |                                         |
             | Product of The Nuovi Orizzonti Company                    |                                         |
@@ -13,21 +14,10 @@
             | http://pebblevm.org                                       |                                         |
             '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -'                                         |
 
-Table Of Contents
-
-	Volume I - Introduction
-		What is Pebble?
+			If the above text appears malformed, please
+			increase the width of your terminal.
 
 
-
-
-
-
-
-
-
-
-Volume I - Introduction
 
 	The Pebble Virtual Machine is the first attempt at an implementation of the Expressive Instruction
 	set Computing model (EISC). Pebble should be considered the canonical or reference implementation
@@ -78,5 +68,84 @@ Volume I - Introduction
 	five instructions that took, five very special purpose instructions, mind you. Something like this does
 	not preserve data relationships very well; the compiler cannot easily know that the 8 and 3 are related
 	immediately, or the fact that they will be used as an address later without complex look-ahead logic.
+
+	Pebble refers to both the Pebble Virtual Machine and the Pebble ISA. Pebble is the canonical reference
+	on what a proper EISC ISA would look like, and this is what this document shall describe; The Pebble ISA
+	and concepts used in the Pebble Virtual Machine. Please keep in mind Pebble was designed from a software
+	perspective, and in hence implemented as a language interpreter. (this language being the Pebble ISA)
+
+	Pebble is not a stack machine, nor is it a register machine. Pebble acts internally on named values
+	which are dynamically typed and variable in size. In Pebble, there are only seven instructions. These
+	include New, Func, End, Return, Call, If, and Escape. Each of these instructions accept addressing mode
+	modifiers to modify how they may view their two operands, and each instruction can interpret each
+	addressing mode in whatever way they deem best fit. This is one of the major powers of Pebble; A very
+	simple ISA with incredibly expressive instructions.
+
+	The addressing modifiers that exist include the Literal (") modifier, the True Literal (') modifier,
+	the Forced Evaluation ({ / }) modifier, the Pointer (< / >), and the Bare ( ) modifier. These modifiers
+	all represent instruction-dependent ways to modify a source operand before it is to be interpreted, and
+	the meanings of them may vary per instruction. The general rule is that the Literal modifier represents
+	an expression, the True Literal modifier represents a piece of data, the Forced Evaluation modifier 
+	represents a pointer to an expression, the Pointer modifier represents a generic pointer, and the Bare
+	modifier being completely instruction-dependent.
+
+	The Pebble expression format follows the value, followed by a space, followed by the operator, followed
+	by another space, followed by another value. In these schematics, the operator is stated to 'own' each
+	space next to it, and one space is allowed to be shared by one or more operators. The valid operators
+	include the Numeric Addition (+) statement, the Numeric Subtraction (-) statement, the Numeric
+	Multiplication (*) statement, the Numeric Division (/) statement, the Numeric Greater than (>) statement,
+	the Numeric Less than (<) statement, the Numeric Equal to (==) statement, the Numeric Not Equal to (!=)
+	statement, the Numeric Greater than or Equal to (>=) statement, the Numeric Less than or Equal to (<=) 
+	statement, the Sting Equal to (?=) statement, the String Contains (-?=) statement, the String Starts with 
+	(s?=) statement, the String Ends with (e?=) statement, and the String Concat (s++) statement. Values can
+	be anything that is a valid English character. The special cases include a value starting with the negative
+	(-) sign, marking that the value is to be negative, or the forced precedence (( / )) sign, marking to
+	'solve' the operation inside of that first and ignore the standard operator precedence. The standard
+	operator precedence is ranked from tiers zero starting, with this tier being solved first. Tier 
+	zero include Numeric Division and Numeric Multiplication. Tier one includes Numeric Addition and Numeric
+	Subtraction. Tier two includes Numeric Less than, Numeric Greater than, Numeric Equal to, Numeric Not
+	Equal to, Numeric Less than or Equal to, and Numeric Greater than or Equal to. Tier three includes 
+	String Concat. Tier four includes String Starts with, String Ends with, String contains, and String
+	equals. This ordering is checked first, and if two operators in the same tier cannot be ordered, then
+	left to right associativity is to be assumed.
+
+	The Numeric Addition operation will add the two numeric values presented and return the result of the
+	addition. 
+	The Numeric Subtraction operation will subtract the left numeric value from the right numeric value and
+	return the result of the operation.
+	The Numeric Division operation will divide the left numeric value from the right numeric value and return
+	the result of the operation.
+	The Numeric Multiplication operation will multiply the left numeric value from the right numeric value and
+	return the result of the operation.
+	The Numeric Equal to operation will check if the left numeric value is equal to the right numeric value 
+	and return zero (0) if true and one (1) if false.
+	The Numeric Not equal to operation will check if the left numeric value is not equal to the right numeric
+	value and return zero if true and one if false.
+	The Numeric Less than operator will compare the left numeric value to the right numeric value and return
+	zero if the left numeric value is less than the right numeric value and one if it is not.
+	The Numeric Greater than operator will compare the left numeric value to the right numeric value and
+	return zero if the left numeric value is greater than the right numeric value and one if it is not.
+	The Numeric Greater than or Equal to operator will compare the left numeric operator to the right numeric
+	operator and return zero if the left numeric operator is greater than or equal to the right numeric
+	operator and one if false.
+	The Numeric Less than or Equal to operator will compare the left numeric operator to the right numeric 
+	operator and return zero if the left numeric operator is less than or equal to the right numeric operator
+	and one if false.
+
+	The New opcode is a representation of a generic data manipulation primitive. This instruction accepts
+	two operands, first being the destination to store to, and the second being the data to store to the
+	destination. The destination operand uses the Literal modifier to represent the named variable to store
+	the data to, the pointer modifier as a reference, which will be followed, to the named variable to store
+	to, the True Literal modifier as an expression who's result is the name of the variable to store to, the
+	Forced Evaluation modifier as representing a pointer to an expression, which will be followed, WHO's
+	result is the name of the named variable to store to, and the Bare modifier in the same way as the True
+	Literal modifier. The source operand treats the Bare modifier as marking the referenced variable name's
+	data to be copied to the destination variable, the True Literal modifier as a piece of literal data to
+	store to the destination, the Literal modifier to be an expression WHO's result is the data to store to
+	the destination, the Forced Evaluation modifier as a pointer to an expression, which will be followed, 
+	and to store the result of said expression to the destination, and the Pointer modifier as to store a 
+	reference to the named variable to the destination.
+
+	A few examples of this opcode in practice include
 
 		

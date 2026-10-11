@@ -30,9 +30,7 @@ static ValueTypes numtype
 
 static long numsword 
 (Value v)
-{
-	return v.Type == type_sword ? v.as.sword : (long)v.as.word;
-}
+{ return v.Type == type_sword ? v.as.sword : (long)v.as.word; }
 
 static unsigned long numword 
 (Value v)
