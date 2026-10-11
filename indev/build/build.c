@@ -85,6 +85,8 @@ const char *ffi_ansi_srcs[] = {
 	"ffi/platform/ansi/std/term/color/basic/back.c",
 	"ffi/platform/ansi/std/term/color/basic/reset.c",
 
+	"ffi/platform/ansi/std/term/cursor/moveAbsolute.c",
+
 	"ffi/platform/ansi/std/term/screen/clear.c",
 
 	NULL
