@@ -1,0 +1,82 @@
+
+            .- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -.                                         |
+            | The Pebble Virtual Machine Systems' Programmer's Handbook |                                         |
+            | Version 2, Revision 0 ! UNFINISHED !                      |                                         |
+            |                                                           |                                         |
+            | Bytecode Specification Version 2 (B2)                      |                                         |
+            | Advanced Addressing Extension (AAE)                       |                                         |
+            | Recursive Function Definition Extension (RFDE)            |                                         |
+            |                                                           |                                         |
+            | By vantheman                                              |                                         |
+            | Product of The Nuovi Orizzonti Company                    |                                         |
+            | http://thenuoviroizzonticompany.org                       |                                         |
+            | http://pebblevm.org                                       |                                         |
+            '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -'                                         |
+
+Table Of Contents
+
+	Volume I - Introduction
+		What is Pebble?
+
+
+
+
+
+
+
+
+
+
+Volume I - Introduction
+
+	The Pebble Virtual Machine is the first attempt at an implementation of the Expressive Instruction
+	set Computing model (EISC). Pebble should be considered the canonical or reference implementation
+	of the EISC computing model and what a good demonstration of an ISA designed around the EISC
+	computing model should look like.
+
+	The EISC architecture is designed around one simple principle; an instruction should be able to be
+	both flexible while providing a meaningful quantity of work. What was deemed the best way to achieve
+	this was by creating incredibly generic and flexible instructions representing higher-level language
+	concepts which then use addressing mode modifier statements to determine sub-operations they are to
+	perform on the data given in the instruction operands, fused into one atomic operation. This model
+	of computing would have a few dozen or less instructions total, each able to perform one incredibly
+	rich operation, which can be fused with other operations keyword modifiers. This model of computing
+	offers many advantages from an implementation and language perspective, including but not limited to
+	vastly simpler compilers which do not have to break higher-level code into load/store or lower-level
+	concepts, the ability for Just In Time or Dynamic compilers to better reason about complex structures
+	like data and instruction relationships, and a major simplification for developers writing backed
+	infrastructure against an EISC model of computer.
+
+	A basic example of what an EISC instruction may look like could be the following
+
+		STORE 0, 0, 1, 8, 3, 1
+
+	This may look odd coming from more traditional load/store architectures. I mean come on, a six
+	operand store?? woah, crazy, I know!
+
+	In this example EISC ISA, the STORE instruction accepts four main operands. Operand one being the source
+	data and operand three being the destination address, while two and four represent the addressing
+	modifiers of operands one and three. In this example, say addressing mode 0 represents the concept
+	of a literal reference, and addressing mode 8 represents a fused addition statement plus another addressing
+	operand after it to fuse with the first, in this case being 1, which may represent an indirection
+	statement.
+
+	In this case, the operation would be the logical equivalent of 'store the literal zero to the logical
+	address 8 + 3'. Now, this is a lot of information to be carried by one instruction. The interesting
+	part, however, is that this is not a special store-literal-to-fused-addition-pointer instruction. It is
+	just a generic data storing primitive instruction using fused addressing modifier statements. This also
+	allows entire programs to be collapsed into single instructions. This same program in a one-operand
+	RISC-style ISA could look something more like
+
+		LOADI 8  /* load immediate 8 into the working register */
+		ADD 3    /* add 3 to the working register */
+		LOADADDR /* load the working register into the address register */
+		LOADI 0  /* load immediate 0 into the working register */
+		STORE    /* store the data in the working register (0) to the reference held in the address
+			  * register (11) */
+
+	five instructions that took, five very special purpose instructions, mind you. Something like this does
+	not preserve data relationships very well; the compiler cannot easily know that the 8 and 3 are related
+	immediately, or the fact that they will be used as an address later without complex look-ahead logic.
+
+		
