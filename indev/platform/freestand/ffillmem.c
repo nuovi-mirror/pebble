@@ -34,7 +34,7 @@ void *ffillmem
 	count = len / wordsize;
 
 	while (count != 0) {
-		*(volatile word *)chardst = (const word )fill;
+		*(volatile word *)chardst = (const word )fill; /* safe since we aligned earlier */
 		chardst += wordsize;
 		--count;
 		len -= wordsize;

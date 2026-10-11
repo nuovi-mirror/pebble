@@ -1,4 +1,9 @@
+Escape std.term.screen.clear
+
 New color 'red'
 New __Escape_std.term.color.basic.fore_ARG0 <color>
-Escape std.term.screen.clear
+Escape std.term.color.basic.fore
+
+New color 'red'
+New __Escape_std.term.color.basic.fore_ARG0 <color>
 Escape std.term.color.basic.fore

@@ -12,18 +12,15 @@ void *copymem (const void *src, void *dst, unsigned long len)
 	unsigned long count = 0;
 
 	/* why did you give me this? */
-	if (len == 0 || src == dst)
-		return dst;
+	if (len == 0 || src == dst) return dst;
 
 	/* if aliagn differs, copy bytes */
-	if ((((unsigned long)charsrc ^ (unsigned long)chardst) & wordmask) != 0)
-		goto copybytes;
+	if ((((unsigned long)charsrc ^ (unsigned long)chardst) & wordmask) != 0) goto copybytes;
 
 	/* align */
 	count = (wordsize - ((unsigned long)charsrc & wordmask)) & wordmask;
 
-	if (count > len)
-		count = len;
+	if (count > len) count = len;
 
 	while (count != 0) {
 		*chardst++ = *charsrc++;
@@ -35,7 +32,7 @@ void *copymem (const void *src, void *dst, unsigned long len)
 	count = len / wordsize;
 
 	while (count != 0) {
-		*(word *)chardst = *(const word *)charsrc;
+		*(word *)chardst = *(const word *)charsrc; /* safe since we aligned previously */
 		chardst += wordsize;
 		charsrc += wordsize;
 		--count;

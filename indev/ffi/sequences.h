@@ -24,5 +24,6 @@
 #ifdef terminal
 /* terminal libraries */
 #include "libs/std/term/color/basic/fore.h"
+#include "libs/std/term/color/basic/back.h"
 #include "libs/std/term/screen/clear.h"
 #endif
