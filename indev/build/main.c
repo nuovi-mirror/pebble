@@ -31,7 +31,7 @@ int main (int argc, char **argv) {
 	strcpy(config.compiler, "cc");
 	strcpy(config.program, "bin/cpebble");
 	strcpy(config.build, "default");
-	strcpy(config.platform, "posix");
+	strcpy(config.platform, "");
 	strcpy(config.precompiler, "");
 	strcpy(config.graphics, "");
 	strcpy(config.terminal, "");
@@ -47,6 +47,8 @@ int main (int argc, char **argv) {
 		parseargs(&config, argv[i]);
 	}
 
+	detectplatform(&config);
+
 	setflags(&config);
 	srccount = mksrclist(&config, src);
 
@@ -55,11 +57,12 @@ int main (int argc, char **argv) {
 		return 0;
 	}
 
-	printf("cflags  : %s\n", config.cflags);
-	printf("ldflags : %s\n", config.ldflags);
+	printf("cflags   : %s\n", config.cflags);
+	printf("ldflags  : %s\n", config.ldflags);
+	printf("platform : %s\n", config.platform);
 
 	compile(&config, src, srccount, objs);
-	link(&config, objs, srccount);
+	linkprog(&config, objs, srccount);
 
 	for (unsigned int i = 0; i < srccount; i++) 
 		free(objs[i]);

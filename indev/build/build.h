@@ -46,7 +46,7 @@ void parseargs (Config *config, char *argument);
 /* compile.c */
 void compiledeps (Config *config, char *srcs, char *objs);
 void compile (Config *config, char **srcs, unsigned int count, char **objs);
-void link (Config *config, char **objs, unsigned int count);
+void linkprog (Config *config, char **objs, unsigned int count);
 void clean (Config *config, char **srcs, unsigned int count);
 
 /* srcs.c */
@@ -56,5 +56,8 @@ unsigned int mksrclist (Config *config, char **srcs);
 
 /* flags.c */
 void setflags (Config *config);
+
+/* automatic detection */
+void detectplatform (struct Config *config);
 
 #endif

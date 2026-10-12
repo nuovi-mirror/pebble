@@ -22,8 +22,7 @@ Building from source
 	to Make. The build system accepts arguments
 
 	target - target operating system to build for - view the platform support
-		list to know what to place here. The default is 'c', which uses
-		pure C99 + Libc.
+		list to know what to place here. Autodetects the platform by default.
 
 	graphics - graphics library to use. The default is none.
 

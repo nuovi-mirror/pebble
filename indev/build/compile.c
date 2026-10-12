@@ -36,8 +36,7 @@ void compile (Config *config, char **srcs, unsigned int count, char **objs) {
 	}
 }
 
-/* please dont include unistd.h */
-void link (Config *config, char **objs, unsigned int count) {
+void linkprog (Config *config, char **objs, unsigned int count) {
 	char cmd[16386]; /* command buffer */
 
 	sprintf(cmd, "%s%s %s %s -o %s", 
