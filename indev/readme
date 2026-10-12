@@ -5,9 +5,13 @@ CPebble
 	The older Zig version has recently been removed from the indev
 	tree, but may still be viewed at http://pebblevm.org/downloads/
 	under the file name deprecated.tar.
-	Please note this does not fully implement pebble schematics
-	yet and is a work-in-progress, unlike the Zig version, which
-	is feature-complete.
+	
+	CPebble manages to be fully cross-compatable with the older Zig
+	one. The only known edge cases are around argument handling and
+	the standard library, which CPebble does not fully support. The
+	pieces of the Pebble standard library CPebble does support work
+	as intended.
+
     	As the Zig version, the license can be viewed at
 	http://thenuoviorizzonticompany.org/license/openlicense/3.txt
 
