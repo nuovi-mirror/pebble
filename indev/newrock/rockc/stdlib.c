@@ -8,6 +8,11 @@ const char stdlib[] = {
 	". Escape std.io.print\n"
 	"}\n"
 
+	"fn std.io.printRaw ( value ) value {\n"
+	". New __Escape_std.io.print_ARG0 <__Func_std.io.printRaw_value>\n"
+	". Escape std.io.print\n"
+	"}\n"
+
 	"fn std.io.printLn ( value ) data {\n"
 	". New __Func_std.io.printLn_data {__Func_std.io.printLn_value}\n"
 	". New __Escape_std.io.printLn_ARG0 <__Func_std.io.printLn_data>\n"
