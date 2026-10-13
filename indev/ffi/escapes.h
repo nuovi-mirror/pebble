@@ -47,6 +47,10 @@ static const struct EscapeSequence escapes[] = {
 
 	{"std.term.screen.clear", escape_std_term_screen_clear},
 #endif
+
+#ifdef proc
+	{"std.proc.spawn", escape_std_proc_spawn},
+#endif
 };
 
 void callEscape (const char *name, unsigned long long seed, FFIvars *vars,

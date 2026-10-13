@@ -1,0 +1,3 @@
+New args 'ls .'
+New __Escape_std.proc.spawn_ARG0 <args>
+Escape std.proc.spawn

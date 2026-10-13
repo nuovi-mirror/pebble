@@ -31,3 +31,8 @@
 
 #include "libs/std/term/screen/clear.h"
 #endif
+
+#ifdef proc
+/* process libraries */
+#include "libs/std/proc/spawn.h"
+#endif

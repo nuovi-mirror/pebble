@@ -35,7 +35,7 @@ int main (int argc, char **argv) {
 	strcpy(config.precompiler, "");
 	strcpy(config.graphics, "");
 	strcpy(config.terminal, "");
-	strcpy(config.cflags, "-Ih -Iffi -std=c99 ");
+	strcpy(config.cflags, "-Ih -Iffi -std=c99 -Dproc ");
 	strcpy(config.ldflags, "-Wl,--gc-sections ");
 
 	for (unsigned int i = 1; i < (unsigned int)argc; i++) {
