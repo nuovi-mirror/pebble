@@ -52,6 +52,7 @@ const char *platform_c_srcs[] = {
 	"platform/c/str2d.c",
 	"platform/c/snprint.c",
 	"platform/c/findchar.c",
+	"platform/c/appendstr.c",
 
 	NULL
 };
