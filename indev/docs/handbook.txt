@@ -112,9 +112,9 @@
 
 	The Numeric Addition operation will add the two numeric values presented and return the result of the
 	addition. 
-	The Numeric Subtraction operation will subtract the left numeric value from the right numeric value and
+	The Numeric Subtraction operation will subtract the right numeric value from the left numeric value and
 	return the result of the operation.
-	The Numeric Division operation will divide the left numeric value from the right numeric value and return
+	The Numeric Division operation will divide the right numeric value from the left numeric value and return
 	the result of the operation.
 	The Numeric Multiplication operation will multiply the left numeric value from the right numeric value and
 	return the result of the operation.
