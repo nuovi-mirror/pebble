@@ -1,9 +1,7 @@
 const char stdlib[] = {
-	"/ # New Rock Standard Library (stdlib)\n"
-
+	". # New Rock Standard Library (stdlib)\n"
 
 	/* io */
-
 	"fn std.io.print ( value ) data {\n"
 	". New __Func_std.io.print_data {__Func_std.io.print_value}\n"
 	". New __Escape_std.io.print_ARG0 <__Func_std.io.print_data>\n"
@@ -45,5 +43,23 @@ const char stdlib[] = {
 	". New __Func_std.proc.spawn_ret __Escape_std.proc.spawn_RET0\n"
 	"}\n"
 
-	". / end of New Rock Standard Library (stdlib)\n" 
+	/* term */
+	"fn std.term.screen.clear ( ) ret {\n"
+	". Escape std.term.screen.clear\n"
+	". New __Func_std.term.screen.clear_ret '0'\n"
+	"}\n"
+
+	"fn std.term.color.basic.fore ( color ) ret {\n"
+	". New __Escape_std.term.color.basic.fore_ARG0 <__Func_std.term.color.basic.fore_color>\n"
+	". Escape std.term.color.basic.fore\n"
+	"ret = '0'\n"
+	"}\n"
+
+	"fn std.term.color.basic.back ( color ) ret {\n"
+	". New __Escape_std.term.color.basic.back_ARG0 <__Func_std.term.color.basic.back_color>\n"
+	". Escape std.term.color.basic.back\n"
+	"ret = '0'\n"
+	"}\n"
+
+	". # end of New Rock Standard Library (stdlib)\n" 
 };
