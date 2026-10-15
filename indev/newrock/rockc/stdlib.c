@@ -1,5 +1,7 @@
 const char stdlib[] = {
-	". # rock stdlib\n"
+	"/ # New Rock Standard Library (stdlib)\n"
+
+
 	/* io */
 
 	"fn std.io.print ( value ) data {\n"
@@ -29,5 +31,19 @@ const char stdlib[] = {
 	". Escape std.misc.random\n"
 	". New __Func_std.misc.random_random __Escape_std.misc.random_RET0\n"
 	"}\n"
-	". # end rock stdlib\n" 
+
+	"fn std.misc.sleep ( time ) slept {\n"
+	". New __Escape_std.misc.sleep_ARG0 <__Func_std.misc.sleep_time>\n"
+	". Escape std.misc.sleep\n"
+	". New __Func_std.misc.sleep_slept __Escape_std.misc.sleep_RET0\n"
+	"}"
+
+	/* proc */
+	"fn std.proc.spawn ( args ) ret {\n"
+	". New __Escape_std.proc.spawn_ARG0 <__Func_std.proc.spawn_args>\n"
+	". Escape std.proc.spawn\n"
+	". New __Func_std.proc.spawn_ret __Escape_std.proc.spawn_RET0\n"
+	"}\n"
+
+	". / end of New Rock Standard Library (stdlib)\n" 
 };

@@ -58,5 +58,5 @@ void escape_std_proc_spawn (FFIvars *vars, unsigned long long seed, FFIArena *sc
 	FFIValue *packed = FFIallocateMemory(persistAlloc, sizeof(FFIValue));
 	*packed = (FFIValue){ .Type = type_sword, .as.sword = ret };
 
-	FFIallocateVariable(vars, "__Escape_std.proc.RET0", packed, persistAlloc);
+	FFIallocateVariable(vars, "__Escape_std.proc.spawn_RET0", packed, persistAlloc);
 }
