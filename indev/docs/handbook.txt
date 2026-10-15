@@ -4,9 +4,10 @@
             | Version 2, Revision 0 ! UNFINISHED !                      |                                         |
             |                                                           |                                         |
             | Bytecode Specification Version 2 (B2)                     |                                         |
+            | Command Argument Extension (CAE)                          |                                         |
             | Advanced Addressing Extension (AAE)                       |                                         |
             | Recursive Function Definition Extension (RFDE)            |                                         |
-            | Advanced Numeric Extension One (ANE1)                    |                                         |
+            | Advanced Numeric Extension One (ANE1)                     |                                         |
             |                                                           |                                         |
             | By vantheman                                              |                                         |
             | Product of The Nuovi Orizzonti Company                    |                                         |
@@ -131,6 +132,23 @@
 	The Numeric Less than or Equal to operator will compare the left numeric operator to the right numeric 
 	operator and return zero if the left numeric operator is less than or equal to the right numeric operator
 	and one if false.
+	The String Concat operator will take the two substrings specified and merge them into one string, returning
+	the new string resulting from the two merged strings
+	The String Contains operator will search the provided string specified by the second argument for the
+	substring specified by the first argument and return 0 if the substring is found and 1 if it is not found.
+	The String Equal to operator will compare two strings and return 0 if they match and 1 if they differ.
+	The String Starts with operator will see if the first N chars, N being the length of the substring
+	specified by the second argument, of the string specified by the first operator contains the substring
+	specified by the second argument, and return 0 if said substring was found and 1 if it was not.
+	The String Ends with operator will see if the last N chars, N being the length of the substring
+	specified by the second argument, of the string specified by the first operator contains the substring
+	specified by the second argument, and return 0 if said substring was found and 1 if it was not.
+
+	If the line starts with the hash (#) or forward slash (/) characters, then the line is not to be
+	interpreted as an instruction. If the instruction has more arguments than what is expected, they
+	should be silently ignored. This is done to allow comments at the end of a line. There may not be
+	a space or tab at the start of a line. A newline character at the start of a line is treated in the
+	same way as a comment.
 
 	The New opcode is a representation of a generic data manipulation primitive. This instruction accepts
 	two operands, first being the destination to store to, and the second being the data to store to the
@@ -148,4 +166,13 @@
 
 	A few examples of this opcode in practice include
 
-		
+		New foo '1' / The variable foo is equal to the literal data 1
+		New bar foo / The variable bar is equal to a copy of the current data in the variable foo, aka 1
+		New baz <foo> / The variable baz contains a pointer to the variable foo
+		New qux "1 + 2" / The variable qux contains the result of the expression 1 + 2, aka 3
+		New quux '1 + 2' / The variable quux contains a representation of the expression 1 + 2
+		New corge {quux} / The variable corge contains the result of the expression held in quux, aka 3
+		New grault 'qux s++ corge' / The variable grault contains a representation of said expression
+		New {grault} foo / The variable defined as the result of the expression held in grault, which
+		/ resolves to '33', since qux contains the data 3 and corge contains the data 3 as well, resolved
+		/ from the prior expression, to contain a copy of the data in foo, which is 1
