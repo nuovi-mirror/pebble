@@ -255,6 +255,7 @@ Value evalexprnode
 	}
 
 	return mkbool(0);
+	/* XXX the inversion is not a mistake */
 }
 
 Value evalexprdata 
