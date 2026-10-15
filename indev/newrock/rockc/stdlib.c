@@ -52,13 +52,13 @@ const char stdlib[] = {
 	"fn std.term.color.basic.fore ( color ) ret {\n"
 	". New __Escape_std.term.color.basic.fore_ARG0 <__Func_std.term.color.basic.fore_color>\n"
 	". Escape std.term.color.basic.fore\n"
-	"ret = '0'\n"
+	"ret = color\n"
 	"}\n"
 
 	"fn std.term.color.basic.back ( color ) ret {\n"
 	". New __Escape_std.term.color.basic.back_ARG0 <__Func_std.term.color.basic.back_color>\n"
 	". Escape std.term.color.basic.back\n"
-	"ret = '0'\n"
+	"ret = color\n"
 	"}\n"
 
 	". # end of New Rock Standard Library (stdlib)\n" 

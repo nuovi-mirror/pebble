@@ -9,7 +9,7 @@ void escape_std_term_color_basic_back (FFIvars *vars, unsigned long long seed, F
 	char *ptrbuff = FFIallocateMemory(tempAlloc, limits->instructions_varnamesize);
 	char *msgbuff = FFIallocateMemory(tempAlloc, limits->instructions_varnamesize);
 
-	FFIValue *ptr = FFIreadVariable(vars, "__Escape_std.term.color.basic.fore_ARG0");
+	FFIValue *ptr = FFIreadVariable(vars, "__Escape_std.term.color.basic.back_ARG0");
 	FFIconvertValueToString(ptrbuff, limits->instructions_varnamesize, *ptr);
 
 	FFIValue *msg = FFIreadVariable(vars, ptrbuff);
