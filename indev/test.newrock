@@ -1,0 +1,11 @@
+include stdlib
+
+fn main ( ) ret {
+	ret = '0'
+	call std.term.screen.clear ( )
+	call std.term.color.basic.fore ( 'green' )
+	call std.term.color.basic.back ( 'green' )
+	call std.proc.spawn ( 'ls -ah' )
+	slept = call std.misc.sleep ( '2000' ) / sleep 2s
+	call std.io.print ( slept )
+}	
