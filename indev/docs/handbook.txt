@@ -75,6 +75,13 @@
 	and concepts used in the Pebble Virtual Machine. Please keep in mind Pebble was designed from a software
 	perspective, and in hence implemented as a language interpreter. (this language being the Pebble ISA)
 
+	Pebble was designed primarily to be implemented in software. Pebble does not inherent the constraints
+	most ISAs do, since it is not intended to be simple for hardware to execute directly. But this begs
+	the question; Most ISAs are not executed in hardware directly, so why do they accept the same
+	constraints that traditional ISAs do? Pebble explores a model where the freedoms software has are
+	available inside of the ISA in itself directly and to explore what a model where software flexibility
+	as a default may look like.
+
 	Pebble is not a stack machine, nor is it a register machine. Pebble acts internally on named values
 	which are dynamically typed and variable in size. In Pebble, there are only seven instructions. These
 	include New, Func, End, Return, Call, If, and Escape. Each of these instructions accept addressing mode
