@@ -18,7 +18,7 @@ void error
 {
 	switch (severity)
 	{
-		case errfatal: print("A fatal error has occored!\n"); break;
+		case errfatal: print("A fatal error has occured!\n"); break;
 		case errmajor: print("A major error has occured!\n"); break;
 		case errsevere: print("A severe error has occured!\n"); break;
 		case errwarning: print("A nonfatal error has occured!\n"); break;
