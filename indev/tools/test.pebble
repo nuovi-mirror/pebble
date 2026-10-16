@@ -122,6 +122,8 @@ _PRINT2 jlb
 
 # those above me
 
+# for more info on this bug, please view bugs/vulnerability/20260808.txt
+
 _GETMEM
 
 New msg 'This will segfault now'
