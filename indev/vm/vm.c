@@ -414,7 +414,7 @@ unsigned long interpret
 
 		case Opcode_Func: 
 		{
-			char *funcname = alloc(scratchAlloc, limits->functions_namesize);
+			char *funcname = alloc(persistAlloc, limits->functions_namesize);
 			unsigned long *lpc = alloc(persistAlloc, 64);
 			
 			switch (instr->FirstOperand.Addressing) 
