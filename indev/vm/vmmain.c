@@ -2,14 +2,12 @@
 
 #include "vm.h"
 #include "allocator.h"
-#include "exitproc.h"
 #include "ffi.h"
 #include "findnewline.h"
 #include "functions.h"
 #include "instructionmapper.h"
 #include "instructions.h"
 #include "main.h"
-#include "print.h"
 #include "snprint.h"
 #include "skipspace.h"
 #include "variables.h"
@@ -55,11 +53,8 @@ int vmmain
 	while ((line = findnewline(&filedata)) != NULL) 
 	{
 		if (current_instruction_count >= limits->instructions_max) 
-		{
-			print("ERROR: LIMITS: INSTRUCTION CAP REACHED!\n");
-			exitproc(1);
-		}
-
+			error(errfatal, errcodelimitreached, "Instruction cap reached!");
+		
 		char *p = skipspace(line);
 		if (p == NULL) continue;
 

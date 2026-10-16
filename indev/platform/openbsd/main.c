@@ -3,7 +3,6 @@
 #include "limits.h"
 #include "vm.h"
 #include "print.h" /* XXX error handling */
-#include "exitproc.h" /* XXX error handling */
 #include "appendstr.h" /* XXX for pledge(2) init */
 #include <unistd.h> /* XXX for pledge(2) and unveil(2) */
 #include <stdlib.h> /* XXX for arc4random(3) */
@@ -21,11 +20,8 @@ int main
 		print(argv[1]);
 		print("\n");
 
-		if (unveil(argv[1], "r") == -1)
-		{
-			print("ERROR: VM: OPENBSD: UNVEIL(2) FAILED! (path 2)\n");
-			exitproc(1);
-		}
+		if (unveil(argv[1], "r") == -1) 
+			error(errfatal, errcodeplatformspecific, "Failed to run unveil(2)!");
 	}
 
 	print("VM: OPENBSD: Locking unveil(2)\n");
@@ -53,11 +49,7 @@ int main
 	print(buff);
 	print("' via pledge(2)\n");
 
-	if (pledge(buff, NULL) == -1)
-	{
-		print("ERROR: VM: OPENBSD: PLEDGE(2) FAILED!\n");
-		exitproc(1);
-	}
+	if (pledge(buff, NULL) == -1) error(errfatal, errcodeplatformspecific, "Failed to run pledge(2)!");
 
 	struct Limits limits;
 	struct Memory mem;

@@ -35,4 +35,5 @@
 #ifdef proc
 /* process libraries */
 #include "libs/std/proc/spawn.h"
+#include "libs/std/proc/wait.h"
 #endif

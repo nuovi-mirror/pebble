@@ -4,6 +4,17 @@
 #undef NULL
 #define NULL ((void *)0)
 
+#define errfatal 0
+#define errsevere 1
+#define errmajor 2
+#define errnonfatal 3
+#define errwarning 4
+
+#define errcodegeneric 0
+#define errcodelimitreached 1
+#define errcodemalformedinput 2
+#define errcodeplatformspecific 3
+
 struct Memory;
 
 typedef struct Args {
@@ -29,5 +40,6 @@ StackFrame popframe (Stack *stack);
 Args initargs (int argc, char **argv);
 
 int main (int argc, char **argv);
+void error(unsigned int severity, unsigned int code, const char *msg);
 
 #endif

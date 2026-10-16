@@ -3,14 +3,44 @@
 #include "entry.h"
 #include "exitproc.h"
 #include "main.h"
-#include "limits.h"
 #include "mem.h"
+#include "snprint.h"
 #include "print.h"
 #include "indrng.h" /* imported random number generator code */
 
 /* temporary NULL definition we can use */
 #undef NULL
 #define NULL ((void *)0)
+
+/* error helper */
+void error
+(unsigned int severity, unsigned int code, const char *msg)
+{
+	switch (severity)
+	{
+		case errfatal: print("A fatal error has occored!\n"); break;
+		case errmajor: print("A major error has occured!\n"); break;
+		case errsevere: print("A severe error has occured!\n"); break;
+		case errwarning: print("A nonfatal error has occured!\n"); break;
+		case errnonfatal: print("A nonfatal errror has occured!\n"); break;
+	}
+
+	char codebuff[32];
+	char severitybuff[32];
+
+	snprint(&codebuff[0], sizeof(codebuff), "%i", code);
+	snprint(&severitybuff[0], sizeof(severitybuff), "%i", severity);
+
+	print("Code: ");
+	print(&codebuff[0]);
+	print("\nSeverity: ");
+	print(&severitybuff[0]);
+	print("\nMessage: ");
+	print(msg);
+	print("\n");
+
+	if (severity == errfatal) exitproc((int)code);
+}
 
 
 /* stack helpers */

@@ -5,7 +5,6 @@
 #include "copystr.h"
 #include "escapes.h"
 #include "evaluator.h"
-#include "exitproc.h"
 #include "expressions.h"
 #include "ffi.h"
 #include "functions.h"
@@ -67,11 +66,7 @@ int parseoperand
 
 		while (*p != delim && *p != '\0') p++;
 
-		if (*p != delim) 
-		{
-			print("ERROR: VM: MAKEIR: UNDETERMINED OPERAND\n");
-			exitproc(1);
-		}
+		if (*p != delim) error(errfatal, errcodemalformedinput, "Undetermined operand when generating IR!");
 
 		*p = '\0'; /* terminate operand text */
 		p++;	   /* move past it for next parse */
@@ -131,11 +126,7 @@ Instruction makeIR
 	char *cursor = line;
 
 	char *p = skipspace(cursor);
-	if (p == NULL) 
-	{
-		print("ERROR: VM: MAKEIR: EMPTY LINE\n");
-		exitproc(1);
-	}
+	if (p == NULL) error(errfatal, errcodemalformedinput, "Empty line found when generating IR!");
 
 	char *opcode_start = p;
 	while (*p != ' ' && *p != '\t' && *p != '\0') p++;
@@ -149,10 +140,7 @@ Instruction makeIR
 	cursor = p;
 
 	if (!lookupopcode(opcode_start, &instr.Opcode)) 
-	{
-		print("ERROR: VM: MAKEIR: UNKNOWN OPCODE\n");
-		exitproc(1);
-	}
+		error(errfatal, errcodemalformedinput, "Unknown opcode found when generating IR!");
 
 	parseoperand(&cursor, &instr.FirstOperand, tempAlloc, persistAlloc);
 	parseoperand(&cursor, &instr.SecondOperand, tempAlloc, persistAlloc);
@@ -190,8 +178,8 @@ unsigned long findend
 		}
 	}
 
-	print("ERROR: HELPER FINDEND: NO MATCHING END FOUND!\n");
-	exitproc(1);
+	error(errfatal, errcodemalformedinput, "No matching End opcode found!");
+	return 0; /* XXX never hit */
 }
 
 /* helpers to resolve addressing modes */
@@ -201,10 +189,7 @@ Value resolve_literal
 	if (val->Type == type_expr) 
 	{
 		if (val->as.expr == NULL) 
-		{
-			print("ERROR: HELPER RESOLVE_LITERAL: NULL EXPRESSION!\n");
-			exitproc(1);
-		}
+			error(errfatal, errcodemalformedinput, "A null expression pointer was given!");
 
 		return evalexprnode(val->as.expr, vars, persistAlloc);
 	}
@@ -251,11 +236,7 @@ Value resolve_pointer
 	valuetostr(buff, buffsize, *val);
 	Value *valptr = getVar(vars, buff);
 	
-	if (valptr == NULL) 
-	{
-		print("ERROR: : HELPER RESOLVE_POINTER: VARIABLE DOES NOT EXIST!\n");
-		exitproc(1);
-	}
+	if (valptr == NULL) error(errfatal, errcodemalformedinput, "Specified variable does not exist!");
 
 	return *valptr;
 }
@@ -265,11 +246,7 @@ unsigned long resolvefunction
 	unsigned long instruction_count)
 {
 	unsigned long *retpc = getFunc(funcs, funcname);
-	if (retpc == NULL) 
-	{
-		print("ERROR: HELPER RESOLVEFUNC: UNKNOWN FUNCTION!\n");
-		exitproc(1);
-	}
+	if (retpc == NULL) error(errfatal, errcodemalformedinput, "The specified function does not exist!");
 
 	int tpos = (pc + 1 < instruction_count) && program[pc + 1].Opcode == Opcode_End;
 	int scall = (stack->count != 0) && cmpstr(stack->items[stack->count - 1].funcname, funcname) == 0;
@@ -334,10 +311,8 @@ unsigned long interpret
 					break;
 				}
 
-				default:
-					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING MODE ON "
-						"OPERAND ONE\n");
-					exitproc(1);
+				default: 
+					error(errfatal, errcodemalformedinput, "Unknown addressing mode!"); 
 					break;
 			}
 
@@ -369,10 +344,8 @@ unsigned long interpret
 						instr->SecondOperand.Data);
 					Value *check = getVar(vars, buf);
 					if (check == NULL) 
-					{
-						print("ERROR: VM: INTERPRETER: NEW: VARIABLE DOES NOT EXIST!\n");
-						exitproc(1);
-					}
+						error(errfatal, errcodemalformedinput, 
+							"The specified variable does not exist!");
 
 					val = *check;
 					break;
@@ -388,9 +361,8 @@ unsigned long interpret
 				}
 
 				default:
-					print("ERROR: VM: INTERPRETER: NEW: UNKNOWN ADDRESSING MODE ON "
-						"OPERAND TWO\n");
-					exitproc(1);
+					error(errfatal, errcodemalformedinput, 
+						"The specified addressing mode is invalid!");
 					break;
 			}
 
@@ -461,8 +433,8 @@ unsigned long interpret
 				}
 
 				default:
-					print("ERROR: INTERPRETER: FUNC: UNSUPPORTED ADDRESSING MODE!\n");
-					exitproc(1);
+					error(errfatal, errcodemalformedinput, 
+						"The specified addressing mode is invalid!");
 					break;
 			}
 
@@ -517,8 +489,8 @@ unsigned long interpret
 				}
 
 				default:
-					print("ERROR: INTERPRETER: IF: UNSUPPORTED ADDRESSING MODE!\n");
-					exitproc(1);
+					error(errfatal, errcodemalformedinput, 
+						"The specified addressing mode is invalid!");
 					break;
 			}
 
@@ -564,8 +536,8 @@ unsigned long interpret
 				}
 
 				default:
-					print("ERROR: INTERPRETER: IF: UNSUPPORTED ADDRESSING MODE!\n");
-					exitproc(1);
+					error(errfatal, errcodemalformedinput, 
+						"The specified addressing mode is invalid!");
 					break;
 			}
 
@@ -622,8 +594,8 @@ unsigned long interpret
 				}
 
 				default:
-					print("ERROR: INTERPRETER: CALL: UNSUPPORTED ADDRESSING MODE!\n");
-					exitproc(1);
+					error(errfatal, errcodemalformedinput, 
+						"The specified addressing mode is invalid!");
 					break;
 			}
 
@@ -690,8 +662,9 @@ unsigned long interpret
 				}
 
 				default:
-					print("ERROR: INTERPRETER: ESCAPE: ADDRESSING MODE IS UNSUPPORTED!\n");
-					exitproc(1);
+					error(errfatal, errcodemalformedinput, 
+						"The specified addressing mode is invalid!");
+					break;
 			}
 
 			callEscape(name, seed, ffivars, scratchAlloc, tempAlloc, persistAlloc, limits);
@@ -725,20 +698,17 @@ unsigned long interpret
 					valuetostr(buf, sizeof(buf), instr->FirstOperand.Data);
 					break;
 				case type_expr:
-					print("ERROR: THIS CANNOT HANDLE EXPRESSIONS!\n");
-					exitproc(1);
+					error(errfatal, errcodemalformedinput, 
+						"The specified addressing mode is invalid!");
 					break;
 				case type_null:
-					print("ERROR: THIS CANNOT HANDLE NULL TYPES!\n");
-					exitproc(1);
+					error(errfatal, errcodemalformedinput, 
+						"The specified addressing mode in invalid!");
 					break;
 			}
 
-			if (getstrlen(buf) >= 32) 
-			{
-				print("\nERROR: INTERPRETER: _PRINT (INTERNAL INSTRUCTION): DATA TOO LONG!\n");
-				exitproc(1);
-			}
+			if (getstrlen(buf) >= 32) error(errfatal, errcodelimitreached, 
+				"The specified data is too long!");
 
 			print(buf);
 			print("\n");
@@ -752,11 +722,8 @@ unsigned long interpret
 			valuetostr(buf, limits->instructions_varnamesize, instr->FirstOperand.Data);
 			Value *stored = getVar(vars, buf);
 
-			if (stored == NULL) 
-			{
-				print("ERROR: VM: INTERPRETER: _PRINT2: VARIABLE DOES NOT EXIST!\n");
-				exitproc(1);
-			}
+			if (stored == NULL) error(errfatal, errcodemalformedinput, 
+				"The specified variable does not exist!");
 
 			Value data = *stored;
 
@@ -786,13 +753,11 @@ unsigned long interpret
 					break;
 
 				case type_expr:
-					print("ERROR: THIS CANNOT HANDLE EXPRESSIONS!\n");
-					exitproc(1);
+					error(errfatal, errcodemalformedinput, "Bad data type given!");
 					break;
 
 				case type_null:
-					print("ERROR: THIS CANNOT HANDLE NULL TYPES!\n");
-					exitproc(1);
+					error(errfatal, errcodemalformedinput, "Bad data type given!");
 					break;
 			}
 

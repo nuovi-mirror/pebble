@@ -50,6 +50,7 @@ static const struct EscapeSequence escapes[] = {
 
 #ifdef proc
 	{"std.proc.spawn", escape_std_proc_spawn},
+	{"std.proc.wait", escape_std_proc_wait},
 #endif
 };
 

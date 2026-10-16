@@ -25,6 +25,7 @@ int FFIconvertValueToString (char *buff, unsigned long buffsize, FFIValue v);
 FFIValue FFIconvertValueToWord (FFIValue v, FFIvars *vars, FFIArena *persistAlloc);
 void FFIstdoutPrint (char *msg);
 void FFIexit (int stat);
+void FFIerror (unsigned int severity, unsigned int status, const char *msg);
 
 
 #endif

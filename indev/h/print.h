@@ -1,4 +1,4 @@
 #ifndef h_print_
 #define h_print_
-void print (char *msg);
+void print (const char *msg);
 #endif

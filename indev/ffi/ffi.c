@@ -80,15 +80,24 @@ FFIValue FFIconvertValueToWord
 (FFIValue v, FFIvars *vars, FFIArena *persistAlloc)
 { return valuetoword(v, vars->map, persistAlloc); }
 
-void FFIstdoutPrint (char *msg)
+void FFIstdoutPrint 
+(char *msg)
 { print(msg); }
 
-void FFIexit (int stat)
-{
-	exitproc(stat);
-}
+void FFIexit 
+(int stat)
+{ exitproc(stat); }
 
-unsigned long long FFImix64 (unsigned long long x)
+void *FFIallocateMemory 
+(FFIArena *arena, unsigned long size)
+{ return alloc(arena, size); }
+
+void FFIerror
+(unsigned int errtype, unsigned int errcode, const char *msg)
+{ error(errtype, errcode, msg); }
+
+unsigned long long FFImix64 
+(unsigned long long x)
 {
 	x ^= x >> 30;
 	x *= 0xBF58476D1CE4E5B9ULL;
@@ -99,7 +108,4 @@ unsigned long long FFImix64 (unsigned long long x)
 	return x;
 }
 
-void *FFIallocateMemory (FFIArena *arena, unsigned long size)
-{
-	return alloc(arena, size);
-}
+

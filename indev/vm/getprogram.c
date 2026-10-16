@@ -1,39 +1,21 @@
 #include "readfile.h"
 #include "main.h"
-#include "print.h"
-#include "exitproc.h"
 #include "allocator.h"
 
 char *getprogram
 (Arena *allocator, unsigned long maxsize, Args *cliargs)
 {
-	if (cliargs->count < 1) 
-	{
-		print("ERROR: VM: NO BYTECODE FILE SPECIFIED!\n");
-		exitproc(1);
-	}
+	if (cliargs->count < 1) error(errfatal, errcodeplatformspecific, "No bytecode file specified!");
 
 	unsigned long filesize = getfilesize(cliargs->values[1]);
-	if (filesize == 0) 
-	{
-		print("ERROR: VM: INIT: CANNOT OPEN SPECIFIED FILE!\n");
-		exitproc(1);
-	}
+	if (filesize == 0) error(errfatal, errcodeplatformspecific, "Cannot open specified bytecode file!");
 
-	if (filesize + 1 > maxsize) 
-	{
-		print("ERROR: VM: INIT: FILE IS TOO LARGE!\n");
-		exitproc(1);
-	}
+	if (filesize + 1 > maxsize) error(errfatal, errcodelimitreached, "Bytecode file is too large!");
 
 	char *file = alloc(allocator, filesize + 1);
 	char *filedata = readfile(cliargs->values[1], file, filesize + 1);
 
-	if (filedata == NULL) 
-	{
-		print("ERROR: VM: INIT: CANNOT OPEN SPECIFIED FILE!\n");
-		exitproc(1);
-	}
+	if (filedata == NULL) error(errfatal, errcodeplatformspecific, "Cannot open specified bytecode file!");
 
 	return file;
 }

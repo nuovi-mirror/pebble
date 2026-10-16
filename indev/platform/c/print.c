@@ -1,6 +1,6 @@
 #include "print.h"
 #include <stdio.h>
 
-void print (char *msg) {
-	fputs(msg, stdout);
-}
+void print 
+(const char *msg) 
+{ fputs(msg, stdout); }
