@@ -1,0 +1,29 @@
+Stack overflow bug
+Class: Major
+Discovered: 20260815
+Status: PATCHED (20260815)
+
+This bug allowed a stack overflow in the language call-stack by the program
+recursing forever. The wrong allocator was used to allocate a function name
+string, causing garbage data to be treated as the return function name, which
+can, in some cases, cause a stack overflow and segmentation fault.
+
+This bug can be reproduced using the program
+
+	include stdlib
+
+	fn main ( ) ret {
+		ret = '0'
+		call std.term.color.basic.back ( 'green' )
+	}
+
+using the reliant standard library code
+
+	"fn std.term.color.basic.back ( color ) ret {\n"
+	". New __Escape_std.term.color.basic.back_ARG0 <__Func_std.term.color.basic.back_color>\n"
+	". Escape std.term.color.basic.back\n"
+	"ret = color\n"
+	"}\n"
+
+This may not be the only way to reproduce it, but it is the current way that is
+known to reproduce reliably. 
