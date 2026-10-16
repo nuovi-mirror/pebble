@@ -10,29 +10,10 @@
 void FFIallocateVariable 
 (FFIvars *vars, const char *varname, void *value, FFIArena *persistAlloc)
 {
-	if (vars->count >= vars->max) 
-	{
-		print("ERROR: FFI: TOO MANY VARIABLES USED!\n");
-		exitproc(1);
-	}
-
-	if (getstrlen(varname) > vars->namesize) 
-	{
-		print("ERROR: FFI: VARIABLE NAME IS TOO LONG!\n");
-		exitproc(1);
-	}
-
-	if (value == NULL) 
-	{
-		print("ERROR: FFI: VALUE IS NULL!\n");
-		exitproc(1);
-	}
-
-	if (getstrlen(varname) == 0) 
-	{
-		print("ERROR: FFI: NO VARIABLE NAME GIVEN!\n");
-		exitproc(1);
-	}
+	if (vars->count >= vars->max) error(errfatal, errcodelimitreached, "Too many FFI variables used!");
+	if (getstrlen(varname) > vars->namesize) error(errfatal, errcodelimitreached, "FFI variable name is too long!");
+	if (value == NULL) error(errfatal, errcodemalformedinput, "FFI variable is NULL!");
+	if (getstrlen(varname) == 0) error(errfatal, errcodemalformedinput, "FFI variable name is empty!");
 
 	putVar(vars->map, varname, value, persistAlloc);
 }
@@ -40,17 +21,8 @@ void FFIallocateVariable
 void *FFIreadVariableUnsafe 
 (FFIvars *vars, const char *varname)
 {
-	if (getstrlen(varname) == 0) 
-	{
-		print("ERROR: FFI: NO VARIABLE NAME GIVEN!\n");
-		exitproc(1);
-	}
-
-	if (getstrlen(varname) > vars->namesize) 
-	{
-		print("ERROR: FFI: VARIABLE NAME IS TOO LONG!\n");
-		exitproc(1);
-	}
+	if (getstrlen(varname) == 0) error(errfatal, errcodemalformedinput, "FFI variable name is empty!");
+	if (getstrlen(varname) > vars->namesize) error(errfatal, errcodelimitreached, "FFI variable name is too long!");
 
 	void *var = getVar(vars->map, varname);
 
@@ -62,11 +34,7 @@ void *FFIreadVariable /* safer wrapper */
 (FFIvars *vars, const char *varname)
 {
 	void *uvar = FFIreadVariableUnsafe(vars, varname);
-
-	if (uvar == NULL) {
-		print("ERROR: FFI: VARIABLE DOES NOT EXIST!\n");
-		exitproc(1);
-	}
+	if (uvar == NULL) error(errfatal, errcodemalformedinput, "FFI variable does not exist!");
 
 	/* cannot be null anymore */
 	return uvar;
