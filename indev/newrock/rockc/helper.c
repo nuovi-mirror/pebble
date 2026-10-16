@@ -10,6 +10,19 @@ char src[MAX_SRC];
 long pos;
 long len;
 
+unsigned short src_file[MAX_SRC];
+unsigned       src_line[MAX_SRC];
+
+typedef struct SrcUnit {
+	char     name[MAX_PATH];
+	int      parent;       /* unit that included this one, -1 for the main file */
+	unsigned parent_line;  /* line of the include statement inside the parent */
+} SrcUnit;
+
+static SrcUnit units[MAX_UNITS];
+static int nunits;
+static int last_diag_unit = -2;
+
 char include_path[MAX_PATH];
 
 char locals[MAX_LOCALS][MAX_NAME];
@@ -23,11 +36,201 @@ int nhelpers;
 
 Helper *current_helper;
 
+char cur_fn[MAX_NAME];
+int local_assigned[MAX_LOCALS];
+int nerrors;
+
+typedef struct CallRef {
+	char name[MAX_NAME];
+	int  argc;
+	int  nbound;
+	Loc  at;
+} CallRef;
+
+typedef struct VarRef {
+	char name[MAX_NAME];
+	Loc  at;
+} VarRef;
+
+static FuncInfo funcs[MAX_FUNCS];
+static int nfuncs;
+
+static CallRef calls[MAX_CALLS];
+static int ncalls;
+
+static VarRef vrefs[MAX_REFS];
+static int nvrefs;
+
+static char globals[MAX_GLOBALS][MAX_NAME];
+static int nglobals;
+
+/* returns -1 when the table is full, which in practice means an include cycle */
+int add_source_unit
+(const char *name, Loc included_from)
+{
+	if (nunits >= MAX_UNITS) return -1;
+
+	SrcUnit *u = &units[nunits];
+
+	strncpy(u->name, name, MAX_PATH - 1);
+	u->name[MAX_PATH - 1] = '\0';
+	u->parent = included_from.file;
+	u->parent_line = included_from.line;
+
+	return nunits++;
+}
+
+/* record where src[start .. start + n) came from; lines count from 1 */
+void tag_source
+(long start, long n, int file)
+{
+	unsigned line = 1;
+
+	for (long i = 0; i < n; i++)
+	{
+		src_file[start + i] = (unsigned short)file;
+		src_line[start + i] = line;
+
+		if (src[start + i] == '\n') line++;
+	}
+}
+
+Loc loc_at
+(long at)
+{
+	Loc l;
+
+	l.file = -1;
+	l.line = 0;
+
+	if (nunits == 0) return l;
+
+	if (at < 0) at = 0;
+
+	/* end of input: report the last real byte, which belongs to whichever
+	 * file (main or included) actually ran out of text */
+	if (at >= len) at = len > 0 ? len - 1 : 0;
+
+	l.file = src_file[at];
+	l.line = src_line[at];
+
+	return l;
+}
+
+/* innermost includer first, like gcc:
+ *   In file included from b.rock:5,
+ *                    from a.rock:3: */
+static void print_include_chain
+(int unit)
+{
+	int printed = 0;
+
+	for (int u = unit; units[u].parent >= 0; u = units[u].parent)
+	{
+		fprintf(stderr, printed ? ",\n                 from %s:%u" : "In file included from %s:%u",
+			units[units[u].parent].name, units[u].parent_line);
+		printed = 1;
+	}
+
+	if (printed) fputs(":\n", stderr);
+}
+
+static void print_diag
+(const char *kind, const char *msg, Loc l)
+{
+	if (l.file < 0)
+	{
+		fprintf(stderr, "rockc: %s: %s\n", kind, msg);
+		return;
+	}
+
+	/* like gcc, only repeat the chain when the file changes */
+	if (l.file != last_diag_unit)
+	{
+		print_include_chain(l.file);
+		last_diag_unit = l.file;
+	}
+
+	fprintf(stderr, "%s:%u: %s: %s\n", units[l.file].name, l.line, kind, msg);
+}
+
+void fail_at
+(const char *msg, long at)
+{
+	print_diag("error", msg, loc_at(at));
+	exit(1);
+}
+
 void fail
 (const char *msg)
+{ fail_at(msg, pos); }
+
+/* generated code is buffered and only written once compilation succeeded,
+ * so a failed compile never leaves a partial program behind */
+static char *obuf;
+static size_t olen;
+static size_t ocap;
+
+static void out_reserve
+(size_t extra)
 {
-	fprintf(stderr, "rockc: error: %s (at byte %ld)\n", msg, pos);
-	exit(1);
+	if (olen + extra + 1 <= ocap) return;
+
+	size_t ncap = ocap ? ocap : 4096;
+
+	while (ncap < olen + extra + 1) ncap *= 2;
+
+	char *p = realloc(obuf, ncap);
+
+	if (!p) fail("out of memory while buffering output");
+
+	obuf = p;
+	ocap = ncap;
+}
+
+static void voutf
+(const char *fmt, va_list ap)
+{
+	va_list copy;
+
+	va_copy(copy, ap);
+	int n = vsnprintf(NULL, 0, fmt, copy);
+	va_end(copy);
+
+	if (n < 0) fail("failed to generate output");
+
+	out_reserve((size_t)n);
+	vsnprintf(obuf + olen, (size_t)n + 1, fmt, ap);
+	olen += (size_t)n;
+}
+
+void outf
+(const char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	voutf(fmt, ap);
+	va_end(ap);
+}
+
+void outs
+(const char *s)
+{
+	size_t n = strlen(s);
+
+	out_reserve(n);
+	memcpy(obuf + olen, s, n);
+	olen += n;
+	obuf[olen] = '\0';
+}
+
+int flush_output
+(void)
+{
+	if (olen > 0 && fwrite(obuf, 1, olen, stdout) != olen) return -1;
+
+	return fflush(stdout) == 0 ? 0 : -1;
 }
 
 int peekch
@@ -54,7 +257,7 @@ void emitf
 	}
 	else
 	{
-		vprintf(fmt, ap);
+		voutf(fmt, ap);
 	}
 
 	va_end(ap);
@@ -77,11 +280,11 @@ Helper *new_helper
 void emit_helper
 (const Helper *h)
 {
-	printf("Func %s\n", h->name);
-	fputs(h->body, stdout);
+	outf("Func %s\n", h->name);
+	outs(h->body);
 
-	if (h->body_len == 0 || h->body[h->body_len - 1] != '\n') putchar('\n');
-	printf("End\n");
+	if (h->body_len == 0 || h->body[h->body_len - 1] != '\n') outs("\n");
+	outs("End\n");
 }
 
 void emit_helpers_from
@@ -90,9 +293,50 @@ void emit_helpers_from
 	for (int i = first; i < nhelpers; i++) emit_helper(&helpers[i]);
 }
 
+/* look at a raw Pebble line so later checks know what it defines */
+static void scan_raw_line
+(const char *line)
+{
+	char op[MAX_NAME], arg[MAX_NAME];
+	int n = 0;
+
+	n = sscanf(line, " %63s %63s", op, arg);
+
+	if (n < 2) return;
+
+	if (strcmp(op, "Func") == 0)
+	{
+		define_func(arg, -1, -1);
+		return;
+	}
+
+	if (strcmp(op, "New") != 0) return;
+
+	if (cur_fn[0])
+	{
+		char prefix[MAX_NAME + 16];
+		size_t plen;
+
+		snprintf(prefix, sizeof prefix, "__Func_%s_", cur_fn);
+		plen = strlen(prefix);
+
+		if (strncmp(arg, prefix, plen) == 0)
+		{
+			mark_assigned(arg + plen);
+			return;
+		}
+	}
+
+	if (is_ident_start((unsigned char)arg[0]) && !(arg[0] == '_' && arg[1] == '_'))
+		define_global(arg);
+}
+
 int try_raw_line
 (void)
 {
+	char line[256];
+	size_t nline = 0;
+
 	if (pos > 0 && src[pos - 1] != '\n') return 0;
 	if (peekch() != '.') return 0;
 
@@ -101,7 +345,13 @@ int try_raw_line
 	if (pos < len && src[pos] != '\n') pos++;
 
 	while (pos < len && src[pos] != '\n')
+	{
+		if (nline + 1 < sizeof line) line[nline++] = src[pos];
 		emitf("%c", src[pos++]);
+	}
+
+	line[nline] = '\0';
+	scan_raw_line(line);
 
 	emitf("\n");
 
@@ -219,6 +469,23 @@ void add_local
 
 	strncpy(locals[nlocals++], name, MAX_NAME - 1);
 	locals[nlocals - 1][MAX_NAME - 1] = '\0';
+	local_assigned[nlocals - 1] = 0;
+}
+
+void mark_assigned
+(const char *name)
+{
+	for (int i = 0; i < nlocals; i++)
+		if (strcmp(locals[i], name) == 0) local_assigned[i] = 1;
+}
+
+int is_assigned
+(const char *name)
+{
+	for (int i = 0; i < nlocals; i++)
+		if (strcmp(locals[i], name) == 0) return local_assigned[i];
+
+	return 0;
 }
 
 void mangle
@@ -228,12 +495,25 @@ void mangle
 	else snprintf(out, cap, "%s", name);
 }
 
+/* open a gap of n bytes at 'at', moving the line tags along with the text */
+static void shift_source
+(long at, long n)
+{
+	size_t count = (size_t)(len - at) + 1;
+
+	memmove(src + at + n, src + at, count);
+	memmove(src_file + at + n, src_file + at, count * sizeof *src_file);
+	memmove(src_line + at + n, src_line + at, count * sizeof *src_line);
+}
+
 void include_file
 (const char *name)
 {
 	char path[MAX_PATH];
 	size_t path_len = strlen(include_path);
 	size_t name_len = strlen(name);
+	long at = pos; /* errors point at the include statement itself */
+	Loc site = loc_at(at);
 
 	if (pos < len && src[pos] == '\n') pos++;
 
@@ -241,21 +521,38 @@ void include_file
 	{
 		size_t stdlib_len = strlen(stdlib);
 
-		if (stdlib_len + 1 > MAX_SRC - len - 1) fail("source buffer is too small for standard library");
+		if (stdlib_len + 1 > MAX_SRC - len - 1) fail_at("source buffer is too small for standard library", at);
 
-		memmove(src + pos + stdlib_len + 1, src + pos, (size_t)(len - pos) + 1);
+		int unit = add_source_unit("<stdlib>", site);
+
+		if (unit < 0) fail_at("too many nested or repeated includes (include cycle?)", at);
+
+		shift_source(pos, (long)stdlib_len + 1);
 		memcpy(src + pos, stdlib, stdlib_len);
-		src[pos + stdlib_len] = '\n';
+		src[pos + (long)stdlib_len] = '\n';
+		tag_source(pos, (long)stdlib_len + 1, unit);
 
 		len += stdlib_len + 1;
 
 		return;
 	}
 
-	if (path_len + 1 + name_len + 1 > sizeof path) fail("include path is too long");
+	if (path_len + 1 + name_len + 1 > sizeof path) fail_at("include path is too long", at);
 
 	if (path_len > 0 && include_path[path_len - 1] == '/') snprintf(path, sizeof path, "%s%s", include_path, name);
 	else snprintf(path, sizeof path, "%s/%s", include_path, name);
+
+	/* a file that is already being included further up the chain is a cycle */
+	for (int u = site.file; u >= 0; u = units[u].parent)
+	{
+		if (strcmp(units[u].name, path) == 0)
+		{
+			char msg[MAX_PATH + 48];
+
+			snprintf(msg, sizeof msg, "'%s' is included recursively", path);
+			fail_at(msg, at);
+		}
+	}
 
 	FILE *file = fopen(path, "r");
 
@@ -264,13 +561,13 @@ void include_file
 		char msg[MAX_PATH + 32];
 
 		snprintf(msg, sizeof msg, "could not open include file '%s'", path);
-		fail(msg);
+		fail_at(msg, at);
 	}
 
 	if (fseek(file, 0, SEEK_END) != 0)
 	{
 		fclose(file);
-		fail("could not seek include file");
+		fail_at("could not seek include file", at);
 	}
 
 	long file_len = ftell(file);
@@ -278,27 +575,37 @@ void include_file
 	if (file_len < 0)
 	{
 		fclose(file);
-		fail("could not determine include file size");
+		fail_at("could not determine include file size", at);
 	}
 
 	if (fseek(file, 0, SEEK_SET) != 0)
 	{
 		fclose(file);
-		fail("could not seek include file");
+		fail_at("could not seek include file", at);
 	}
 
 	if ((unsigned long)file_len >
 		(unsigned long)(MAX_SRC - len - 1))
 	{
 		fclose(file);
-		fail("source buffer is too small for included file");
+		fail_at("source buffer is too small for included file", at);
 	}
 
-	memmove(src + pos + file_len, src + pos, (size_t)(len - pos) + 1);
+	int unit = add_source_unit(path, site);
+
+	if (unit < 0)
+	{
+		fclose(file);
+		fail_at("too many nested or repeated includes (include cycle?)", at);
+	}
+
+	shift_source(pos, file_len);
 	size_t got = fread(src + pos, 1, (size_t)file_len, file);
 	fclose(file);
 
-	if (got != (size_t)file_len) fail("could not read include file");
+	if (got != (size_t)file_len) fail_at("could not read include file", at);
+
+	tag_source(pos, file_len, unit);
 
 	len += file_len;
 }
@@ -339,4 +646,196 @@ void subst_expr
 	}
 
 	out[oi] = '\0';
+}
+
+
+/* ---- compile-time checks ---- */
+
+void report_error
+(const char *msg, Loc at)
+{
+	print_diag("error", msg, at);
+	nerrors++;
+}
+
+void report_warning
+(const char *msg, Loc at)
+{
+	print_diag("warning", msg, at);
+}
+
+static FuncInfo *find_func
+(const char *name)
+{
+	for (int i = 0; i < nfuncs; i++)
+		if (strcmp(funcs[i].name, name) == 0) return &funcs[i];
+
+	return NULL;
+}
+
+void define_func
+(const char *name, int nparams, int nresults)
+{
+	if (find_func(name))
+	{
+		char msg[MAX_NAME + 48];
+
+		snprintf(msg, sizeof msg, "function '%s' is defined more than once", name);
+		fail(msg);
+	}
+
+	if (nfuncs >= MAX_FUNCS) fail("too many functions");
+
+	FuncInfo *f = &funcs[nfuncs++];
+
+	strncpy(f->name, name, MAX_NAME - 1);
+	f->name[MAX_NAME - 1] = '\0';
+	f->nparams = nparams;
+	f->nresults = nresults;
+	f->at = loc_at(pos);
+}
+
+void note_call
+(const char *name, int argc, int nbound, long at)
+{
+	if (ncalls >= MAX_CALLS) fail("too many function calls");
+
+	CallRef *r = &calls[ncalls++];
+
+	strncpy(r->name, name, MAX_NAME - 1);
+	r->name[MAX_NAME - 1] = '\0';
+	r->argc = argc;
+	r->nbound = nbound;
+	r->at = loc_at(at);
+}
+
+static int has_global
+(const char *name)
+{
+	for (int i = 0; i < nglobals; i++)
+		if (strcmp(globals[i], name) == 0) return 1;
+
+	return 0;
+}
+
+void define_global
+(const char *name)
+{
+	if (has_global(name)) return;
+	if (nglobals >= MAX_GLOBALS) fail("too many global variables");
+
+	strncpy(globals[nglobals], name, MAX_NAME - 1);
+	globals[nglobals][MAX_NAME - 1] = '\0';
+	nglobals++;
+}
+
+/* a bare name was read as a variable */
+void use_var
+(const char *name, long at)
+{
+	if (is_local(name))
+	{
+		if (!is_assigned(name))
+		{
+			char msg[MAX_NAME + 64];
+
+			snprintf(msg, sizeof msg, "variable '%s' is used before it is assigned", name);
+			report_error(msg, loc_at(at));
+		}
+
+		return;
+	}
+
+	/* __ names are compiler/stdlib internals written by hand */
+	if (name[0] == '_' && name[1] == '_') return;
+
+	if (nvrefs >= MAX_REFS) fail("too many variable references");
+
+	VarRef *r = &vrefs[nvrefs++];
+
+	strncpy(r->name, name, MAX_NAME - 1);
+	r->name[MAX_NAME - 1] = '\0';
+	r->at = loc_at(at);
+}
+
+/* {x} and <x>: only checked when the text is exactly one name */
+void use_text_var
+(const char *text, long at)
+{
+	char name[MAX_NAME];
+	size_t n = 0;
+
+	while (*text == ' ') text++;
+
+	if (!is_ident_start((unsigned char)*text)) return;
+
+	while (*text && is_ident_char((unsigned char)*text))
+	{
+		if (n + 1 >= sizeof name) return;
+		name[n++] = *text++;
+	}
+
+	name[n] = '\0';
+
+	while (*text == ' ') text++;
+
+	if (*text) return;
+
+	use_var(name, at);
+}
+
+/* checks that need the whole program, so forward references stay legal */
+int finish_checks
+(void)
+{
+	char msg[3 * MAX_NAME + 96];
+
+	for (int i = 0; i < ncalls; i++)
+	{
+		const CallRef *r = &calls[i];
+		const FuncInfo *f = find_func(r->name);
+
+		if (!f)
+		{
+			snprintf(msg, sizeof msg, "call to undefined function '%s'", r->name);
+			report_error(msg, r->at);
+			continue;
+		}
+
+		if (f->nparams >= 0 && r->argc != f->nparams)
+		{
+			snprintf(msg, sizeof msg,
+				"function '%s' takes %d argument(s) but %d given",
+				r->name, f->nparams, r->argc);
+			report_error(msg, r->at);
+		}
+
+		if (f->nresults >= 0 && r->nbound > f->nresults)
+		{
+			snprintf(msg, sizeof msg,
+				"function '%s' returns %d value(s) but %d are being assigned",
+				r->name, f->nresults, r->nbound);
+			report_error(msg, r->at);
+		}
+	}
+
+	for (int i = 0; i < nvrefs; i++)
+	{
+		if (has_global(vrefs[i].name)) continue;
+
+		snprintf(msg, sizeof msg,
+			"undeclared variable '%s' (not a local, an export, or a raw New)",
+			vrefs[i].name);
+		report_error(msg, vrefs[i].at);
+	}
+
+	if (has_main)
+	{
+		const FuncInfo *m = find_func("main");
+
+		if (m && m->nparams > 0)
+			report_error("'main' is called with no arguments, so it cannot take parameters", m->at);
+	}
+
+	return nerrors;
 }

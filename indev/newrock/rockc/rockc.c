@@ -50,6 +50,7 @@ void compile_value
 		char subst[MAX_VALUE];
 
 		read_delimited('}', text, sizeof text);
+		use_text_var(text, pos);
 		subst_expr(fn, text, subst, sizeof subst);
 
 		snprintf(out, cap, "{%s}", subst);
@@ -65,6 +66,7 @@ void compile_value
 		char subst[MAX_VALUE];
 
 		read_delimited('>', text, sizeof text);
+		use_text_var(text, pos);
 		subst_expr(fn, text, subst, sizeof subst);
 
 		snprintf(out, cap, "<%s>", subst);
@@ -75,8 +77,10 @@ void compile_value
 	if (is_ident_start(c))
 	{
 		char name[MAX_NAME];
+		long at = pos;
 
 		read_ident(name, sizeof name);
+		use_var(name, at);
 		mangle(fn, name, out, cap);
 
 		return;
@@ -86,9 +90,13 @@ void compile_value
 }
 
 void compile_call
-(const char *fn, const char *dest_local_or_null)
+(const char *fn, char dests[][MAX_NAME], int ndests)
 {
 	char callee[MAX_NAME];
+
+	skipws();
+
+	long at = pos;
 
 	read_ident(callee, sizeof callee);
 
@@ -112,14 +120,17 @@ void compile_call
 
 	expect_char(')');
 
+	note_call(callee, argc, ndests, at);
+
 	emitf("Call %s\n", callee);
 
-	if (dest_local_or_null)
+	/* results are bound in order: first name gets RET0, second RET1, ... */
+	for (int i = 0; i < ndests; i++)
 	{
 		char mangled[MAX_NAME];
 
-		mangle(fn, dest_local_or_null, mangled, sizeof mangled);
-		emitf("New %s __Func_%s_RET0\n", mangled, callee);
+		mangle(fn, dests[i], mangled, sizeof mangled);
+		emitf("New %s __Func_%s_RET%d\n", mangled, callee, i);
 	}
 }
 
@@ -335,36 +346,74 @@ void compile_stmt
 		char name[MAX_NAME];
 
 		read_ident(name, sizeof name);
+
+		if (!is_local(name))
+		{
+			char msg[MAX_NAME + 64];
+
+			snprintf(msg, sizeof msg, "cannot export '%s': not a variable of this function", name);
+			fail(msg);
+		}
+
+		use_var(name, pos);
+		define_global(name);
 		emitf("New %s __Func_%s_%s\n", name, fn, name);
 		return;
 	}
 
 	if (try_keyword("call"))
 	{
-		compile_call(fn, NULL);
+		compile_call(fn, NULL, 0);
 		return;
 	}
 
-	char name[MAX_NAME];
+	/* one or more space-separated destination names, then '=' */
+	char names[MAX_LOCALS][MAX_NAME];
+	int nnames = 0;
 
-	read_ident(name, sizeof name);
-	add_local(name);
+	for (;;)
+	{
+		if (nnames >= MAX_LOCALS) fail("too many assignment targets");
+
+		skipws();
+
+		if (!is_ident_start(peekch()))
+			fail(nnames == 0 ? "expected a statement"
+				: "expected '=' after assignment target(s) (unknown statement?)");
+
+		read_ident(names[nnames], sizeof names[nnames]);
+		add_local(names[nnames]);
+		nnames++;
+
+		skipws();
+
+		if (peekch() == '=') break;
+	}
 
 	expect_char('=');
 
 	if (try_keyword("call"))
 	{
-		compile_call(fn, name);
+		compile_call(fn, names, nnames);
+
+		for (int i = 0; i < nnames; i++) mark_assigned(names[i]);
+
 		return;
 	}
 
 	char val[MAX_VALUE];
 	compile_value(fn, val, sizeof val);
 
-	char mangled[MAX_NAME];
-	mangle(fn, name, mangled, sizeof mangled);
+	/* same value is assigned to every target */
+	for (int i = 0; i < nnames; i++)
+	{
+		char mangled[MAX_NAME];
 
-	emitf("New %s %s\n", mangled, val);
+		mangle(fn, names[i], mangled, sizeof mangled);
+		emitf("New %s %s\n", mangled, val);
+	}
+
+	for (int i = 0; i < nnames; i++) mark_assigned(names[i]);
 }
 
 void compile_fn
@@ -390,7 +439,11 @@ void compile_fn
 		if (nparams >= MAX_LOCALS) fail("too many parameters");
 
 		read_ident(params[nparams], sizeof params[nparams]);
+
+		if (is_local(params[nparams])) fail("duplicate parameter name");
+
 		add_local(params[nparams]);
+		mark_assigned(params[nparams]);
 
 		nparams++;
 		skipws();
@@ -398,21 +451,43 @@ void compile_fn
 
 	expect_char(')');
 
-	char result[MAX_NAME];
+	char results[MAX_LOCALS][MAX_NAME];
+	int nresults = 0;
 
-	read_ident(result, sizeof result);
-	add_local(result);
+	/* one or more result names; they map to RET0, RET1, ... in order */
+	for (;;)
+	{
+		if (nresults >= MAX_LOCALS) fail("too many results");
+
+		read_ident(results[nresults], sizeof results[nresults]);
+
+		for (int i = 0; i < nresults; i++)
+			if (strcmp(results[i], results[nresults]) == 0)
+				fail("duplicate result name");
+
+		add_local(results[nresults]);
+		nresults++;
+
+		skipws();
+
+		if (peekch() == '{') break;
+	}
 
 	expect_char('{');
+
+	Loc fn_loc = loc_at(pos);
+
+	define_func(fn, nparams, nresults);
+	snprintf(cur_fn, sizeof cur_fn, "%s", fn);
 
 	int first_helper = nhelpers;
 
 	Helper *old_helper = current_helper;
 	current_helper = NULL;
 
-	printf("Func %s\n", fn);
+	outf("Func %s\n", fn);
 
-	for (int i = 0; i < nparams; i++) printf("New __Func_%s_%s __Func_%s_ARG%d\n", fn, params[i], fn, i);
+	for (int i = 0; i < nparams; i++) outf("New __Func_%s_%s __Func_%s_ARG%d\n", fn, params[i], fn, i);
 
 	skipws();
 
@@ -425,12 +500,27 @@ void compile_fn
 
 	expect_char('}');
 
-	printf("New __Func_%s_RET0 __Func_%s_%s\n", fn, fn, result);
-	printf("End\n");
+	for (int i = 0; i < nresults; i++)
+		if (!is_assigned(results[i]))
+		{
+			char msg[3 * MAX_NAME + 64];
+
+			snprintf(msg, sizeof msg, "result '%s' of function '%s' is never assigned", results[i], fn);
+			report_warning(msg, fn_loc);
+		}
+
+	for (int i = 0; i < nresults; i++)
+		outf("New __Func_%s_RET%d __Func_%s_%s\n", fn, i, fn, results[i]);
+
+	outf("End\n");
 
 	current_helper = old_helper;
 
 	emit_helpers_from(first_helper);
+
+	/* locals belong to the function; top-level code has none */
+	nlocals = 0;
+	cur_fn[0] = '\0';
 }
 
 void compile_top_stmt
@@ -451,7 +541,7 @@ void compile_top_stmt
 
 	if (try_keyword("call"))
 	{
-		compile_call("", NULL);
+		compile_call("", NULL, 0);
 		return;
 	}
 
@@ -494,9 +584,16 @@ int main
 	src[len] = '\0';
 	pos = 0;
 
+	Loc no_parent = { -1, 0 };
+	int main_file = add_source_unit(argv[1], no_parent);
+
+	tag_source(0, len, main_file);
+	src_file[len] = (unsigned short)main_file;
+	src_line[len] = len > 0 ? src_line[len - 1] : 1;
+
 	skipws();
 
-	printf("#!/usr/bin/env pblvm\n");
+	outf("#!/usr/bin/env pblvm\n");
 
 	while (pos < len)
 	{
@@ -507,6 +604,19 @@ int main
 		skipws();
 	}
 
-	if (has_main) printf("Call main\n");
+	if (finish_checks() > 0)
+	{
+		fprintf(stderr, "rockc: %d error(s); no output written\n", nerrors);
+		return 1;
+	}
+
+	if (has_main) outf("Call main\n");
+
+	if (flush_output() != 0)
+	{
+		fprintf(stderr, "rockc: error: could not write output\n");
+		return 1;
+	}
+
 	return 0;
 }
