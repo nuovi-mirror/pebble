@@ -1,5 +1,5 @@
 New args 'ls .'
 New __Escape_std.proc.spawn_ARG0 <args>
 Escape std.proc.spawn
-New __Escape_std.proc.wait_RET0 <__Escape_std.proc.spawn_RET0>
+New __Escape_std.proc.wait_ARG0 <__Escape_std.proc.spawn_RET0>
 Escape std.proc.wait

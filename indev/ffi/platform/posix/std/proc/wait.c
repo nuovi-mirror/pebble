@@ -28,14 +28,14 @@ void escape_std_proc_wait (FFIvars *vars, unsigned long long seed, FFIArena *scr
 	if (WIFSIGNALED(status)) /* killed by a signal */
 	{
 		*exitmarker = (FFIValue){ .Type = type_word, .as.word = 0 }; /* killed with signal */
-		*exitcode = (FFIValue){ .Type = type_sword, .as.sword = status }; /* exit signal */
+		*exitcode = (FFIValue){ .Type = type_sword, .as.sword = WTERMSIG(status) }; /* exit signal */
 		FFIallocateVariable(vars, "__Escape_std.proc.wait_RET0", &exitcode, persistAlloc);
-		FFIallocateVariable(vars, "__Escape_std.proc.wait_RET1", &exitcode, persistAlloc);
+		FFIallocateVariable(vars, "__Escape_std.proc.wait_RET1", &exitmarker, persistAlloc);
 	} else /* normal exit */ 
 	{
 		*exitmarker = (FFIValue){ .Type = type_word, .as.word = 1 }; /* not killed with signal */
-		*exitcode = (FFIValue){ .Type = type_sword, .as.sword = status }; /* exit status */
+		*exitcode = (FFIValue){ .Type = type_sword, .as.sword = WEXITSTATUS(status) }; /* exit status */
 		FFIallocateVariable(vars, "__Escape_std.proc.wait_RET0", &exitcode, persistAlloc);
-		FFIallocateVariable(vars, "__Escape_std.proc.wait_RET1", &exitcode, persistAlloc);
+		FFIallocateVariable(vars, "__Escape_std.proc.wait_RET1", &exitmarker, persistAlloc);
 	}
 }
