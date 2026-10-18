@@ -183,3 +183,116 @@
 		New {grault} foo / The variable defined as the result of the expression held in grault, which
 		/ resolves to '33', since qux contains the data 3 and corge contains the data 3 as well, resolved
 		/ from the prior expression, to contain a copy of the data in foo, which is 1
+
+	The Func opcode is the opcode to begin recording to the function table until the End opcode is reached. The
+	Func opcode only takes one operand, being the name of the function to begin recording. This name can be a
+	piece of literal text using the bare or True Literal addressing modes, the result of an expression via the
+	Literal addressing mode, the result of an expression taken from a pointer with the Forced Evaluation
+	addressing mode, or a pointer to a piece of text via the pointer addressing mode. Every opcode specified
+	from the Func statement until the End statement will be recorded into the function entry under the defined]
+	name. Multiple functions of the same name are allowed to be declared, in which case the last definition in
+	terms of where it appears in the bytecode stream should be the one valid. However, functions should be
+	recorded as they are seen, not at compile-time. This means a function cannot be called before it is defined,
+	and if a function is re-defined but called before the re-definition, the old function value should be called.
+
+	Some examples include
+
+		Func a / start recording opcodes to function a
+		New x '1' / an opcode in function a
+		New y '2' / another opcode in function a
+		End / end function a
+
+		New x 'a s++ b' / create name template
+		New a '1' / fill first value
+		New b '2' / fill second value
+		Func {x} / create function '12'
+		New w '1' / an opcode in function 12
+		End / end function 12
+
+	Another opcode plays in hand with this, being the Call opcode, a call to a defined function. This opcode
+	will call the function by name using a literal name via the bare and True Literal addressing modes, by
+	the result of an expression from the Literal addressing mode, by the result of a pointer to an expression
+	from the Forced Evaluation addressing mode, or by a pointer to the name by the Pointer addressing mode. This
+	opcode only takes one operand, being the name of the function to cal.
+
+	Some examples include
+
+		New template 'base s++ modifier' / create name template
+		New base 'func' / fill first value
+		New modifier '0' / fill second value
+		Call {template} / call the function func0
+
+		Func a / define function a
+		New x '1' / an opcode in function a
+		End / end function a
+		Call a / call function a; x now = 1
+		Func a / re-define function a
+		New x '2' / an opcode in the new function a
+		End / end the new function a
+		Call a / call the re-defined function; x now = 2
+
+	The Return opcode can be used to return from a function early. This opcode takes no arguments and simply
+	ends the function once it is hit inside of a function. This opcode is considered invalid when used outside
+	of a function.
+
+	Some examples include
+
+		Func foo / define function foo
+		Return / return from function foo
+		New x '2' / this should never be hit
+		End / end function foo
+		New x '1' / set x to 1
+		Call foo / x is still set to 1, since the code path changing it should never be hit
+
+	A Return statement is said to be implicitly at the end of an End statement, but generally implementations
+	do not literally inject that opcode in, but instead interpret them in a similar way. The End opcode ends
+	the function definition and returns to the caller when hit, while Return only returns to the caller when
+	hit, not ending the function yet.
+
+	The If opcode is used for conditional control flow. This opcode is used to call a function if the stated
+	expression resolves to zero. It accepts two arguments, the first being the name of the function to call,
+	and the second being the expression to use. The first argument uses the bare addressing mode and True
+	Literal to represent the function name directly, the Literal addressing mode to represent an expression
+	who's result contains the function name, the Pointer addressing mode as a pointer to the function name,
+	and the Forced Evaluation addressing mode as a pointer to an expression who's result should be the
+	function name. The second operand uses the bare and True Literal addressing modes to represent the
+	result, not of a expression, the Literal addressing mode to represent an expression to evaluate as the
+	conditional, the Forced Evaluation mode as a pointer to an expression to be evaluated, and the Pointer
+	addressing mode as a pointer to an expression to be evaluated, which is the same as the Forced Evaluation
+	addressing mode.
+
+	Some examples include
+
+		Func a / define function a
+		New x '1' / some instruction in function a
+		End / end function a
+		If a "1 > 0" / call function a if the expression == 0. This expression resolves to zero.
+		
+		New template 'base s++ modifier s++ modifier2' / define a template
+		New base 'func' / define the first entry
+		New modifier '0' / define the second entry
+		New modifier2 '1' / define the third entry
+		If {template} '0' / call function func01 if 0 == 0
+
+		New expression '1 > 0' / define the expression to use 
+		If a <expression> / evaluate the expression held in the variable and call the function a
+				  / if it's result == 0
+		If a {expression} / the same thing as above
+
+	And finally, the Escape opcode, which is used to call a function using the Foreign Function interface.
+	The FFI is used to implement the Pebble standard library, which will be described later. The FFI is
+	a small interface to allow one programming language to use the Pebble internal variable table, hence
+	allowing it to interface with Pebble code. The Pebble standard library uses an interface that is stable
+	on the Pebble-facing side, but the FFI itself is implementation-specific. 
+
+	The Escape opcode takes one argument, being the name of the FFI sequence to call. It accepts the
+	addressing modes bare and True Literal as the name of the sequence to call, Literal as an expression
+	who's result is the sequence to call, Pointer as a pointer to the name of the sequence to call, and Forced
+	Evaluation as a pointer to an expression who's name is the sequence to call.
+
+	FFI code is compiled into the virtual machine binary itself, not loaded at runtime, This means once a
+	copy of the virtual machine is compiled, sequences cannot be added or removed. Sequences have access
+	to only the internal variable table of the virtual machine, through whatever interface the implementation
+	of the virtual machine and FFI wish to allow. Again, the Pebble-facing sequences of the Pebble standard
+	library are stable, but the implementation of the FFI, it's interface and the FFI code itself is
+	specific to the implementation of the virtual machine itself. 
