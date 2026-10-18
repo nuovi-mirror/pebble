@@ -50,7 +50,8 @@ int main
 
 	unsigned long long seed = getrandom();
 	Args cliargs = initargs(argc, argv);
-	Stack *stack = initstack(1024, &mem);
+	Stack *stack = initstack((limits.stack_callStack_frameSize *
+		limits.stack_callStack_cap), &mem);
 
 	int ret = vmmain(cliargs, stack, seed, &mem, &limits);
 	freestack(stack);

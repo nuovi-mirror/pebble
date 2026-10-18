@@ -1,0 +1,17 @@
+Heap (language stack) overflow bug
+Class: Major
+Discovered: 20260817
+Status: PATCHED (20260817)
+
+This bug allowed for out-of-bounds writes in the allocated heap, specifically
+the language call stack area, due to a small piece of older shim code that
+hard-coded the number of entries that were allowed to be on the stack at one
+time. This was idiomatic at the time, but was never changed when the update
+to platform-defined limits was made. This was in platforms c, posix, openbsd
+and puredarwin, files platforms/n/main.c. This could either cause outbound
+memory writes or a segmentation fault depending on the platform. This was
+fixed by simply not hard-coding the limit, instead grabbing it from the
+platform limits defined.
+
+Platforms c, posix, and openbsd were patched. Platform puredarwin was
+NOT patched, since it is depreciated at the current time of this bug.
