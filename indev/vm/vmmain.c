@@ -79,6 +79,10 @@ int vmmain
 		
 	}
 
+	Value *argcount = alloc(persistAlloc, sizeof(Value));
+	*argcount = (Value){ .Type = type_word, .as.word = cliargs.count };
+	putVar(&vars, "VMARGC", argcount, persistAlloc);
+
 	/* execution */
 	unsigned long pc = 0;
 	while (pc < current_instruction_count) 
