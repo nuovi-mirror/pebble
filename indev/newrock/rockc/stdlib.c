@@ -43,6 +43,13 @@ const char stdlib[] = {
 	". New __Func_std.proc.spawn_ret __Escape_std.proc.spawn_RET0\n"
 	"}\n"
 
+	"fn std.proc.wait ( id ) type status {\n"
+	". New __Escape_std.proc.wait_ARG0 <__Func_std.proc.wait_id>\n"
+	". Escape std.proc.wait\n"
+	". New __Func_std.proc.wait_type __Escape_std.proc.wait_RET1\n"
+	". New __Func_std.proc.wait_status __Escape_std.proc.wait_RET0\n"
+	"}"
+
 	/* term */
 	"fn std.term.screen.clear ( ) ret {\n"
 	". Escape std.term.screen.clear\n"

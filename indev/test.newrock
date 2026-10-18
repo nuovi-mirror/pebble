@@ -3,9 +3,18 @@ include stdlib
 
 fn main ( ) ret {
 	ret = '0'
-	call std.term.cursor.moveAbsolute ( '1' '1' )
-	call std.term.screen.clear ( )
-	call std.term.color.basic.fore ( 'black' )
-	call std.term.color.basic.back ( 'white' )
-	call std.proc.spawn ( 'ls -ah' )
+	pid = call std.proc.spawn ( 'ls -ah' )
+	type status = call std.proc.wait ( pid )
+
+	if ( "type == 0" ) {
+		msg = 'Killed by signal '
+		export msg
+	} else {
+		msg = 'Exited with status '
+		export msg
+	}
+
+	call std.io.printLn ( msg )
+	call std.io.print ( status )
+		
 }	
