@@ -1,0 +1,3 @@
+New x '1'
+New y [x]
+_PRINT2 y

@@ -8,6 +8,7 @@ typedef enum {
 	addrmode_forced_eval,
 	addrmode_bare,
 	addrmode_pointer,
+	addrmode_indirect,
 } InstructionAddressingMode;
 
 typedef enum {

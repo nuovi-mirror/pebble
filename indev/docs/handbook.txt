@@ -3,11 +3,12 @@
             | The Pebble Virtual Machine Systems' Programmer's Handbook |                                         |
             | Version 2, Revision 0 ! UNFINISHED !                      |                                         |
             |                                                           |                                         |
-            | Bytecode Specification Version 2 (B2)                     |                                         |
+            | Bytecode Specification Version Two (B2)                   |                                         |
             | Command Argument Extension (CAE)                          |                                         |
             | Advanced Addressing Extension (AAE)                       |                                         |
             | Recursive Function Definition Extension (RFDE)            |                                         |
             | Advanced Numeric Extension One (ANE1)                     |                                         |
+            | Advanced Addressing Extension Two (AAE2)                  |                                         |
             |                                                           |                                         |
             | By vantheman                                              |                                         |
             | Product of The Nuovi Orizzonti Company                    |                                         |
@@ -90,12 +91,13 @@
 	simple ISA with incredibly expressive instructions.
 
 	The addressing modifiers that exist include the Literal (") modifier, the True Literal (') modifier,
-	the Forced Evaluation ({ / }) modifier, the Pointer (< / >), and the Bare ( ) modifier. These modifiers
-	all represent instruction-dependent ways to modify a source operand before it is to be interpreted, and
-	the meanings of them may vary per instruction. The general rule is that the Literal modifier represents
-	an expression, the True Literal modifier represents a piece of data, the Forced Evaluation modifier 
-	represents a pointer to an expression, the Pointer modifier represents a generic pointer, and the Bare
-	modifier being completely instruction-dependent.
+	the Forced Evaluation ({ / }) modifier, the Pointer (< / >), the Indirect ([ / ]), and the Bare ( ) 
+	modifier. These modifiers all represent instruction-dependent ways to modify a source operand before it 
+	is to be interpreted, and the meanings of them may vary per instruction. The general rule is that the 
+	Literal modifier represents an expression, the True Literal modifier represents a piece of data, the 
+	Forced Evaluation modifier represents a pointer to an expression, the Pointer modifier represents a 
+	generic pointer, the Indirect modifier represents a pointer which is to be read, and the Bare modifier 
+	being completely instruction-dependent.
 
 	The Pebble expression format follows the value, followed by a space, followed by the operator, followed
 	by another space, followed by another value. In these schematics, the operator is stated to 'own' each
@@ -161,15 +163,18 @@
 	two operands, first being the destination to store to, and the second being the data to store to the
 	destination. The destination operand uses the Literal modifier to represent the named variable to store
 	the data to, the pointer modifier as a reference, which will be followed, to the named variable to store
-	to, the True Literal modifier as an expression who's result is the name of the variable to store to, the
-	Forced Evaluation modifier as representing a pointer to an expression, which will be followed, WHO's
-	result is the name of the named variable to store to, and the Bare modifier in the same way as the True
-	Literal modifier. The source operand treats the Bare modifier as marking the referenced variable name's
-	data to be copied to the destination variable, the True Literal modifier as a piece of literal data to
-	store to the destination, the Literal modifier to be an expression WHO's result is the data to store to
-	the destination, the Forced Evaluation modifier as a pointer to an expression, which will be followed, 
-	and to store the result of said expression to the destination, and the Pointer modifier as to store a 
-	reference to the named variable to the destination.
+	to, the Indirect modifier the same as the Pointer modifier, the True Literal modifier as an expression 
+	who's result is the name of the variable to store to, the Forced Evaluation modifier as representing a 
+	pointer to an expression, which will be followed, who's result is the name of the named variable to store 
+	to, and the Bare modifier in the same way as the True Literal modifier. The source operand treats the Bare 
+	modifier as marking the referenced variable name's data to be copied to the destination variable, the True 
+	Literal modifier as a piece of literal data to store to the destination, the Literal modifier to be an 
+	expression who's result is the data to store to the destination, the Forced Evaluation modifier as a pointer 
+	to an expression, which will be followed, and to store the result of said expression to the destination,
+	the Pointer modifier as to store a reference to the named variable to the destination, and the Indirect
+	modifier to store the data in the referenced variable by the pointer.
+
+	Unless explicitly stated, the Indirect modifier is treated in the same way as the New modifier.
 
 	A few examples of this opcode in practice include
 
@@ -183,6 +188,8 @@
 		New {grault} foo / The variable defined as the result of the expression held in grault, which
 		/ resolves to '33', since qux contains the data 3 and corge contains the data 3 as well, resolved
 		/ from the prior expression, to contain a copy of the data in foo, which is 1
+		New grumpy [grault] / the variable grumpy is a copy of the data in the variable referenced by the
+		/ variable grault
 
 	The Func opcode is the opcode to begin recording to the function table until the End opcode is reached. The
 	Func opcode only takes one operand, being the name of the function to begin recording. This name can be a
@@ -213,7 +220,7 @@
 	will call the function by name using a literal name via the bare and True Literal addressing modes, by
 	the result of an expression from the Literal addressing mode, by the result of a pointer to an expression
 	from the Forced Evaluation addressing mode, or by a pointer to the name by the Pointer addressing mode. This
-	opcode only takes one operand, being the name of the function to cal.
+	opcode only takes one operand, being the name of the function to call.
 
 	Some examples include
 

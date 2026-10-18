@@ -3,13 +3,11 @@ include stdlib
 fn main ( ) ret {
 	ret = '0'
 
-	VMARGC = '0'
 	import VMARGC
 	x = call std.io.print ( VMARGC )
 
 	x = VMARGC
 	while ( "x >= VMARGC" ) {
-		import x
 		x = "x - 1"
 		arg = "VMARG s++ x"
 		call std.io.print ( arg )

@@ -341,6 +341,26 @@ void compile_stmt
 		return;
 	}
 
+	if (try_keyword("import"))
+	{
+		char name[MAX_NAME];
+
+		read_ident(name, sizeof name);
+
+		if (is_local(name))
+		{
+			char msg[MAX_NAME + 64];
+
+			snprintf(msg, sizeof msg, "cannot import '%s': already a variable of this function", name);
+			fail(msg);
+		}
+
+		add_local(name);
+		mark_assigned(name);
+		emitf("New __Func_%s_%s %s\n", fn, name, name);
+		return;
+	}
+
 	if (try_keyword("export"))
 	{
 		char name[MAX_NAME];
@@ -360,6 +380,8 @@ void compile_stmt
 		emitf("New %s __Func_%s_%s\n", name, fn, name);
 		return;
 	}
+
+
 
 	if (try_keyword("call"))
 	{
