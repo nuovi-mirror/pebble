@@ -16,6 +16,9 @@ typedef struct Config {
 	char *platform; /* platform to build for */
 	char *graphics; /* optional graphics backend */
 	char *terminal; /* optional terminal backend */
+
+	char *proc; /* yes for process management support */
+	char *fs; /* yes for filesystem I/O support */
 } Config;
 
 /* VM source code */

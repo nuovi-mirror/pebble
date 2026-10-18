@@ -24,9 +24,11 @@ Building from source
 	target - target operating system to build for - view the platform support
 		list to know what to place here. Autodetects the platform by default.
 
-	graphics - graphics library to use. The default is none.
+	graphics - graphics library to use. The default is none. Needed for
+		   libraries like gs.2d.window.create
 
-	terminal - terminal backend to use. The default is none.
+	terminal - terminal backend to use. The default is none. Needed for
+		   libraries like std.term.screen.clear
 
 	build - the type of build to use - these include fast, debug, and
 		default. The default is 'default'. Please note fast builds
@@ -43,6 +45,12 @@ Building from source
 
 	cflags - the C compiler flags to use before adding the build-specific
 		compiler flags. The default is '-std=c99'.
+
+	proc - adds process management support if this is equal to 'yes'. 
+	       Defaults to no. Needed for libraries such as std.proc.spawn
+
+	fs - adds arbitrary filesystem I/O support if this is equal to 'yes'.
+	     Defaults to no. Needed for libraries like std.fs.file.read
 
 	
 	To build from source, simply run

@@ -25,6 +25,10 @@ static unsigned int internal_detectplatform
 	return platform_c;
 }
 
+/* XXX puredarwin must be selected manualy since it cannot be distinguished
+ * from MacOS here, but this does not really matter anyways since it is
+ * depreciated */
+
 void detectplatform
 (struct Config *config)
 {

@@ -53,6 +53,9 @@ unsigned int mksrclist (Config *config, char **srcs) {
 		addsrcs(ffi_c_srcs, srcs, &count);
 	}
 
+	if (strcmp(config->proc, "yes") == 0) strcat(config->cflags, "-Dproc ");
+	if (strcmp(config->fs, "yes") == 0) strcat(config->cflags, "-Dfs ");
+
 	if (strcmp(config->terminal, "ansi") == 0) {
 		addsrcs(ffi_ansi_srcs, srcs, &count);
 		strcat(config->cflags, "-Dterminal -Dterminal_ansi ");

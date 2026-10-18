@@ -16,6 +16,8 @@ void parseargs (Config *config, char *argument) {
 	else if (strcmp(argument, "terminal") == 0) config->terminal = equals;
 	else if (strcmp(argument, "cflags") == 0) config->cflags = equals;
 	else if (strcmp(argument, "ldflags") == 0) config->ldflags = equals;
+	else if (strcmp(argument, "proc") == 0) config->proc = equals;
+	else if (strcmp(argument, "fs") == 0) config->fs = equals;
 
 	else usage();
 }

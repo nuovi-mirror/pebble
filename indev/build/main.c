@@ -17,16 +17,20 @@ int main (int argc, char **argv) {
 	char terminal[32];
 	char cflags[1024];
 	char ldflags[1024];
+	char proc[8];
+	char fs[8];
 
-	config.compiler = (char *)&compiler;
-	config.program = (char *)&program;
-	config.build = (char *)&build;
-	config.platform = (char *)&platform;
-	config.precompiler = (char *)&precompiler;
-	config.graphics = (char *)&graphics;
-	config.terminal = (char *)&terminal;
-	config.cflags = (char *)&cflags;
-	config.ldflags = (char *)&ldflags;
+	config.compiler = (char *)&compiler[0];
+	config.program = (char *)&program[0];
+	config.build = (char *)&build[0];
+	config.platform = (char *)&platform[0];
+	config.precompiler = (char *)&precompiler[0];
+	config.graphics = (char *)&graphics[0];
+	config.terminal = (char *)&terminal[0];
+	config.cflags = (char *)&cflags[0];
+	config.ldflags = (char *)&ldflags[0];
+	config.proc = (char *)&proc[0];
+	config.fs = (char *)&fs[0];
 
 	strcpy(config.compiler, "cc");
 	strcpy(config.program, "bin/cpebble");
@@ -35,8 +39,10 @@ int main (int argc, char **argv) {
 	strcpy(config.precompiler, "");
 	strcpy(config.graphics, "");
 	strcpy(config.terminal, "ansi");
-	strcpy(config.cflags, "-Ih -Iffi -std=c99 -Dproc ");
+	strcpy(config.cflags, "-Ih -Iffi -std=c99 ");
 	strcpy(config.ldflags, "-Wl,--gc-sections ");
+	strcpy(config.proc, "");
+	strcpy(config.fs, "");
 
 	for (unsigned int i = 1; i < (unsigned int)argc; i++) {
 		if (strcmp(argv[i], "clean") == 0) {
