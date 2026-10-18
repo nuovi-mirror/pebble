@@ -1,3 +1,6 @@
 New x '1'
 New y [x]
 _PRINT2 y
+
+New [x] '1'
+PRINT2 1
