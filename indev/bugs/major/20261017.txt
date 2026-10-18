@@ -1,7 +1,7 @@
 Heap (language stack) overflow bug
 Class: Major
-Discovered: 20260817
-Status: PATCHED (20260817)
+Discovered: 20261017
+Status: PATCHED (20261017)
 
 This bug allowed for out-of-bounds writes in the allocated heap, specifically
 the language call stack area, due to a small piece of older shim code that

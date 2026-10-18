@@ -1,7 +1,7 @@
 Stack overflow bug
 Class: Major
-Discovered: 20260815
-Status: PATCHED (20260815)
+Discovered: 20261015
+Status: PATCHED (20261015)
 
 This bug allowed a stack overflow in the language call-stack by the program
 recursing forever. The wrong allocator was used to allocate a function name
