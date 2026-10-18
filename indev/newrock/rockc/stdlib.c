@@ -61,5 +61,12 @@ const char stdlib[] = {
 	"ret = color\n"
 	"}\n"
 
+	"fn std.term.cursor.moveAbsolute ( x y ) ret {\n"
+	". New __Escape_std.term.cursor.moveAbsolute_ARG0 <__Func_std.term.cursor.moveAbsolute_x>\n"
+	". New __Escape_std.term.cursor.moveAbsolute_ARG1 <__Func_std.term.cursor.moveAbsolute_y>\n"
+	". Escape std.term.cursor.moveAbsolute\n"
+	"ret = '0'\n"
+	"}\n"
+
 	". # end of New Rock Standard Library (stdlib)\n" 
 };
