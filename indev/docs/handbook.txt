@@ -153,6 +153,20 @@
 	specified by the second argument, of the string specified by the first operator contains the substring
 	specified by the second argument, and return 0 if said substring was found and 1 if it was not.
 
+	Pebble is dynamically and loosely typed. When a value is stored by an instruction, the type is defined
+	based on deterministic parsing rules. This is the type the value is to be associated with until another
+	instruction stores to that value. Operators are allowed to implicitly change the type, but the operator
+	itself does not store the changed type to the variable, only for the operation. The type they may change
+	it to is defined in the operation; numeric operators may change it to a numeric type and string operators
+	may change it to string types. The new result of the operation is not type guessed, but is the type of
+	the two operators. Both operands must be of the same time when performing the expression internally, but
+	one or more of the operands can be changed based on the operator. Eg. if I were to ask the virtual
+	machine to store '01' to a variable, this may be stored as a string to preserve the leading zero, but then
+	if I ask the virtual machine to perform the numeric addition operation with this value, it may be
+	implicitly converted to a numeric value, losing the leading zero, and returning a numeric result, but
+	the initial variable stored does not change type, and the variable itself is still a string. From the 
+	perspective of the programmer, no more information is needed on types besides this.
+
 	If the line starts with the hash (#) or forward slash (/) characters, then the line is not to be
 	interpreted as an instruction. If the instruction has more arguments than what is expected, they
 	should be silently ignored. This is done to allow comments at the end of a line. There may not be
