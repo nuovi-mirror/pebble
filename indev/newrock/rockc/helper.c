@@ -676,6 +676,7 @@ static FuncInfo *find_func
 void define_func
 (const char *name, int nparams, int nresults)
 {
+	/* XXX allow function to be re-defined
 	if (find_func(name))
 	{
 		char msg[MAX_NAME + 48];
@@ -683,6 +684,7 @@ void define_func
 		snprintf(msg, sizeof msg, "function '%s' is defined more than once", name);
 		fail(msg);
 	}
+	*/
 
 	if (nfuncs >= MAX_FUNCS) fail("too many functions");
 
