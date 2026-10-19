@@ -1,16 +1,8 @@
-include stdlib
-
 fn main ( ) ret {
 	ret = '0'
 
-	import VMARGC
-	x = call std.io.print ( VMARGC )
-
-	x = VMARGC
-	while ( "x >= VMARGC" ) {
-		x = "x - 1"
-		arg = "VMARG s++ x"
-		call std.io.print ( arg )
-		export x
+	fn thing ( ) ret2 {
+		ret2 = '0'
+		ret = '0'
 	}
 }

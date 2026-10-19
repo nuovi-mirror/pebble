@@ -407,3 +407,48 @@
 
 	Now, this might not be the exact ordering, since things such as compiler-generated startup routines
 	exist, but this is how the program will execute from the user's perspective.
+
+	Every item defined as a body by the '{' and '}' characters is defined to have it's own explicit scope.
+	The code in this region cannot see global variables and code outside of it cannot see variables defined
+	by it. The keywords 'import' and 'export' are defined to allow the sharing of variables between scopes.
+	The import keyword is used to copy a variable from the global scope into the local scope, and export is
+	used to copy a variable from the local scope into the global scope. It is important to note that these
+	are copies, not references. This means if I change a variable after I export it, the variable inside of
+	the global scope does not change. Both of these keywords should be followed by a space, then the variable
+	to perform the operation on.
+
+	Extra control flow statements include the 'if', 'else if', 'else', and 'while' statements. The if
+	statement should be followed by a space, the '(' character, a Pebble expression to evaluate, then the
+	')' character, followed by a space and the character '{'. The data is to be executed only if the Pebble
+	expression evaluates to 0, which is the true value in Pebble. else if and while all follow the
+	same syntax, but with different meanings. Else if may come after an if statement on the same line as
+	the if or another else if statement, on the same line as the '}' character, with the statement followed
+	by a space. The else statement may come in the same place. The else if statement is used to chain
+	conditional statements together, to be evaluated in the order they appear in. Else is used to define
+	what is to happen last if none of the if or else statements evaluate to true. Else does not use  the
+	same syntax, only needing the else keyword, followed by a space and the '{' character, with the body
+	being ended by the '}' character. The while statement is used to execute the defined block while the
+	condition defined evaluates to true. The statement is checked once pre loop, and the body is ran if
+	the statement evaluates to true.
+
+	An example would be
+
+		fn main ( ) return {
+			return = '0'
+			x = '0'
+
+			if ( "x < 3" ) {
+				x = "x + 1"
+			} else {
+				x = '4'
+			}
+
+			while ( "x != 0" ) {
+				x = "x - 1"
+			}
+		}
+
+	It is important to note the statements if, else if, else, and while are an exception to the scoping rule,
+	as they are allowed to view the variables of the function they are defined in by default. The values are 
+	not copied around in this case; the if statement mutating x is mutating the same variable x that main
+	sees. But x is also not a global in this case; it is still local to main.
