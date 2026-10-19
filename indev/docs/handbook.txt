@@ -123,7 +123,7 @@
 	addition. 
 	The Numeric Subtraction operation will subtract the right numeric value from the left numeric value and
 	return the result of the operation.
-	The Numeric Division operation will divide the right numeric value from the left numeric value and return
+	The Numeric Division operation will divide the left numeric value from the right numeric value and return
 	the result of the operation.
 	The Numeric Multiplication operation will multiply the left numeric value from the right numeric value and
 	return the result of the operation.
@@ -303,3 +303,107 @@
 	of the virtual machine and FFI wish to allow. Again, the Pebble-facing sequences of the Pebble standard
 	library are stable, but the implementation of the FFI, it's interface and the FFI code itself is
 	specific to the implementation of the virtual machine itself. 
+
+	New Rock is a modern dialect of the Rock language (which is actually older than CPebble itself, since it
+	was first described for the Zig version of the virtual machine that is now deprecated) designed to express
+	the capabilities introduced by the Advanced Addressing Extension more explicitly, as well as to be a more
+	modern and readable variant. Someone who knows Rock could read New Rock, and someone who knows New Rock
+	could probably read New Rock. The Rock language is beyond the scope of this document and only New Rock
+	will be described. It is worthy to note Rock and New Rock have different syntax in a lot of places, so
+	do not assume they are cross-compatible in any way.
+
+	New Rock is designed around mapping Pebble code to higher-level concepts, so that a programmer may gain
+	all the benefits of using the Pebble Virtual Machine without needing to write Pebble bytecode by hand.
+
+	New Rock functions are defined using the 'fn' keyword. This keyword should be followed immediately by a
+	space and the '(' character. This should be followed by space-separated ordered arguments the function
+	should accept as variable names, ended by a space and the ')' character. The variables the function is
+	to return should come after this, also space-separated and ordered. The '{' character with a space
+	immediately before it and a newline immediately after it marks the end of the function definition statement
+	and the start of the function body. The function body should continue until the '}' character is seen
+	Indentation does not matter in this case, as the functions are scoped by the '{' and '}' characters.
+	The function is to be defined as a re-usable piece of code that can be called later using the 'call'
+	statement, followed immediately by a space and the name of the function to call, followed by another
+	space and the '(' character, the space-separated ordered arguments
+	to pass to the function, which will be copied into the argument variables defined by the function
+	definition statement in the order they are given in the call statement, followed by a space and the ')'
+	character to end the call statement. This statement is used to begin executing the function name and
+	to return to the line of code immediately after the call statement once the function has ended.
+
+	Variable assignment is done by stating the names of the variables you wish to assign separated by spaces,
+	followed by a space and the '=' character, then the Pebble value you wish to assign to them. The Pebble
+	value is allowed to be any Pebble statement defined as valid above, using any of the addressing modes
+	defined above. For this keyword, the addressing modes map to the addressing modes of the Pebble New opcode.
+
+	During the assignment of variables, the call keyword is allowed to be used. If the call keyword used, then
+	the variables defined are to be assigned as the ordered returns of the function being called.
+
+	The 'main' function is defined as the entry point, or where the program will begin executing. Please note
+	this is not literally the first statement executed. Depending on context or code, invisible initialization
+	code may be executed before the main function, such as Pebble statements to register defined functions, but
+	the main function is the program entry point.
+
+	Functions are to be callable as soon as the body of the function ends. This means you are unable to call
+	a function that is defined later in the application code.
+
+	The 'include' statement is used to include a piece of code not defined in the application from another
+	file containing valid New Rock source code. The keyword should be followed by a space, which should then
+	be followed by a path to the file containing said source code. This path is operating-system dependent
+	and should be adjusted to the operating system. If the system permits it, the path may be relative to the
+	current directory that the source code or user is in. The inclusion system is not a module system, but is
+	a text preprocessor and substitution system, meaning it is more comparable to something like C, relative
+	to something like Java. However, since functions are allowed to be defined more than once in New Rock, this
+	means that including the same file more than once is permitted. In the case where a function is defined
+	more than once, the last defined instance of it is to be permitted. However, if the function is called
+	in between re-definition, the current definition of the function is to be used, just in the same way as
+	Pebble. The special include path 'stdlib' is to be the compiler-provided standard library for New Rock.
+	If the file named to be imported matches this keyword, the filesystem is not searched, and the
+	compiler-provided standard library is included instead. The functions and routines defined by this library
+	are to be declared later in this document.
+
+	New Rock does not have the concept of runtime code importing, so all include statements are handled
+	purely at compile-time.
+
+	Spaces are allowed within valid Pebble statements if they are inside of the addressing mode markers.
+
+	A short example of a valid New Rock program would be
+
+		include stdlib
+
+		fn add ( a b ) result {
+			result = "a + b"
+		}
+
+		fn main ( ) return {
+			return = call add ( '1' '2' )
+			call std.io.print ( return )
+		}
+
+	This program will first include the standard library code into the source code for later use. It then
+	defines a function named add, which takes two arguments, a and b, and returns the variable result at
+	the end of the function's execution. The function sets the variable result to the result of the Pebble
+	statement "a + b", adding the two arguments passed together. Then, at the end of the function, the
+	result is returned, which is in the variable result, which is defined to be the return variable of
+	this function. It then defines the program entry point, main, to take no arguments and return one
+	variable, return. Main is never called by another function, so the return value of it is meaningless,
+	but still required. It is common to simply initialize it to zero at the start of the function. This
+	function calls the function add using two Pebble statements as arguments, '1' and '2'. These are passed
+	to the add function, which then adds the two together and returns the result. The main function then
+	stores the result into the variable return. It then calls the function std.io.print from the standard
+	library with one argument, being the variable return. This function is used to print data onto standard
+	output, as described later.
+
+	The conceptual execution of this order is
+
+		main 
+		  | --- return = call add ( '1' '2' )
+			  | --- add '1' '2'
+				  | --- variable result = "1 + 2"
+				  | --- return current value of variable result (3)
+			  | --- variable return = returned variable of add
+		  | --- call std.io.print ( return )
+			  | --- printing of the variable result's data (3)
+		  | --- return current value of variable result (3)
+
+	Now, this might not be the exact ordering, since things such as compiler-generated startup routines
+	exist, but this is how the program will execute from the user's perspective.
