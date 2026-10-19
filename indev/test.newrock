@@ -1,8 +1,0 @@
-fn main ( ) ret {
-	ret = '0'
-
-	fn thing ( ) ret2 {
-		ret2 = '0'
-		ret = '0'
-	}
-}
