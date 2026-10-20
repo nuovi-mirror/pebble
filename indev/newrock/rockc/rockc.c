@@ -567,6 +567,50 @@ void compile_top_stmt
 		return;
 	}
 
+	if (is_ident_start(peekch()))
+	{
+		/* top-level assignment: these are real, unmangled globals, since
+		 * there's no enclosing function to own them. add_local() is never
+		 * called here, so mangle("", name, ...) leaves every name as-is. */
+		char names[MAX_LOCALS][MAX_NAME];
+		int nnames = 0;
+
+		for (;;)
+		{
+			if (nnames >= MAX_LOCALS) fail("too many assignment targets");
+
+			skipws();
+
+			if (!is_ident_start(peekch()))
+				fail(nnames == 0 ? "expected a statement"
+					: "expected '=' after assignment target(s) (unknown statement?)");
+
+			read_ident(names[nnames], sizeof names[nnames]);
+			define_global(names[nnames]);
+			nnames++;
+
+			skipws();
+
+			if (peekch() == '=') break;
+		}
+
+		expect_char('=');
+
+		if (try_keyword("call"))
+		{
+			compile_call("", names, nnames);
+			return;
+		}
+
+		char val[MAX_VALUE];
+		compile_value("", val, sizeof val);
+
+		for (int i = 0; i < nnames; i++)
+			emitf("New %s %s\n", names[i], val);
+
+		return;
+	}
+
 	fail("expected 'fn', 'include', or 'call' at top level");
 }
 
@@ -607,7 +651,7 @@ int main
 	pos = 0;
 
 	Loc no_parent = { -1, 0 };
-	int main_file = add_source_unit(argv[1], no_parent);
+	int main_file = add_source_unit(argv[1], no_parent, 0 /* the user's own file: not trusted */);
 
 	tag_source(0, len, main_file);
 	src_file[len] = (unsigned short)main_file;

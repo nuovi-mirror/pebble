@@ -64,7 +64,7 @@ extern int nerrors;
 
 void fail (const char *msg);
 void fail_at (const char *msg, long at);
-int add_source_unit (const char *name, Loc included_from);
+int add_source_unit (const char *name, Loc included_from, int trusted);
 void tag_source (long start, long n, int file);
 Loc loc_at (long at);
 

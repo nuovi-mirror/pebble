@@ -17,6 +17,7 @@ typedef struct SrcUnit {
 	char     name[MAX_PATH];
 	int      parent;       /* unit that included this one, -1 for the main file */
 	unsigned parent_line;  /* line of the include statement inside the parent */
+	int      trusted;      /* raw '.' Pebble lines are allowed in this exact unit */
 } SrcUnit;
 
 static SrcUnit units[MAX_UNITS];
@@ -66,7 +67,7 @@ static int nglobals;
 
 /* returns -1 when the table is full, which in practice means an include cycle */
 int add_source_unit
-(const char *name, Loc included_from)
+(const char *name, Loc included_from, int trusted)
 {
 	if (nunits >= MAX_UNITS) return -1;
 
@@ -76,6 +77,7 @@ int add_source_unit
 	u->name[MAX_PATH - 1] = '\0';
 	u->parent = included_from.file;
 	u->parent_line = included_from.line;
+	u->trusted = trusted;
 
 	return nunits++;
 }
@@ -340,6 +342,9 @@ int try_raw_line
 	if (pos > 0 && src[pos - 1] != '\n') return 0;
 	if (peekch() != '.') return 0;
 
+	if (!units[loc_at(pos).file].trusted)
+		fail_at("raw Pebble ('.') lines are only allowed in the literal text of the standard library", pos);
+
 	pos++; /* consume '.' */
 
 	if (pos < len && src[pos] != '\n') pos++;
@@ -523,7 +528,7 @@ void include_file
 
 		if (stdlib_len + 1 > MAX_SRC - len - 1) fail_at("source buffer is too small for standard library", at);
 
-		int unit = add_source_unit("<stdlib>", site);
+		int unit = add_source_unit("<stdlib>", site, 1 /* trusted: this is the literal stdlib text */);
 
 		if (unit < 0) fail_at("too many nested or repeated includes (include cycle?)", at);
 
@@ -591,7 +596,7 @@ void include_file
 		fail_at("source buffer is too small for included file", at);
 	}
 
-	int unit = add_source_unit(path, site);
+	int unit = add_source_unit(path, site, 0 /* ordinary included file: not trusted */);
 
 	if (unit < 0)
 	{
