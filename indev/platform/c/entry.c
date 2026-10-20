@@ -18,11 +18,11 @@ void error
 {
 	switch (severity)
 	{
-		case errfatal: print("A fatal error has occured!\n"); break;
-		case errmajor: print("A major error has occured!\n"); break;
-		case errsevere: print("A severe error has occured!\n"); break;
-		case errwarning: print("A nonfatal error has occured!\n"); break;
-		case errnonfatal: print("A nonfatal errror has occured!\n"); break;
+		case errfatal: print("A fatal error has occurred!\n"); break;
+		case errmajor: print("A major error has occurred!\n"); break;
+		case errsevere: print("A severe error has occurred!\n"); break;
+		case errwarning: print("A nonfatal error has occurred!\n"); break;
+		case errnonfatal: print("A nonfatal errror has occureed!\n"); break;
 	}
 
 	char codebuff[32];

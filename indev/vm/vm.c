@@ -293,8 +293,7 @@ unsigned long interpret
 				case addrmode_literal: 
 				{
 					char *buf = alloc(tempAlloc, limits->instructions_varnamesize);
-					val = resolve_literal(buf, limits->instructions_varnamesize,
-						&instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
+					val = resolve_literal(buf, limits->instructions_varnamesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc);
 					valuetostr(dest, limits->instructions_varnamesize, val);
 					break;
 				}
@@ -368,11 +367,12 @@ unsigned long interpret
 
 				case addrmode_indirect: 
 				{
-					char *buff = alloc(persistAlloc, limits->instructions_varnamesize);
-					valuetostr(buff, limits->instructions_varnamesize, instr->SecondOperand.Data);
-					Value *check = getVar(vars, buff);
-					if (check == NULL) error(errfatal, errcodemalformedinput, "The specified variable does not exist!");
-					val = *check;
+					char *buff1 = alloc(persistAlloc, limits->instructions_varnamesize);
+					char *buff2 = alloc(persistAlloc, limits->instructions_varnamesize);
+
+					Value ref = resolve_pointer(buff1, limits->instructions_varnamesize, &instr->SecondOperand.Data, vars, tempAlloc, persistAlloc);
+					val = resolve_pointer(buff2, limits->instructions_varnamesize, &ref, vars, tempAlloc, persistAlloc);
+					
 					break;
 				}
 
