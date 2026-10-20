@@ -1,9 +1,11 @@
-<a href="http://pebblevm.org">Pebble</a> is a small and simple virtual machine language
+http://pebblevm.org
+
+Pebble is a small and simple virtual machine language
 written in C.
 
 [ NOTE ] - The old implimentation of Pebble, which was written in Zig, has become
 depreciated. If, for some reason, you still wish to use this, it can be downloaded
-at our main site <a href="http://pebblevm.org/downloads/">here</a>
+at our main site - http://pebblevm.org/downloads/
 
 Pebble is a highly portable, ultralight, and fully host-safe
 virtual machine executing the Pebble bytecode language. Pebble
@@ -34,10 +36,10 @@ CPebble is not currently feature-complete and has yet to add all of
 the Pebble schematics, unlike the older Zig version, which has been moved
 to old/.
 
-A list of mirrors is available <a href="http://pebblevm.org/mirrors.html">here</a>
-The canonical source can be fetched <a href="http://pebblevm.org/git">here</a> over Git
+A list of mirrors is available - http://pebblevm.org/mirrors.html
+The canonical source can be fetched over Git - http://pebblevm.org/git
 
 Please note this item is still in an early Alpha phase.
 
-Product of <a href="http://thenuoviorizzonticompany.org">The Nuovi Orizzonti Company</a>
-
+Product of The Nuovi Orizzonti Company
+http://thenuoviorizzonticompany.org
