@@ -524,7 +524,7 @@ void include_file
 
 	if (strcmp(name, "stdlib") == 0)
 	{
-		size_t stdlib_len = strlen(stdlib);
+		size_t stdlib_len = strlen(stdlib_data);
 
 		if (stdlib_len + 1 > MAX_SRC - len - 1) fail_at("source buffer is too small for standard library", at);
 
@@ -533,7 +533,7 @@ void include_file
 		if (unit < 0) fail_at("too many nested or repeated includes (include cycle?)", at);
 
 		shift_source(pos, (long)stdlib_len + 1);
-		memcpy(src + pos, stdlib, stdlib_len);
+		memcpy(src + pos, stdlib_data, stdlib_len);
 		src[pos + (long)stdlib_len] = '\n';
 		tag_source(pos, (long)stdlib_len + 1, unit);
 

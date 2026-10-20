@@ -9,6 +9,8 @@ with a New Rock compiler.
 The New Rock compiler can be found in the rockc/ folder relative to here
 and can be compiled simply with
 
+	cc -o embed newrock/embed.c
+	./embed newrock/rockc/stdlib.newrock stdlib >newrock/rockc/stdlib.h
 	cc -o bin/rockc newrock/rockc/*.c
 
 from the current directory to generate one rockc binary. Running this 
