@@ -7,8 +7,8 @@
             | Command Argument Extension (CAE)                          |                                         |
             | Advanced Addressing Extension (AAE)                       |                                         |
             | Recursive Function Definition Extension (RFDE)            |                                         |
-            | Advanced Numeric Extension One (ANE1)                     |                                         |
-            | Advanced Addressing Extension Two (AAE2)                  |                                         |
+            | Advanced Numeric Extension, One (ANE1)                    |                                         |
+            | Advanced Addressing Extension, Two (AAE2)                 |                                         |
             |                                                           |                                         |
             | By vantheman                                              |                                         |
             | Product of The Nuovi Orizzonti Company                    |                                         |
@@ -466,3 +466,57 @@
 	as they are allowed to view the variables of the function they are defined in by default. The values are 
 	not copied around in this case; the if statement mutating x is mutating the same variable x that main
 	sees. But x is also not a global in this case; it is still local to main.
+
+
+
+
+
+
+
+	The Pebble standard library is a set of functions registered as Escape sequences in the Pebble Virtual
+	Machine used for providing common host access functions and routines. These routines are implementation-
+	dependent, just as the FFI itself, but the interface exposed to Pebble code is stable across
+	implementations. This document describes Version 2 of the standard library, currently used by CPebble.
+
+	Escape sequence names of the standard library follow the naming convention of dot (.)-separated
+	groupings, with the first group being 'std' and the final entry being the function name. 
+	The standard library defines four groups into the standard library, being basic input and output, 
+	terminal manipulation, process management, file management, and miscellaneous. These groups may have
+	subgroups within them, but these are the four primary groups. 
+
+	Arguments passed to these escape sequences via Pebble variables. These variables are distinguished from
+	normal variables by the prefix of '__Escape_'. This is then followed by the escape sequence in reference,
+	and the string '_ARG', followed by the argument number. Returning variables from an escape sequence to 
+	Pebble code and storing a variable internally as an escape sequence follows the same convention, but with 
+	the ending string "_RET", followed by the return number, or simply replacing the ending suffix with the 
+	internal variable name, respectively. Hence, if a piece of FFI code wishes to store the variable 'foo', 
+	and the escape sequence associated is named 'bar.baz', it would store the variable as 
+	'__Escape_bar.baz_foo'. If a piece of Pebble code wishes to give this same escape sequence one argument,
+	it would define it as '__Escape_bar.baz_ARG0', and if it wanted to return one value to a Pebble program,
+	it would return it as '__Escape_bar.baz_RET0'. Arguments given to escape sequences should contain a
+	pointer to another Pebble variable containing the data, which can be used via the Pointer addressing mode.
+	Return values should return the data in question, not a pointer to it.
+
+	The group associated with basic input and output, known as io, contains three functions, being print,
+	printLn, and input. Under the naming convention, these become std.io.print, std.io.printLn, and
+	std.io.input. Sequence print accepts one argument, being the data to print to standard output. The
+	print sequence will append a newline to the data requested to be printed. printLn does the same, but
+	it will not append a newline. input will read terminal input until a newline character is given and
+	return the data read. It does not take any arguments.
+
+	The group associated with miscellaneous functions, known as misc, contains three functions, being
+	random, time, and sleep. Random takes no arguments and returns one value, being a random architecture-
+	dependent size number. Time takes no arguments and returns the current time of day. Sleep takes one
+	argument, being the approximate time to suspend in milliseconds. The time slept may be shorter or longer
+	than the requested time, but it should be relatively close. The actual time slept depends on the host
+	operating system, architecture, and implementation of the virtual machine and FFI code. One argument is
+	returned, being the real time slept in milliseconds.
+
+	The group associated with process manipulation, known as proc, includes two functions, being spawn and
+	wait. Spawn accepts one argument, being the the process to spawn with space-separated arguments in a
+	string, and returns one value, being the operating-specific identifier for the newly spawned process.
+	The spawned process runs in the background. The process identifier is designed to be passed around to
+	other functions in this group instead of being used by Pebble code directly. Wait accepts one argument,
+	being the operating system-specific identifier of the process to wait on. It returns two values, the
+	first being either the exit code the process spawned returned if the second return value is 1, or the
+	signal it was killed with if it was killed with a signal, in which case the second return will be 0.
