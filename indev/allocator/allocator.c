@@ -1,26 +1,17 @@
 #include "allocator.h"
 #include "ffillmem.h"
-#include "exitproc.h"
 #include "main.h"
-#include "print.h"
 
 struct Arena *initAlloc 
 (void *backing, unsigned long size) 
 {
 	/* platform layer gives us backing memory */
-	if (backing == NULL) {
-		print("ERROR: ALLOCATOR: GIVEN NULL BACKING POINTER\n");
-		exitproc(1);
-	}
+	if (backing == NULL) error(errfatal, errcodeallocatorerror, "Given a null backing pointer!");
 
 	struct Arena *arena = (struct Arena *)backing;
 	char *srt_ptr = (char *)backing + sizeof(struct Arena);
 
-	if (size < sizeof(struct Arena)) 
-	{
-		print("ERROR: ALLOCATOR: BACKING IS TOO SMALL!\n");
-		exitproc(1);
-	}
+	if (size < sizeof(struct Arena)) error(errfatal, errcodeallocatorerror, "Backing allocation is too small!");
 
 	/* create the arena */
 	arena->size = size; 	/* set the size */
@@ -42,11 +33,7 @@ void *alloc
 	unsigned long misalign = used % ARENA_ALIGNMENT;
 	unsigned long padding = misalign ? (ARENA_ALIGNMENT - misalign) : 0;
 
-	/* OOM error */
-	if (used + padding + size > arena->size) {
-		print("ERROR: ALLOCATOR: FATAL: OUT OF MEMORY!\n");
-		exitproc(1); 
-	}
+	if (used + padding + size > arena->size) error(errfatal, errcodeallocationerror, "Out of memory!");
 
 	arena->curr_ptr += padding;
 	void *result = arena->curr_ptr;

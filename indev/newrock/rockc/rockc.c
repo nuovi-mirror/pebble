@@ -57,6 +57,23 @@ void compile_value
 
 		return;
 	}
+
+	if (c == '[')
+	{
+		pos++;
+
+		char text[MAX_VALUE];
+		char subst[MAX_VALUE];
+
+		read_delimited(']', text, sizeof text);
+		use_text_var(text, pos);
+		subst_expr(fn, text, subst, sizeof subst);
+
+		snprintf(out, cap, "[%s]", subst);
+
+		return;
+	}
+
 	
 	if (c == '<')
 	{
@@ -86,7 +103,7 @@ void compile_value
 		return;
 	}
 
-	fail("expected a value ('literal', \"expression\", or a bare name)");
+	fail("expected a value ('literal', \"expression\", <pointer>, [indirect], {forced evaluation}, or a bare name)");
 }
 
 void compile_call
@@ -173,8 +190,7 @@ void compile_if
 
 	for (;;)
 	{
-		if (nbranches >= MAX_IF_BRANCHES)
-			fail("too many if branches");
+		if (nbranches >= MAX_IF_BRANCHES) fail("too many if branches");
 
 		expect_char('(');
 
@@ -183,8 +199,7 @@ void compile_if
 		expect_char(')');
 		expect_char('{');
 
-		snprintf(body_fns[nbranches], sizeof body_fns[nbranches],
-			"__RockIf_%u", next_control_id++);
+		snprintf(body_fns[nbranches], sizeof body_fns[nbranches], "__RockIf_%u", next_control_id++);
 
 		Helper *branch = new_helper(body_fns[nbranches]);
 
@@ -194,18 +209,15 @@ void compile_if
 
 		skipws();
 
-		if (!try_keyword("else"))
-			break;
+		if (!try_keyword("else")) break;
 
 		skipws();
 
-		if (try_keyword("if"))
-			continue;
+		if (try_keyword("if")) continue;
 
 		expect_char('{');
 
-		snprintf(else_fn, sizeof else_fn,
-			"__RockElse_%u", next_control_id++);
+		snprintf(else_fn, sizeof else_fn, "__RockElse_%u", next_control_id++);
 
 		Helper *else_body = new_helper(else_fn);
 
@@ -217,9 +229,7 @@ void compile_if
 
 	char dispatch_fns[MAX_IF_BRANCHES][MAX_NAME];
 
-	for (int i = 0; i < nbranches; i++)
-		snprintf(dispatch_fns[i], sizeof dispatch_fns[i],
-			"__RockDispatch_%u", next_control_id++);
+	for (int i = 0; i < nbranches; i++) snprintf(dispatch_fns[i], sizeof dispatch_fns[i], "__RockDispatch_%u", next_control_id++);
 
 	for (int i = 0; i < nbranches; i++)
 	{
@@ -235,20 +245,10 @@ void compile_if
 			char inverse[MAX_VALUE];
 			unsigned long n = strlen(conditions[i]);
 
-			if (n >= 2 &&
-				conditions[i][0] == '"' &&
-				conditions[i][n - 1] == '"')
-				snprintf(inverse, sizeof inverse,
-					"\"(%.*s) != 0\"",
-					(int)(n - 2),
-					conditions[i] + 1);
-			else
-				snprintf(inverse, sizeof inverse,
-					"(%s) != 0",
-					conditions[i]);
+			if (n >= 2 && conditions[i][0] == '"' && conditions[i][n - 1] == '"') snprintf(inverse, sizeof inverse, "\"(%.*s) != 0\"", (int)(n - 2), conditions[i] + 1);
+			else snprintf(inverse, sizeof inverse, "(%s) != 0", conditions[i]);
 
-			emitf("If %s %s\n",
-				dispatch_fns[i + 1], inverse);
+			emitf("If %s %s\n", dispatch_fns[i + 1], inverse);
 		}
 		else if (has_else)
 		{

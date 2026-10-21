@@ -14,6 +14,10 @@
 #define errcodelimitreached 1
 #define errcodemalformedinput 2
 #define errcodeplatformspecific 3
+#define errcodeallocatorerror 4
+#define errcodeallocationerror 5
+#define errcodenumericoverflow 6
+#define errcodenumericunderflow 7
 
 struct Memory;
 

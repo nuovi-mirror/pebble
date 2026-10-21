@@ -11,6 +11,10 @@
 #include "values.h"
 #include "variables.h"
 
+#include <limits.h> /* XXX remove this at some point */
+#include <float.h> /* XXX remove this at some point */
+#include <math.h> /* XXX remove this at some point */
+
 Value resolveleaf 
 (Value v, VarMap *vars)
 {
@@ -75,9 +79,40 @@ static Value h_NumericAdd
 
 	switch (numtype(l, r)) 
 	{
-		case type_flt: v = (Value){ .Type = type_flt, .as.flt = numflt(l) + numflt(r) }; break;
-		case type_sword: v = (Value){ .Type = type_sword, .as.sword = numsword(l) + numsword(r) }; break;
-		default: v = (Value){ .Type = type_word, .as.word = numword(l) + numword(r) }; break;
+		case type_flt: 
+		{
+			double lf = numflt(l);
+			double rf = numflt(r);
+
+			if (rf > 0.0 && lf > DBL_MAX - rf) error(errfatal, errcodenumericoverflow, "Floating addition positive overflow!");
+			if (rf < 0.0 && lf < -DBL_MAX - rf) error(errfatal, errcodenumericunderflow, "Floating addition negative overflow!");
+
+			v = (Value){ .Type = type_flt, .as.flt = lf + rf }; 
+			break;
+		}
+
+		case type_sword: 
+		{
+			long ls = numsword(l);
+			long rs = numsword(r);
+
+			if (rs > 0 && ls > LONG_MAX - rs) error(errfatal, errcodenumericoverflow, "Signed addition overflow!");
+			if (rs < 0 && ls < LONG_MIN - rs) error(errfatal, errcodenumericunderflow, "Signed addition underflow!");
+
+			v = (Value){ .Type = type_sword, .as.sword = ls + rs }; 
+			break;
+		}
+
+		default: 
+		{
+			unsigned long lw = numword(l);
+			unsigned long rw = numword(r);
+
+			if (lw > ULONG_MAX - rw) error(errfatal, errcodenumericoverflow, "Unsigned addition overflow!");
+
+			v = (Value){ .Type = type_word, .as.word = lw + rw }; 
+			break;
+		}
 	}
 
 	return v;
@@ -90,9 +125,40 @@ static Value h_NumericSub
 
 	switch (numtype(l, r)) 
 	{
-		case type_flt: v = (Value){ .Type = type_flt, .as.flt = numflt(l) - numflt(r) }; break;	
-		case type_sword: v = (Value){ .Type = type_sword, .as.sword = numsword(l) - numsword(r) }; break;
-		default: v = (Value){ .Type = type_word, .as.word = numword(l) - numword(r) }; break;
+		case type_flt: 
+		{
+			double lf = numflt(l);
+			double rf = numflt(r);
+
+			if (rf < 0.0 && lf > DBL_MAX + rf) error(errfatal, errcodenumericoverflow, "Floating subtraction positive overflow!");
+			if (rf > 0.0 && lf < -DBL_MAX + rf) error(errfatal, errcodenumericunderflow, "Floating subtraction negative overflow!");
+
+			v = (Value){ .Type = type_flt, .as.flt = lf - rf }; 
+			break;	
+		}
+
+		case type_sword:
+		{	
+			long ls = numsword(l);
+			long rs = numsword(r);
+
+			if (rs > 0 && ls < LONG_MIN + rs) error(errfatal, errcodenumericunderflow, "Signed subtraction underflow!");
+			if (rs < 0 && ls > LONG_MAX + rs) error(errfatal, errcodenumericoverflow, "Signed subtraction overflow!");
+
+			v = (Value){ .Type = type_sword, .as.sword = ls - rs }; 
+			break;
+		}
+
+		default: 
+		{
+			unsigned long lw = numword(l);
+			unsigned long rw = numword(r);
+
+			if (lw < rw) error(errfatal, errcodenumericunderflow, "Unsigned subtraction underflow!");
+
+			v = (Value){ .Type = type_word, .as.word = numword(l) - numword(r) }; 
+			break;
+		}
 	}
 
 	return v;
@@ -105,9 +171,54 @@ static Value h_NumericMul
 
 	switch (numtype(l, r)) 
 	{
-		case type_flt: v = (Value){ .Type = type_flt, .as.flt = numflt(l) * numflt(r) }; break;
-		case type_sword: v = (Value){ .Type = type_sword, .as.sword = numsword(l) * numsword(r) }; break;
-		default: v = (Value){ .Type = type_word, .as.word = numword(l) * numword(r) }; break;
+		case type_flt: 
+		{
+			double lf = numflt(l);
+			double rf = numflt(r);
+
+			if (lf > 0.0)
+			{
+				if (rf > 0.0 && lf > DBL_MAX / rf) error(errfatal, errcodenumericoverflow, "Floating multiplcation overflow!");
+				else if (rf < 0.0 && rf < -DBL_MAX / lf) error(errfatal, errcodenumericunderflow, "Floating multiplcation underflow!");
+			} else if (lf < 0.0)
+			{
+				if (rf > 0.0 && lf < -DBL_MAX / rf) error(errfatal, errcodenumericunderflow, "Floating multiplcation underflow!");
+				else if (rf < 0.0 && lf < DBL_MAX / rf) error(errfatal, errcodenumericoverflow, "Floating multiplcation overflow!");
+			}
+
+			v = (Value){ .Type = type_flt, .as.flt = numflt(l) * numflt(r) }; 
+			break;
+		}
+
+		case type_sword: 
+		{
+			long ls = numsword(l);
+			long rs = numsword(r);
+
+			if (ls > 0)
+			{
+				if (rs > 0 && ls > LONG_MAX / rs) error(errfatal, errcodenumericoverflow, "Signed multiplcation overflow!");
+				if (rs < 0 && rs < LONG_MIN / ls) error(errfatal, errcodenumericunderflow, "Signed multiplcation underflow!");
+			} else if (ls < 0)
+			{
+				if (rs > 0 && ls < LONG_MAX / rs) error(errfatal, errcodenumericunderflow, "Signed multiplcation underflow!");
+				else if (rs < 0 && ls < LONG_MAX / rs) error(errfatal, errcodenumericoverflow, "Signed multiplcation overflow!");
+			}
+
+			v = (Value){ .Type = type_sword, .as.sword = ls * rs }; 
+			break;
+		}
+
+		default: 
+		{
+			unsigned long lw = numword(l);
+			unsigned long rw = numword(r);
+
+			if (rw != 0 && lw > ULONG_MAX / rw) error(errfatal, errcodenumericoverflow, "Unsigned multiplcation overflow!");
+
+			v = (Value){ .Type = type_word, .as.word = lw * rw }; 
+			break;
+		}
 	}
 
 	return v;
@@ -121,19 +232,43 @@ static Value h_NumericDiv
 	switch (numtype(l, r)) 
 	{
 		case type_flt:
-			v.Type = type_flt;
-			v.as.flt = numflt(r) == 0.0 ? 0.0 : numflt(l) / numflt(r);
+		{
+			double lf = numflt(l);
+			double rf = numflt(r);
+
+			if (lf > 0.0)
+			{
+				if (rf > 0.0 && lf > DBL_MAX * rf) error(errfatal, errcodenumericoverflow, "Floating division overflow!");
+				else if (rf < 0.0 && lf < -DBL_MAX * rf) error(errfatal, errcodenumericunderflow, "Floating division underflow!");
+			} else if (lf > 0.0)
+			{
+				if (rf > 0.0 && lf < -DBL_MAX * rf) error(errfatal, errcodenumericunderflow, "Floating division underflow!");
+				else if (rf < 0.0 && lf < DBL_MAX * rf) error(errfatal, errcodenumericoverflow, "Floating division overflow!");
+			}
+
+			v = (Value){ .Type = type_flt, .as.flt = rf == 0.0 ? 0.0 : lf / rf };
 			break;
+		}
 	
 		case type_sword:
-			v.Type = type_sword;
-			v.as.sword = numsword(r) == 0 ? 0 : numsword(l) / numsword(r);
+		{
+			long ls = numsword(l);
+			long rs = numsword(r);
+
+			if (ls == LONG_MIN && rs == -1) error(errfatal, errcodenumericoverflow, "Signed division overflow!");
+
+			v = (Value){ .Type = type_sword, .as.sword = rs == 0 ? 0 : ls / rs };
 			break;
+		}
 	
 		default:
-			v.Type = type_word;
-			v.as.word = numword(r) == 0 ? 0 : numword(l) / numword(r);
+		{
+			unsigned long lw = numword(l);
+			unsigned long rw = numword(r);
+
+			v = (Value){ .Type = type_word, .as.word = rw == 0 ? 0 : lw / rw };
 			break;
+		}
 	}
 
 	return v;

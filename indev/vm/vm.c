@@ -267,9 +267,7 @@ unsigned long resolvefunction
 
 /* instruction interpreter - instruction-by-instruction loop of execution */
 unsigned long interpret 
-(Instruction *instr, Instruction *program, unsigned long long seed, unsigned long instruction_count, 
- 	struct Limits *limits, VarMap *vars, FFIvars *ffivars, Stack *stack, FuncMap *funcs, 
-	unsigned long pc, Arena *persistAlloc, Arena *scratchAlloc, Arena *tempAlloc)
+(Instruction *instr, Instruction *program, unsigned long long seed, unsigned long instruction_count, struct Limits *limits, VarMap *vars, FFIvars *ffivars, Stack *stack, FuncMap *funcs, unsigned long pc, Arena *persistAlloc, Arena *scratchAlloc, Arena *tempAlloc)
 {
 	switch (instr->Opcode) 
 	{
