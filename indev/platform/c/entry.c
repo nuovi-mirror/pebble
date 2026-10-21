@@ -47,10 +47,7 @@ void error
 void pushframe 
 (Stack *stack, StackFrame *frame)
 {
-	if (stack->count >= stack->capacity) {
-		print("ERROR: CALLSTACK: STACK OVERFLOW!\n");
-		exitproc(1);
-	}
+	if (stack->count >= stack->capacity) error(errfatal, errcodestackerror, "Call Stack overflow!");
 
 	stack->items[stack->count] = *frame;
 	stack->count++;
@@ -61,10 +58,7 @@ StackFrame popframe
 {
 	StackFrame frame;
 
-	if (stack->count == 0) {
-		print("ERROR: CALLSTACK: STACK UNDERFLOW!\n");
-		exitproc(1);
-	}
+	if (stack->count <= 0) error(errfatal, errcodestackerror, "Call Stack underflow!");
 
 	stack->count--;
 	frame = stack->items[stack->count];
@@ -89,10 +83,7 @@ Stack *initstack
 	StackFrame *stack_items = (StackFrame *)mem->stack_callStack_frames;
 	Stack *stack = (Stack *)mem->stack_callStack_stack;
 
-	if (stack == NULL || stack_items == NULL || capacity == 0) {
-		print("ERROR: INIT: CANNOT ALLOCATE A CALL STACK!\n");
-		exitproc(1);
-	}
+	if (stack == NULL || stack_items == NULL || capacity == 0) error(errfatal, errcodestackerror, "Cannot allocate a call stack!");
 
 	stack->items = stack_items;
 	stack->count = 0;
@@ -131,4 +122,5 @@ unsigned long long getrandom
 
 	return mix64(temp[0]);
 }
+
 #endif
