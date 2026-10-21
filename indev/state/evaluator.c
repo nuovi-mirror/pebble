@@ -157,6 +157,8 @@ static Value h_NumericSub
 			if (lw < rw) 
 			/* XXX old behavior - error(errfatal, errcodenumericunderflow, "Unsigned subtraction underflow!"); */
 			{
+				if (lw > LONG_MAX || rw > LONG_MAX) error(errfatal, errcodenumericunderflow, "Unsigned subtraction underflow!");
+
 				long ls = numsword(l);
 				long rs = numsword(r);
 
@@ -209,7 +211,7 @@ static Value h_NumericMul
 			if (ls > 0)
 			{
 				if (rs > 0 && ls > LONG_MAX / rs) error(errfatal, errcodenumericoverflow, "Signed multiplcation overflow!");
-				if (rs < 0 && rs < LONG_MIN / ls) error(errfatal, errcodenumericunderflow, "Signed multiplcation underflow!");
+				if (rs < 0 && rs < LONG_MIN / rs) error(errfatal, errcodenumericunderflow, "Signed multiplcation underflow!");
 			} else if (ls < 0)
 			{
 				if (rs > 0 && ls < LONG_MAX / rs) error(errfatal, errcodenumericunderflow, "Signed multiplcation underflow!");
@@ -251,7 +253,7 @@ static Value h_NumericDiv
 			{
 				if (rf > 0.0 && lf > DBL_MAX * rf) error(errfatal, errcodenumericoverflow, "Floating division overflow!");
 				else if (rf < 0.0 && lf < -DBL_MAX * rf) error(errfatal, errcodenumericunderflow, "Floating division underflow!");
-			} else if (lf > 0.0)
+			} else if (lf < 0.0)
 			{
 				if (rf > 0.0 && lf < -DBL_MAX * rf) error(errfatal, errcodenumericunderflow, "Floating division underflow!");
 				else if (rf < 0.0 && lf < DBL_MAX * rf) error(errfatal, errcodenumericoverflow, "Floating division overflow!");
