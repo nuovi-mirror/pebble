@@ -154,9 +154,20 @@ static Value h_NumericSub
 			unsigned long lw = numword(l);
 			unsigned long rw = numword(r);
 
-			if (lw < rw) error(errfatal, errcodenumericunderflow, "Unsigned subtraction underflow!");
+			if (lw < rw) 
+			/* XXX old behavior - error(errfatal, errcodenumericunderflow, "Unsigned subtraction underflow!"); */
+			{
+				long ls = numsword(l);
+				long rs = numsword(r);
 
-			v = (Value){ .Type = type_word, .as.word = numword(l) - numword(r) }; 
+				if (rs > 0 && ls < LONG_MIN + rs) error(errfatal, errcodenumericunderflow, "Signed subtraction underflow!");
+				if (rs < 0 && ls > LONG_MAX + rs) error(errfatal, errcodenumericoverflow, "Signed subtraction overflow!");
+			
+				v = (Value){ .Type = type_sword, .as.sword = ls - rs };
+				break;
+			}
+
+			v = (Value){ .Type = type_word, .as.word = lw - rw }; 
 			break;
 		}
 	}

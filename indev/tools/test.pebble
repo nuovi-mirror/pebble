@@ -31,6 +31,9 @@ _PRINT2 f
 _PRINT2 g
 _PRINT2 h
 
+New us "2 - 3"
+_PRINT2 us
+
 New "la s++ la" '1'
 New "ab s++ ab" '2'
 New "ab s++ cd" '3'
