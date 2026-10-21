@@ -281,7 +281,7 @@ static int h_NumericCmp
 	{
 		case type_flt: return numflt(l) > numflt(r) ? 1 : numflt(l) < numflt(r) ? -1 : 0;
 		case type_sword: return numsword(l) > numsword(r) ? 1 : numsword(l) < numsword(r) ? -1 : 0;
-		default: return numword(l) > numword(r) ? 1 : numword(l) < numword(r) ? -1 : 0;
+			default: return numword(l) > numword(r) ? 1 : numword(l) < numword(r) ? -1 : 0;
 	}
 }
 
