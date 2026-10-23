@@ -78,7 +78,7 @@ int main
 	limits.allocator_IRAlloc_maxmem = ((limits.instructions_maxbuffersize) + sizeof(struct Arena));
 	limits.allocator_lalloc_maxretries = 3;
 
-	char *mem_arena_tempAlloc_backing = lalloc(limits.allocator_temp_maxmem);
+	char *mem_arena_tempAlloc_backing = lalloc(limits.allocator_temp_maxmem, limits.allocator_lalloc_maxretries);
 	char *mem_arena_scratchAlloc_backing = lalloc(limits.allocator_scratch_maxmem, limits.allocator_lalloc_maxretries);
 	char *mem_arena_persistAlloc_backing = lalloc(limits.allocator_persist_maxmem, limits.allocator_lalloc_maxretries);
 	char *mem_arena_IRAlloc_backing = lalloc(limits.allocator_IRAlloc_maxmem, limits.allocator_lalloc_maxretries);
