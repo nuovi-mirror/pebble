@@ -53,6 +53,7 @@ const char *platform_c_srcs[] = {
 	"platform/c/snprint.c",
 	"platform/c/findchar.c",
 	"platform/c/appendstr.c",
+	"platform/c/lalloc.c",
 
 	NULL
 };

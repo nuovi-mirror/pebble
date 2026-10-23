@@ -7,6 +7,7 @@ struct Limits {
 	unsigned long allocator_persist_maxmem; /* max mem in persist allocator */
 	unsigned long allocator_scratch_maxmem; /* max mem in scratch allocator */
 	unsigned long allocator_IRAlloc_maxmem; /* max mem in scratch allocator */
+	unsigned int allocator_lalloc_maxretries; /* max times to retry allocation call in lalloc() */
 
 	/* instruction-related */
 	unsigned long instructions_max; /* max number of instructions that can be executed */

@@ -2,6 +2,7 @@
 #include "mem.h"
 #include "limits.h"
 #include "vm.h"
+#include "lalloc.h" /* initial backings */
 #include "print.h" /* XXX error handling */
 #include "appendstr.h" /* XXX for pledge(2) init */
 #include <unistd.h> /* XXX for pledge(2) and unveil(2) */
@@ -71,18 +72,18 @@ int main
 	limits.instruction_new_destsize = 32;
 	limits.instruction_new_datasize = 32;
 
-	limits.allocator_temp_maxmem = ((8 * 1024 * 1024) + sizeof(struct Arena)); 
-	limits.allocator_persist_maxmem = ((32 * 1024 * 1024) + sizeof(struct Arena));
-	limits.allocator_scratch_maxmem = ((6 * 1024 * 1024) + sizeof(struct Arena));
+	limits.allocator_temp_maxmem = ((2 * 1024 * 1024) + sizeof(struct Arena)); 
+	limits.allocator_persist_maxmem = ((6 * 1024 * 1024) + sizeof(struct Arena));
+	limits.allocator_scratch_maxmem = ((2 * 1024 * 1024) + sizeof(struct Arena));
 	limits.allocator_IRAlloc_maxmem = ((limits.instructions_maxbuffersize) + sizeof(struct Arena));
+	limits.allocator_lalloc_maxretries = 3;
 
-	char *mem_arena_tempAlloc_backing = malloc(limits.allocator_temp_maxmem);
-	char *mem_arena_scratchAlloc_backing = malloc(limits.allocator_scratch_maxmem);
-	char *mem_arena_persistAlloc_backing = malloc(limits.allocator_persist_maxmem);
-	char *mem_arena_IRAlloc_backing = malloc(limits.allocator_IRAlloc_maxmem);
-	Stack *mem_stack_callStack_stack = malloc(limits.stack_callStack_size);
-	StackFrame *mem_stack_callStack_frames = malloc(limits.stack_callStack_frameSize  
-		* limits.stack_callStack_cap);
+	char *mem_arena_tempAlloc_backing = lalloc(limits.allocator_temp_maxmem);
+	char *mem_arena_scratchAlloc_backing = lalloc(limits.allocator_scratch_maxmem, limits.allocator_lalloc_maxretries);
+	char *mem_arena_persistAlloc_backing = lalloc(limits.allocator_persist_maxmem, limits.allocator_lalloc_maxretries);
+	char *mem_arena_IRAlloc_backing = lalloc(limits.allocator_IRAlloc_maxmem, limits.allocator_lalloc_maxretries);
+	Stack *mem_stack_callStack_stack = lalloc(limits.stack_callStack_size, limits.allocator_lalloc_maxretries);
+	StackFrame *mem_stack_callStack_frames = lalloc(limits.stack_callStack_frameSize * limits.stack_callStack_cap, limits.allocator_lalloc_maxretries);
 
 	mem.arena_tempAlloc_backing = mem_arena_tempAlloc_backing;
 	mem.arena_scratchAlloc_backing = mem_arena_scratchAlloc_backing;
