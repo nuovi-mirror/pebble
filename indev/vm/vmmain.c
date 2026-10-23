@@ -38,7 +38,7 @@ int vmmain
 	InstructionMap instructionMap = initInstructionMap(limits->instructions_maxcache, persistAlloc);
 
 	Scheduler scheduler;
-	scheduler_init(&scheduler, stack);
+	scheduler_init(&scheduler, stack, limits);
 
 	ffivars->map = &vars;
 	ffivars->count = 0;
@@ -51,6 +51,8 @@ int vmmain
 	char *line;
 	unsigned long current_instruction_count = 0;
 	Instruction *program = alloc(IRAlloc, limits->allocator_IRAlloc_maxmem);
+
+	unsigned long pc = 0;
 
 	/* startup */
 	while ((line = findnewline(&filedata)) != NULL) 
@@ -93,7 +95,7 @@ int vmmain
 
 		while(!scheduler.yield && task->pc < current_instruction_count)
 		{
-			task->pc = interpret(&program[pc], program, seed, current_instruction_count, limits, &vars, ffivars, stack, &funcs, pc, persistAlloc, scratchAlloc, tempAlloc);
+			task->pc = interpret(&program[task->pc], program, seed, current_instruction_count, limits, &vars, ffivars, stack, &funcs, task->pc, persistAlloc, scratchAlloc, tempAlloc, &scheduler);
 			resetAllocator(scratchAlloc);
 			resetAllocator(tempAlloc);
 		}

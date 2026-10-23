@@ -8,7 +8,7 @@
 #include "values.h"
 
 void scheduler_init
-(Scheduler *scheduler, Stack *mainstack, Limits *limits)
+(Scheduler *scheduler, Stack *mainstack, struct Limits *limits)
 {
 	for (unsigned long i = 0; i < limits->tasks_max; i++)
 	{
@@ -22,16 +22,16 @@ void scheduler_init
 
 	/* task 0 is the program itself */
 	scheduler->tasks[0].state = task_ready;
-	scheduler->tasks[0].stack = mainstack'
+	scheduler->tasks[0].stack = mainstack;
 	scheduler->current = 0;
 	scheduler->yield = 0;
 }
 
 /* find a free slot; caller must fill name and call scheduler_start() */
 Task *scheduler_claim
-(Scheduler *scheduler, Limits *limits)
+(Scheduler *scheduler, struct Limits *limits)
 {
-	for (unsigned long i = 0; i < limits->tasks_max; i++) if (shceduler->tasks[i].state == task_free) return &scheduler->tasks[i];
+	for (unsigned long i = 0; i < limits->tasks_max; i++) if (scheduler->tasks[i].state == task_free) return &scheduler->tasks[i];
 
 	error(errfatal, errcodelimitreached, "Too many tasks!");
 	return NULL; /* XXX never hit */
@@ -39,7 +39,7 @@ Task *scheduler_claim
 
 /* make a claimed task runnable */
 void scheduler_start
-(Task *task, unsigned long entry, Arena *persistAlloc, Limits *limits)
+(Task *task, unsigned long entry, Arena *persistAlloc, struct Limits *limits)
 {
 	if (task->stack == NULL)
 	{
@@ -50,7 +50,7 @@ void scheduler_start
 
 	task->stack->count = 0;
 
-	StackFrame bottom = { limits->tasks_donepc, task->name };
+	StackFrame bottom = { ((unsigned long)-1), task->name };
 	pushframe(task->stack, &bottom);
 
 	task->pc = entry;
@@ -61,7 +61,7 @@ void scheduler_start
 void scheduler_yield
 (Scheduler *scheduler, unsigned long ms)
 {
-	Task *task = &scheduler[scheduler->current];
+	Task *task = &scheduler->tasks[scheduler->current];
 	scheduler->yield = 1;
 
 	if (ms != 0)
@@ -74,9 +74,11 @@ void scheduler_yield
 void scheduler_finish
 (Scheduler *scheduler, VarMap *vars)
 {
+	Task *task = &scheduler->tasks[scheduler->current];
+
 	if (task->flag[0] != '\0')
 	{
-		Value *flag = getVars(vars, task->flag);
+		Value *flag = getVar(vars, task->flag);
 		if (flag != NULL) *flag = (Value){ .Type = type_word, .as.word = 1 };
 	}
 
@@ -84,11 +86,11 @@ void scheduler_finish
 }
 
 int scheduler_next
-(Scheduler *scheduler)
+(Scheduler *scheduler, struct Limits *limits)
 {
 	for (;;)
 	{
-		if (scheduler->tasks[0].state = task_free) return 0;
+		if (scheduler->tasks[0].state == task_free) return 0;
 
 		unsigned long now = clockms();
 		unsigned long soonest = 0;
@@ -105,7 +107,7 @@ int scheduler_next
 				else if (soonest == 0 || (unsigned long)left < soonest) soonest = (unsigned long)left;
 			}
 
-			if (task->state == fiber_ready)
+			if (task->state == task_ready)
 			{
 				scheduler->current = i;
 				return 1;
