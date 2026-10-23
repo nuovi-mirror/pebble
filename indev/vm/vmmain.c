@@ -37,6 +37,9 @@ int vmmain
 	FuncMap funcs = initFuncs(limits->functions_max, persistAlloc);
 	InstructionMap instructionMap = initInstructionMap(limits->instructions_maxcache, persistAlloc);
 
+	Scheduler scheduler;
+	scheduler_init(&scheduler, stack);
+
 	ffivars->map = &vars;
 	ffivars->count = 0;
 	ffivars->max = limits->variables_max;
@@ -52,8 +55,7 @@ int vmmain
 	/* startup */
 	while ((line = findnewline(&filedata)) != NULL) 
 	{
-		if (current_instruction_count >= limits->instructions_max) 
-			error(errfatal, errcodelimitreached, "Instruction cap reached!");
+		if (current_instruction_count >= limits->instructions_max) error(errfatal, errcodelimitreached, "Instruction cap reached!");
 		
 		char *p = skipspace(line);
 		if (p == NULL) continue;
@@ -84,13 +86,19 @@ int vmmain
 	putVar(&vars, "VMARGC", argcount, persistAlloc);
 
 	/* execution */
-	unsigned long pc = 0;
-	while (pc < current_instruction_count) 
+	while (scheduler_next(&scheduler, limits))
 	{
-		pc = interpret(&program[pc], program, seed, current_instruction_count, limits, &vars, ffivars, 
-			stack, &funcs, pc, persistAlloc, scratchAlloc, tempAlloc);
-		resetAllocator(scratchAlloc);
-		resetAllocator(tempAlloc);
+		Task *task = &scheduler.tasks[scheduler.current];
+		scheduler.yield = 0;
+
+		while(!scheduler.yield && task->pc < current_instruction_count)
+		{
+			task->pc = interpret(&program[pc], program, seed, current_instruction_count, limits, &vars, ffivars, stack, &funcs, pc, persistAlloc, scratchAlloc, tempAlloc);
+			resetAllocator(scratchAlloc);
+			resetAllocator(tempAlloc);
+		}
+
+		if (task->pc >= current_instruction_count) scheduler_finish(&scheduler, &vars);
 	}
 
 	/* clean-up */

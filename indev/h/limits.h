@@ -25,6 +25,10 @@ struct Limits {
 	unsigned long functions_max; /* max number of functiosn that can be defined */
 	unsigned long functions_namesize; /* size in bytes of a function name */
 
+	/* task related */
+	unsigned long tasks_max; /* max number of tasks at one time */
+	unsigned long tasks_depth; /* max stack depth per fiber */
+
 	/* variable-related */
 	unsigned long variables_max; /* max number of variables at a time */
 

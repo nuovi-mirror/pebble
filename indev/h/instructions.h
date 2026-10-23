@@ -20,6 +20,8 @@ typedef enum {
 	Opcode_Return,
 	Opcode_Escape,
 	Opcode_End,
+	Opcode_Spawn,
+	Opcode_Yield,
 	/* internal opcodes */
 	Opcode_Internal_PRINT,
 	Opcode_Internal_PRINT2,
@@ -49,6 +51,8 @@ static const InstructionOpcodeEntry InstructionOpcodeEntryTable[] = {
 	{"Return", Opcode_Return},
 	{"End", Opcode_End},
 	{"Escape", Opcode_Escape},
+	{"Spawn", Opcode_Spawn},
+	{"Yield", Opcode_Yield},
 	/* internal opcodes */
 	{"_PRINT", Opcode_Internal_PRINT},
 	{"_PRINT2", Opcode_Internal_PRINT2},

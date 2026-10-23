@@ -19,6 +19,7 @@
 #include "snprint.h"
 #include "values.h"
 #include "variables.h"
+#include "tasks.h"
 
 /* used to parse an instruction operand - guesses the type and addressing mode */
 int parseoperand 
@@ -266,9 +267,8 @@ unsigned long resolvefunction
 	return *retpc;
 }
 
-/* instruction interpreter - instruction-by-instruction loop of execution */
 unsigned long interpret 
-(Instruction *instr, Instruction *program, unsigned long long seed, unsigned long instruction_count, struct Limits *limits, VarMap *vars, FFIvars *ffivars, Stack *stack, FuncMap *funcs, unsigned long pc, Arena *persistAlloc, Arena *scratchAlloc, Arena *tempAlloc)
+(Instruction *instr, Instruction *program, unsigned long long seed, unsigned long instruction_count, struct Limits *limits, VarMap *vars, FFIvars *ffivars, Stack *stack, FuncMap *funcs, unsigned long pc, Arena *persistAlloc, Arena *scratchAlloc, Arena *tempAlloc, Scheduler *scheduler)
 {
 	switch (instr->Opcode) 
 	{

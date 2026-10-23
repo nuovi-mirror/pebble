@@ -18,6 +18,7 @@ const char *vm_srcs[] = {
 	"state/instructions.c",
 	"state/values.c",
 	"state/variables.c",
+	"state/tasks.c",
 
 	NULL
 };
@@ -37,6 +38,7 @@ const char *platform_freestand_srcs[] = {
 	"platform/freestand/strsplit.c",
 	"platform/freestand/inputl.c",
 	"platform/freestand/ffillmem.c",
+	"platform/freestand/clockms.c",
 
 	NULL
 };
@@ -71,6 +73,7 @@ const char *indrng_srcs[] = {
 const char *platform_posix_srcs[] = {
 	"platform/posix/inputn.c",
 	"platform/posix/snooze.c",
+	"platform/posix/clockms.c",
 
 	NULL
 };
