@@ -71,6 +71,8 @@ int main
 	limits.misc_vmargmaxdigits = 2;
 	limits.instruction_new_destsize = 32;
 	limits.instruction_new_datasize = 32;
+	limits.tasks_max = 32;
+	limits.tasks_depth = 128;
 
 	limits.allocator_temp_maxmem = ((2 * 1024 * 1024) + sizeof(struct Arena)); 
 	limits.allocator_persist_maxmem = ((6 * 1024 * 1024) + sizeof(struct Arena));

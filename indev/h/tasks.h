@@ -28,7 +28,7 @@ typedef struct {
 	int yield; /* set by Yield instruction; marks the end of the current time slice */
 } Scheduler;
 
-void scheduler_init (Scheduler *scheduler, Stack *mainstack, struct Limits *limits);
+void scheduler_init (Scheduler *scheduler, Stack *mainstack, Arena *persistAlloc, struct Limits *limits);
 Task *scheduler_claim (Scheduler *scheduler, struct Limits *limits);
 void scheduler_start (Task *task, unsigned long entry, Arena *persistAlloc, struct Limits *limits);
 void scheduler_yield (Scheduler *scheduler, unsigned long ms);

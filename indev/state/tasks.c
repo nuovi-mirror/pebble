@@ -8,7 +8,7 @@
 #include "values.h"
 
 void scheduler_init
-(Scheduler *scheduler, Stack *mainstack, struct Limits *limits)
+(Scheduler *scheduler, Stack *mainstack, Arena *persistAlloc, struct Limits *limits)
 {
 	for (unsigned long i = 0; i < limits->tasks_max; i++)
 	{
@@ -16,6 +16,10 @@ void scheduler_init
 		scheduler->tasks[i].pc = 0;
 		scheduler->tasks[i].stack = NULL;
 		scheduler->tasks[i].wake = 0;
+
+		scheduler->tasks[i].name = alloc(persistAlloc, limits->functions_namesize);
+		scheduler->tasks[i].flag = alloc(persistAlloc, limits->instructions_varnamesize);
+
 		scheduler->tasks[i].name[0] = '\0';
 		scheduler->tasks[i].flag[0] = '\0';
 	}
