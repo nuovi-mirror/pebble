@@ -144,8 +144,7 @@ Instruction makeIR
 
 	cursor = p;
 
-	if (!lookupopcode(opcode_start, &instr.Opcode)) 
-		error(errfatal, errcodemalformedinput, "Unknown opcode found when generating IR!");
+	if (!lookupopcode(opcode_start, &instr.Opcode)) error(errfatal, errcodemalformedinput, "Unknown opcode found when generating IR!");
 
 	parseoperand(&cursor, &instr.FirstOperand, tempAlloc, persistAlloc);
 	parseoperand(&cursor, &instr.SecondOperand, tempAlloc, persistAlloc);
@@ -162,6 +161,8 @@ Instruction makeIR
 		copymem(&instr, buf, sizeof(instr));
 		putInstruction(instructionMap, line, buf, persistAlloc);
 	}
+
+	current_instruction_cachesize += sizeof(Instruction); /* incriment the cache size */
 
 	return instr;
 }
