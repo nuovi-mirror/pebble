@@ -1,0 +1,51 @@
+Func print
+New __Escape_std.io.print_ARG0 <msg>
+Escape std.io.print
+End
+
+Func workerA
+New msg 'A: 1'
+Call print
+Yield
+New msg 'A: 2'
+Call print
+Yield
+New msg 'A: 3'
+Call print
+Yield
+End
+
+Func workerB
+New msg 'B: 1'
+Call print
+Yield
+New msg 'B: 2'
+Call print
+End
+
+Func awaitA
+Yield 1
+If awaitA <doneA>
+End
+
+Func awaitB
+Yield 1
+If awaitB <doneB>
+End
+
+New msg 'main: spawning'
+Call print
+
+Spawn workerA doneA
+Spawn workerB doneB
+
+New msg 'main: spawned; awaiting'
+Call print
+
+Call awaitA
+New msg 'main: A finished'
+Call print
+
+Call awaitB
+New msg 'main: B finished'
+Call print

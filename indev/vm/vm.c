@@ -122,11 +122,18 @@ Instruction makeIR
 {
 	if (*line == '/' || *line == '#') return (struct Instruction){ Opcode_Internal_NOP };
 	Instruction *instrFromMap = getInstruction(instructionMap, line);
-	static unsigned long current_instruction_cachesize;
 
 	if (instrFromMap != NULL) return *instrFromMap;
 	/* this is safe since it should have already been placed on
 	 * the persistent allocator */
+
+	char *cachekey = NULL;
+
+	if (instructionMap->size < limits->instructions_maxcache)
+	{
+		cachekey = alloc(persistAlloc, getstrlen(line) + 1);
+		copystr(line, cachekey);
+	}
 
 	Instruction instr = {0};
 	char *cursor = line;
@@ -151,19 +158,14 @@ Instruction makeIR
 	parseoperand(&cursor, &instr.SecondOperand, tempAlloc, persistAlloc);
 	/* XXX third operand unused for now */
 
-	/* the instruction has been made
-	 * the instruction does not exist on the mapper yet
+	/* the instruction has been made the instruction does not exist on the mapper yet
 	 * so we map it for future use */
-
-	/* but only if we did not hit the max */
-	if (current_instruction_cachesize <= limits->instructions_maxcache) 
+	if (cachekey != NULL)
 	{
 		char *buf = alloc(persistAlloc, sizeof(Instruction));
 		copymem(&instr, buf, sizeof(instr));
-		putInstruction(instructionMap, line, buf, persistAlloc);
+		putInstruction(instructionMap, cachekey, buf, persistAlloc);
 	}
-
-	current_instruction_cachesize += sizeof(Instruction); /* incriment the cache size */
 
 	return instr;
 }
@@ -694,6 +696,75 @@ unsigned long interpret
 
 			callEscape(name, seed, ffivars, scratchAlloc, tempAlloc, persistAlloc, limits);
 			break;
+		}
+
+		case Opcode_Spawn:
+		{
+			Task *task = scheduler_claim(scheduler, limits);
+			char *buff = alloc(tempAlloc, limits->functions_namesize);
+
+			switch(instr->FirstOperand.Addressing)
+			{
+				case addrmode_bare:
+					valuetostr(task->name, limits->functions_namesize, instr->FirstOperand.Data);
+					break;
+				default:
+					error(errfatal, errcodemalformedinput, "Invalid addressing mode!");
+					break;
+			}
+
+			unsigned long entry = resolvefunction(pc, funcs, stack, program, persistAlloc, task->name, instruction_count);
+			task->flag = '\0';
+
+			/* second operand is not required */
+			if (!(instr->SecondOperand.Addressing == addrmode_literal && instr->SecondOperand.Data.Type == type_word && instr->SecondOperand.Data.as.word == 0))
+			{
+				char *fbuff = alloc(tempAlloc, limits->instructions_varnamesize);
+
+				switch(instr->SecondOperand.Addressing)
+				{
+					case addrmode_bare:
+						valuetostr(task->flag, limits->instructions_varnamesize, instr->SecondOperand.Data);
+						break;
+					default:
+						error(errfatal, errcodemalformedinput, "Invalid addressing mode!");
+						break;
+				}
+
+				Value *flag = getVar(vars, task->flag);
+
+				if (flag == NULL)
+				{
+					char *key = alloc(persistAlloc, getstrlen(task->flag) + 1);
+					copystr(task->flag, key);
+					flag = alloc(persistAlloc, sizeof(Value));
+					putVar(vars, key, flag, persistAlloc);
+				}
+
+				*flag = (Value){ .Type = type_word, .as.word = 0 };
+			}
+
+			scheduler_start(task, entry, persistAlloc, limits);
+			return pc + 1;
+		}
+
+		case Opcode_Yield:
+		{
+			char *buff = alloc(tempAlloc, limits->instructions_varnamesize);
+			unsigned long ms;
+
+			switch(instr->FirstOperand.Addressing)
+			{
+				case addrmode_bare:
+					ms = valuetoword(instr->FirstOperand.Data, vars, persistAlloc).as.word;
+					break;
+				default:
+					error(errfatal, errcodemalformedinput, "Invalid addressing mode!");
+					break;
+			}
+
+			scheduler_yield(scheduler, ms);
+			return pc + 1;
 		}
 
 		/* internal opcodes */

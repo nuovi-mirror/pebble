@@ -95,7 +95,7 @@ int vmmain
 
 		while(!scheduler.yield && task->pc < current_instruction_count)
 		{
-			task->pc = interpret(&program[task->pc], program, seed, current_instruction_count, limits, &vars, ffivars, stack, &funcs, task->pc, persistAlloc, scratchAlloc, tempAlloc, &scheduler);
+			task->pc = interpret(&program[task->pc], program, seed, current_instruction_count, limits, &vars, ffivars, task->stack, &funcs, task->pc, persistAlloc, scratchAlloc, tempAlloc, &scheduler);
 			resetAllocator(scratchAlloc);
 			resetAllocator(tempAlloc);
 		}
