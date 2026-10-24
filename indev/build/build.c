@@ -56,6 +56,7 @@ const char *platform_c_srcs[] = {
 	"platform/c/findchar.c",
 	"platform/c/appendstr.c",
 	"platform/c/lalloc.c",
+	"platform/c/strtokn.c",
 
 	NULL
 };

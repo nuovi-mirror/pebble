@@ -21,8 +21,8 @@ void FFIallocateVariable (FFIvars *vars, const char *varname, void *value, FFIAr
 void *FFIreadVariableUnsafe (FFIvars *vars, const char *varname);
 void *FFIreadVariable (FFIvars *vars, const char *varname); /* wrapper - aborts instead of returning NULL */
 
-int FFIconvertValueToString (char *buff, unsigned long buffsize, FFIValue v);
-FFIValue FFIconvertValueToWord (FFIValue v, FFIvars *vars, FFIArena *persistAlloc);
+int FFIconvertValueToString (char *buff, unsigned long buffsize, FFIValue v, struct Limits *limits);
+FFIValue FFIconvertValueToWord (FFIValue v, FFIvars *vars, FFIArena *persistAlloc, struct Limits *limits);
 void FFIstdoutPrint (char *msg);
 void FFIexit (int stat);
 void FFIerror (unsigned int severity, unsigned int status, const char *msg);

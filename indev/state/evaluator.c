@@ -10,6 +10,7 @@
 #include "main.h"
 #include "values.h"
 #include "variables.h"
+#include "strtokn.h"
 
 #include <limits.h> /* XXX remove this at some point */
 #include <float.h> /* XXX remove this at some point */
@@ -299,11 +300,11 @@ static int h_NumericCmp
 }
 
 static const char *asstr 
-(Value v, char *buf, unsigned long n)
+(Value v, char *buf, unsigned long n, struct Limits *limits)
 {
 	if (v.Type == type_str) return v.as.str;
 
-	valuetostr(buf, n, v);
+	valuetostr(buf, n, v, limits);
 	return buf;
 }
 
@@ -317,10 +318,10 @@ static Value mkbool
 }
 
 Value evalexprnode 
-(ExprNode *node, VarMap *vars, Arena *persistAlloc)
+(ExprNode *node, VarMap *vars, Arena *persistAlloc, struct Limits *limits)
 {
-	Value l = evalexprdata(node->left, vars, persistAlloc);
-	Value r = evalexprdata(node->right, vars, persistAlloc);
+	Value l = evalexprdata(node->left, vars, persistAlloc, limits);
+	Value r = evalexprdata(node->right, vars, persistAlloc, limits);
 	char lb[64], rb[64];
 	int cmp;
 
@@ -358,14 +359,14 @@ Value evalexprnode
 			return mkbool(cmp != 0);
 
 		case ExprOp_StringEqualTo:
-			return mkbool(cmpstr(asstr(l, lb, sizeof(lb)), asstr(r, rb, sizeof(rb))) == 0);
+			return mkbool(cmpstr(asstr(l, lb, sizeof(lb), limits), asstr(r, rb, sizeof(rb), limits)) == 0);
 
 		case ExprOp_StringContains:
 		case ExprOp_StringStartsWith:
 		case ExprOp_StringEndsWith: 
 		{
-			const char *ls = asstr(l, lb, sizeof(lb));
-			const char *rs = asstr(r, rb, sizeof(rb));
+			const char *ls = asstr(l, lb, sizeof(lb), limits);
+			const char *rs = asstr(r, rb, sizeof(rb), limits);
 			unsigned long ll = getstrlen(ls);
 			unsigned long rl = getstrlen(rs);
 
@@ -385,10 +386,12 @@ Value evalexprnode
 
 		case ExprOp_StringConcat: 
 		{
-			const char *ls = asstr(l, lb, sizeof(lb));
-			const char *rs = asstr(r, rb, sizeof(rb));
+			const char *ls = asstr(l, lb, sizeof(lb), limits);
+			const char *rs = asstr(r, rb, sizeof(rb), limits);
 			unsigned long ll = getnstrlen(ls);
 			unsigned long rl = getnstrlen(rs);
+
+			if ((ll + rl + 1) >= limits->misc_strlen) error(errfatal, errcodelimitreached, "String is too long!");
 			char *out = alloc(persistAlloc, ll + rl + 1);
 
 			copymem(ls, out, ll);
@@ -400,6 +403,44 @@ Value evalexprnode
 			v.as.str = out;
 			return v;
 		}
+
+		case ExprOp_StringFind:
+		{
+			const char *ls = asstr(l, lb, sizeof(lb), limits);
+			const char *rs = asstr(r, rb, sizeof(rb), limits);
+			unsigned long ll = getstrlen(ls);
+			unsigned long rl = getstrlen(rs);
+
+			unsigned long pos = 0;
+			char *str, *ostr = NULL;
+
+			Value *vstr = getVar(vars, ls);
+			Value *vstr2 = getVar(vars, rs);
+
+			if (vstr == NULL) str = ls;
+			else 
+			{
+				char *strbuff = alloc(persistAlloc, limits->misc_strlen);
+				asstr(*vstr, strbuff, limits->misc_strlen, limits);
+				str = strbuff;
+			}
+
+			if (vstr2 == NULL) ostr = ls;
+			else 
+			{
+				char *strbuff2 = alloc(persistAlloc, limits->misc_strlen);
+				asstr(*vstr2, strbuff2, limits->misc_strlen, limits);
+				ostr = strbuff2;
+			}
+
+			char *index = strtokn(str, ostr);
+			if (index != NULL) pos = (unsigned long)(index - ls) + 1;
+
+			Value v;
+			v.Type = type_word;
+			v.as.word = pos;
+			return v;
+		}
 	}
 
 	return mkbool(0);
@@ -407,12 +448,12 @@ Value evalexprnode
 }
 
 Value evalexprdata 
-(ExprNodeData data, VarMap *vars, Arena *persistAlloc)
+(ExprNodeData data, VarMap *vars, Arena *persistAlloc, struct Limits *limits)
 {
 	if (data.Type == ExprDataVal) return resolveleaf(data.value, vars);
-	return evalexprnode(data.Node, vars, persistAlloc);
+	return evalexprnode(data.Node, vars, persistAlloc, limits);
 }
 
 Value evalstr 
-(const char *str, int *ok, VarMap *vars, Arena *tempAlloc, Arena *persistAlloc)
-{ return evalexprdata(str2expr(str, ok, tempAlloc, persistAlloc), vars, persistAlloc); }
+(const char *str, int *ok, VarMap *vars, Arena *tempAlloc, Arena *persistAlloc, struct Limits *limits)
+{ return evalexprdata(str2expr(str, ok, tempAlloc, persistAlloc), vars, persistAlloc, limits); }

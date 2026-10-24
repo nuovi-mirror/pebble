@@ -141,15 +141,22 @@ struct PackedLimits setlimits
 	limits.instructions_initbuffersize = (512 * sizeof(Instruction));
 	limits.instructions_maxcache = 512;
 	limits.instructions_varnamesize = 64;
+
 	limits.stack_callStack_cap = 512;
 	limits.stack_callStack_frameSize = (sizeof(StackFrame));
 	limits.stack_callStack_size = (limits.stack_callStack_cap * limits.stack_callStack_frameSize);
+
 	limits.functions_max = 5000;
 	limits.functions_namesize = 32;
+
 	limits.variables_max = 512;
+
 	limits.escapes_namesize = 32;
+
 	limits.misc_maxfilebuffersize = (6 * 1024 * 1024);
 	limits.misc_vmargmaxdigits = 2;
+	limits.misc_strlen = 128;
+
 	limits.instruction_new_destsize = 32;
 	limits.instruction_new_datasize = 32;
 

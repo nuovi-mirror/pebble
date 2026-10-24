@@ -22,6 +22,7 @@ typedef enum {
 	ExprOp_StringEndsWith,
 	ExprOp_StringStartsWith,
 	ExprOp_StringConcat,
+	ExprOp_StringFind,
 } ExprOperation;
 
 typedef enum {
@@ -76,15 +77,16 @@ const ExprOperator *strtooperator (const char *str);
 Value parseliteral (const char **str, Arena *tempAlloc, Arena *persistAlloc);
 void nexttoken (char **str, Token *token, Arena *tempAlloc, Arena *persistAlloc);
 int exprnodetostr (char *buf, unsigned long bufsize, ExprNode *node);
-ExprNode *newexprnode (ExprOperation op, ExprNodeData left, ExprNodeData right,
-	Arena *arena);
+ExprNode *newexprnode (ExprOperation op, ExprNodeData left, ExprNodeData right, Arena *arena);
 ExprNodeData parseexpr (ExprParser *p, int maxPrec, Arena *tempAlloc, Arena *persistAlloc);
 ExprNodeData parseprimary (ExprParser *p, Arena *tempAlloc, Arena *persistAlloc);
 
 /* type guesser infa */
 int isexpression (const char *str);
+
 /* entry point */
 ExprNodeData str2expr (const char *str, int *ok, Arena *tempAlloc, Arena *persistAlloc);
+
 /* wrapper */
 Value guessvaluetypeorexpr (char *data, Arena *tempAlloc, Arena *persistAlloc);
 #endif

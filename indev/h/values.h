@@ -1,7 +1,9 @@
 #ifndef h_values_
 #define h_values_
+
 #include "allocator.h"
 #include "variables.h"
+#include "limits.h"
 
 typedef struct ExprNode ExprNode; /* from expressions.h */
 
@@ -28,7 +30,8 @@ typedef struct Value {
 	} as;
 } Value;
 
-int valuetostr (char *buff, unsigned long buffsize, Value v);
-Value valuetoword (Value v, VarMap *vars, Arena *persistAlloc);
+int valuetostr (char *buff, unsigned long buffsize, Value v, struct Limits *limits);
+Value valuetoword (Value v, VarMap *vars, Arena *persistAlloc, struct Limits *limits);
 Value guessvaluetype (char *data, Arena *persistAlloc);
+
 #endif

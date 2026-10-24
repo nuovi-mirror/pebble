@@ -41,12 +41,12 @@ void *FFIreadVariable /* safer wrapper */
 }
 
 int FFIconvertValueToString 
-(char *buff, unsigned long buffsize, FFIValue v)
-{ return valuetostr(buff, buffsize, v); }
+(char *buff, unsigned long buffsize, FFIValue v, struct Limits *limits)
+{ return valuetostr(buff, buffsize, v, limits); }
 
 FFIValue FFIconvertValueToWord 
-(FFIValue v, FFIvars *vars, FFIArena *persistAlloc)
-{ return valuetoword(v, vars->map, persistAlloc); }
+(FFIValue v, FFIvars *vars, FFIArena *persistAlloc, struct Limits *limits)
+{ return valuetoword(v, vars->map, persistAlloc, limits); }
 
 void FFIstdoutPrint 
 (char *msg)
