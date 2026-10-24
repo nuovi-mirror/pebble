@@ -26,15 +26,45 @@ void *FFIreadVariableUnsafe
 
 	void *var = getVar(vars->map, varname);
 
-	/* may return NULL */
+	/* XXX may return NULL */
 	return var;
 }
 
-void *FFIreadVariable /* safer wrapper */
+FFIValue *FFIreadVariable /* safer wrapper */
 (FFIvars *vars, const char *varname)
 {
 	void *uvar = FFIreadVariableUnsafe(vars, varname);
-	if (uvar == NULL) error(errfatal, errcodemalformedinput, "FFI variable does not exist!");
+	if (uvar == NULL) FFIerror(errfatal, errcodemalformedinput, "FFI variable does not exist!");
+
+	/* cannot be null anymore */
+	return uvar;
+}
+
+void *FFIresolvePointerUnsafe 
+(FFIvars *vars, const char *varname, FFIArena *tempAlloc, struct Limits *limits)
+{
+	if (getstrlen(varname) == 0) error(errfatal, errcodemalformedinput, "FFI variable name is empty!");
+	if (getstrlen(varname) > vars->namesize) error(errfatal, errcodelimitreached, "FFI variable name is too long!");
+
+	void *var = getVar(vars->map, varname);
+	if (var == NULL) return NULL;
+
+	char *buffer = FFIallocateMemory(tempAlloc, limits->misc_strlen);
+	FFIValue *value = (FFIValue *)var;
+	FFIconvertValueToString(buffer, limits->misc_strlen, *value, limits);
+
+	void *var2 = getVar(vars->map, buffer);
+	if (var2 == NULL) return NULL;
+
+	/* XXX may return NULL */
+	return var2;
+}
+
+FFIValue *FFIresolvePointer /* safer wrapper */
+(FFIvars *vars, const char *varname, FFIArena *tempAlloc, struct Limits *limits)
+{
+	void *uvar = FFIresolvePointerUnsafe(vars, varname, tempAlloc, limits);
+	if (uvar == NULL) FFIerror(errfatal, errcodemalformedinput, "FFI variable does not exist!");
 
 	/* cannot be null anymore */
 	return uvar;
@@ -49,9 +79,18 @@ FFIValue FFIconvertValueToWord
 { return valuetoword(v, vars->map, persistAlloc, limits); }
 
 void FFIstdoutPrint 
-(char *msg)
+(const char *msg)
 { print(msg); }
 
+void FFIstdoutPrintValue
+(FFIValue *var, FFIArena *tempAlloc, struct Limits *limits)
+{
+	char *buffer = FFIallocateMemory(tempAlloc, limits->misc_strlen);
+	FFIconvertValueToString(buffer, limits->misc_strlen, *var, limits);
+	FFIstdoutPrint(buffer);
+}
+
+/* XXX depreciated */
 void FFIexit 
 (int stat)
 { exitproc(stat); }
@@ -75,5 +114,3 @@ unsigned long long FFImix64
 
 	return x;
 }
-
-

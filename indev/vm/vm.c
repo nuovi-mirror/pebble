@@ -229,7 +229,7 @@ Value resolve_literal
 }
 
 Value resolve_forced_eval 
-(char *buff, unsigned long buffsize, Value *val, VarMap *vars, Arena *tempAlloc, Arena *persistAlloc, limits)
+(char *buff, unsigned long buffsize, Value *val, VarMap *vars, Arena *tempAlloc, Arena *persistAlloc, struct Limits *limits)
 {
 	valuetostr(buff, buffsize, *val, limits);
 	Value *var = getVar(vars, buff);
