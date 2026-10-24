@@ -27,12 +27,15 @@ unsigned int mksrclist (Config *config, char **srcs) {
 	addsrcs(vm_srcs, srcs, &count);
 
 	if (strcmp(config->platform, "freestand") == 0) 
+	{ 
 		addsrcs(platform_freestand_srcs, srcs, &count);
-	else if (strcmp(config->platform, "c") == 0) {
+		strcat(config->cflags, "-Dnoclock ");
+	} else if (strcmp(config->platform, "c") == 0) 
+	{
 		addsrcs(platform_c_srcs, srcs, &count);
 		addsrcs(platform_freestand_srcs, srcs, &count);
 		addsrcs(indrng_srcs, srcs, &count);
-		strcat(config->cflags, "-Dindrng -Dnoinput -Dnosnooze ");
+		strcat(config->cflags, "-Dindrng -Dnoinput -Dnosnooze -Dnoclock ");
 	} else if (strcmp(config->platform, "posix") == 0 ||
 		 strcmp(config->platform, "openbsd") == 0 ||
 		 strcmp(config->platform, "puredarwin") == 0)

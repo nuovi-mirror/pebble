@@ -1,9 +1,9 @@
 #ifndef platform_clockms_
 #define platform_clockms_
 
-#include "clockms.h"
+#define _POSIX_C_SOURCE 200809L /* XXX for Linux */
 
-#define _POSIX_C_SOURCE 200809L
+#include "clockms.h"
 #include <time.h>
 
 unsigned long clockms

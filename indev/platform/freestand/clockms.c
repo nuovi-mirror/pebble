@@ -1,4 +1,4 @@
-#ifndef platform_clockms_
+#ifdef noclock
 #define platform_clockms_
 
 unsigned long clockms

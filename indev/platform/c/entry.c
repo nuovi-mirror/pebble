@@ -153,9 +153,9 @@ struct PackedLimits setlimits
 	limits.instruction_new_destsize = 32;
 	limits.instruction_new_datasize = 32;
 
-	limits.allocator_temp_maxmem = ((32 * 1024 * 1024) + sizeof(struct Arena)); 
-	limits.allocator_persist_maxmem = ((256 * 1024 * 1024) + sizeof(struct Arena));
-	limits.allocator_scratch_maxmem = ((32 * 1024 * 1024) + sizeof(struct Arena));
+	limits.allocator_temp_maxmem = ((4 * 1024 * 1024) + sizeof(struct Arena)); 
+	limits.allocator_persist_maxmem = ((6 * 1024 * 1024) + sizeof(struct Arena));
+	limits.allocator_scratch_maxmem = ((2 * 1024 * 1024) + sizeof(struct Arena));
 	limits.allocator_IRAlloc_maxmem = ((limits.instructions_maxbuffersize) + sizeof(struct Arena));
 	limits.allocator_lalloc_maxretries = 3;
 	limits.tasks_max = 32;
