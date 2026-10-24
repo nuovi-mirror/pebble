@@ -706,6 +706,7 @@ unsigned long interpret
 			switch(instr->FirstOperand.Addressing)
 			{
 				case addrmode_bare:
+				case addrmode_true_literal:
 					valuetostr(task->name, limits->functions_namesize, instr->FirstOperand.Data);
 					break;
 				default:
@@ -713,8 +714,9 @@ unsigned long interpret
 					break;
 			}
 
-			unsigned long entry = resolvefunction(pc, funcs, stack, program, persistAlloc, task->name, instruction_count);
-			task->flag = '\0';
+			unsigned long *entry = getFunc(funcs, task->name);
+			if (entry == NULL) error(errfatal, errcodemalformedinput, "The specified function does not exist!");
+			task->flag[0] = '\0';
 
 			/* second operand is not required */
 			if (!(instr->SecondOperand.Addressing == addrmode_literal && instr->SecondOperand.Data.Type == type_word && instr->SecondOperand.Data.as.word == 0))
@@ -724,6 +726,7 @@ unsigned long interpret
 				switch(instr->SecondOperand.Addressing)
 				{
 					case addrmode_bare:
+					case addrmode_true_literal:
 						valuetostr(task->flag, limits->instructions_varnamesize, instr->SecondOperand.Data);
 						break;
 					default:
@@ -744,24 +747,26 @@ unsigned long interpret
 				*flag = (Value){ .Type = type_word, .as.word = 0 };
 			}
 
-			scheduler_start(task, entry, persistAlloc, limits);
+			scheduler_start(task, *entry, persistAlloc, limits);
 			return pc + 1;
 		}
 
 		case Opcode_Yield:
 		{
 			char *buff = alloc(tempAlloc, limits->instructions_varnamesize);
-			unsigned long ms;
+			unsigned long ms = 0;
 
-			switch(instr->FirstOperand.Addressing)
-			{
-				case addrmode_bare:
-					ms = valuetoword(instr->FirstOperand.Data, vars, persistAlloc).as.word;
-					break;
-				default:
-					error(errfatal, errcodemalformedinput, "Invalid addressing mode!");
-					break;
-			}
+			if (!(instr->FirstOperand.Addressing == addrmode_literal && instr->FirstOperand.Data.Type == type_word && instr->FirstOperand.Data.as.word == 0))
+				switch(instr->FirstOperand.Addressing)
+				{
+					case addrmode_bare:
+					case addrmode_true_literal:
+						ms = valuetoword(instr->FirstOperand.Data, vars, persistAlloc).as.word;
+						break;
+					default:
+						error(errfatal, errcodemalformedinput, "Invalid addressing mode!");
+						break;
+				}
 
 			scheduler_yield(scheduler, ms);
 			return pc + 1;
