@@ -28,11 +28,13 @@ int main
 	limits.instruction_new_destsize = 32;
 	limits.instruction_new_datasize = 32;
 
-	limits.allocator_temp_maxmem = ((8 * 1024 * 1024) + sizeof(struct Arena)); 
-	limits.allocator_persist_maxmem = ((32 * 1024 * 1024) + sizeof(struct Arena));
-	limits.allocator_scratch_maxmem = ((6 * 1024 * 1024) + sizeof(struct Arena));
+	limits.allocator_temp_maxmem = ((32 * 1024 * 1024) + sizeof(struct Arena)); 
+	limits.allocator_persist_maxmem = ((256 * 1024 * 1024) + sizeof(struct Arena));
+	limits.allocator_scratch_maxmem = ((32 * 1024 * 1024) + sizeof(struct Arena));
 	limits.allocator_IRAlloc_maxmem = ((limits.instructions_maxbuffersize) + sizeof(struct Arena));
 	limits.allocator_lalloc_maxretries = 3;
+	limits.tasks_max = 32;
+	limits.tasks_depth = 256;
 
 	char *mem_arena_tempAlloc_backing = lalloc(limits.allocator_temp_maxmem, limits.allocator_lalloc_maxretries);
 	char *mem_arena_scratchAlloc_backing = lalloc(limits.allocator_scratch_maxmem, limits.allocator_lalloc_maxretries);

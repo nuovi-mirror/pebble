@@ -74,9 +74,9 @@ int main
 	limits.tasks_max = 32;
 	limits.tasks_depth = 128;
 
-	limits.allocator_temp_maxmem = ((2 * 1024 * 1024) + sizeof(struct Arena)); 
-	limits.allocator_persist_maxmem = ((6 * 1024 * 1024) + sizeof(struct Arena));
-	limits.allocator_scratch_maxmem = ((2 * 1024 * 1024) + sizeof(struct Arena));
+	limits.allocator_temp_maxmem = ((8 * 1024 * 1024) + sizeof(struct Arena)); 
+	limits.allocator_persist_maxmem = ((32 * 1024 * 1024) + sizeof(struct Arena));
+	limits.allocator_scratch_maxmem = ((8 * 1024 * 1024) + sizeof(struct Arena));
 	limits.allocator_IRAlloc_maxmem = ((limits.instructions_maxbuffersize) + sizeof(struct Arena));
 	limits.allocator_lalloc_maxretries = 3;
 
