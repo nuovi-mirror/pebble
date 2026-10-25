@@ -674,6 +674,7 @@ unsigned long interpret
 		{
 			Task *task = scheduler_claim(scheduler, limits);
 			char *buff = alloc(tempAlloc, limits->functions_namesize);
+			Value temp;
 
 			switch(instr->FirstOperand.Addressing)
 			{
@@ -681,6 +682,23 @@ unsigned long interpret
 				case addrmode_true_literal:
 					valuetostr(task->name, limits->functions_namesize, instr->FirstOperand.Data, limits);
 					break;
+
+				case addrmode_literal:
+					temp = resolve_literal(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
+					valuetostr(task->name, limits->functions_namesize, temp, limits);
+					break;
+
+				case addrmode_forced_eval:
+					temp = resolve_forced_eval(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
+					valuetostr(task->name, limits->functions_namesize, temp, limits);
+					break;
+
+				case addrmode_pointer:
+				case addrmode_indirect:
+					temp = resolve_pointer(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
+					valuetostr(task->name, limits->functions_namesize, temp, limits);
+					break;
+
 				default:
 					error(errfatal, errcodemalformedinput, "Invalid addressing mode!");
 					break;
@@ -694,6 +712,7 @@ unsigned long interpret
 			if (!(instr->SecondOperand.Addressing == addrmode_literal && instr->SecondOperand.Data.Type == type_word && instr->SecondOperand.Data.as.word == 0))
 			{
 				char *fbuff = alloc(tempAlloc, limits->instructions_varnamesize);
+				Value temp;
 
 				switch(instr->SecondOperand.Addressing)
 				{
@@ -701,6 +720,23 @@ unsigned long interpret
 					case addrmode_true_literal:
 						valuetostr(task->flag, limits->instructions_varnamesize, instr->SecondOperand.Data, limits);
 						break;
+
+					case addrmode_literal:
+						temp = resolve_literal(fbuff, limits->instructions_varnamesize, &instr->SecondOperand.Data, vars, tempAlloc, persistAlloc, limits);
+						valuetostr(task->flag, limits->instructions_varnamesize, temp, limits);
+						break;
+
+					case addrmode_forced_eval:
+						temp = resolve_forced_eval(fbuff, limits->instructions_varnamesize, &instr->SecondOperand.Data, vars, tempAlloc, persistAlloc, limits);
+						valuetostr(task->flag, limits->instructions_varnamesize, temp, limits);
+						break;
+
+					case addrmode_pointer:
+					case addrmode_indirect:
+						temp = resolve_pointer(fbuff, limits->instructions_varnamesize, &instr->SecondOperand.Data, vars, tempAlloc, persistAlloc, limits);
+						valuetostr(task->flag, limits->instructions_varnamesize, temp, limits);
+						break;
+
 					default:
 						error(errfatal, errcodemalformedinput, "Invalid addressing mode!");
 						break;
@@ -726,6 +762,7 @@ unsigned long interpret
 		case Opcode_Yield:
 		{
 			char *buff = alloc(tempAlloc, limits->instructions_varnamesize);
+			Value temp;
 			unsigned long ms = 0;
 
 			if (!(instr->FirstOperand.Addressing == addrmode_literal && instr->FirstOperand.Data.Type == type_word && instr->FirstOperand.Data.as.word == 0))
@@ -735,6 +772,23 @@ unsigned long interpret
 					case addrmode_true_literal:
 						ms = valuetoword(instr->FirstOperand.Data, vars, persistAlloc, limits).as.word;
 						break;
+
+					case addrmode_literal:
+						temp = resolve_literal(buff, limits->misc_strlen, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
+						ms = valuetoword(temp, vars, persistAlloc, limits).as.word;
+						break;
+
+					case addrmode_forced_eval:
+						temp = resolve_forced_eval(buff, limits->misc_strlen, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
+						ms = valuetoword(temp, vars, persistAlloc, limits).as.word;
+						break;
+
+					case addrmode_pointer:
+					case addrmode_indirect:
+						temp = resolve_pointer(buff, limits->misc_strlen, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
+						ms = valuetoword(temp, vars, persistAlloc, limits).as.word;
+						break;
+
 					default:
 						error(errfatal, errcodemalformedinput, "Invalid addressing mode!");
 						break;

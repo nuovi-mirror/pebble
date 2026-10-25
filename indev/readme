@@ -60,7 +60,7 @@ Building from source
 		$ ./bin/cpebble tools/test.pebble # test suite one
 		$ ./bin/cpebble tools/test-new.pebble # test suite two
 
-	Plase note for the sdl2 graphics backend, the file sdl2.conf must exist
+	Please note for the sdl2 graphics backend, the file sdl2.conf must exist
 	in the same folder as the resulting binary from the build system. This file
 	should contain two lines; the first should contain the linker flags, and
 	the second the compiler flags, needed to be added for sdl2 to compile. This
@@ -111,3 +111,5 @@ Supported Platforms
 Product of The Nuovi Orizzonti Company
 http://thenuoviorizzonticompany.org
 http://pebblevm.org
+
+LICENSE: http://thenuoviorizzonticompany.org/license/openlicense/latest.txt
