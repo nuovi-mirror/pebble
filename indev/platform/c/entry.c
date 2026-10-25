@@ -129,6 +129,17 @@ unsigned long long getrandom
 #endif
 
 /* helper for default limits values */
+/* measured costs, in bytes. see the notes on how to re-measure them with _GETMEM */
+#define LIMITS_BYTES_PER_LINE 32		/* average line of source */
+#define LIMITS_TEMP_PER_INSTRUCTION 24		/* temp left behind by parsing one line */
+#define LIMITS_TEMP_SLACK (64 * 1024)
+#define LIMITS_PERSIST_FIXED (128 * 1024)	/* hash tables, FFI vars, args, ... */
+#define LIMITS_PERSIST_PER_INSTRUCTION 40	/* operand strings kept by the IR */
+#define LIMITS_PERSIST_PER_CACHED 160		/* an instruction cache entry */
+#define LIMITS_PERSIST_PER_TASK 64		/* task bookkeeping, besides its stack */
+#define LIMITS_PERSIST_DATA (2 * 1024 * 1024)	/* variables, functions, strings made at runtime */
+#define LIMITS_SCRATCH_STRINGS 512
+
 struct PackedLimits setlimits
 (void)
 {
@@ -136,7 +147,15 @@ struct PackedLimits setlimits
 	struct Memory mem = {0};
 	struct PackedLimits packed = {0};
 
-	limits.instructions_max = 500000;
+	/* the knobs: what a program is allowed to be. the arena sizes below are worked 
+	 * out from these, so they cannot disagree with each other. a program that is 
+	 * too big then gets a clear 'cap reached' error, instead of 'Out of memory!' 
+	 * at some arbitrary point. for a small target, lower instructions_max, 
+	 * tasks_max and tasks_depth; everything else follows */
+	limits.instructions_max = 200000;
+	limits.tasks_max = 32;
+	limits.tasks_depth = 256;
+
 	limits.instructions_maxbuffersize = (limits.instructions_max * sizeof(Instruction));
 	limits.instructions_initbuffersize = (512 * sizeof(Instruction));
 	limits.instructions_maxcache = 512;
@@ -156,21 +175,31 @@ struct PackedLimits setlimits
 
 	limits.escapes_namesize = 32;
 
-	limits.misc_maxfilebuffersize = (6 * 1024 * 1024);
+	limits.misc_maxfilebuffersize = (limits.instructions_max * LIMITS_BYTES_PER_LINE);
 	limits.misc_vmargmaxdigits = 2;
 	limits.misc_strlen = limits.cmd_args * limits.cmd_chars;
 
 	limits.instruction_new_destsize = 32;
 	limits.instruction_new_datasize = 32;
 
-	limits.allocator_temp_maxmem = ((4 * 1024 * 1024) + sizeof(struct Arena)); 
-	limits.allocator_persist_maxmem = ((6 * 1024 * 1024) + sizeof(struct Arena));
-	limits.allocator_scratch_maxmem = ((2 * 1024 * 1024) + sizeof(struct Arena));
+	/* temp holds the whole source file while it is parsed, plus what parsing leaves behind */
+	limits.allocator_temp_maxmem = (limits.misc_maxfilebuffersize 
+		+ (limits.instructions_max * LIMITS_TEMP_PER_INSTRUCTION) + LIMITS_TEMP_SLACK + sizeof(struct Arena)); 
+
+	/* persist is never freed. it holds everything a program keeps: what loading it costs, 
+	 * the instruction cache, a stack for every task, and room for its variables, functions 
+	 * and strings. the VM cannot give any of it back, so the sum has to be right */
+	limits.allocator_persist_maxmem = (LIMITS_PERSIST_FIXED 
+		+ (limits.instructions_max * LIMITS_PERSIST_PER_INSTRUCTION)
+		+ (limits.instructions_maxcache * LIMITS_PERSIST_PER_CACHED)
+		+ (limits.tasks_max * ((limits.tasks_depth * sizeof(StackFrame)) + LIMITS_PERSIST_PER_TASK))
+		+ LIMITS_PERSIST_DATA + sizeof(struct Arena));
+
+	/* scratch is reset after every instruction; this many full-size strings is plenty */
+	limits.allocator_scratch_maxmem = ((LIMITS_SCRATCH_STRINGS * limits.misc_strlen) + sizeof(struct Arena));
 	limits.allocator_IRAlloc_maxmem = ((limits.instructions_maxbuffersize) + sizeof(struct Arena));
 	limits.allocator_lalloc_maxretries = 3;
 
-	limits.tasks_max = 32;
-	limits.tasks_depth = 256;
 
 	char *mem_arena_tempAlloc_backing = lalloc(limits.allocator_temp_maxmem, limits.allocator_lalloc_maxretries);
 	char *mem_arena_scratchAlloc_backing = lalloc(limits.allocator_scratch_maxmem, limits.allocator_lalloc_maxretries);

@@ -47,8 +47,6 @@ void escape_std_proc_spawn
 
 	/* parent process */
 
-	FFIValue *packed = FFIallocateMemory(persistAlloc, sizeof(FFIValue));
-	*packed = (FFIValue){ .Type = type_sword, .as.sword = ret };
-
-	FFIallocateVariable(vars, "__Escape_std.proc.spawn_RET0", packed, persistAlloc);
+	FFIsetVariable(vars, "__Escape_std.proc.spawn_RET0", 
+		(FFIValue){ .Type = type_sword, .as.sword = ret }, persistAlloc);
 }

@@ -20,6 +20,7 @@ void *FFIallocateMemory (FFIArena *arena, unsigned long size);
 void FFIallocateVariable (FFIvars *vars, const char *varname, void *value, FFIArena *persistAlloc);
 void *FFIreadVariableUnsafe (FFIvars *vars, const char *varname);
 FFIValue *FFIreadVariable (FFIvars *vars, const char *varname); /* wrapper - aborts instead of returning NULL */
+void FFIsetVariable (FFIvars *vars, const char *varname, FFIValue value, FFIArena *persistAlloc);
 
 void *FFIresolvePointerUnsafe (FFIvars *vars, const char *varname, FFIArena *tempAlloc, struct Limits *limits);
 FFIValue *FFIresolvePointer (FFIvars *vars, const char *varname, FFIArena *tempAlloc, struct Limits *limits);

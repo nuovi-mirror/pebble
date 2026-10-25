@@ -26,13 +26,9 @@ void escape_std_misc_random
 
 	retseed = mix64(retseed ^ 0xB81CAF4C3);
 
-	FFIValue *ret = alloc(persistAlloc, sizeof(FFIValue));
-	*ret = (FFIValue){ .Type = type_word, .as.word = retseed };
+	FFIValue result = { .Type = type_word, .as.word = retseed };
 
-	FFIValue *rseed = alloc(persistAlloc, sizeof(FFIValue));
-	*rseed = (FFIValue){ .Type = type_word, .as.word = retseed };
-
-	FFIallocateVariable(vars, "__Escape_std.misc.random_RET0", ret, persistAlloc);
-	FFIallocateVariable(vars, "__Escape_std.misc.random_seed", rseed, persistAlloc);
+	FFIsetVariable(vars, "__Escape_std.misc.random_RET0", result, persistAlloc);
+	FFIsetVariable(vars, "__Escape_std.misc.random_seed", result, persistAlloc);
 }
 

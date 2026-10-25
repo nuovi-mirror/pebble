@@ -10,8 +10,6 @@ void escape_std_misc_sleep
 
 	unsigned long slept = snooze((unsigned long)time.as.word);
 
-	FFIValue *ret = FFIallocateMemory(persistAlloc, sizeof(FFIValue) + (sizeof(type_word) * 8));
-	*ret = (FFIValue){ .Type = type_word, .as.word = slept };
-
-	FFIallocateVariable(vars, "__Escape_std.misc.sleep_RET0", ret, persistAlloc);
+	FFIsetVariable(vars, "__Escape_std.misc.sleep_RET0", 
+		(FFIValue){ .Type = type_word, .as.word = slept }, persistAlloc);
 }

@@ -539,18 +539,15 @@
 
 
 
-                    - Advanced Programming Tecniques -
+                    - Advanced Programming Techniques -
 
-	Pebble offers many advanced programming tecniques that may not be immediatly obvious from the language
+	Pebble offers many advanced programming techniques that may not be immediately obvious from the language
 	itself. These can be odd or non-intuitive properties of addressing combinations, ordering behaviors,
 	uncommon operations, unusual operator interactions, some combination, or something even less intuitive.
 	Tricks such as these can be incredibly powerful for programmers to know, since they allow the written
-	Pebble code to be shorter, cleaner, faster, smaller, and overall better, or in somce cases, able to
+	Pebble code to be shorter, cleaner, faster, smaller, and overall better, or in some cases, able to
 	express a concept the 'standard' method may not.
 
-	A few of these tricks will be discussed below:
-
-	Dynamic referencing
 		It is possible to perform operations on data whos values cannot be reliably known until
 		runtime or cannot be defined cleanly at compile-time via the expressive operators. Thanks
 		to the Advanced Addressing Extension, addressing across instructions is mostly uniform and
@@ -570,7 +567,7 @@
 		allows the name of the function being called to be dynamic, potentially not known at
 		compile-time. The fact that said addressing modes only evaluate once the marker symbols
 		are found in the opcode, this means the values can change at runtime after I use them
-		without modifcation of the template. I could do something like this
+		without modification of the template. I could do something like this
 
 			Func func0
 			New modifier '1'
@@ -588,5 +585,52 @@
 		the same function. Since the function func0 modifies one of the variables used to create
 		the template, the second Call opcode sees a new value in the variable referenced by the
 		template when it attempts to resolve it, causing the second function, func1, to be called
-		instead. 
+		instead. If we pair this with the RFDE, Recursive Function Definition Extension, which
+		allows one function to define another, then we can create something truly cursed.
 
+			Func define
+			Func {template}
+			_PRINT called
+			End
+			New modifier "modifier + 1"
+			New count "count + 1"
+			_PRINT2 count
+			If define "count < max"
+			End
+			New count '0'
+			New max '3'
+			New template 'func s++ modifier'
+			New modifier '0'
+			Call define
+			Call func2
+
+		This example defines a function, which defines several more functions based on a template.
+		If we wanted to get really fancy, we could create something similar to this, where each
+		function then calls a series of dynamically generated If opcodes based on the value of
+		another variable given to them, with said functions being called by the If opcodes, to have
+		each generated function perform a different operation based on values given to the program
+		when the functions are generated.
+
+		Something similar can be done for variable names; we can define variables whos names are
+		the result of a template using AAE
+
+			New template 'base s++ mod'
+			New base 'var'
+			New mod '0'
+			New {template} '0' / var0 = 0
+
+		We can also do something similar to this with the name of the variable used as a pointer to
+		get the data to place in the generated variable using the [] addressing mode added by the
+		AAE2, Advanced Addressing Extension Two
+
+			New template 'base s++ mod'
+			New template2 'base2 s++ mod'
+			New base 'var'
+			New base2 'val'
+			New mod '0'
+			New {template2} '1' / val0 = 1
+			New {template} [template2] / var0 = 1
+			New mod '1'
+
+		In this example, we generate both the name of the variable and the variable whos data we wish
+		to copy into said variable from templates.

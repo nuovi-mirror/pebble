@@ -291,14 +291,14 @@ unsigned long interpret
 				case addrmode_literal: 
 				{
 					char *buf = alloc(tempAlloc, limits->instructions_varnamesize);
-					val = resolve_literal(buf, limits->instructions_varnamesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
+					val = resolve_literal(buf, limits->instructions_varnamesize, &instr->FirstOperand.Data, vars, tempAlloc, tempAlloc, limits);
 					valuetostr(dest, limits->instructions_varnamesize, val, limits);
 					break;
 				}
 				case addrmode_forced_eval: 
 				{
 					char *buf = alloc(tempAlloc, limits->instructions_varnamesize);
-					val = resolve_forced_eval(buf, limits->instructions_varnamesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
+					val = resolve_forced_eval(buf, limits->instructions_varnamesize, &instr->FirstOperand.Data, vars, tempAlloc, tempAlloc, limits);
 					valuetostr(dest, limits->instructions_varnamesize, val, limits);
 					break;
 				}
@@ -355,16 +355,25 @@ unsigned long interpret
 
 				case addrmode_pointer: 
 				{
-					char *buff = alloc(persistAlloc, limits->instructions_varnamesize);
-					valuetostr(buff, limits->instructions_varnamesize, instr->SecondOperand.Data, limits);
-					val = (Value){ .Type = type_str, .as.str = buff };
+					/* a string operand already lives in persistent memory, in the IR, so 
+					 * there is nothing to copy. only a non-string (eg. the word in <5>) 
+					 * needs a persistent string made for it */
+					if (instr->SecondOperand.Data.Type == type_str) val = instr->SecondOperand.Data;
+					else 
+					{
+						char *buff = alloc(persistAlloc, limits->instructions_varnamesize);
+						valuetostr(buff, limits->instructions_varnamesize, instr->SecondOperand.Data, limits);
+						val = (Value){ .Type = type_str, .as.str = buff };
+					}
+
 					break;
 				}
 
 				case addrmode_indirect: 
 				{
-					char *buff1 = alloc(persistAlloc, limits->instructions_varnamesize);
-					char *buff2 = alloc(persistAlloc, limits->instructions_varnamesize);
+					/* only used for the two lookups; the result does not point at them */
+					char *buff1 = alloc(scratchAlloc, limits->instructions_varnamesize);
+					char *buff2 = alloc(scratchAlloc, limits->instructions_varnamesize);
 
 					Value ref = resolve_pointer(buff1, limits->instructions_varnamesize, &instr->SecondOperand.Data, vars, tempAlloc, persistAlloc, limits);
 					val = resolve_pointer(buff2, limits->instructions_varnamesize, &ref, vars, tempAlloc, persistAlloc, limits);
@@ -398,8 +407,10 @@ unsigned long interpret
 
 		case Opcode_Func: 
 		{
-			char *funcname = alloc(persistAlloc, limits->functions_namesize);
-			unsigned long *lpc = alloc(persistAlloc, 64);
+			/* names, conditions and the like are only needed for this one instruction, so
+			 * what evaluating them allocates goes on tempAlloc and not persistAlloc. only a
+			 * value that a variable keeps (the second operand of New) needs to persist */
+			char *funcname = alloc(scratchAlloc, limits->functions_namesize);
 			
 			switch (instr->FirstOperand.Addressing) 
 			{
@@ -413,7 +424,7 @@ unsigned long interpret
 				case addrmode_literal: 
 				{
 					char *buff = alloc(scratchAlloc, limits->functions_namesize);
-					Value vptr = resolve_literal(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
+					Value vptr = resolve_literal(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, tempAlloc, limits);
 					valuetostr(funcname, limits->functions_namesize, vptr, limits);
 					break;
 				}
@@ -421,7 +432,7 @@ unsigned long interpret
 				case addrmode_forced_eval: 
 				{
 					char *buff = alloc(scratchAlloc, limits->functions_namesize);
-					Value vptr = resolve_forced_eval(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
+					Value vptr = resolve_forced_eval(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, tempAlloc, limits);
 					valuetostr(funcname, limits->functions_namesize, vptr, limits);
 					break;
 				}
@@ -440,8 +451,20 @@ unsigned long interpret
 					break;
 			}
 
-			*lpc = pc + 1; /* since we are on the func instruction */
-			putFunc(funcs, funcname, lpc, persistAlloc); /* place the function onto the index */
+			/* redefining a function (eg. a dynamic name that comes round again) only 
+			 * moves its entry point; only a new name needs persistent memory */
+			unsigned long *known = getFunc(funcs, funcname);
+
+			if (known != NULL) *known = pc + 1; /* since we are on the func instruction */
+			else 
+			{
+				char *key = alloc(persistAlloc, getstrlen(funcname) + 1);
+				copystr(funcname, key);
+				unsigned long *lpc = alloc(persistAlloc, sizeof(unsigned long));
+				*lpc = pc + 1;
+				putFunc(funcs, key, lpc, persistAlloc); /* place the function onto the index */
+			}
+
 			return findend(program, instruction_count, pc) + 1; /* find the End statement */
 			break;
 		}
@@ -461,7 +484,7 @@ unsigned long interpret
 				case addrmode_literal: 
 				{
 					char *buff = alloc(scratchAlloc, limits->functions_namesize);
-					Value vptr = resolve_literal(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
+					Value vptr = resolve_literal(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, tempAlloc, limits);
 					valuetostr(funcname, limits->functions_namesize, vptr, limits);
 					break;
 				}
@@ -469,7 +492,7 @@ unsigned long interpret
 				case addrmode_forced_eval: 
 				{
 					char *buff = alloc(scratchAlloc, limits->functions_namesize);
-					Value vptr = resolve_forced_eval(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
+					Value vptr = resolve_forced_eval(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, tempAlloc, limits);
 					valuetostr(funcname, limits->functions_namesize, vptr, limits);
 					break;
 				}
@@ -500,14 +523,14 @@ unsigned long interpret
 				case addrmode_literal: 
 				{
 					char *buff = alloc(tempAlloc, limits->functions_namesize);
-					result = resolve_literal(buff, limits->functions_namesize, &instr->SecondOperand.Data, vars, tempAlloc, persistAlloc, limits);
+					result = resolve_literal(buff, limits->functions_namesize, &instr->SecondOperand.Data, vars, tempAlloc, tempAlloc, limits);
 					break;
 				}
 
 				case addrmode_forced_eval: 
 				{
 					char *buff = alloc(tempAlloc, limits->functions_namesize);
-					result = resolve_forced_eval(buff, limits->functions_namesize, &instr->SecondOperand.Data, vars, tempAlloc, persistAlloc, limits);
+					result = resolve_forced_eval(buff, limits->functions_namesize, &instr->SecondOperand.Data, vars, tempAlloc, tempAlloc, limits);
 					break;
 				}
 
@@ -517,14 +540,14 @@ unsigned long interpret
 				case addrmode_pointer: 
 				{
 					char *buff = alloc(tempAlloc, limits->functions_namesize);
-					result = resolve_forced_eval(buff, limits->functions_namesize, &instr->SecondOperand.Data, vars, tempAlloc, persistAlloc, limits);
+					result = resolve_forced_eval(buff, limits->functions_namesize, &instr->SecondOperand.Data, vars, tempAlloc, tempAlloc, limits);
 					break;
 				}
 
 				case addrmode_indirect: 
 				{
 					char *buff = alloc(tempAlloc, limits->functions_namesize);
-					result = resolve_forced_eval(buff, limits->functions_namesize, &instr->SecondOperand.Data, vars, tempAlloc, persistAlloc, limits);
+					result = resolve_forced_eval(buff, limits->functions_namesize, &instr->SecondOperand.Data, vars, tempAlloc, tempAlloc, limits);
 					break;
 				}
 
@@ -564,7 +587,7 @@ unsigned long interpret
 				case addrmode_literal: 
 				{
 					char *buff = alloc(scratchAlloc, limits->functions_namesize);
-					Value val = resolve_literal(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
+					Value val = resolve_literal(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, tempAlloc, limits);
 					valuetostr(funcname, limits->functions_namesize, val, limits);
 					break;
 				}
@@ -572,7 +595,7 @@ unsigned long interpret
 				case addrmode_forced_eval: 
 				{
 					char *buff = alloc(tempAlloc, limits->functions_namesize);
-					Value val = resolve_forced_eval(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
+					Value val = resolve_forced_eval(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, tempAlloc, limits);
 					valuetostr(funcname, limits->functions_namesize, val, limits);
 					break;
 				}
@@ -632,7 +655,7 @@ unsigned long interpret
 				case addrmode_literal: 
 				{
 					char *buff = alloc(tempAlloc, limits->escapes_namesize);
-					Value val = resolve_literal(buff, limits->escapes_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
+					Value val = resolve_literal(buff, limits->escapes_namesize, &instr->FirstOperand.Data, vars, tempAlloc, tempAlloc, limits);
 					valuetostr(name, limits->escapes_namesize, val, limits);
 					break;
 				}
@@ -640,7 +663,7 @@ unsigned long interpret
 				case addrmode_forced_eval: 
 				{
 					char *buff = alloc(tempAlloc, limits->escapes_namesize);
-					Value val = resolve_forced_eval(buff, limits->escapes_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
+					Value val = resolve_forced_eval(buff, limits->escapes_namesize, &instr->FirstOperand.Data, vars, tempAlloc, tempAlloc, limits);
 					valuetostr(name, limits->escapes_namesize, val, limits);
 					break;
 				}
@@ -684,12 +707,12 @@ unsigned long interpret
 					break;
 
 				case addrmode_literal:
-					temp = resolve_literal(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
+					temp = resolve_literal(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, tempAlloc, limits);
 					valuetostr(task->name, limits->functions_namesize, temp, limits);
 					break;
 
 				case addrmode_forced_eval:
-					temp = resolve_forced_eval(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
+					temp = resolve_forced_eval(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, tempAlloc, limits);
 					valuetostr(task->name, limits->functions_namesize, temp, limits);
 					break;
 
@@ -722,12 +745,12 @@ unsigned long interpret
 						break;
 
 					case addrmode_literal:
-						temp = resolve_literal(fbuff, limits->instructions_varnamesize, &instr->SecondOperand.Data, vars, tempAlloc, persistAlloc, limits);
+						temp = resolve_literal(fbuff, limits->instructions_varnamesize, &instr->SecondOperand.Data, vars, tempAlloc, tempAlloc, limits);
 						valuetostr(task->flag, limits->instructions_varnamesize, temp, limits);
 						break;
 
 					case addrmode_forced_eval:
-						temp = resolve_forced_eval(fbuff, limits->instructions_varnamesize, &instr->SecondOperand.Data, vars, tempAlloc, persistAlloc, limits);
+						temp = resolve_forced_eval(fbuff, limits->instructions_varnamesize, &instr->SecondOperand.Data, vars, tempAlloc, tempAlloc, limits);
 						valuetostr(task->flag, limits->instructions_varnamesize, temp, limits);
 						break;
 
@@ -774,12 +797,12 @@ unsigned long interpret
 						break;
 
 					case addrmode_literal:
-						temp = resolve_literal(buff, limits->misc_strlen, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
+						temp = resolve_literal(buff, limits->misc_strlen, &instr->FirstOperand.Data, vars, tempAlloc, tempAlloc, limits);
 						ms = valuetoword(temp, vars, persistAlloc, limits).as.word;
 						break;
 
 					case addrmode_forced_eval:
-						temp = resolve_forced_eval(buff, limits->misc_strlen, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
+						temp = resolve_forced_eval(buff, limits->misc_strlen, &instr->FirstOperand.Data, vars, tempAlloc, tempAlloc, limits);
 						ms = valuetoword(temp, vars, persistAlloc, limits).as.word;
 						break;
 

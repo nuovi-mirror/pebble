@@ -19,20 +19,18 @@ void escape_std_proc_wait
 	/* wait on the child process */
 	if (waitpid(pid, &status, 0) == -1) FFIerror(errfatal, errcodegeneric, "Cannot waitpid(2)!\n");
 
-	FFIValue *exitmarker = FFIallocateMemory(persistAlloc, sizeof(FFIValue));
-	FFIValue *exitcode = FFIallocateMemory(persistAlloc, sizeof(FFIValue));
+	FFIValue exitmarker, exitcode;
 
 	if (WIFSIGNALED(status)) /* killed by a signal */
 	{
-		*exitmarker = (FFIValue){ .Type = type_word, .as.word = 0 }; /* killed with signal */
-		*exitcode = (FFIValue){ .Type = type_sword, .as.sword = WTERMSIG(status) }; /* exit signal */
-		FFIallocateVariable(vars, "__Escape_std.proc.wait_RET0", exitcode, persistAlloc);
-		FFIallocateVariable(vars, "__Escape_std.proc.wait_RET1", exitmarker, persistAlloc);
+		exitmarker = (FFIValue){ .Type = type_word, .as.word = 0 }; /* killed with signal */
+		exitcode = (FFIValue){ .Type = type_sword, .as.sword = WTERMSIG(status) }; /* exit signal */
 	} else /* normal exit */ 
 	{
-		*exitmarker = (FFIValue){ .Type = type_word, .as.word = 1 }; /* not killed with signal */
-		*exitcode = (FFIValue){ .Type = type_sword, .as.sword = WEXITSTATUS(status) }; /* exit status */
-		FFIallocateVariable(vars, "__Escape_std.proc.wait_RET0", exitcode, persistAlloc);
-		FFIallocateVariable(vars, "__Escape_std.proc.wait_RET1", exitmarker, persistAlloc);
+		exitmarker = (FFIValue){ .Type = type_word, .as.word = 1 }; /* not killed with signal */
+		exitcode = (FFIValue){ .Type = type_sword, .as.sword = WEXITSTATUS(status) }; /* exit status */
 	}
+
+	FFIsetVariable(vars, "__Escape_std.proc.wait_RET0", exitcode, persistAlloc);
+	FFIsetVariable(vars, "__Escape_std.proc.wait_RET1", exitmarker, persistAlloc);
 }

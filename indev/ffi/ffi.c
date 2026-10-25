@@ -40,6 +40,25 @@ FFIValue *FFIreadVariable /* safer wrapper */
 	return uvar;
 }
 
+/* set a variable to a value, eg. an escape's return value. Values are copied by value, 
+ * so if the variable already exists it is updated in place. allocating a new one on every 
+ * call would eat the persistent arena, which is never freed */
+void FFIsetVariable 
+(FFIvars *vars, const char *varname, FFIValue value, FFIArena *persistAlloc)
+{
+	FFIValue *existing = FFIreadVariableUnsafe(vars, varname);
+
+	if (existing != NULL) 
+	{
+		*existing = value;
+		return;
+	}
+
+	FFIValue *created = FFIallocateMemory(persistAlloc, sizeof(FFIValue));
+	*created = value;
+	FFIallocateVariable(vars, varname, created, persistAlloc);
+}
+
 void *FFIresolvePointerUnsafe 
 (FFIvars *vars, const char *varname, FFIArena *tempAlloc, struct Limits *limits)
 {
