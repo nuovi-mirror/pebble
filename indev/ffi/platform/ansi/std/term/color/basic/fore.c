@@ -3,17 +3,12 @@
 #include "cmpstr.h"
 #include "copystr.h"
 
-void escape_std_term_color_basic_fore (FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc,
-	FFIArena *tempAlloc, FFIArena *persistAlloc, struct Limits *limits)
+void escape_std_term_color_basic_fore 
+(FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc, FFIArena *tempAlloc, FFIArena *persistAlloc, struct Limits *limits)
 {
-	char *ptrbuff = FFIallocateMemory(tempAlloc, limits->instructions_varnamesize);
 	char *msgbuff = FFIallocateMemory(tempAlloc, limits->instructions_varnamesize);
-
-	FFIValue *ptr = FFIreadVariable(vars, "__Escape_std.term.color.basic.fore_ARG0");
-	FFIconvertValueToString(ptrbuff, limits->instructions_varnamesize, *ptr);
-
-	FFIValue *msg = FFIreadVariable(vars, ptrbuff);
-	FFIconvertValueToString(msgbuff, limits->instructions_varnamesize, *msg);
+	FFIValue *msg = FFIresolvePointer(vars, "__Escape_std.term.color.basic.fore_ARG0", tempAlloc, limits);
+	FFIconvertValueToString(msgbuff, limits->instructions_varnamesize, *msg, limits);
 
 	/* XXX very unoptimized, but optmizing this is just not worth it */
 

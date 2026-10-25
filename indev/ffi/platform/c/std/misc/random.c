@@ -13,15 +13,14 @@ static unsigned long mix64
 	return x;
 }
 void escape_std_misc_random 
-(FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc, FFIArena *tempAlloc, 
- FFIArena *persistAlloc, struct Limits *limits)
+(FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc, FFIArena *tempAlloc, FFIArena *persistAlloc, struct Limits *limits)
 {
 	unsigned long long retseed;
 
 	FFIValue *ptr = FFIreadVariableUnsafe(vars, "__Escape_std.misc.random_seed");
 	
 	if (ptr != NULL) {
-		FFIValue v = FFIconvertValueToWord(*ptr, vars, persistAlloc);
+		FFIValue v = FFIconvertValueToWord(*ptr, vars, persistAlloc, limits);
 		retseed = (unsigned long long)v.as.word;
 	} else retseed = seed;
 

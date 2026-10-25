@@ -3,27 +3,21 @@
 #include "findchar.h"
 #include <unistd.h>
 
-#define argcount 32
-
-void escape_std_proc_spawn (FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc,
-	FFIArena *tempAlloc, FFIArena *persistAlloc, struct Limits *limits)
+void escape_std_proc_spawn 
+(FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc, FFIArena *tempAlloc, FFIArena *persistAlloc, struct Limits *limits)
 {
-	char *ptrbuff = FFIallocateMemory(tempAlloc, limits->instructions_varnamesize);
-	char *msgbuff = FFIallocateMemory(tempAlloc, limits->instructions_varnamesize);
-
-	FFIValue *ptr = FFIreadVariable(vars, "__Escape_std.proc.spawn_ARG0");
-	FFIconvertValueToString(ptrbuff, limits->instructions_varnamesize, *ptr);
-	FFIValue *msg = FFIreadVariable(vars, ptrbuff);
-	FFIconvertValueToString(msgbuff, limits->instructions_varnamesize, *msg);
+	char *procs = FFIallocateMemory(tempAlloc, limits->cmd_args * limits->cmd_chars);
+	FFIValue *procv = FFIresolvePointer(vars, "__Escape_std.proc.spawn_ARG0", tempAlloc, limits);
+	FFIconvertValueToString(procs, limits->misc_strlen, *procv, limits);
 	
-	char *args[argcount] = { NULL };
-	char *current = msgbuff;
+	char *args = FFIallocateMemory(tempAlloc, limits->cmd_args * limits->cmd_chars);
+	char *current = procs;
 	unsigned long i = 0;
 
 	/* parse the arguments */
-	while (i < argcount - 1 && current != NULL)
+	while (i < limits->cmd_args - 1 && current != NULL)
 	{
-		args[i++] = current;
+		args[i++] = *current;
 		char *space = findchar(current, ' ');
 
 		if (space == NULL) break;
@@ -38,19 +32,15 @@ void escape_std_proc_spawn (FFIvars *vars, unsigned long long seed, FFIArena *sc
 	pid_t rproc = fork();
 	int ret = -1; /* err by default */
 
-	if (rproc < 0)
-	{
-		/* fork failed */
-		FFIstdoutPrint("ERROR: FFI std.proc.spawn: CANNOT RUN fork(2) (POSIX build)!\n");
-		FFIexit(1);
+	if (rproc < 0) FFIerror(errfatal, errcodeplatformspecific, "Cannot fork(2)!");
+
 	/* child process */
-	} else if (rproc == 0)
+	else if (rproc == 0)
 	{
-		execvp(args[0], args);
+		execvp(&args[0], &args);
 
 		/* only reached if execvp(3) failed */
-		FFIstdoutPrint("ERROR: FFI std.proc.spawn: CANNOT RUN execvp(3) (POSIX build)!\n");
-		FFIexit(1);
+		FFIerror(errfatal, errcodeplatformspecific, "Cannot run execvp(3)!");
 	} else ret = rproc; /* also parent process */
 
 	/* parent process */

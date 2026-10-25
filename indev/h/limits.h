@@ -32,6 +32,11 @@ struct Limits {
 	/* variable-related */
 	unsigned long variables_max; /* max number of variables at a time */
 
+	/* process related */
+	unsigned long cmd_args; /* max number of args when spawning a process */
+	unsigned long cmd_chars; /* chars per argument */
+
+	/* FFI related */
 	unsigned long escapes_namesize; /* max chars for an escape name */
 
 	/* misc */

@@ -10,6 +10,7 @@
 #include "main.h"
 #include "snprint.h"
 #include "str2ul.h"
+#include "str2l.h"
 #include "variables.h"
 #include "limits.h"
 
@@ -40,7 +41,8 @@ int valuetostr
 	}
 }
 
-Value valuetoword (Value v, VarMap *vars, Arena *persistAlloc, struct Limits *limits)
+Value valuetoword 
+(Value v, VarMap *vars, Arena *persistAlloc, struct Limits *limits)
 {
 	switch (v.Type) {
 		case type_word: return v;
@@ -51,6 +53,21 @@ Value valuetoword (Value v, VarMap *vars, Arena *persistAlloc, struct Limits *li
 		case type_pointer: return (struct Value){ .Type = type_word, .as.word = 0 };
 		case type_expr: return evalexprnode(v.as.expr, vars, persistAlloc, limits);
 		default: return (struct Value){ .Type = type_word, .as.word = 0 }; /* should never be hit */
+	}
+}
+
+Value valuetosword 
+(Value v, VarMap *vars, Arena *persistAlloc, struct Limits *limits)
+{
+	switch (v.Type) {
+		case type_sword: return v;
+		case type_word: return (struct Value){ .Type = type_sword, .as.sword = (long)v.as.sword };
+		case type_flt: return (struct Value){ .Type = type_sword, .as.sword = (long)v.as.flt };
+		case type_str: return (struct Value){ .Type = type_sword, .as.sword = str2l(v.as.str, NULL, 10) };
+		case type_null: return (struct Value){ .Type = type_sword, .as.sword = 0 };
+		case type_pointer: return (struct Value){ .Type = type_sword, .as.sword = 0 };
+		case type_expr: return evalexprnode(v.as.expr, vars, persistAlloc, limits);
+		default: return (struct Value){ .Type = type_sword, .as.sword = 0 }; /* should never be hit */
 	}
 }
 

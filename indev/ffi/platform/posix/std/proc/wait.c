@@ -8,15 +8,12 @@
  * RET0 - either the signal it was killed with or the exit status 
  * RET1 - 0 if it was killed with a signal, 1 if not */
 
-void escape_std_proc_wait (FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc,
-	FFIArena *tempAlloc, FFIArena *persistAlloc, struct Limits *limits)
+void escape_std_proc_wait 
+(FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc, FFIArena *tempAlloc, FFIArena *persistAlloc, struct Limits *limits)
 {
-	char *ptrbuff = FFIallocateMemory(tempAlloc, limits->instructions_varnamesize);
-	FFIValue *ptr = FFIreadVariable(vars, "__Escape_std.proc.wait_ARG0");
-	FFIconvertValueToString(ptrbuff, limits->instructions_varnamesize, *ptr);
-	FFIValue *msg = FFIreadVariable(vars, ptrbuff);
-
-	int pid = (int)msg->as.sword;
+	FFIValue *msg = FFIresolvePointer(vars, "__Escape_std.proc.wait_ARG0", tempAlloc, limits);
+	FFIValue vpid = FFIconvertValueToSword(*msg, vars, persistAlloc, limits);
+	int pid = (int)vpid.as.sword;
 	int status;
 
 	/* wait on the child process */

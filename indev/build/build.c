@@ -51,6 +51,7 @@ const char *platform_c_srcs[] = {
 	"platform/c/print.c",
 	"platform/c/readfile.c",
 	"platform/c/str2ul.c",
+	"platform/c/str2l.c",
 	"platform/c/str2d.c",
 	"platform/c/snprint.c",
 	"platform/c/findchar.c",

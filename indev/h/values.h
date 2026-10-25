@@ -32,6 +32,7 @@ typedef struct Value {
 
 int valuetostr (char *buff, unsigned long buffsize, Value v, struct Limits *limits);
 Value valuetoword (Value v, VarMap *vars, Arena *persistAlloc, struct Limits *limits);
+Value valuetosword (Value v, VarMap *vars, Arena *persistAlloc, struct Limits *limits);
 Value guessvaluetype (char *data, Arena *persistAlloc);
 
 #endif

@@ -151,11 +151,14 @@ struct PackedLimits setlimits
 
 	limits.variables_max = 512;
 
+	limits.cmd_args = 8;
+	limits.cmd_chars = 64;
+
 	limits.escapes_namesize = 32;
 
 	limits.misc_maxfilebuffersize = (6 * 1024 * 1024);
 	limits.misc_vmargmaxdigits = 2;
-	limits.misc_strlen = 128;
+	limits.misc_strlen = limits.cmd_args * limits.cmd_chars;
 
 	limits.instruction_new_destsize = 32;
 	limits.instruction_new_datasize = 32;
@@ -165,6 +168,7 @@ struct PackedLimits setlimits
 	limits.allocator_scratch_maxmem = ((2 * 1024 * 1024) + sizeof(struct Arena));
 	limits.allocator_IRAlloc_maxmem = ((limits.instructions_maxbuffersize) + sizeof(struct Arena));
 	limits.allocator_lalloc_maxretries = 3;
+
 	limits.tasks_max = 32;
 	limits.tasks_depth = 256;
 

@@ -26,6 +26,7 @@ FFIValue *FFIresolvePointer (FFIvars *vars, const char *varname, FFIArena *tempA
 
 int FFIconvertValueToString (char *buff, unsigned long buffsize, FFIValue v, struct Limits *limits);
 FFIValue FFIconvertValueToWord (FFIValue v, FFIvars *vars, FFIArena *persistAlloc, struct Limits *limits);
+FFIValue FFIconvertValueToSword (FFIValue v, FFIvars *vars, FFIArena *persistAlloc, struct Limits *limits);
 
 void FFIstdoutPrint (const char *msg);
 void FFIstdoutPrintValue (FFIValue *var, FFIArena *tempAlloc, struct Limits *limits);

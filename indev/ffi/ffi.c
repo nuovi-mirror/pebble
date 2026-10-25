@@ -78,6 +78,10 @@ FFIValue FFIconvertValueToWord
 (FFIValue v, FFIvars *vars, FFIArena *persistAlloc, struct Limits *limits)
 { return valuetoword(v, vars->map, persistAlloc, limits); }
 
+FFIValue FFIconvertValueToSword 
+(FFIValue v, FFIvars *vars, FFIArena *persistAlloc, struct Limits *limits)
+{ return valuetosword(v, vars->map, persistAlloc, limits); }
+
 void FFIstdoutPrint 
 (const char *msg)
 { print(msg); }
