@@ -21,6 +21,15 @@
 
 
 
+
+
+
+
+
+
+
+                    - Introduction -
+
 	The Pebble Virtual Machine is the first attempt at an implementation of the Expressive Instruction
 	set Computing model (EISC). Pebble should be considered the canonical or reference implementation
 	of the EISC computing model and what a good demonstration of an ISA designed around the EISC
@@ -82,6 +91,10 @@
 	constraints that traditional ISAs do? Pebble explores a model where the freedoms software has are
 	available inside of the ISA in itself directly and to explore what a model where software flexibility
 	as a default may look like.
+
+
+
+                    - Pebble -
 
 	Pebble is not a stack machine, nor is it a register machine. Pebble acts internally on named values
 	which are dynamically typed and variable in size. In Pebble, there are only seven instructions. These
@@ -318,6 +331,8 @@
 	library are stable, but the implementation of the FFI, it's interface and the FFI code itself is
 	specific to the implementation of the virtual machine itself. 
 
+                    - New Rock -
+
 	New Rock is a modern dialect of the Rock language (which is actually older than CPebble itself, since it
 	was first described for the Zig version of the virtual machine that is now deprecated) designed to express
 	the capabilities introduced by the Advanced Addressing Extension more explicitly, as well as to be a more
@@ -471,7 +486,7 @@
 
 
 
-
+                    - The Pebble Standard Library (stdpbl) - 
 
 	The Pebble standard library is a set of functions registered as Escape sequences in the Pebble Virtual
 	Machine used for providing common host access functions and routines. These routines are implementation-
@@ -520,3 +535,58 @@
 	being the operating system-specific identifier of the process to wait on. It returns two values, the
 	first being either the exit code the process spawned returned if the second return value is 1, or the
 	signal it was killed with if it was killed with a signal, in which case the second return will be 0.
+
+
+
+
+                    - Advanced Programming Tecniques -
+
+	Pebble offers many advanced programming tecniques that may not be immediatly obvious from the language
+	itself. These can be odd or non-intuitive properties of addressing combinations, ordering behaviors,
+	uncommon operations, unusual operator interactions, some combination, or something even less intuitive.
+	Tricks such as these can be incredibly powerful for programmers to know, since they allow the written
+	Pebble code to be shorter, cleaner, faster, smaller, and overall better, or in somce cases, able to
+	express a concept the 'standard' method may not.
+
+	A few of these tricks will be discussed below:
+
+	Dynamic referencing
+		It is possible to perform operations on data whos values cannot be reliably known until
+		runtime or cannot be defined cleanly at compile-time via the expressive operators. Thanks
+		to the Advanced Addressing Extension, addressing across instructions is mostly uniform and
+		most data can be supplied at runtime. The data supplied can be the result of things such
+		as a reference, and expression, and so on. Using the {} and "" addressing syntax, I can
+		define variables and functions whos names are not known until runtime or may be the result
+		of a template or expression. This is a form of metaprogramming, since the expression's result
+		is used to construct the name.
+
+			New template 'base s++ modifier1 s++ modifier2'
+			New base 'func'
+			New modifier1 '0'
+			New modifier2 '1'
+			Call {template}
+
+		The template itself is known at compile-time, but the substituted values are not. This
+		allows the name of the function being called to be dynamic, potentially not known at
+		compile-time. The fact that said addressing modes only evaluate once the marker symbols
+		are found in the opcode, this means the values can change at runtime after I use them
+		without modifcation of the template. I could do something like this
+
+			Func func0
+			New modifier '1'
+			End
+			Func func1
+			New result '2'
+			End
+			New template 'base s++ modifier'
+			New base 'func'
+			New modifier '0'
+			Call {template}
+			Call {template}
+
+		Although the two source-code lines using the template are the same, they are not calling
+		the same function. Since the function func0 modifies one of the variables used to create
+		the template, the second Call opcode sees a new value in the variable referenced by the
+		template when it attempts to resolve it, causing the second function, func1, to be called
+		instead. 
+

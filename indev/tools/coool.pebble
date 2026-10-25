@@ -1,0 +1,15 @@
+Func define
+New modifier "modifier + 1"
+Func {template}
+New x '1'
+End
+New count "count + 1"
+_PRINT2 count
+If define "count < max"
+End
+New count '0'
+New max '3'
+New template 'func s++ modfier'
+New modifier '0'
+Call define
+Call func2
