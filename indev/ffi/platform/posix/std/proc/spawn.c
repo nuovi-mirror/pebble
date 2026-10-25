@@ -10,23 +10,25 @@ void escape_std_proc_spawn
 	FFIValue *procv = FFIresolvePointer(vars, "__Escape_std.proc.spawn_ARG0", tempAlloc, limits);
 	FFIconvertValueToString(procs, limits->misc_strlen, *procv, limits);
 	
-	char *args = FFIallocateMemory(tempAlloc, limits->cmd_args * limits->cmd_chars);
+	char **args = FFIallocateMemory(tempAlloc, limits->cmd_args * sizeof(char));
 	char *current = procs;
-	unsigned long i = 0;
+	unsigned long argc = 0;
 
 	/* parse the arguments */
-	while (i < limits->cmd_args - 1 && current != NULL)
+	while (*current != NULL && argc < limits->cmd_args)
 	{
-		args[i++] = *current;
-		char *space = findchar(current, ' ');
+		while (*current == ' ') current++;
+		if (*current == '\0') break;
 
+		args[argc++] = current;
+		char *space = findchar(current, ' ');
 		if (space == NULL) break;
+
 		*space = '\0';
 		current = space + 1;
-
-		/* skip many spaces */
-		while (*current == ' ') current++;
 	}
+
+	args[argc] = NULL;
 
 
 	pid_t rproc = fork();
@@ -37,7 +39,7 @@ void escape_std_proc_spawn
 	/* child process */
 	else if (rproc == 0)
 	{
-		execvp(&args[0], &args);
+		execvp(args[0], args);
 
 		/* only reached if execvp(3) failed */
 		FFIerror(errfatal, errcodeplatformspecific, "Cannot run execvp(3)!");
