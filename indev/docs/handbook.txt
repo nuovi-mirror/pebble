@@ -331,6 +331,126 @@
 	library are stable, but the implementation of the FFI, it's interface and the FFI code itself is
 	specific to the implementation of the virtual machine itself. 
 
+
+
+                    - Task Management Extension -
+
+	The Task Management Extension (TME) is a vm-level extension that ties deep into how execution works.
+	This is the only current extension that added new opcodes to the Bytecode Two specification. The
+	extension defines what is known as a 'task', which is a Pebble function routine with it's own call
+	stack independent of the main program, which is in itself also a task, being task 0 or the 'main' task,
+	which can be scheduled by the vm scheduler. This allows for basic multitasking within the virtual machine.
+
+	Two new opcodes are added by this extension; Spawn and Yield. Spawn is used to create a new task and Yield
+	being used to request the scheduler determine which task to run. The scheduler is allowed to use whatever
+	algorithm it wishes to use to determine what task should run when, but it must respect the Yield
+	instruction and not choose to run the same task as the one requesting the yield.
+
+	The Spawn opcode accepts two operands, one of them being optional. The first operand is to be the name of
+	the function to create the new task in, and the second being the variable to modify when the created task
+	has finished. Spawn does not immediately run the task, but instead creates a task that is ready to be ran.
+	If the second operand is not present, no variable will be modified at the end of the task. The variable is
+	modified when the function representing the task returns for said task, not when the task calls a function
+	or itself requests a yield. A task is explicitly allowed to call a function and request a yield, but once
+	the initial function used to create said task returns, the scheduler is allowed to decide who gets to run
+	next. For the first operand, the addressing mode True Literal is treated as the literal name of the
+	function to initialize the task with. This is also true for the Bare addressing mode. The Literal addressing
+	mode is used to inline an expression whos result is the name of the initial function to use for the task.
+	The Forced Evaluation addressing mode is used as a pointer to an expression whos result will be used as
+	the initial function for the task. The Pointer addressing mode is used to represent a variable whos name
+	contains the initial function for the task. The data in said variable will be used as the name of the
+	initial function for the task. The Indirect addressing mode is treated the same.
+
+	The second operand accepts the same addressing modes as the first, but this operand is used to represent
+	the variable to modify when the task completes. Completion is defined as when the initial function of
+	the task returns. All addressing modes for this operand are the same as the previous, except for the
+	fact that the resulting data is used as the name of the variable to modify. When the opcode finishes, the
+	variable will be set to zero ('0'), and one ('1') when it finishes.
+
+	The Yield opcode is used to request the scheduler run a different task. This opcode accepts one operand,
+	but is allowed to have none. If the opcode has one operand, then the operand is used as the time to
+	yield for in milliseconds. Once the time is complete, the scheduler is to return to the task which
+	requested the yield. If no operands are given, then the scheduler may determine which task is to run
+	and for how long. The scheduler does not have to return to the task which requested the yield once
+	the task it started first finishes, as in this case, the scheduler is given full control over deciding
+	who to run and when.
+
+	An example of these opcodes in use could be 
+
+		Func print
+		New __Escape_std.io.print_ARG0 <msg>
+		Escape std.io.print
+		End
+
+		Func workerA
+		New msg 'A: 1'
+		Call print
+		Yield
+		New msg 'A: 2'
+		Call print
+		Yield
+		New msg 'A: 3'
+		Call print
+		Yield
+		End
+
+		Func workerB
+		New msg 'B: 1'
+		Call print
+		Yield
+		New msg 'B: 2'
+		Call print
+		End
+
+		Func awaitA
+		Yield 1
+		If awaitA <doneA>
+		End
+
+		Func awaitB
+		Yield 1
+		If awaitB <doneB>
+		End
+
+		New msg 'main: spawning'
+		Call print
+
+		Spawn workerA doneA
+		Spawn workerB doneB
+
+		New msg 'main: spawned; awaiting'
+		Call print
+
+		Call awaitA
+		New msg 'main: A finished'
+		Call print
+
+		Call awaitB
+		New msg 'main: B finished'
+		Call print
+
+	In this program, we create two tasks, making a total of three. Task one, Task two, and the
+	Main task. Here, we spawn tasks one and two, then repeatedly request to yield for one
+	millisecond until the task is done, waiting on task one and two, in that order. The
+	expected output of this program is
+
+		main: spawning
+		main: spawned; awaiting
+		A: 1
+		B: 1
+		A: 2
+		B: 2
+		A: 3
+		main: A finished
+		main: B finished
+
+	However, we may not wait exactly one millisecond, a task must remain on the instruction boundary.
+	So, instead we wait for as long as possible while remaining on the instruction boundary. This is
+	done to enforce ordering rules and make sure the global state does not become corrupted, since it
+	is generally only safe to pause on the instruction boundary.
+
+
+
                     - New Rock -
 
 	New Rock is a modern dialect of the Rock language (which is actually older than CPebble itself, since it
@@ -634,3 +754,4 @@
 
 		In this example, we generate both the name of the variable and the variable whos data we wish
 		to copy into said variable from templates.
+
