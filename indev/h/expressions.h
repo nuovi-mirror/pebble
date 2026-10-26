@@ -11,6 +11,7 @@ typedef enum {
 	ExprOp_NumericSub,
 	ExprOp_NumericMul,
 	ExprOp_NumericDiv,
+	ExprOp_NumericMod,
 	ExprOp_NumericGreaterThan,
 	ExprOp_NumericLessThan,
 	ExprOp_NumericGreaterThanOrEqualTo,

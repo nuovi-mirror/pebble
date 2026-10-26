@@ -262,7 +262,9 @@ static Value h_NumericDiv
 				else if (rf < 0.0 && lf < DBL_MAX * rf) error(errfatal, errcodenumericoverflow, "Floating division overflow!");
 			}
 
-			v = (Value){ .Type = type_flt, .as.flt = rf == 0.0 ? 0.0 : lf / rf };
+			if (rf == 0.0 || lf == 0.0) v = (Value){ .Type = type_word, .as.word = 0 };
+			else v = (Value){ .Type = type_sword, .as.sword = (long)(lf / rf) };
+
 			break;
 		}
 	
@@ -273,7 +275,9 @@ static Value h_NumericDiv
 
 			if (ls == LONG_MIN && rs == -1) error(errfatal, errcodenumericoverflow, "Signed division overflow!");
 
-			v = (Value){ .Type = type_sword, .as.sword = rs == 0 ? 0 : ls / rs };
+			if (rs == 0 || ls == 0) v = (Value){ .Type = type_word, .as.word = 0 };
+			else v = (Value){ .Type = type_sword, .as.sword = ls / rs };
+
 			break;
 		}
 	
@@ -282,13 +286,61 @@ static Value h_NumericDiv
 			unsigned long lw = numword(l);
 			unsigned long rw = numword(r);
 
-			v = (Value){ .Type = type_word, .as.word = rw == 0 ? 0 : lw / rw };
+			if (rw == 0 || lw == 0) v = (Value){ .Type = type_word, .as.word = 0 };
+			else v = (Value){ .Type = type_word, .as.word = lw / rw };
+
 			break;
 		}
 	}
 
 	return v;
 }
+
+static Value h_NumericMod 
+(Value l, Value r)
+{
+	Value v;
+
+	switch (numtype(l, r)) 
+	{
+		case type_flt:
+		{
+			double lf = numflt(l);
+			double rf = numflt(r);
+
+			if (rf == 0.0 || lf == 0.0) v = (Value){ .Type = type_word, .as.word = 0 };
+			else v = (Value){ .Type = type_sword, .as.sword = (long)(lf / rf) };
+
+			break;
+		}
+	
+		case type_sword:
+		{
+			long ls = numsword(l);
+			long rs = numsword(r);
+
+			if (rs == 0 || ls == 0) v = (Value){ .Type = type_word, .as.word = 0 };
+			else v = (Value){ .Type = type_sword, .as.sword = ls % rs };
+
+			break;
+		}
+	
+		default:
+		{
+			unsigned long lw = numword(l);
+			unsigned long rw = numword(r);
+
+			if (rw == 0 || lw == 0) v = (Value){ .Type = type_word, .as.word = 0 };
+			else v = (Value){ .Type = type_word, .as.word = lw % rw };
+
+			break;
+		}
+	}
+
+	return v;
+}
+
+
 
 static int h_NumericCmp 
 (Value l, Value r)
@@ -333,6 +385,7 @@ Value evalexprnode
 		case ExprOp_NumericSub: return h_NumericSub(l, r);
 		case ExprOp_NumericMul: return h_NumericMul(l, r);
 		case ExprOp_NumericDiv: return h_NumericDiv(l, r);
+		case ExprOp_NumericMod: return h_NumericMod(l, r);
 
 		case ExprOp_NumericGreaterThan:
 			cmp = h_NumericCmp(l, r);

@@ -14,6 +14,7 @@ const ExprOperator ExprOperators[] = {
 	{"-", ExprOp_NumericSub, 1},
 	{"*", ExprOp_NumericMul, 0},
 	{"/", ExprOp_NumericDiv, 0},
+	{"%", ExprOp_NumericMod, 0},
 	{">", ExprOp_NumericGreaterThan, 2},
 	{"<", ExprOp_NumericLessThan, 2},
 	{">=", ExprOp_NumericGreaterThanOrEqualTo, 2},

@@ -9,6 +9,7 @@
             | Recursive Function Definition Extension (RFDE)            |                                         |
             | Advanced Numeric Extension, One (ANE1)                    |                                         |
             | Advanced Addressing Extension, Two (AAE2)                 |                                         |
+            | Advanced String Sorting Extension (ASSE)                  |                                         |
             |                                                           |                                         |
             | By vantheman                                              |                                         |
             | Product of The Nuovi Orizzonti Company                    |                                         |
@@ -116,16 +117,19 @@
 	by another space, followed by another value. In these schematics, the operator is stated to 'own' each
 	space next to it, and one space is allowed to be shared by one or more operators. The valid operators
 	include the Numeric Addition (+) statement, the Numeric Subtraction (-) statement, the Numeric
-	Multiplication (*) statement, the Numeric Division (/) statement, the Numeric Greater than (>) statement,
-	the Numeric Less than (<) statement, the Numeric Equal to (==) statement, the Numeric Not Equal to (!=)
-	statement, the Numeric Greater than or Equal to (>=) statement, the Numeric Less than or Equal to (<=) 
-	statement, the Sting Equal to (?=) statement, the String Contains (-?=) statement, the String Starts with 
-	(s?=) statement, the String Ends with (e?=) statement, and the String Concat (s++) statement. Values can
-	be anything that is a valid English character. The special cases include a value starting with the negative
-	(-) sign, marking that the value is to be negative, or the forced precedence (( / )) sign, marking to
-	'solve' the operation inside of that first and ignore the standard operator precedence. The standard
-	operator precedence is ranked from tiers zero starting, with this tier being solved first. Tier 
-	zero include Numeric Division and Numeric Multiplication. Tier one includes Numeric Addition and Numeric
+	Multiplication (*) statement, the Numeric Division (/) statement, the Numeric Modulo (%) statement, the 
+	Numeric Greater than (>) statement, the Numeric Less than (<) statement, the Numeric Equal to (==) 
+	statement, the Numeric Not Equal to (!=) statement, the Numeric Greater than or Equal to (>=) statement, 
+	the Numeric Less than or Equal to (<=) statement, the Sting Equal to (?=) statement, the String Contains 
+	(-?=) statement, the String Starts with (s?=) statement, the String Ends with (e?=) statement, and the 
+	String Concat (s++) statement. 
+
+	Values can be anything that is a valid English character. The special cases include a value starting 
+	with the negative (-) sign, marking that the value is to be negative, or the forced precedence (( / )) 
+	sign, marking to 'solve' the operation inside of that first and ignore the standard operator precedence. 
+
+	The standard operator precedence is ranked from tiers zero starting, with this tier being solved first. Tier 
+	zero include Numeric Division, Multiplication, and Modulo. Tier one includes Numeric Addition and Numeric
 	Subtraction. Tier two includes Numeric Less than, Numeric Greater than, Numeric Equal to, Numeric Not
 	Equal to, Numeric Less than or Equal to, and Numeric Greater than or Equal to. Tier three includes 
 	String Concat. Tier four includes String Starts with, String Ends with, String contains, and String
@@ -136,10 +140,11 @@
 	addition. 
 	The Numeric Subtraction operation will subtract the right numeric value from the left numeric value and
 	return the result of the operation.
-	The Numeric Division operation will divide the left numeric value from the right numeric value and return
+	The Numeric Division operation will divide the right numeric value from the right numeric value and return
 	the result of the operation.
 	The Numeric Multiplication operation will multiply the left numeric value from the right numeric value and
 	return the result of the operation.
+	The Numeric Modulo operation will grab the remainder of the Numeric Division operator and return it.
 	The Numeric Equal to operation will check if the left numeric value is equal to the right numeric value 
 	and return zero (0) if true and one (1) if false.
 	The Numeric Not equal to operation will check if the left numeric value is not equal to the right numeric
@@ -165,6 +170,31 @@
 	The String Ends with operator will see if the last N chars, N being the length of the substring
 	specified by the second argument, of the string specified by the first operator contains the substring
 	specified by the second argument, and return 0 if said substring was found and 1 if it was not.
+
+	Division on two floating-point values will not return a floating-point value, and if the result of division
+	produces a remainder, the remainder will be excluded. The modulo operator is used in this case. In the
+	case of floating-point division, a floating-point division operator should be performed, but the final
+	returned result should not be a floating-point value. No rounding should be performed; the decimal place
+	should be 'chopped off' cleanly.
+
+	The Advanced String Manipulation Extension (ASSE) introduced three new operators, String Split Left, String
+	Split Right, and String Find. String Find takes one string value and a second substring and will find the
+	substring on the right in the substring on the left. String Split Left takes one string value and one unsigned
+	numeric value, on the left and right respectively, just as String Split Right. String Split Left will go to the
+	position specified by the right operand and return the string's data until that position, excluding it. String
+	Split Right will go to the position and return the data in the string until that position, excluding it. If
+	either position is out-of-bounds, it will return the given string. String Find will return the position of the
+	first character in the string where the first instance of the substring is found.
+
+	All three of these operators are allowed to implicitly be pointers. This means, if any value given to any
+	operand to them is a valid variable name, they will act on the data in said variable. If not, they will
+	simply act on the data given.
+
+	String Split Left can be used as operator 'ssl', String Split Right as operator 'ssr', and String Find as
+	operator 'sf'.
+
+
+
 
 	Pebble is dynamically and loosely typed. When a value is stored by an instruction, the type is defined
 	based on deterministic parsing rules. This is the type the value is to be associated with until another
