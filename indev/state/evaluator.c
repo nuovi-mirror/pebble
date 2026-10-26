@@ -12,6 +12,8 @@
 #include "variables.h"
 #include "strtokn.h"
 
+#include <stdio.h> /* XXX debug */
+
 #include <limits.h> /* XXX remove this at some point */
 #include <float.h> /* XXX remove this at some point */
 #include <math.h> /* XXX remove this at some point */
@@ -459,14 +461,51 @@ Value evalexprnode
 				str = strbuff;
 			}
 
-			if (vstr2 == NULL) pos = numword(l);
+			if (vstr2 == NULL) pos = numword(r);
 			else pos = numword(*vstr2);
 
 			unsigned long ostrlen = (getstrlen(str) - pos);
 			ostr = alloc(persistAlloc, ostrlen);
 			char *pstr = str + pos;
 
+			if (pos > ostrlen) pos = ostrlen;
+
+			ostr[ostrlen] = '\0';
 			copymem(pstr, ostr, ostrlen);
+
+			return (Value){ .Type = type_str, .as.str = ostr };
+		}
+
+		case ExprOp_StringSplitLeft: 
+		{
+			const char *ls = asstr(l, lb, sizeof(lb), limits);
+			const char *rs = asstr(r, rb, sizeof(rb), limits);
+
+			char *str, *ostr = NULL;
+			unsigned long pos = 0;
+
+			Value *vstr = getVar(vars, ls);
+			Value *vstr2 = getVar(vars, rs);
+
+			if (vstr == NULL) str = ls;
+			else 
+			{
+				char *strbuff = alloc(persistAlloc, limits->misc_strlen);
+				asstr(*vstr, strbuff, limits->misc_strlen, limits);
+				str = strbuff;
+			}
+
+			if (vstr2 == NULL) pos = numword(r);
+			else pos = numword(*vstr2);
+
+			unsigned long strlen = getstrlen(str);
+			if (pos > strlen) pos = strlen;
+			unsigned long ostrlen = pos - 1;
+			ostr = alloc(persistAlloc, ostrlen);
+			char *pstr = str + pos;
+
+			copymem(str, ostr, ostrlen);
+			ostr[ostrlen] = '\0';
 
 			return (Value){ .Type = type_str, .as.str = ostr };
 		}
