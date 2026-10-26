@@ -408,8 +408,6 @@ Value evalexprnode
 		{
 			const char *ls = asstr(l, lb, sizeof(lb), limits);
 			const char *rs = asstr(r, rb, sizeof(rb), limits);
-			unsigned long ll = getstrlen(ls);
-			unsigned long rl = getstrlen(rs);
 
 			unsigned long pos = 0;
 			char *str, *ostr = NULL;
@@ -440,6 +438,37 @@ Value evalexprnode
 			v.Type = type_word;
 			v.as.word = pos;
 			return v;
+		}
+
+		case ExprOp_StringSplitRight: 
+		{
+			const char *ls = asstr(l, lb, sizeof(lb), limits);
+			const char *rs = asstr(r, rb, sizeof(rb), limits);
+
+			char *str, *ostr = NULL;
+			unsigned long pos = 0;
+
+			Value *vstr = getVar(vars, ls);
+			Value *vstr2 = getVar(vars, rs);
+
+			if (vstr == NULL) str = ls;
+			else 
+			{
+				char *strbuff = alloc(persistAlloc, limits->misc_strlen);
+				asstr(*vstr, strbuff, limits->misc_strlen, limits);
+				str = strbuff;
+			}
+
+			if (vstr2 == NULL) pos = numword(l);
+			else pos = numword(*vstr2);
+
+			unsigned long ostrlen = (getstrlen(str) - pos);
+			ostr = alloc(persistAlloc, ostrlen);
+			char *pstr = str + pos;
+
+			copymem(pstr, ostr, ostrlen);
+
+			return (Value){ .Type = type_str, .as.str = ostr };
 		}
 	}
 

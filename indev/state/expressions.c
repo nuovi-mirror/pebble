@@ -17,7 +17,7 @@ const ExprOperator ExprOperators[] = {
 	{">", ExprOp_NumericGreaterThan, 2},
 	{"<", ExprOp_NumericLessThan, 2},
 	{">=", ExprOp_NumericGreaterThanOrEqualTo, 2},
-	{"<=", ExprOp_NumericLessThanOrEqualTo},
+	{"<=", ExprOp_NumericLessThanOrEqualTo, 2},
 	{"==", ExprOp_NumericEqualTo, 2},
 	{"!=", ExprOp_NumericNotEqualTo, 2},
 	{"?=", ExprOp_StringEqualTo, 4},
@@ -26,6 +26,7 @@ const ExprOperator ExprOperators[] = {
 	{"s?=", ExprOp_StringStartsWith, 4},
 	{"s++", ExprOp_StringConcat, 3},
 	{"sf", ExprOp_StringFind, 4},
+	{"ssr", ExprOp_StringSplitRight, 4},
 };
 
 static int startsnumericliteral

@@ -23,6 +23,7 @@ typedef enum {
 	ExprOp_StringStartsWith,
 	ExprOp_StringConcat,
 	ExprOp_StringFind,
+	ExprOp_StringSplitRight,
 } ExprOperation;
 
 typedef enum {
