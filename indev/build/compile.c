@@ -6,7 +6,7 @@
 void compiledeps (Config *config, char *srcs, char *objs) {
 	char cmd[4096]; /* command buffer */
 
-	sprintf(cmd, "%s%s %s %s -MMD -MP -c -o %s %s", 
+	sprintf(cmd, "%s%s %s %s -c -o %s %s", 
 		config->precompiler, 
 		config->precompiler[0] != '\0' ? " " : "",
 		config->compiler,

@@ -40,7 +40,12 @@ int main (int argc, char **argv) {
 	strcpy(config.graphics, "");
 	strcpy(config.terminal, "ansi");
 	strcpy(config.cflags, "-Ih -Iffi -std=c99 ");
-	strcpy(config.ldflags, "-Wl,--gc-sections ");
+
+	/* XXX not supported by all compilers 
+	 * strcpy(config.ldflags, "-Wl,--gc-sections ");
+	 */
+
+	strcpy(config.ldflags, "");
 	strcpy(config.proc, "");
 	strcpy(config.fs, "");
 
