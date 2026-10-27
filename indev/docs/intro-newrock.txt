@@ -212,6 +212,128 @@ main. We then copy the local variable x of main into the global namespace
 as x.
 
 
+You can place a comment in code using the '/' and '#' characters either
+at the start or end of a line. A comment cannot be placed in the middle
+of a line. Everything after the character is consitored the comment until
+a newline is placed.
+
+
+The New Rock standard library includes several useful functions. These are
+mainly used to perform host-system interactions, such as printing, waiting,
+multitasking, and so on. We will go over each library that exists in it
+in order here:
+
+	std.io.print - print formatted text
+		This takes one argument, being a valid expression which
+		will be resolved and automatically printed. If the data
+		appears to be expression-like, it is evaluated as an
+		expression using the same mechanisms as " in standard
+		New Rock.
+
+		Examples:
+
+			include stdlib
+
+			fn main ( ) x {
+				x = '1 + 2'
+				call std.io.print ( x ) 
+				/ prints '3'
+			}
+
+			- - -
+
+			include stdlib
+
+			fn main ( ) x {
+				x = 'Hello, World!'
+				call std.io.print ( x )
+				/ prints 'Hello, World!'
+			}
+
+			- - - 
+
+			include stdlib
+
+			fn main ( ) ret {
+				ret = '0'
+				call std.io.print ( 'Hello, World!' )
+				/ same as above
+			}
+
+	std.io.printLn - print without a newline
+		std.io.printLn is the same as std.io.print, but it des
+		NOT append a newline to the end of the printed data
+
+	std.io.printRaw - prints data without formatting
+		std.io.printRaw will print data without the special
+		formatting rules of print and printLn
+
+		Examples:
+
+			include stdlib
+
+			fn main ( ) x {
+				x = '1 + 2'
+				call std.io.printRaw ( x )
+				/ prints '1 + 2', no newline
+			}
+
+	std.io.input - request terminal input
+		std.io.input will read from terminal input until a newline
+		and return the data read. This will NOT echo the data typed
+		from the terminal onto output. This will block until one
+		newline (Enter) charatcer is pressed.
+
+		Examples:
+
+			include stdlib
+
+			fn main ( ) input {
+				input = call std.io.input ( )
+			}
+
+	std.misc.sleep - sleep for N milliseconds
+		std.io.sleep will block and wait for the specified number
+		of milliseconds (one millisecond is 1/1000th of a second,
+		AKA 1000 milliseconds is 1 second). Depending on the
+		implimentation, this may ask the task scheduler to run
+		another task in the background (which will be discussed
+		later in). This will return the real amount of time slept.
+
+		Examples:
+
+			include stdlib
+
+			fn main ( ) time {
+				time = call std.misc.sleep ( '500' )
+				/ we have slept for half a second
+				base = 'Slept for '
+				text = "base s++ time s++ ms"
+				call std.io.print ( text )
+				/ s++ is concat(), so this
+				/ resolves to  'Slept for [time]ms'
+				/ where time is the variable time
+			}
+
+	std.misc.random - generate a random number
+		This will return a NON-CRYPTOGRAPHIC platform-sized random
+		number
+
+		Examples:
+
+			include stdlib
+
+			fn main ( ) num {
+				num = call std.misc.random ( )
+
+				if ( "num == 4" ) {
+					call std.io.print ( 'secure' )
+				} else {
+					call std.io.print ( 'investigate' )
+				}
+			}
+
+
   [ XXX - finish me - for more info, please refer to the state document
   above! ]
 		
