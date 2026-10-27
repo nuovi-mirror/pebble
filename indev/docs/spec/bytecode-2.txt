@@ -48,10 +48,12 @@ Operators
 	period (.) character as either any character besides the first
 	character if there is no minus sign, or any character besides
 	the first or second character if there is a minus sign. If a
-	numeric value contains a leading or trailing zero, the value
+	numeric value contains a leading zero, the value
 	should be parsed as a Stringly value to preserve those, unless
 	the value has only one leading zero followed by a period. In such
-	a case, the value can be represented as a numeric value. A Stringly
+	a case, the value can be represented as a numeric value. This rule
+	applies to the second character if the leading value is a minus
+	sign. In such a case, the value can be parsed as numeric. A Stringly
 	value is any string who contains only valid ASCII characters. A
 	value should be determined if it is numeric before it is determined
 	to be Stringly. Only one period and / or minus sign may be present
