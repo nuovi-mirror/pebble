@@ -29,10 +29,8 @@ fn std.misc.random ( ) random {
 . New __Func_std.misc.random_random __Escape_std.misc.random_RET0
 }
 
-fn std.misc.sleep ( time ) slept {
-. New __Escape_std.misc.sleep_ARG0 <__Func_std.misc.sleep_time>
-. Escape std.misc.sleep
-. New __Func_std.misc.sleep_slept __Escape_std.misc.sleep_RET0
+fn std.misc.sleep ( time ) time {
+. Yield <__Func_std.misc.sleep_time>
 }
 
 / proc
@@ -73,6 +71,49 @@ fn std.term.cursor.moveAbsolute ( x y ) ret {
 . New __Escape_std.term.cursor.moveAbsolute_ARG0 <__Func_std.term.cursor.moveAbsolute_x>
 . New __Escape_std.term.cursor.moveAbsolute_ARG1 <__Func_std.term.cursor.moveAbsolute_y>
 . Escape std.term.cursor.moveAbsolute
+	ret = '0'
+}
+
+/ tasks
+
+. New __std.task.count '0'
+. New __std.task.slot '__await_ s++ __task'
+
+fn std.task.spawn ( name ) handle {
+. New __std.task.count "__std.task.count + 1"
+. New __Func_std.task.spawn_handle "__std.task.done s++ __std.task.count"
+. Spawn <__Func_std.task.spawn_name> <__Func_std.task.spawn_handle>
+}
+
+fn std.task.spawn1 ( name arg ) handle {
+. New __Func_std.task.spawn1_t '__Func_ s++ __Func_std.task.spawn1_name s++ _ARG0'
+. New {__Func_std.task.spawn1_t} __Func_std.task.spawn1_arg
+. New __std.task.count "__std.task.count + 1"
+. New __Func_std.task.spawn1_handle "__std.task.done s++ __std.task.count"
+. Spawn <__Func_std.task.spawn1_name> <__Func_std.task.spawn1_handle>
+}
+
+fn std.task.yield ( ms ) ret {
+. Yield <__Func_std.task.yield_ms>
+	ret = '0'
+}
+
+fn std.task.done ( handle ) done {
+. New __Func_std.task.done_done [__Func_std.task.done_handle]
+}
+
+. Func __std.task.await_loop
+. Yield 1
+. New __std.task.n {__std.task.slot}
+. New __std.task.v [__std.task.n]
+. New __std.task.w [__std.task.v]
+. If __std.task.await_loop <__std.task.w>
+. End
+
+fn std.task.await ( handle ) ret {
+. New __std.task.n {__std.task.slot}
+. New {__std.task.n} __Func_std.task.await_handle
+. Call __std.task.await_loop
 	ret = '0'
 }
 

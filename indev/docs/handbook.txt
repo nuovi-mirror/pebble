@@ -479,6 +479,10 @@
 	done to enforce ordering rules and make sure the global state does not become corrupted, since it
 	is generally only safe to pause on the instruction boundary.
 
+	The variable __task should be managed by the virtual machine and hold a numeric value representing
+	the current task in execution. Task 0 should always be the main task. The implimentation may define
+	how task numbers are allocated however it wishes, as long as task 0 is always the main task.
+
 
 
                     - New Rock -

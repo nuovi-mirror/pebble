@@ -93,6 +93,16 @@ int vmmain
 		Task *task = &scheduler.tasks[scheduler.current];
 		scheduler.yield = 0;
 
+		Value *self = getVar(&vars, "__task");
+
+		if (self == NULL)
+		{
+			self = alloc(persistAlloc, sizeof(Value));
+			putVar(&vars, "__task", self, persistAlloc);
+		}
+
+		*self = (Value){ .Type = type_word, .as.word = scheduler.current };
+
 		while(!scheduler.yield && task->pc < current_instruction_count)
 		{
 			task->pc = interpret(&program[task->pc], program, seed, current_instruction_count, limits, &vars, ffivars, task->stack, &funcs, task->pc, persistAlloc, scratchAlloc, tempAlloc, &scheduler);
@@ -100,7 +110,7 @@ int vmmain
 			resetAllocator(tempAlloc);
 		}
 
-		if (task->pc >= current_instruction_count) scheduler_finish(&scheduler, &vars);
+		if (task->pc >= current_instruction_count && task->state != task_sleeping) scheduler_finish(&scheduler, &vars);
 	}
 
 	/* clean-up */
