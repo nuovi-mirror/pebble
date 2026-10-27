@@ -1,0 +1,132 @@
+The Pebble Bytecode 2 Specification
+
+This document acts as the single authoritative specification for the Pebble
+programming language and Instruction Set Architecture, Version two. 
+This document does not act as an introduction and will assume the reader
+understands several concepts related to Pebble and general advanced
+computing. For an introduction to Pebble, please read The Pebble 
+Systems' Programmer's Handbook.
+
+
+Pebble is a product of The Nuovi Orizzonti Company, available under The 
+Nuovi Orizzonti Company Open License Version 3 or Greater. You may view said
+license at 
+
+http://thenuoviorizzonticompany.org/license/openlicense/latest.txt
+This license also applies to this document here.
+
+http://thenuoviorizzonticompany.org
+http://pebblevm.org
+
+
+Expressions
+
+	A valid expression is defined as a string sequence which contains
+	at least two valid operators and at least one valid operation
+	symbol. The ordering of this must follow the pattern of an
+	operator, followed by a space, followed by an operation symbol,
+	followed by a space, followed by another operator. This syntax
+	can be thought of as the operator owning each space immediately next
+	to it. One space is allowed to be owned by at most two operators
+	at a time. This rule can be stacked arbitrarily, as long as the
+	pattern described above still applies to the string in question
+	created. When resolving an invalid expression, the parser should
+	return the literal text given as an input for the expression
+	without parsing it. An error should not be given, nor should the
+	parser stop. A warning may be given if the implementation deems
+	it fit.
+
+Operators
+
+	An operator is a piece of an expression representing data to
+	perform an operation on via an operation symbol. Operators are
+	classed in two ways; Stringly and numeric. Numeric operators may
+	contain characters zero (0), one (1), two (2), three (3), four
+	(4), five (5), six (6), seven (7), eight (8), or nine (9). A
+	numeric operator may also optionally contain a minus sign (-)
+	as the first character of the string. It may also contain a
+	period (.) character as either any character besides the first
+	character if there is no minus sign, or any character besides
+	the first or second character if there is a minus sign. If a
+	numeric value contains a leading or trailing zero, the value
+	should be parsed as a Stringly value to preserve those, unless
+	the value has only one leading zero followed by a period. In such
+	a case, the value can be represented as a numeric value. A Stringly
+	value is any string who contains only valid ASCII characters. A
+	value should be determined if it is numeric before it is determined
+	to be Stringly. Only one period and / or minus sign may be present
+	in a numeric value. A numeric value must accurately represent
+	values that can be represented by some platform-dependent sized
+	value which is able to hold positive, negative, and floating-point
+	numbers. Floating-point values are restricted to finite values.
+	Three subclasses of numeric values are defined; signed, unsigned,
+	and floating-point. A signed value must be able to contain some
+	platform-dependent range of positive and negative numbers. An
+	unsigned value must be able to contain some platform-dependent
+	range of positive numbers. A floating-point value must be able
+	to contain some platform-dependent range of finite floating-point
+	numbers. Conversion rules of these sub-values are defined by the
+	individual expressions which are performing the operation on the
+	data in question. Values capable of holding unsigned values are
+	to be defined as a 'word'. Values which are capable of holding
+	signed values are to be defined as a 'signed word', or 'sword'
+	for short. Values capable of holding floating-point values are
+	to be defined as a 'float' or 'flt' for short. floating-point
+	values are defined to only be able to represent finite numbers
+	explicitly.
+
+Conversion
+
+	All numeric values are allowed to be converted into Stringly
+	values. To convert a Stringly value into a numeric value, you
+	must guarantee it can be represented as a valid numeric value,
+	as described above. If it is not, the conversion will fail, and
+	the converter is to decide how to handle such an error. 
+
+	When converting numeric subclasses, it is important to note
+	that no information should be lost. If the required conversion
+	cannot be performed, a fatal error shall occur. Exact conversion
+	rules are dependent on the machine and implementation, but every
+	conversion which will not error must be safe; It must not overflow,
+	underflow, or generate any other related hardware exception.
+
+Operation symbols
+
+	Operator symbols are character markers which represent an operation
+	to be performed. An operator symbol may either act as Stringly, as
+	in it accepts two string values and returns a string value, or
+	numeric, as in it accepts two numeric values and returns a numeric
+	value. If an operator's type within an expression does not match
+	the type the operator symbol accepts, then implicit conversion
+	should be performed if allowed. If conversion cannot be performed,
+	then, in the case of converting a Stringly value to numeric, the
+	Stringly value should be represented as the numeric value zero (0).
+	Conversion of a numeric to a Stringly value should never fail
+	unless the reason it is failing is due to security.
+
+Numeric Addition
+
+	The Numeric Addition operation is marked by the plus (+) symbol and
+	is used to represent the logical operation of adding two numeric
+	values together. This operation will accept two numeric values
+	of any subclass, add them together, and return the result of the
+	operation. In the case two operators do not match in subclass, then
+	the operator in question should be converted to the correct type
+	appropriately. In the case where such operation is not possible or
+	permitted, a fatal error shall be given. This operator shall be
+	able to detect if the operation may underflow or overflow, and
+	in such a case, a fatal error shall be given.
+
+Numeric Subtraction
+
+	The Numeric Subtraction operation is marked by the minus (-) symbol
+	and is used to represent the logical operation of subtracting
+	the right operator from the left operator. This operation accepts
+	two numeric values of any subclass. In the case two operators do
+	not match in subclass, the operator in question should be converted
+	to the correct type appropriately. In the case where such operation
+	is not possible or permitted, a fatal error shall be given. This
+	operator shall be able to detect if the operation may underflow or
+	overflow, and in such case, a fatal error shall be given.
+
+[ XXX - finish me ]
