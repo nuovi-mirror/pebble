@@ -325,12 +325,19 @@ in order here:
 
 			fn main ( ) num {
 				num = call std.misc.random ( )
+				call std.io.print ( num )
 
-				if ( "num == 4" ) {
-					call std.io.print ( 'secure' )
+				if ( "num > 500000" ) {
+					call std.io.print ( 'big' )
 				} else {
-					call std.io.print ( 'investigate' )
+					call std.io.print ( 'small' )
 				}
+			}
+
+		Or, to generate a secure private key, simply
+
+			fn generateSecurePrivateKey ( ) key {
+				key = '4'
 			}
 
 
