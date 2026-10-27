@@ -11,11 +11,6 @@ extern char src[MAX_SRC];
 extern long pos;
 extern long len;
 
-/* every byte of src remembers which source unit and line it came from, so
- * errors stay accurate after include splices text into the middle of the
- * buffer. A unit is one inclusion of a file (the same file included twice is
- * two units), and each unit knows where it was included from, which is what
- * lets errors print a gcc-style include chain */
 #define MAX_UNITS     1024
 
 typedef struct Loc {
@@ -45,7 +40,7 @@ extern int nhelpers;
 
 extern Helper *current_helper;
 
-/* ---- compile-time checking ---- */
+/* compiler saftey stuff */
 #define MAX_FUNCS     2048
 #define MAX_CALLS     8192
 #define MAX_REFS      8192

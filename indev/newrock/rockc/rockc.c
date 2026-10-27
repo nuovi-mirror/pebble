@@ -1,7 +1,3 @@
-/* simple New Rock demo compiler
- * uses Pebble AAE schematics instead of older Rock marker symbols
- * reads program from a file and writes compiled Pebble code to stdout */
-
 #include <stdio.h>
 #include <string.h>
 #include "stuff.h"
@@ -110,17 +106,11 @@ void compile_call
 (const char *fn, char dests[][MAX_NAME], int ndests)
 {
 	char callee[MAX_NAME];
-
 	skipws();
-
 	long at = pos;
-
 	read_ident(callee, sizeof callee);
-
 	expect_char('(');
-
 	skipws();
-
 	int argc = 0;
 
 	while (peekch() != ')')
@@ -131,17 +121,13 @@ void compile_call
 		emitf("New __Func_%s_ARG%d %s\n", callee, argc, val);
 
 		argc++;
-
 		skipws();
 	}
 
 	expect_char(')');
-
 	note_call(callee, argc, ndests, at);
-
 	emitf("Call %s\n", callee);
 
-	/* results are bound in order: first name gets RET0, second RET1, ... */
 	for (int i = 0; i < ndests; i++)
 	{
 		char mangled[MAX_NAME];
@@ -156,9 +142,7 @@ void compile_if_branch
 (const char *fn, Helper *helper)
 {
 	Helper *old_helper = current_helper;
-
 	current_helper = helper;
-
 	skipws();
 
 	while (peekch() != '}')
@@ -171,7 +155,6 @@ void compile_if_branch
 	}
 
 	expect_char('}');
-
 	current_helper = old_helper;
 }
 
@@ -179,6 +162,7 @@ void compile_if_branch
 void compile_if
 (const char *fn)
 {
+
 #define MAX_IF_BRANCHES 64
 
 	char conditions[MAX_IF_BRANCHES][MAX_VALUE];
@@ -191,36 +175,28 @@ void compile_if
 	for (;;)
 	{
 		if (nbranches >= MAX_IF_BRANCHES) fail("too many if branches");
-
 		expect_char('(');
-
 		compile_value(fn, conditions[nbranches], sizeof conditions[nbranches]);
 
 		expect_char(')');
 		expect_char('{');
 
 		snprintf(body_fns[nbranches], sizeof body_fns[nbranches], "__RockIf_%u", next_control_id++);
-
 		Helper *branch = new_helper(body_fns[nbranches]);
 
 		compile_if_branch(fn, branch);
 
 		nbranches++;
-
 		skipws();
 
 		if (!try_keyword("else")) break;
-
 		skipws();
 
 		if (try_keyword("if")) continue;
-
 		expect_char('{');
 
 		snprintf(else_fn, sizeof else_fn, "__RockElse_%u", next_control_id++);
-
 		Helper *else_body = new_helper(else_fn);
-
 		compile_if_branch(fn, else_body);
 
 		has_else = 1;
@@ -228,7 +204,6 @@ void compile_if
 	}
 
 	char dispatch_fns[MAX_IF_BRANCHES][MAX_NAME];
-
 	for (int i = 0; i < nbranches; i++) snprintf(dispatch_fns[i], sizeof dispatch_fns[i], "__RockDispatch_%u", next_control_id++);
 
 	for (int i = 0; i < nbranches; i++)
@@ -255,17 +230,8 @@ void compile_if
 			char inverse[MAX_VALUE];
 			unsigned long n = strlen(conditions[i]);
 
-			if (n >= 2 &&
-				conditions[i][0] == '"' &&
-				conditions[i][n - 1] == '"')
-				snprintf(inverse, sizeof inverse,
-					"\"(%.*s) != 0\"",
-					(int)(n - 2),
-					conditions[i] + 1);
-			else
-				snprintf(inverse, sizeof inverse,
-					"(%s) != 0",
-					conditions[i]);
+			if (n >= 2 && conditions[i][0] == '"' && conditions[i][n - 1] == '"') snprintf(inverse, sizeof inverse, "\"(%.*s) != 0\"", (int)(n - 2), conditions[i] + 1);
+			else snprintf(inverse, sizeof inverse, "(%s) != 0", conditions[i]);
 
 			emitf("If %s %s\n", else_fn, inverse);
 		}
@@ -276,6 +242,7 @@ void compile_if
 	emitf("If %s 0\n", dispatch_fns[0]);
 
 #undef MAX_IF_BRANCHES
+
 }
 
 void compile_while
@@ -285,7 +252,6 @@ void compile_while
 	char while_fn[MAX_NAME];
 
 	expect_char('(');
-
 	compile_value(fn, condition, sizeof condition);
 
 	expect_char(')');
@@ -316,9 +282,7 @@ void compile_while
 void compile_stmt
 (const char *fn)
 {
-	if (try_raw_line())
-		return;
-
+	if (try_raw_line()) return;
 	if (try_keyword("include"))
 	{
 		char name[MAX_PATH];
@@ -389,7 +353,6 @@ void compile_stmt
 		return;
 	}
 
-	/* one or more space-separated destination names, then '=' */
 	char names[MAX_LOCALS][MAX_NAME];
 	int nnames = 0;
 
@@ -399,9 +362,7 @@ void compile_stmt
 
 		skipws();
 
-		if (!is_ident_start(peekch()))
-			fail(nnames == 0 ? "expected a statement"
-				: "expected '=' after assignment target(s) (unknown statement?)");
+		if (!is_ident_start(peekch())) fail(nnames == 0 ? "expected a statement" : "expected '=' after assignment target(s) (unknown statement?)");
 
 		read_ident(names[nnames], sizeof names[nnames]);
 		add_local(names[nnames]);
@@ -417,7 +378,6 @@ void compile_stmt
 	if (try_keyword("call"))
 	{
 		compile_call(fn, names, nnames);
-
 		for (int i = 0; i < nnames; i++) mark_assigned(names[i]);
 
 		return;
@@ -426,7 +386,6 @@ void compile_stmt
 	char val[MAX_VALUE];
 	compile_value(fn, val, sizeof val);
 
-	/* same value is assigned to every target */
 	for (int i = 0; i < nnames; i++)
 	{
 		char mangled[MAX_NAME];
@@ -442,28 +401,21 @@ void compile_fn
 (void)
 {
 	char fn[MAX_NAME];
-
 	read_ident(fn, sizeof fn);
-
 	if (strcmp(fn, "main") == 0) has_main = 1;
-
 	nlocals = 0;
 
 	char params[MAX_LOCALS][MAX_NAME];
 	int nparams = 0;
 
 	expect_char('(');
-
 	skipws();
 
 	while (peekch() != ')')
 	{
 		if (nparams >= MAX_LOCALS) fail("too many parameters");
-
 		read_ident(params[nparams], sizeof params[nparams]);
-
 		if (is_local(params[nparams])) fail("duplicate parameter name");
-
 		add_local(params[nparams]);
 		mark_assigned(params[nparams]);
 
@@ -476,20 +428,14 @@ void compile_fn
 	char results[MAX_LOCALS][MAX_NAME];
 	int nresults = 0;
 
-	/* one or more result names; they map to RET0, RET1, ... in order */
 	for (;;)
 	{
 		if (nresults >= MAX_LOCALS) fail("too many results");
-
 		read_ident(results[nresults], sizeof results[nresults]);
 
-		for (int i = 0; i < nresults; i++)
-			if (strcmp(results[i], results[nresults]) == 0)
-				fail("duplicate result name");
-
+		for (int i = 0; i < nresults; i++) if (strcmp(results[i], results[nresults]) == 0) fail("duplicate result name");
 		add_local(results[nresults]);
 		nresults++;
-
 		skipws();
 
 		if (peekch() == '{') break;
@@ -508,9 +454,7 @@ void compile_fn
 	current_helper = NULL;
 
 	outf("Func %s\n", fn);
-
 	for (int i = 0; i < nparams; i++) outf("New __Func_%s_%s __Func_%s_ARG%d\n", fn, params[i], fn, i);
-
 	skipws();
 
 	while (peekch() != '}')
@@ -531,16 +475,12 @@ void compile_fn
 			report_warning(msg, fn_loc);
 		}
 
-	for (int i = 0; i < nresults; i++)
-		outf("New __Func_%s_RET%d __Func_%s_%s\n", fn, i, fn, results[i]);
+	for (int i = 0; i < nresults; i++) outf("New __Func_%s_RET%d __Func_%s_%s\n", fn, i, fn, results[i]);
 
 	outf("End\n");
-
 	current_helper = old_helper;
-
 	emit_helpers_from(first_helper);
 
-	/* locals belong to the function; top-level code has none */
 	nlocals = 0;
 	cur_fn[0] = '\0';
 }
@@ -548,8 +488,7 @@ void compile_fn
 void compile_top_stmt
 (void)
 {
-	if (try_raw_line())
-		return;
+	if (try_raw_line()) return;
 
 	if (try_keyword("include"))
 	{
@@ -569,21 +508,15 @@ void compile_top_stmt
 
 	if (is_ident_start(peekch()))
 	{
-		/* top-level assignment: these are real, unmangled globals, since
-		 * there's no enclosing function to own them. add_local() is never
-		 * called here, so mangle("", name, ...) leaves every name as-is. */
 		char names[MAX_LOCALS][MAX_NAME];
 		int nnames = 0;
 
 		for (;;)
 		{
 			if (nnames >= MAX_LOCALS) fail("too many assignment targets");
-
 			skipws();
 
-			if (!is_ident_start(peekch()))
-				fail(nnames == 0 ? "expected a statement"
-					: "expected '=' after assignment target(s) (unknown statement?)");
+			if (!is_ident_start(peekch())) fail(nnames == 0 ? "expected a statement" : "expected '=' after assignment target(s) (unknown statement?)");
 
 			read_ident(names[nnames], sizeof names[nnames]);
 			define_global(names[nnames]);
@@ -605,13 +538,12 @@ void compile_top_stmt
 		char val[MAX_VALUE];
 		compile_value("", val, sizeof val);
 
-		for (int i = 0; i < nnames; i++)
-			emitf("New %s %s\n", names[i], val);
+		for (int i = 0; i < nnames; i++) emitf("New %s %s\n", names[i], val);
 
 		return;
 	}
 
-	fail("expected 'fn', 'include', or 'call' at top level");
+	fail("expected 'fn', 'include', 'call' or a definition at top level");
 }
 
 int main
@@ -624,11 +556,9 @@ int main
 	}
 
 	if (strlen(argv[2]) >= sizeof include_path) fail("include search path is too long");
-
 	strcpy(include_path, argv[2]);
 
 	FILE *file = fopen(argv[1], "r");
-
 	if (!file)
 	{
 		fprintf(stderr, "rockc: error: could not open source file '%s'\n", argv[1]);
@@ -658,7 +588,6 @@ int main
 	src_line[len] = len > 0 ? src_line[len - 1] : 1;
 
 	skipws();
-
 	outf("#!/usr/bin/env pblvm\n");
 
 	while (pos < len)

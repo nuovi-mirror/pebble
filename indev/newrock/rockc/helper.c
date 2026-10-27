@@ -65,7 +65,6 @@ static int nvrefs;
 static char globals[MAX_GLOBALS][MAX_NAME];
 static int nglobals;
 
-/* returns -1 when the table is full, which in practice means an include cycle */
 int add_source_unit
 (const char *name, Loc included_from, int trusted)
 {
@@ -82,7 +81,6 @@ int add_source_unit
 	return nunits++;
 }
 
-/* record where src[start .. start + n) came from; lines count from 1 */
 void tag_source
 (long start, long n, int file)
 {
@@ -106,11 +104,8 @@ Loc loc_at
 	l.line = 0;
 
 	if (nunits == 0) return l;
-
 	if (at < 0) at = 0;
 
-	/* end of input: report the last real byte, which belongs to whichever
-	 * file (main or included) actually ran out of text */
 	if (at >= len) at = len > 0 ? len - 1 : 0;
 
 	l.file = src_file[at];
@@ -119,9 +114,6 @@ Loc loc_at
 	return l;
 }
 
-/* innermost includer first, like gcc:
- *   In file included from b.rock:5,
- *                    from a.rock:3: */
 static void print_include_chain
 (int unit)
 {
@@ -129,8 +121,7 @@ static void print_include_chain
 
 	for (int u = unit; units[u].parent >= 0; u = units[u].parent)
 	{
-		fprintf(stderr, printed ? ",\n                 from %s:%u" : "In file included from %s:%u",
-			units[units[u].parent].name, units[u].parent_line);
+		fprintf(stderr, printed ? ",\n                 from %s:%u" : "In file included from %s:%u", units[units[u].parent].name, units[u].parent_line);
 		printed = 1;
 	}
 
@@ -146,7 +137,6 @@ static void print_diag
 		return;
 	}
 
-	/* like gcc, only repeat the chain when the file changes */
 	if (l.file != last_diag_unit)
 	{
 		print_include_chain(l.file);
@@ -167,8 +157,6 @@ void fail
 (const char *msg)
 { fail_at(msg, pos); }
 
-/* generated code is buffered and only written once compilation succeeded,
- * so a failed compile never leaves a partial program behind */
 static char *obuf;
 static size_t olen;
 static size_t ocap;
@@ -177,13 +165,9 @@ static void out_reserve
 (size_t extra)
 {
 	if (olen + extra + 1 <= ocap) return;
-
 	size_t ncap = ocap ? ocap : 4096;
-
 	while (ncap < olen + extra + 1) ncap *= 2;
-
 	char *p = realloc(obuf, ncap);
-
 	if (!p) fail("out of memory while buffering output");
 
 	obuf = p;
@@ -231,7 +215,6 @@ int flush_output
 (void)
 {
 	if (olen > 0 && fwrite(obuf, 1, olen, stdout) != olen) return -1;
-
 	return fflush(stdout) == 0 ? 0 : -1;
 }
 
@@ -295,7 +278,6 @@ void emit_helpers_from
 	for (int i = first; i < nhelpers; i++) emit_helper(&helpers[i]);
 }
 
-/* look at a raw Pebble line so later checks know what it defines */
 static void scan_raw_line
 (const char *line)
 {
@@ -303,7 +285,6 @@ static void scan_raw_line
 	int n = 0;
 
 	n = sscanf(line, " %63s %63s", op, arg);
-
 	if (n < 2) return;
 
 	if (strcmp(op, "Func") == 0)
@@ -329,8 +310,7 @@ static void scan_raw_line
 		}
 	}
 
-	if (is_ident_start((unsigned char)arg[0]) && !(arg[0] == '_' && arg[1] == '_'))
-		define_global(arg);
+	if (is_ident_start((unsigned char)arg[0]) && !(arg[0] == '_' && arg[1] == '_')) define_global(arg);
 }
 
 int try_raw_line
@@ -342,11 +322,9 @@ int try_raw_line
 	if (pos > 0 && src[pos - 1] != '\n') return 0;
 	if (peekch() != '.') return 0;
 
-	if (!units[loc_at(pos).file].trusted)
-		fail_at("raw Pebble ('.') lines are only allowed in the literal text of the standard library", pos);
+	if (!units[loc_at(pos).file].trusted) fail_at("WARNING: Pebble injection attempted! This is usually done to get around compiler saftey checks; Is this program malicious? Please use the wrappers provided by stdlib!", pos);
 
-	pos++; /* consume '.' */
-
+	pos++;
 	if (pos < len && src[pos] != '\n') pos++;
 
 	while (pos < len && src[pos] != '\n')
@@ -357,9 +335,7 @@ int try_raw_line
 
 	line[nline] = '\0';
 	scan_raw_line(line);
-
 	emitf("\n");
-
 	if (pos < len && src[pos] == '\n') pos++;
 
 	return 1;
@@ -393,9 +369,7 @@ void read_ident
 (char *out, size_t cap)
 {
 	skipws();
-
-	if (!is_ident_start(peekch()))
-		fail("expected an identifier");
+	if (!is_ident_start(peekch())) fail("expected an identifier");
 
 	size_t n = 0;
 
@@ -480,16 +454,13 @@ void add_local
 void mark_assigned
 (const char *name)
 {
-	for (int i = 0; i < nlocals; i++)
-		if (strcmp(locals[i], name) == 0) local_assigned[i] = 1;
+	for (int i = 0; i < nlocals; i++) if (strcmp(locals[i], name) == 0) local_assigned[i] = 1;
 }
 
 int is_assigned
 (const char *name)
 {
-	for (int i = 0; i < nlocals; i++)
-		if (strcmp(locals[i], name) == 0) return local_assigned[i];
-
+	for (int i = 0; i < nlocals; i++) if (strcmp(locals[i], name) == 0) return local_assigned[i];
 	return 0;
 }
 
@@ -500,7 +471,6 @@ void mangle
 	else snprintf(out, cap, "%s", name);
 }
 
-/* open a gap of n bytes at 'at', moving the line tags along with the text */
 static void shift_source
 (long at, long n)
 {
@@ -525,11 +495,8 @@ void include_file
 	if (strcmp(name, "stdlib") == 0)
 	{
 		size_t stdlib_len = strlen(stdlib_data);
-
 		if (stdlib_len + 1 > MAX_SRC - len - 1) fail_at("source buffer is too small for standard library", at);
-
 		int unit = add_source_unit("<stdlib>", site, 1 /* trusted: this is the literal stdlib text */);
-
 		if (unit < 0) fail_at("too many nested or repeated includes (include cycle?)", at);
 
 		shift_source(pos, (long)stdlib_len + 1);
@@ -547,7 +514,6 @@ void include_file
 	if (path_len > 0 && include_path[path_len - 1] == '/') snprintf(path, sizeof path, "%s%s", include_path, name);
 	else snprintf(path, sizeof path, "%s/%s", include_path, name);
 
-	/* a file that is already being included further up the chain is a cycle */
 	for (int u = site.file; u >= 0; u = units[u].parent)
 	{
 		if (strcmp(units[u].name, path) == 0)
@@ -589,8 +555,7 @@ void include_file
 		fail_at("could not seek include file", at);
 	}
 
-	if ((unsigned long)file_len >
-		(unsigned long)(MAX_SRC - len - 1))
+	if ((unsigned long)file_len > (unsigned long)(MAX_SRC - len - 1))
 	{
 		fclose(file);
 		fail_at("source buffer is too small for included file", at);
@@ -609,9 +574,7 @@ void include_file
 	fclose(file);
 
 	if (got != (size_t)file_len) fail_at("could not read include file", at);
-
 	tag_source(pos, file_len, unit);
-
 	len += file_len;
 }
 
@@ -653,8 +616,7 @@ void subst_expr
 	out[oi] = '\0';
 }
 
-
-/* ---- compile-time checks ---- */
+/* compiler saftey checks */
 
 void report_error
 (const char *msg, Loc at)
@@ -665,16 +627,12 @@ void report_error
 
 void report_warning
 (const char *msg, Loc at)
-{
-	print_diag("warning", msg, at);
-}
+{ print_diag("warning", msg, at); }
 
 static FuncInfo *find_func
 (const char *name)
 {
-	for (int i = 0; i < nfuncs; i++)
-		if (strcmp(funcs[i].name, name) == 0) return &funcs[i];
-
+	for (int i = 0; i < nfuncs; i++) if (strcmp(funcs[i].name, name) == 0) return &funcs[i];
 	return NULL;
 }
 
@@ -719,9 +677,7 @@ void note_call
 static int has_global
 (const char *name)
 {
-	for (int i = 0; i < nglobals; i++)
-		if (strcmp(globals[i], name) == 0) return 1;
-
+	for (int i = 0; i < nglobals; i++) if (strcmp(globals[i], name) == 0) return 1;
 	return 0;
 }
 
@@ -736,7 +692,6 @@ void define_global
 	nglobals++;
 }
 
-/* a bare name was read as a variable */
 void use_var
 (const char *name, long at)
 {
@@ -753,9 +708,7 @@ void use_var
 		return;
 	}
 
-	/* __ names are compiler/stdlib internals written by hand */
 	if (name[0] == '_' && name[1] == '_') return;
-
 	if (nvrefs >= MAX_REFS) fail("too many variable references");
 
 	VarRef *r = &vrefs[nvrefs++];
@@ -765,7 +718,6 @@ void use_var
 	r->at = loc_at(at);
 }
 
-/* {x} and <x>: only checked when the text is exactly one name */
 void use_text_var
 (const char *text, long at)
 {
@@ -773,7 +725,6 @@ void use_text_var
 	size_t n = 0;
 
 	while (*text == ' ') text++;
-
 	if (!is_ident_start((unsigned char)*text)) return;
 
 	while (*text && is_ident_char((unsigned char)*text))
@@ -785,13 +736,10 @@ void use_text_var
 	name[n] = '\0';
 
 	while (*text == ' ') text++;
-
 	if (*text) return;
-
 	use_var(name, at);
 }
 
-/* checks that need the whole program, so forward references stay legal */
 int finish_checks
 (void)
 {
@@ -811,17 +759,13 @@ int finish_checks
 
 		if (f->nparams >= 0 && r->argc != f->nparams)
 		{
-			snprintf(msg, sizeof msg,
-				"function '%s' takes %d argument(s) but %d given",
-				r->name, f->nparams, r->argc);
+			snprintf(msg, sizeof msg, "function '%s' takes %d argument(s) but %d given", r->name, f->nparams, r->argc);
 			report_error(msg, r->at);
 		}
 
 		if (f->nresults >= 0 && r->nbound > f->nresults)
 		{
-			snprintf(msg, sizeof msg,
-				"function '%s' returns %d value(s) but %d are being assigned",
-				r->name, f->nresults, r->nbound);
+			snprintf(msg, sizeof msg, "function '%s' returns %d value(s) but %d are being assigned", r->name, f->nresults, r->nbound);
 			report_error(msg, r->at);
 		}
 	}
@@ -830,9 +774,7 @@ int finish_checks
 	{
 		if (has_global(vrefs[i].name)) continue;
 
-		snprintf(msg, sizeof msg,
-			"undeclared variable '%s' (not a local, an export, or a raw New)",
-			vrefs[i].name);
+		snprintf(msg, sizeof msg, "undeclared variable '%s' (not a local, an export, or a raw New)", vrefs[i].name);
 		report_error(msg, vrefs[i].at);
 	}
 
@@ -840,8 +782,7 @@ int finish_checks
 	{
 		const FuncInfo *m = find_func("main");
 
-		if (m && m->nparams > 0)
-			report_error("'main' is called with no arguments, so it cannot take parameters", m->at);
+		if (m && m->nparams > 0) report_error("'main' is called with no arguments, so it cannot take parameters", m->at);
 	}
 
 	return nerrors;
