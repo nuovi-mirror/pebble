@@ -131,4 +131,71 @@ Numeric Subtraction
 	operator shall be able to detect if the operation may underflow or
 	overflow, and in such case, a fatal error shall be given.
 
+Numeric Division
+
+	The Numeric Division operation is marked by the forward slash (/)
+	symbol and is used to represent the logical operation of dividing
+	the right operator from the left operator. This operation accepts
+	two numeric values of any subclass. In the case two operators do
+	not match in subclass, the operator in question should be converted
+	to the correct type appropriately. In the case where such operation
+	is not possible or permitted, a fatal error shall be given. This
+	operator shall be able to detect if the operation may underflow
+	or overflow, and in such case, a fatal error shall be given. If
+	any of the operators in the expression are zero (0 or 0.0), then
+	the result should be zero. If the result produces a remainder, then
+	the remainder should not be included. If both operator are
+	floating-point, then a floating-point operation shall be performed,
+	but the decimal shall not be represented in the result given.
+
+Numeric multiplication
+
+	The Numeric Multiplication operation is marked by the pound (*)
+	symbol and is used to represent the logical operation of
+	multiplying the left numeric operator and right numeric operator.
+	In the case the two operators do not match in subclass, the
+	operator in question should be converted to the correct type
+	appropriately. In the case where such operation is not possible
+	or permitted, a fatal error shall be given. This operator shall
+	be able to detect if the operation may underflow or overflow, and in
+	such case, a fatal error shall be given.
+
+Opcode parsing
+
+	The opcode is the first string of text immediately after a newline
+	immediately before a space. The operands of the opcode are defined
+	to be the space-separated strings after the opcode up until a
+	newline character is present. If the line begins with a space ( ),
+	a tab (Tab), a newline (Enter), a forward slash (/), or a hash (#),
+	then the line is to be ignored. If an opcode contains more operands
+	than which are valid, the extra operands are to be ignored. If any 
+	opcode is invalid, the data within an operand does not match what 
+	the opcode expects, or opcode-specific parsing rules are broken, 
+	a fatal error is to be thrown. Invalid syntax in this form is not 
+	to be ignored.
+
+Opcodes
+
+	Valid opcodes include New, Func, Call, End, If, Return, and Escape.
+	The first character of an opcode must be capitalized, with the rest
+	being lowercase. Opcodes New and If accept two operands. Opcodes
+	Func, Call, and Escape accept one operand. Opcodes End and Return
+	accept no operands.
+
+Opcode New
+
+	The New opcode accepts a first operand as the name of the variable
+	to store as a stringly value and the second as the data to place
+	inside of the variable in question. For the second operand, if the
+	string is enclosed by the double quotation (") character, then
+	the data is used to represent an expression that will be evaluated,
+	rather than literal data. The result of the expression is to be
+	stored. In the case the string is enclosed by the single quotation 
+	(') character, then the data is to be treated as literal or
+	unparsed. If there are any spaces inside of those, the space is
+	not considered a break to a new operand, but as part of the data
+	itself. If there is no marking, then the string is used to
+	represent a variable by name who's data will be copied into the
+	referenced variable by the first operand.
+
 [ XXX - finish me ]
