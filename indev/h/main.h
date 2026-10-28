@@ -19,6 +19,7 @@
 #define errcodenumericoverflow 6
 #define errcodenumericunderflow 7
 #define errcodestackerror 8
+#define errcodeundefined 9
 
 struct Memory;
 

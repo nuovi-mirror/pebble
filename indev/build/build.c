@@ -39,6 +39,8 @@ const char *platform_freestand_srcs[] = {
 	"platform/freestand/inputl.c",
 	"platform/freestand/ffillmem.c",
 	"platform/freestand/clockms.c",
+	"platform/freestand/inputn.c",
+	"platform/freestand/snooze.c",
 
 	NULL
 };

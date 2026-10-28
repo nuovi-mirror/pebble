@@ -1,3 +1,6 @@
+#ifndef platform_inputn_
+#define platform_inputn_
+
 #include "inputn.h"
 #include "main.h"
 #include <termios.h>
@@ -36,3 +39,5 @@ unsigned long inputn (char *buff, unsigned long size) {
 	/* buff[i] = '\0'; XXX no end char */
 	return i;
 }
+
+#endif
