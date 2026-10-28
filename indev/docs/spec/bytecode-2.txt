@@ -201,7 +201,7 @@ Opcode New
 Opcode Func
 
 	The Func opcode accepts one operand, being the name of the function
-	to define. This should be strigly. This will begin defining a
+	to define. This should be stringly. This will begin defining a
 	function until the End statement is specified, in which all the
 	opcodes which are in-between the Fund and End opcodes are to be
 	treated as the information associated with the function. If the
@@ -250,5 +250,65 @@ Opcode Return
 	inside of the caller that was used to call the function. This
 	opcode is only valid inside of a function. If this opcode is seen
 	outside of a function, then a fatal error shall be thrown.
+
+Opcode Call
+
+	The Call opcode accepts one operand, which is the name of the
+	function to call. The function's name specified by this operand
+	is used as the new point of execution. The current point of
+	execution should be saved to a new location for the duration of
+	the function, then the current location of execution should become
+	the entry point of the function specified, defined as the first
+	opcode after the Func opcode defining the function. At the end
+	of the function, defined above, the caller should be returned
+	to as described by End and Return. If the function requested does
+	not exist, then a fatal error should be thrown.
+
+Opcode IF
+
+	The If opcode accepts two operands, which is the name of the
+	function to call if the second operand's expression resolves to
+	zero (0) numeric, and the second operand, being the expression
+	in reference. The expression in the second opcode should be
+	enclosed by the double quotation (") character, as with the
+	New instruction. If the expression resolves to the numeric
+	value zero (0), then the function requested by the first operand
+	will be called, as described by the Call opcode. If the expression
+	described by the second operand is invalid or does not resolve to
+	the numeric value zero (0), then execution shall continue.
+
+Opcode Escape
+
+	The Escape opcode accepts one operand, being the name of the escape
+	sequence to call. If the escape sequence in reference does not
+	exist, a fatal error shall be thrown. Because Escape in itself is
+	an opcode, the escape sequence being called remains on the
+	instruction boundary and is treated as one instruction.
+
+Calling native code
+
+	An interface for native code should be supplied by the
+	implementation. The interface for native code is defined fully by
+	the implementation, as long as it contains a way for native code
+	to read and write variables inside of the virtual machine. The
+	code for a native implementation of a routine is defined as an
+	escape sequence, or an escape for short, and is to be executed
+	using the Escape instruction described above. Arguments shall
+	be passed to native code from the perspective of the Pebble
+	programmer via special variables. This is also the way return
+	values are passed from native code to Pebble programs. These 
+	variables are separated by naming convention, starting with the
+	characters '__Escape_', followed immediately by the name of the
+	escape sequence, followed by the characters '_ARG' for arguments
+	or '_RET' for return values, and finally followed by either the
+	argument number for arguments or the return number for returns.
+	These numbers begin at zero and may go up to any arbitrary value
+	as long as the platform allows it. Native code may store data
+	surviving beyond the instruction boundary via this same interface,
+	creating variables of the naming convention starting with 
+	'__Escape_', followed immediately by the escape sequence name,
+	followed immediately by the underscore (_) character, followed by
+	any arbitrary ASCII string the escape sequence wishes to add, or
+	they may use some other implementation-defined method.
 
 [ XXX - finish me ]
