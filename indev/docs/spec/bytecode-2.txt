@@ -198,4 +198,57 @@ Opcode New
 	represent a variable by name who's data will be copied into the
 	referenced variable by the first operand.
 
+Opcode Func
+
+	The Func opcode accepts one operand, being the name of the function
+	to define. This should be strigly. This will begin defining a
+	function until the End statement is specified, in which all the
+	opcodes which are in-between the Fund and End opcodes are to be
+	treated as the information associated with the function. If the
+	function name already exists, then this is to override the existing
+	definition. The function is only valid to be called until after
+	the Func keyword appears with the function name. Until then,
+	the function is unmapped and calling it is to throw a fatal error.
+	The information associated with the function is not to be executed
+	as instructions until the function is called. The valid opcodes
+	that may be associated with a function are New, Call, If, Escape,
+	and Return. A function is not permitted to be defined inside of
+	another function, hence why Func and End are not permitted inside
+	of a function. Function's opcodes are to be mapped logically
+	line-by-line; Once the Func keyword is found, the function name
+	is mapped to the first opcode of the function body. Every opcode
+	after this point until End is to be logically appended into the
+	function's definition until the End opcode. A function can be
+	called before it is complete, but in doing so, the rest of the
+	function body that has not been seen is not mapped. However, by
+	pure chance, this does still execute the entire function, since
+	the calling of the function shall check against the End opcode
+	for each opcode after the function's entry point, and finish
+	the calling if so. Hence, although the function is not fully
+	defined, it can still be called with the entire definition of
+	opcodes being executed.
+
+Opcode End
+
+	The End opcode accepts no operands. This opcode is used to end the
+	definition of a function declared by the Func opcode. Once this
+	opcode is hit, the function's data should be fully mapped, unless
+	the function is being called before a full definition, as described
+	above. A return to the caller is implicit at an End statement.
+	Returning rules as defined by the Return opcode are to be
+	applied to this implicit return. This opcode is only valid within
+	the scope of a function. If this opcode is found without a function
+	definition related to it, a fatal error is to be thrown.
+
+Opcode Return
+
+	The Return opcode accepts no operands. This opcode is used to
+	return early from a function. When this opcode is hit, the
+	caller of the function execution is currently inside of is to be
+	left, and the caller is to be returned to. The returned address
+	shall be the address of the opcode immediately after the statement
+	inside of the caller that was used to call the function. This
+	opcode is only valid inside of a function. If this opcode is seen
+	outside of a function, then a fatal error shall be thrown.
+
 [ XXX - finish me ]
