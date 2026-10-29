@@ -36,6 +36,10 @@ Expressions
 	parser stop. A warning may be given if the implementation deems
 	it fit.
 
+	The two exceptions to this rule are: If the expression is
+	surrounded by the '(' and ')' characters at the start and end,
+	respectively, and if a numeric value begins with the '-' character.
+
 Operators
 
 	An operator is a piece of an expression representing data to
@@ -239,6 +243,22 @@ String Concat
 	with the string in the left operand. If the platform or
 	implementation defines the string as too long, a fatal error
 	shall be thrown. The resulting merged string will be returned.
+
+Operation precedence
+
+	Operation precedence is classified into tiers, and lower tiers
+	should be evaluated first, unless the expression is enclosed
+	by the '(' starting character and the ')' ending character. If
+	this is true, then the expression enclosed in reference is to be
+	evaluated first. Standard groupings include group zero, which
+	contains operators Numeric Multiplication, Numeric Division, and
+	Numeric Modulo. Group one includes Numeric Addition and Numeric
+	Subtraction. Group two includes Numeric Less Than, Numeric Greater
+	Than, and Numeric Equal to. Group three includes String Concat.
+	Group four includes String Equals, String Starts With, and String
+	Ends With. If there is more than one operation present in the
+	same group packed within one expression, then the expression
+	furthest to the left hand side will be evaluated first.
 
 Opcode parsing
 
