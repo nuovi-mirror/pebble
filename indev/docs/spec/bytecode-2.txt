@@ -411,4 +411,17 @@ Calling native code
 	any arbitrary ASCII string the escape sequence wishes to add, or
 	they may use some other implementation-defined method.
 
+Execution
+
+	The program is to begin executing at the first opcode in the data
+	stream or program. 
+
+	An implementation or platform may define limits for anything it
+	wishes, such as string lengths, variable count, instructions
+	executed, and so on.
+
+	All variables are global and shall remain valid after definition
+	until the implementation decides they are no longer of use. They
+	must be, at minimum, available until they are no longer referenced.
+
 [ XXX - finish me ]
