@@ -157,8 +157,88 @@ Numeric multiplication
 	operator in question should be converted to the correct type
 	appropriately. In the case where such operation is not possible
 	or permitted, a fatal error shall be given. This operator shall
-	be able to detect if the operation may underflow or overflow, and in
-	such case, a fatal error shall be given.
+	be able to detect if the operation may underflow or overflow, and
+	in such case, a fatal error shall be given.
+
+Numeric Modulo
+
+	The Numeric Modulo operation is marked by the percent (%) symbol
+	and is used to represent the logical operation of dividing the
+	right numeric value by the left numeric value and returning the
+	remainder of the operation. If there is no remainder, the result
+	should be zero (0). This operation returns either a numeric
+	value of subclass word or sword. Floating-point values cannot be
+	returned by this operation. This operation does not explicitly
+	have to perform the division and is permitted to use another
+	operation used to acquire the same result, but as with the other
+	operators, if a fault of any type may occur in how the
+	implementation performs this operation, should throw a fatal error.
+	If the subclasses of the operands do not match, the subclass in
+	question should be converted to a the correct type appropriately.
+	If this is not possible or permitted, a fatal error shall be
+	thrown.
+
+Numeric Equals
+
+	The Numeric Equals operation is marked by two equal to (=)
+	characters and is used to compare two numeric operators. If
+	the two numeric operators match, this operation will return
+	zero (0). If they do not, it will return one (1). If the subclasses
+	of the operands do not match, the operator in question should be
+	converted to the appropriate type. If this is not possible or
+	permitted, a fatal error shall be thrown.
+
+Numeric Less Than
+
+	The Numeric Less Than operation is marked by the less than (<)
+	character and is used to compare two numeric operators. If the
+	left numeric operator is less than the right numeric operator,
+	zero (0) is returned. If not, one (1) is returned. If the
+	subclasses of the operators do not match, the operator in
+	question should be converted to the appropriate type. If this
+	is not possible or permitted, a fatal error shall be given.
+
+Numeric Greater Than
+
+	The Numeric Greater Than operator is marked by the greater than
+	(>) character and is used to compare two numeric operands and
+	return zero (0) if the left operator is greater than the right
+	operator, and one (1) if it is not. If the subclasses of the
+	operators of the operators do not match, the operator in question
+	should be converted to the appropriate type. If this is not
+	possible or permitted, a fatal error shall be given.
+
+String Equals
+
+	The String Equals operation is marked by the question mark (?)
+	character followed by the equals (=) character and is used to
+	compare two stringly values. If the two operands are the same,
+	then zero (0) should be returned. If not, one (1) should be
+	returned.
+
+String Starts With
+
+	The String Starts With operation is marked by the characters
+	's?='. This operation will check if the first characters in
+	the string of the first operand are the same as the string
+	in the second operand. If they match, zero (0) will be
+	returned. If not, one (1) will be returned.
+
+String Ends With
+
+	The String Ends With operation is marked by the characters 'e?='.
+	This operation will check if the last characters of the string
+	in the left operand are equal to the characters in the right
+	operand. If they match, zero (0) will be returned. If not, 
+	one (1) will be returned.
+
+String Concat
+
+	The String Concat operation is marked by the 's++' characters.
+	This operation will append the string in the right operand
+	with the string in the left operand. If the platform or
+	implementation defines the string as too long, a fatal error
+	shall be thrown. The resulting merged string will be returned.
 
 Opcode parsing
 
@@ -264,7 +344,7 @@ Opcode Call
 	to as described by End and Return. If the function requested does
 	not exist, then a fatal error should be thrown.
 
-Opcode IF
+Opcode If
 
 	The If opcode accepts two operands, which is the name of the
 	function to call if the second operand's expression resolves to
