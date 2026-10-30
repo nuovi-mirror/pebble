@@ -40,6 +40,10 @@ Expressions
 	surrounded by the '(' and ')' characters at the start and end,
 	respectively, and if a numeric value begins with the '-' character.
 
+	If any stringly value inside of an expression is a valid variable
+	name, then the variable in reference shall be substituted with
+	it's value at the time of evaluating the expression.
+
 Operators
 
 	An operator is a piece of an expression representing data to
