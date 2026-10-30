@@ -1,0 +1,12 @@
+New file 'test.txt'
+New data '\tWelcome,\nTo The World of Tomorrow!\n'
+
+New __Escape_std.fs.file.write_ARG0 <file>
+New __Escape_std.fs.file.write_ARG1 <data>
+
+_PRINT2 file
+_PRINT2 data
+
+Escape std.fs.file.write
+
+_PRINT2 __Escape_std.fs.file.write_RET0
