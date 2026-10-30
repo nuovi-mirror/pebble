@@ -20,6 +20,7 @@
 #define errcodenumericunderflow 7
 #define errcodestackerror 8
 #define errcodeundefined 9
+#define errcodeescapesequencenotfound 10
 
 struct Memory;
 
