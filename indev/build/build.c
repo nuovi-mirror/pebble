@@ -51,7 +51,7 @@ const char *platform_c_srcs[] = {
 	"platform/c/exitproc.c",
 	"platform/c/setmem.c",
 	"platform/c/print.c",
-	"platform/c/readfile.c",
+	"platform/c/readfile.c", /* XXX depreciated file I/O interface */
 	"platform/c/str2ul.c",
 	"platform/c/str2l.c",
 	"platform/c/str2d.c",
@@ -60,6 +60,7 @@ const char *platform_c_srcs[] = {
 	"platform/c/appendstr.c",
 	"platform/c/lalloc.c",
 	"platform/c/strtokn.c",
+	"platform/c/files.c", /* XXX new file I/O interface */
 
 	NULL
 };
@@ -94,9 +95,7 @@ const char *ffi_ansi_srcs[] = {
 	"ffi/platform/ansi/std/term/color/basic/fore.c",
 	"ffi/platform/ansi/std/term/color/basic/back.c",
 	"ffi/platform/ansi/std/term/color/basic/reset.c",
-
 	"ffi/platform/ansi/std/term/cursor/moveAbsolute.c",
-
 	"ffi/platform/ansi/std/term/screen/clear.c",
 
 	NULL
@@ -106,13 +105,12 @@ const char *ffi_ansi_srcs[] = {
 const char *ffi_c_srcs[] = {
 	"ffi/platform/c/test/hello.c",
 	"ffi/platform/c/test/getseed.c",
-
 	"ffi/platform/c/std/io/print.c",
 	"ffi/platform/c/std/io/printLn.c",
 	"ffi/platform/c/std/io/input.c",
-
 	"ffi/platform/c/std/misc/random.c",
 	"ffi/platform/c/std/misc/sleep.c",
+	"ffi/platform/c/std/fs/file/write.c",
 
 	NULL
 };

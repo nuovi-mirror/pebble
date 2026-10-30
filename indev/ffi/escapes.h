@@ -32,6 +32,12 @@ static const struct EscapeSequence escapes[] = {
 	{"std.misc.sleep", escape_std_misc_sleep},
 #endif
 
+#ifndef notime
+	/* XXX not implimented 
+	{"std.misc.time", escape_std_misc_time},
+	*/
+#endif
+
 #ifdef graphics
 	/* graphics libraries */
 	{"gs.2d.window.create", escape_gs_2d_window_create},
@@ -52,6 +58,18 @@ static const struct EscapeSequence escapes[] = {
 	{"std.proc.spawn", escape_std_proc_spawn},
 	{"std.proc.wait", escape_std_proc_wait},
 #endif
+
+#ifdef fs
+	{"std.fs.file.write", escape_std_fs_file_write},
+	/* XXX not implimented 
+	{"std.fs.file.read", escape_std_fs_file_read},
+	{"std.fs.file.writeBinary", escape_std_fs_file_writeBinary}.
+	{"std.fs.dir.change", escape_std_fs_dir_change},
+	{"std.fs.dir.get", escape_std_fs_dir_get},
+	{"std.fs.dir.list", escape_std_fs_dir_list},
+	*/
+#endif
+
 };
 
 void callEscape (const char *name, unsigned long long seed, FFIvars *vars,
