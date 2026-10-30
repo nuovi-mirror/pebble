@@ -32,6 +32,9 @@ int main (int argc, char **argv) {
 	config.proc = (char *)&proc[0];
 	config.fs = (char *)&fs[0];
 
+	bufinit(&config.usercflags);
+	bufinit(&config.userldflags);
+
 	strcpy(config.compiler, "cc");
 	strcpy(config.program, "bin/cpebble");
 	strcpy(config.build, "default");
@@ -39,7 +42,7 @@ int main (int argc, char **argv) {
 	strcpy(config.precompiler, "");
 	strcpy(config.graphics, "");
 	strcpy(config.terminal, "ansi");
-	strcpy(config.cflags, "-Ih -Iffi -std=c99 ");
+	strcpy(config.cflags, "-iquote h -Iffi -std=c99 ");
 
 	/* XXX not supported by all compilers 
 	 * strcpy(config.ldflags, "-Wl,--gc-sections ");
@@ -68,15 +71,16 @@ int main (int argc, char **argv) {
 		return 0;
 	}
 
-	printf("cflags   : %s\n", config.cflags);
-	printf("ldflags  : %s\n", config.ldflags);
+	/* XXX removed
+	printf("cflags   : %s %s\n", config.cflags, bufstr(&config.usercflags));
+	printf("ldflags  : %s %s\n", config.ldflags, bufstr(&config.userldflags));
 	printf("platform : %s\n", config.platform);
+	*/
 
 	compile(&config, src, srccount, objs);
 	linkprog(&config, objs, srccount);
 
-	for (unsigned int i = 0; i < srccount; i++) 
-		free(objs[i]);
+	for (unsigned int i = 0; i < srccount; i++) free(objs[i]);
 
 	return 0;
 }

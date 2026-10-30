@@ -4,9 +4,13 @@
 #undef NULL
 #define NULL ((void *)0)
 
+typedef struct Buf { char *data; unsigned long len, cap; } Buf;
+
 typedef struct Config {
 	char *cflags; /* compiler flags */
 	char *ldflags; /* linker flags */	
+	Buf usercflags; /* cflags= from the command line (appended last) */
+	Buf userldflags; /* ldflags= from the command line (appended last) */
 
 	char *program; /* output binary */
 	char *compiler; /* C compiler path */
@@ -42,6 +46,15 @@ extern const char *ffi_ansi_srcs[];
 /* helper.c */
 void error (const char *msg);
 void usage (void);
+
+/* buf.c */
+void bufinit (Buf *b);
+void buffree (Buf *b);
+const char *bufstr (const Buf *b);
+void bufaddn (Buf *b, const char *s, unsigned long n);
+void bufadd (Buf *b, const char *s);
+void bufshquote (Buf *b, const char *s);
+int addflags (Buf *dst, const char *s);
 
 /* args.c */
 void parseargs (Config *config, char *argument);

@@ -1,3 +1,5 @@
+#define _POSIX_C_SOURCE 200809L /* XXX needed for Linux */
+
 #include "ffi.h"
 #include "limits.h"
 #include <unistd.h>

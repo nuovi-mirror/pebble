@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 
-const char *getmain (Config *config) {
+const char *getmain 
+(Config *config) 
+{
 	if (strcmp(config->platform, "freestand") == 0) return "platform/freestand/main.c";
 	if (strcmp(config->platform, "c") == 0) return "platform/c/main.c";
 	if (strcmp(config->platform, "posix") == 0) return "platform/posix/main.c";
@@ -11,17 +13,22 @@ const char *getmain (Config *config) {
 	if (strcmp(config->platform, "puredarwin") == 0) return "platform/puredarwin/main.c";
 
 	error("unknown platform");
-	return NULL; /* never reached */
+	return NULL; /* XXX never hit */
 }
 
-void addsrcs (const char **srcs, char **all, unsigned int *count) {
-	for (unsigned int i = 0; srcs[i] != NULL; i++) {
+void addsrcs 
+(const char **srcs, char **all, unsigned int *count) 
+{
+	for (unsigned int i = 0; srcs[i] != NULL; i++) 
+	{
 		all[*count] = srcs[i];
 		(*count)++;
 	}
 }
 
-unsigned int mksrclist (Config *config, char **srcs) {
+unsigned int mksrclist 
+(Config *config, char **srcs) 
+{
 	unsigned int count = 0;
 
 	addsrcs(vm_srcs, srcs, &count);

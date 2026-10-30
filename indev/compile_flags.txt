@@ -1,5 +1,5 @@
 -std=c99
--Ih
+-iquote h
 -Iffi
 -Wall 
 -Wextra 

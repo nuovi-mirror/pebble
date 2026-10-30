@@ -12,11 +12,9 @@
 #include "variables.h"
 #include "strtokn.h"
 
-#include <stdio.h> /* XXX debug */
-
-#include <limits.h> /* XXX remove this at some point */
-#include <float.h> /* XXX remove this at some point */
-#include <math.h> /* XXX remove this at some point */
+#include <limits.h>
+#include <math.h>
+#include <float.h>
 
 Value resolveleaf 
 (Value v, VarMap *vars)

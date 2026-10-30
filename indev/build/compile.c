@@ -3,25 +3,34 @@
 #include <stdlib.h>
 #include <string.h>
 
-void compiledeps (Config *config, char *srcs, char *objs) {
-	char cmd[4096]; /* command buffer */
+void compiledeps 
+(Config *config, char *srcs, char *objs) 
+{
+	Buf cmd;
+	int result;
 
-	sprintf(cmd, "%s%s %s %s -c -o %s %s", 
-		config->precompiler, 
-		config->precompiler[0] != '\0' ? " " : "",
-		config->compiler,
-		config->cflags,
-		objs,
-		srcs
-	);
+	bufinit(&cmd);
+	if (config->precompiler[0] != '\0') { bufadd(&cmd, config->precompiler); bufadd(&cmd, " "); }
+	bufadd(&cmd, config->compiler);
+	bufadd(&cmd, " ");
+	bufadd(&cmd, config->cflags);
+	bufadd(&cmd, " ");
+	bufadd(&cmd, bufstr(&config->usercflags)); /* last, so the user wins */
+	bufadd(&cmd, " -c -o ");
+	bufadd(&cmd, objs);
+	bufadd(&cmd, " ");
+	bufadd(&cmd, srcs);
 
 	printf("CC %s\n", srcs);
 
-	int result = system(cmd);
+	result = system(bufstr(&cmd));
+	buffree(&cmd);
 	if (result != 0) error("compiler failed");
 }
 
-void compile (Config *config, char **srcs, unsigned int count, char **objs) {
+void compile 
+(Config *config, char **srcs, unsigned int count, char **objs) 
+{
 	char obj[1024];
 
 	for (unsigned int i = 0; i < count; i++) {
@@ -36,35 +45,44 @@ void compile (Config *config, char **srcs, unsigned int count, char **objs) {
 	}
 }
 
-void linkprog (Config *config, char **objs, unsigned int count) {
-	char cmd[16386]; /* command buffer */
+void linkprog 
+(Config *config, char **objs, unsigned int count) 
+{
+	Buf cmd;
+	int result;
 
-	sprintf(cmd, "%s%s %s %s -o %s", 
-		config->precompiler, 
-		config->precompiler[0] != '\0' ? " " : "",
-		config->compiler,
-		config->ldflags,
-		config->program
-	);
+	bufinit(&cmd);
+	if (config->precompiler[0] != '\0') { bufadd(&cmd, config->precompiler); bufadd(&cmd, " "); }
+	bufadd(&cmd, config->compiler);
+	bufadd(&cmd, " ");
+	bufadd(&cmd, config->ldflags);
+	bufadd(&cmd, " ");
+	bufadd(&cmd, bufstr(&config->userldflags));
+	bufadd(&cmd, " -o ");
+	bufshquote(&cmd, config->program);
 
-	unsigned long offset = strlen(cmd);
-
-	for (unsigned int i = 0; i < count; i++) {
-		sprintf(cmd + offset, " %s", objs[i]);
-		offset = strlen(cmd);
+	for (unsigned int i = 0; i < count; i++) 
+	{
+		bufadd(&cmd, " ");
+		bufadd(&cmd, objs[i]);
 	}
 
 	printf("LD %s\n", config->program);
 
-	if (system(cmd) != 0) error("linker failed");
+	result = system(bufstr(&cmd));
+	buffree(&cmd);
+	if (result != 0) error("linker failed");
 }
 
-void clean (Config *config, char **srcs, unsigned int count) {
+void clean (
+Config *config, char **srcs, unsigned int count) 
+{
 	char objs[1024], deps[1024];
 
 	remove(config->program);
 
-	for (unsigned int i = 0; i < count; i++) {
+	for (unsigned int i = 0; i < count; i++) 
+	{
 		sprintf(objs, "%s", srcs[i]);
 		objs[strlen(objs) - 1] = 'o'; /* same logic as before */
 
