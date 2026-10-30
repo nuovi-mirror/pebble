@@ -44,7 +44,7 @@ unsigned long writefile
 	if (datasize == 0) return 0;
 	if (data == NULL) return 0;
 
-	FILE *f = fopen(path, "rw");
+	FILE *f = fopen(path, "wb");
 	if (!f) return 0;
 
 	/*
@@ -55,6 +55,8 @@ unsigned long writefile
 
 	wsize = datasize;
 
-	unsigned long wtnsize = fwrite(data, wsize, 1, f);
+	unsigned long wtnsize = fwrite(data, 1, wsize, f);
+
+	if (fclose(f) != 0) return 0;
 	return wtnsize;
 }
