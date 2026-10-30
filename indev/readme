@@ -55,8 +55,9 @@ Building from source
 	
 	To build from source, simply run
 
-		$ cc -o make build/*.c # build the building tool
-		$ ./make # build the VM
+		$ mkdir -p bin/
+		$ cc -o bin/make build/*.c # build the building tool
+		$ ./bin/make # build the VM
 		$ ./bin/cpebble tools/test.pebble # test suite one
 		$ ./bin/cpebble tools/test-new.pebble # test suite two
 
