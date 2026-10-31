@@ -179,23 +179,21 @@ struct PackedLimits setlimits
 	limits.misc_vmargmaxdigits = 2;
 	limits.misc_strlen = limits.cmd_args * limits.cmd_chars;
 
+	limits.file_escapelen_add = 512;
+	limits.file_maxsize = (12 * 1024 * 1024);
+
 	limits.instruction_new_destsize = 32;
 	limits.instruction_new_datasize = 32;
 
-	/* temp holds the whole source file while it is parsed, plus what parsing leaves behind */
 	limits.allocator_temp_maxmem = (limits.misc_maxfilebuffersize 
 		+ (limits.instructions_max * LIMITS_TEMP_PER_INSTRUCTION) + LIMITS_TEMP_SLACK + sizeof(struct Arena)); 
 
-	/* persist is never freed. it holds everything a program keeps: what loading it costs, 
-	 * the instruction cache, a stack for every task, and room for its variables, functions 
-	 * and strings. the VM cannot give any of it back, so the sum has to be right */
 	limits.allocator_persist_maxmem = (LIMITS_PERSIST_FIXED 
 		+ (limits.instructions_max * LIMITS_PERSIST_PER_INSTRUCTION)
 		+ (limits.instructions_maxcache * LIMITS_PERSIST_PER_CACHED)
 		+ (limits.tasks_max * ((limits.tasks_depth * sizeof(StackFrame)) + LIMITS_PERSIST_PER_TASK))
 		+ LIMITS_PERSIST_DATA + sizeof(struct Arena));
 
-	/* scratch is reset after every instruction; this many full-size strings is plenty */
 	limits.allocator_scratch_maxmem = ((LIMITS_SCRATCH_STRINGS * limits.misc_strlen) + sizeof(struct Arena));
 	limits.allocator_IRAlloc_maxmem = ((limits.instructions_maxbuffersize) + sizeof(struct Arena));
 	limits.allocator_lalloc_maxretries = 3;

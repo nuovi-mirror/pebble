@@ -61,6 +61,8 @@ const char *platform_c_srcs[] = {
 	"platform/c/lalloc.c",
 	"platform/c/strtokn.c",
 	"platform/c/files.c", /* XXX new file I/O interface */
+	"platform/c/unescape.c",
+	"platform/c/escape.c",
 
 	NULL
 };
@@ -111,6 +113,7 @@ const char *ffi_c_srcs[] = {
 	"ffi/platform/c/std/misc/random.c",
 	"ffi/platform/c/std/misc/sleep.c",
 	"ffi/platform/c/std/fs/file/write.c",
+	"ffi/platform/c/std/fs/file/read.c",
 
 	NULL
 };

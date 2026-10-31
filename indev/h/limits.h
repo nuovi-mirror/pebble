@@ -39,6 +39,10 @@ struct Limits {
 	/* FFI related */
 	unsigned long escapes_namesize; /* max chars for an escape name */
 
+	/* file related */
+	unsigned long file_escapelen_add; /* size to add to a file len when escaping data */
+	unsigned long file_maxsize; /* max file size */
+
 	/* misc */
 	unsigned long misc_maxfilebuffersize; /* max buffer size for the bytecode file */
 	unsigned long misc_vmargmaxdigits; /* max number of arg digits, eg '2' for up to '99' args */
