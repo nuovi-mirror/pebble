@@ -62,7 +62,7 @@ int main
 	arc4random_buf(&seed, sizeof(seed));
 
 	Args cliargs = initargs(argc, argv);
-	Stack *stack = initstack((limits.stack_callStack_frameSize *limits.stack_callStack_cap), &mem);
+	Stack *stack = initstack((limits.stack_callStack_cap), &mem);
 
 	int ret = vmmain(cliargs, stack, seed, &mem, &limits);
 	freestack(stack);

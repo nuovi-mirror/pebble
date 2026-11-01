@@ -288,11 +288,12 @@ int isexpression (const char *str)
 }
 
 /* wrapper */
-Value guessvaluetypeorexpr (char *data, Arena *tempAlloc, Arena *persistAlloc)
+Value guessvaluetypeorexpr 
+(char *data, Arena *tempAlloc, Arena *persistAlloc)
 {
 	if (isexpression(data)) {
 		int ok;
-		ExprNodeData tree = str2expr(data, &ok, tempAlloc, persistAlloc);
+		ExprNodeData tree = str2expr(data, &ok, persistAlloc, persistAlloc);
 
 		if (ok && tree.Type == ExprDataNode && tree.Node != NULL) {
 			Value v;

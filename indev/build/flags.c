@@ -80,6 +80,7 @@ void setflags (Config *config) {
 			"-Wvla "
 			"-Wdouble-promotion "
 			"-Wfloat-equal "
+			"-Ddebug "
 		);
 
 	else

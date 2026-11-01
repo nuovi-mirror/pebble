@@ -147,11 +147,6 @@ struct PackedLimits setlimits
 	struct Memory mem = {0};
 	struct PackedLimits packed = {0};
 
-	/* the knobs: what a program is allowed to be. the arena sizes below are worked 
-	 * out from these, so they cannot disagree with each other. a program that is 
-	 * too big then gets a clear 'cap reached' error, instead of 'Out of memory!' 
-	 * at some arbitrary point. for a small target, lower instructions_max, 
-	 * tasks_max and tasks_depth; everything else follows */
 	limits.instructions_max = 200000;
 	limits.tasks_max = 32;
 	limits.tasks_depth = 256;

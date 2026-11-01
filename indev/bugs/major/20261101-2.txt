@@ -1,0 +1,13 @@
+Memory Lifetime Bug
+Class: Major
+Discovered: 20261101
+Status: PATCHED (20261101)
+
+This bug was caused by a path on the evaluator allocating parsed IR trees
+to an arena that is cleared before the data is used last. The area
+in the arena is not written back over, so the bug is hard to spot. This
+bug was in the expression evaluator, affecting all platforms.
+
+This can be recreated using a very large program which creates
+too many expressions, causing the structures they reside in to point
+to invalid memory

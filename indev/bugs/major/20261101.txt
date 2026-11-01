@@ -1,0 +1,18 @@
+Heap Overflow Bug
+Class: Major
+Discovered: 20261101
+Status: PATCHED (20261101)
+
+This bug was caused by an invalid check in the language-level call-stack
+(allocated on the heap), causing an immediate out-of-bounds write and
+a segmentation fault. This bug has been patched for platforms c, posix,
+and openbsd. 
+
+This can be replicated with
+
+Func a		/ define the function
+New x '1'	/ to force a real stack push
+Call a		/ call itself
+New x '1'	/ to force a real stack push
+End		/ end the function
+Call 1		/ init

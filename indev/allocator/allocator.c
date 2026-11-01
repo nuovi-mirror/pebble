@@ -14,11 +14,11 @@ struct Arena *initAlloc
 	if (size < sizeof(struct Arena)) error(errfatal, errcodeallocatorerror, "Backing allocation is too small!");
 
 	/* create the arena */
-	arena->size = size; 	/* set the size */
+	arena->size = size - sizeof(Arena);	    /* set the size */
 	arena->curr_ptr = srt_ptr;  /* set the current pointer */
 	arena->arena_ptr = srt_ptr; /* set the start of the arena */
 
-#ifdef nozeromem
+#ifndef nozeromem
 	/* initalize the memory to 0 */
 	ffillmem(0, (volatile void *)arena->arena_ptr, arena->size);
 #endif
@@ -33,7 +33,7 @@ void *alloc
 	unsigned long misalign = used % ARENA_ALIGNMENT;
 	unsigned long padding = misalign ? (ARENA_ALIGNMENT - misalign) : 0;
 
-	if (used + padding + size > arena->size) error(errfatal, errcodeallocationerror, "Out of memory!");
+	if (used + padding + size > arena->size - sizeof(Arena)) error(errfatal, errcodeallocationerror, "Out of memory!");
 
 	arena->curr_ptr += padding;
 	void *result = arena->curr_ptr;
@@ -46,13 +46,13 @@ void freeAllocator
 {
 	/* XXX does nothing now since the backings are now managed by the platform
 	 * abstraction layer - it is their job to free it */
+	return;
 }
 
 void resetAllocator 
 (struct Arena *arena) 
 {
-	if (arena == NULL)
-		return;
+	if (arena == NULL) return;
 
 	/* XXX dont zero it - returned memory may contain old data */
 	arena->curr_ptr = arena->arena_ptr;
@@ -61,12 +61,8 @@ void resetAllocator
 
 unsigned long getAllocatorSizeUsed 
 (struct Arena *arena) 
-{ 
-	return (unsigned long)(arena->curr_ptr - arena->arena_ptr); 
-}
+{ return (unsigned long)(arena->curr_ptr - arena->arena_ptr); }
 
 unsigned long getAllocatorSizeRemaining 
 (struct Arena *arena) 
-{ 
-	return arena->size - getAllocatorSizeUsed(arena); 
-}
+{ return arena->size - getAllocatorSizeUsed(arena); }

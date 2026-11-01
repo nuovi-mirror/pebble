@@ -821,7 +821,8 @@ unsigned long interpret
 			return pc + 1;
 		}
 
-		/* internal opcodes */
+#ifdef debug
+		/* internal / debug opcodes */
 		case Opcode_Internal_PRINT: 
 		{
 			char buf[32];
@@ -1000,6 +1001,9 @@ unsigned long interpret
 			print(buff);
 			print("\n");
 		}
+#endif /* #ifdef debug */
+
+		default: error(errfatal, errcodemalformedinput, "Opcode is invalid!");
 	}
 
 	/* no fancy control flow needed here - incriment the pc */
