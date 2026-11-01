@@ -4,11 +4,10 @@
 typedef struct Arena {	    /* template for an arena */
 	char *curr_ptr;	    /* pointer to the next free block */
 	char *arena_ptr;    /* pointer to the start of the arena */
-	unsigned long size; /* size of the arena in bytes */
+	unsigned long size; /* usable bytes, i.e. what alloc() may hand out */
 } Arena;
 
-/* widest commonly-aligned types */
-/* used to compute safe alignment boundaries */
+/* widest commonly-aligned types; used to compute safe alignment boundaries */
 typedef union {
 	long long ll;
 	long double ld;
@@ -17,11 +16,13 @@ typedef union {
 
 #define ARENA_ALIGNMENT (sizeof(MaxAlign))
 
-struct Arena *initAlloc (void *backing, unsigned long size);
+unsigned long arenaBackingSize (unsigned long usable);
+
+struct Arena *initAlloc (void *backing, unsigned long backing_size);
 void *alloc (struct Arena *arena, unsigned long size);
 void freeAllocator (struct Arena *arena);
 void resetAllocator (struct Arena *arena);
 unsigned long getAllocatorSizeUsed (struct Arena *arena);
 unsigned long getAllocatorSizeRemaining (struct Arena *arena);
 
-#endif
+#endif /* #ifndef h_allocator_ */

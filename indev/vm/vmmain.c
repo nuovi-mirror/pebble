@@ -52,7 +52,7 @@ int vmmain
 
 	char *line;
 	unsigned long current_instruction_count = 0;
-	Instruction *program = alloc(IRAlloc, limits->allocator_IRAlloc_maxmem);
+	Instruction *program = alloc(IRAlloc, limits->instructions_maxbuffersize);
 
 	/* startup */
 	while ((line = findnewline(&filedata)) != NULL) 

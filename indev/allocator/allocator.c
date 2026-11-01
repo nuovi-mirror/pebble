@@ -2,21 +2,36 @@
 #include "ffillmem.h"
 #include "main.h"
 
-struct Arena *initAlloc 
-(void *backing, unsigned long size) 
+static unsigned long align_up
+(unsigned long n)
+{
+	unsigned long misalign = n % ARENA_ALIGNMENT;
+	return misalign ? (n + (ARENA_ALIGNMENT - misalign)) : n;
+}
+
+unsigned long arenaBackingSize
+(unsigned long usable)
+{
+	return align_up(sizeof(struct Arena)) + (ARENA_ALIGNMENT - 1) + usable;
+}
+
+struct Arena *initAlloc
+(void *backing, unsigned long backing_size)
 {
 	/* platform layer gives us backing memory */
 	if (backing == NULL) error(errfatal, errcodeallocatorerror, "Given a null backing pointer!");
 
+	unsigned long addr = (unsigned long)backing;
+	unsigned long overhead = align_up(addr + sizeof(struct Arena)) - addr;
+
+	if (backing_size < overhead) error(errfatal, errcodeallocatorerror, "Backing allocation is too small!");
+
 	struct Arena *arena = (struct Arena *)backing;
-	char *srt_ptr = (char *)backing + sizeof(struct Arena);
+	char *srt_ptr = (char *)backing + overhead;
 
-	if (size < sizeof(struct Arena)) error(errfatal, errcodeallocatorerror, "Backing allocation is too small!");
-
-	/* create the arena */
-	arena->size = size; 	    /* set the size */
-	arena->curr_ptr = srt_ptr;  /* set the current pointer */
-	arena->arena_ptr = srt_ptr; /* set the start of the arena */
+	arena->size = backing_size - overhead;
+	arena->curr_ptr = srt_ptr;
+	arena->arena_ptr = srt_ptr;
 
 #ifndef nozeromem
 	/* initalize the memory to 0 */
@@ -26,14 +41,18 @@ struct Arena *initAlloc
 	return arena; /* return a pointer to the new allocated arena */
 }
 
-void *alloc 
-(struct Arena *arena, unsigned long size) 
+void *alloc
+(struct Arena *arena, unsigned long size)
 {
-	unsigned long used = (unsigned long)(arena->curr_ptr - arena->arena_ptr);
+	unsigned long used = getAllocatorSizeUsed(arena);
+	unsigned long left = arena->size - used; /* XXX cannot underflow; used <= size */
 	unsigned long misalign = used % ARENA_ALIGNMENT;
 	unsigned long padding = misalign ? (ARENA_ALIGNMENT - misalign) : 0;
 
-	if (used + padding + size > arena->size) error(errfatal, errcodeallocationerror, "Out of memory!");
+	if (padding > left || size > left - padding) {
+		error(errfatal, errcodeallocationerror, "Out of memory!");
+		return NULL; /* XXX never hit */
+	}
 
 	arena->curr_ptr += padding;
 	void *result = arena->curr_ptr;

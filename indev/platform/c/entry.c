@@ -128,17 +128,30 @@ unsigned long long getrandom
 }
 #endif
 
-/* helper for default limits values */
-/* measured costs, in bytes. see the notes on how to re-measure them with _GETMEM */
-#define LIMITS_BYTES_PER_LINE 32		/* average line of source */
-#define LIMITS_TEMP_PER_INSTRUCTION 24		/* temp left behind by parsing one line */
-#define LIMITS_TEMP_SLACK (64 * 1024)
-#define LIMITS_PERSIST_FIXED (128 * 1024)	/* hash tables, FFI vars, args, ... */
-#define LIMITS_PERSIST_PER_INSTRUCTION 40	/* operand strings kept by the IR */
-#define LIMITS_PERSIST_PER_CACHED 160		/* an instruction cache entry */
-#define LIMITS_PERSIST_PER_TASK 64		/* task bookkeeping, besides its stack */
-#define LIMITS_PERSIST_DATA (2 * 1024 * 1024)	/* variables, functions, strings made at runtime */
-#define LIMITS_SCRATCH_STRINGS 512
+/* bits and bobs and such */
+struct SizingCosts {
+	unsigned long bytes_per_line;		/* average line of source */
+	unsigned long temp_per_instruction;	/* temp left behind by parsing one line */
+	unsigned long temp_slack;
+	unsigned long persist_fixed;		/* hash tables, FFI vars, args, ... */
+	unsigned long persist_per_instruction;	/* operand strings kept by the IR */
+	unsigned long persist_per_cached;	/* an instruction cache entry */
+	unsigned long persist_per_task;		/* task bookkeeping, besides its stack */
+	unsigned long persist_data;		/* variables, functions, strings made at runtime */
+	unsigned long scratch_strings;
+};
+
+static const struct SizingCosts default_costs = {
+	.bytes_per_line = 32,
+	.temp_per_instruction = 24,
+	.temp_slack = 64 * 1024,
+	.persist_fixed = 128 * 1024,
+	.persist_per_instruction = 40,
+	.persist_per_cached = 160,
+	.persist_per_task = 64,
+	.persist_data = 2 * 1024 * 1024,
+	.scratch_strings = 512,
+};
 
 struct PackedLimits setlimits
 (void)
@@ -146,6 +159,7 @@ struct PackedLimits setlimits
 	struct Limits limits = {0};
 	struct Memory mem = {0};
 	struct PackedLimits packed = {0};
+	const struct SizingCosts *costs = &default_costs; /* an embedder could take this as a parameter */
 
 	limits.instructions_max = 200000;
 	limits.tasks_max = 32;
@@ -170,7 +184,7 @@ struct PackedLimits setlimits
 
 	limits.escapes_namesize = 32;
 
-	limits.misc_maxfilebuffersize = (limits.instructions_max * LIMITS_BYTES_PER_LINE);
+	limits.misc_maxfilebuffersize = (limits.instructions_max * costs->bytes_per_line);
 	limits.misc_vmargmaxdigits = 2;
 	limits.misc_strlen = limits.cmd_args * limits.cmd_chars;
 
@@ -180,16 +194,20 @@ struct PackedLimits setlimits
 	limits.instruction_new_destsize = 32;
 	limits.instruction_new_datasize = 32;
 
-	limits.allocator_temp_maxmem = (limits.misc_maxfilebuffersize 
-		+ (limits.instructions_max * LIMITS_TEMP_PER_INSTRUCTION) + LIMITS_TEMP_SLACK + sizeof(struct Arena)); 
+	limits.allocator_temp_maxmem = (limits.misc_maxfilebuffersize + (limits.instructions_max * costs->temp_per_instruction) + costs->temp_slack);
 
-	limits.allocator_persist_maxmem = (LIMITS_PERSIST_FIXED 
-		+ (limits.instructions_max * LIMITS_PERSIST_PER_INSTRUCTION)
-		+ (limits.instructions_maxcache * LIMITS_PERSIST_PER_CACHED)
-		+ (limits.tasks_max * ((limits.tasks_depth * sizeof(StackFrame)) + LIMITS_PERSIST_PER_TASK))
-		+ LIMITS_PERSIST_DATA + sizeof(struct Arena));
+	limits.allocator_persist_maxmem = (costs->persist_fixed 
+		+ (limits.instructions_max * costs->persist_per_instruction)
+		+ (limits.instructions_maxcache * costs->persist_per_cached)
+		+ (limits.tasks_max * ((limits.tasks_depth * sizeof(StackFrame)) + costs->persist_per_task))
+		+ costs->persist_data);
 
-	limits.allocator_scratch_maxmem = ((LIMITS_SCRATCH_STRINGS * limits.misc_strlen) + sizeof(struct Arena));
+	limits.allocator_scratch_maxmem = ((costs->scratch_strings * limits.misc_strlen));
+	limits.allocator_IRAlloc_maxmem = ((limits.instructions_maxbuffersize));
+	limits.allocator_temp_maxmem = arenaBackingSize(limits.allocator_temp_maxmem);
+	limits.allocator_persist_maxmem = arenaBackingSize(limits.allocator_persist_maxmem);
+	limits.allocator_scratch_maxmem = arenaBackingSize(limits.allocator_scratch_maxmem);
+	limits.allocator_IRAlloc_maxmem = arenaBackingSize(limits.allocator_IRAlloc_maxmem);
 	limits.allocator_IRAlloc_maxmem = ((limits.instructions_maxbuffersize) + sizeof(struct Arena));
 	limits.allocator_lalloc_maxretries = 3;
 

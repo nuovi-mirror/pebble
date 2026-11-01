@@ -10,7 +10,6 @@
 #include "main.h"
 #include "values.h"
 #include "variables.h"
-#include "strtokn.h"
 
 #include <limits.h>
 #include <math.h>
@@ -369,6 +368,31 @@ static Value mkbool
 	return v;
 }
 
+static Value mkstr
+(const char *src, unsigned long len, Arena *persistAlloc)
+{
+	char *out = alloc(persistAlloc, len + 1);
+
+	copymem(src, out, len);
+	out[len] = '\0';
+
+	return (Value){ .Type = type_str, .as.str = out };
+}
+
+static unsigned long findsub
+(const char *hay, const char *needle)
+{
+	unsigned long hl = getstrlen(hay);
+	unsigned long nl = getstrlen(needle);
+
+	if (nl == 0 || nl > hl) return 0;
+
+	for (unsigned long i = 0; i + nl <= hl; i++)
+		if (cmpstrn(hay + i, needle, nl) == 0) return i + 1;
+
+	return 0;
+}
+
 Value evalexprnode 
 (ExprNode *node, VarMap *vars, Arena *persistAlloc, struct Limits *limits)
 {
@@ -459,106 +483,30 @@ Value evalexprnode
 
 		case ExprOp_StringFind:
 		{
-			const char *ls = asstr(l, lb, sizeof(lb), limits);
-			const char *rs = asstr(r, rb, sizeof(rb), limits);
+			const char *hay = asstr(l, lb, sizeof(lb), limits);
+			const char *needle = asstr(r, rb, sizeof(rb), limits);
 
-			unsigned long pos = 0;
-			char *str, *ostr = NULL;
-
-			Value *vstr = getVar(vars, ls);
-			Value *vstr2 = getVar(vars, rs);
-
-			if (vstr == NULL) str = ls;
-			else 
-			{
-				char *strbuff = alloc(persistAlloc, limits->misc_strlen);
-				asstr(*vstr, strbuff, limits->misc_strlen, limits);
-				str = strbuff;
-			}
-
-			if (vstr2 == NULL) ostr = ls;
-			else 
-			{
-				char *strbuff2 = alloc(persistAlloc, limits->misc_strlen);
-				asstr(*vstr2, strbuff2, limits->misc_strlen, limits);
-				ostr = strbuff2;
-			}
-
-			char *index = strtokn(str, ostr);
-			if (index != NULL) pos = (unsigned long)(index - ls) + 1;
-
-			Value v;
-			v.Type = type_word;
-			v.as.word = pos;
-			return v;
+			return (Value){ .Type = type_word, .as.word = findsub(hay, needle) };
 		}
 
-		case ExprOp_StringSplitRight: 
+		case ExprOp_StringSplitLeft:
 		{
-			const char *ls = asstr(l, lb, sizeof(lb), limits);
-			const char *rs = asstr(r, rb, sizeof(rb), limits);
+			const char *str = asstr(l, lb, sizeof(lb), limits);
+			unsigned long len = getstrlen(str);
+			unsigned long pos = numword(r);
 
-			char *str, *ostr = NULL;
-			unsigned long pos = 0;
-
-			Value *vstr = getVar(vars, ls);
-			Value *vstr2 = getVar(vars, rs);
-
-			if (vstr == NULL) str = ls;
-			else 
-			{
-				char *strbuff = alloc(persistAlloc, limits->misc_strlen);
-				asstr(*vstr, strbuff, limits->misc_strlen, limits);
-				str = strbuff;
-			}
-
-			if (vstr2 == NULL) pos = numword(r);
-			else pos = numword(*vstr2);
-
-			unsigned long ostrlen = (getstrlen(str) - pos);
-			ostr = alloc(persistAlloc, ostrlen);
-			char *pstr = str + pos;
-
-			if (pos > ostrlen) pos = ostrlen;
-
-			ostr[ostrlen] = '\0';
-			copymem(pstr, ostr, ostrlen);
-
-			return (Value){ .Type = type_str, .as.str = ostr };
+			if (pos == 0 || pos > len) return mkstr(str, len, persistAlloc);
+			return mkstr(str, pos - 1, persistAlloc);
 		}
 
-		case ExprOp_StringSplitLeft: 
+		case ExprOp_StringSplitRight:
 		{
-			const char *ls = asstr(l, lb, sizeof(lb), limits);
-			const char *rs = asstr(r, rb, sizeof(rb), limits);
+			const char *str = asstr(l, lb, sizeof(lb), limits);
+			unsigned long len = getstrlen(str);
+			unsigned long pos = numword(r);
 
-			char *str, *ostr = NULL;
-			unsigned long pos = 0;
-
-			Value *vstr = getVar(vars, ls);
-			Value *vstr2 = getVar(vars, rs);
-
-			if (vstr == NULL) str = ls;
-			else 
-			{
-				char *strbuff = alloc(persistAlloc, limits->misc_strlen);
-				asstr(*vstr, strbuff, limits->misc_strlen, limits);
-				str = strbuff;
-			}
-
-			if (vstr2 == NULL) pos = numword(r);
-			else pos = numword(*vstr2);
-
-			unsigned long strlen = getstrlen(str);
-			if (pos > strlen) pos = strlen;
-			unsigned long ostrlen = pos - 1;
-			ostr = alloc(persistAlloc, ostrlen);
-			char *pstr = str + pos;
-
-			copymem(str, ostr, ostrlen);
-			ostr[ostrlen] = '\0';
-
-			return (Value){ .Type = type_str, .as.str = ostr };
+			if (pos > len) return mkstr(str, len, persistAlloc);
+			return mkstr(str + pos, len - pos, persistAlloc);
 		}
 	}
 
