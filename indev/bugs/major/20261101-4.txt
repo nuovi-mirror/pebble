@@ -1,0 +1,8 @@
+Heap overflow bug
+Class: Major
+Discovered: 20261101
+Status: PATCHED (20261101)
+
+This bug was caused by the ssf and ssl operations in the expression
+tree evaluator code not handing overflows properly, causing a heap
+overflow.

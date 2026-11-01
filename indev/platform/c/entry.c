@@ -208,7 +208,6 @@ struct PackedLimits setlimits
 	limits.allocator_persist_maxmem = arenaBackingSize(limits.allocator_persist_maxmem);
 	limits.allocator_scratch_maxmem = arenaBackingSize(limits.allocator_scratch_maxmem);
 	limits.allocator_IRAlloc_maxmem = arenaBackingSize(limits.allocator_IRAlloc_maxmem);
-	limits.allocator_IRAlloc_maxmem = ((limits.instructions_maxbuffersize) + sizeof(struct Arena));
 	limits.allocator_lalloc_maxretries = 3;
 
 

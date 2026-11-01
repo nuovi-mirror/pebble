@@ -1,0 +1,8 @@
+Allocator overflow bug
+Class: Major
+Discovered: 20261101
+Status: PATCHED (20261101)
+
+This bug was caused by an invalid size field in the general-purpose arena
+allocator code, causing an extra 24 bytes (the size of the struct) to be
+handed out, which points to memory that should not be handed out.

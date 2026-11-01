@@ -355,9 +355,6 @@ unsigned long interpret
 
 				case addrmode_pointer: 
 				{
-					/* a string operand already lives in persistent memory, in the IR, so 
-					 * there is nothing to copy. only a non-string (eg. the word in <5>) 
-					 * needs a persistent string made for it */
 					if (instr->SecondOperand.Data.Type == type_str) val = instr->SecondOperand.Data;
 					else 
 					{
@@ -371,7 +368,6 @@ unsigned long interpret
 
 				case addrmode_indirect: 
 				{
-					/* only used for the two lookups; the result does not point at them */
 					char *buff1 = alloc(scratchAlloc, limits->instructions_varnamesize);
 					char *buff2 = alloc(scratchAlloc, limits->instructions_varnamesize);
 
@@ -382,8 +378,7 @@ unsigned long interpret
 				}
 
 				default:
-					error(errfatal, errcodemalformedinput, 
-						"The specified addressing mode is invalid!");
+					error(errfatal, errcodemalformedinput, "The specified addressing mode is invalid!");
 					break;
 			}
 
@@ -407,9 +402,6 @@ unsigned long interpret
 
 		case Opcode_Func: 
 		{
-			/* names, conditions and the like are only needed for this one instruction, so
-			 * what evaluating them allocates goes on tempAlloc and not persistAlloc. only a
-			 * value that a variable keeps (the second operand of New) needs to persist */
 			char *funcname = alloc(scratchAlloc, limits->functions_namesize);
 			
 			switch (instr->FirstOperand.Addressing) 
@@ -451,8 +443,6 @@ unsigned long interpret
 					break;
 			}
 
-			/* redefining a function (eg. a dynamic name that comes round again) only 
-			 * moves its entry point; only a new name needs persistent memory */
 			unsigned long *known = getFunc(funcs, funcname);
 
 			if (known != NULL) *known = pc + 1; /* since we are on the func instruction */
@@ -527,23 +517,11 @@ unsigned long interpret
 					break;
 				}
 
-				case addrmode_forced_eval: 
-				{
-					char *buff = alloc(tempAlloc, limits->functions_namesize);
-					result = resolve_forced_eval(buff, limits->functions_namesize, &instr->SecondOperand.Data, vars, tempAlloc, tempAlloc, limits);
-					break;
-				}
-
 				/* in this case, a pointer refers to a pointer to an
 				 * expression, which is compatable with the forced_eavl
 				 * addressing mode, so we can just copy that */
+				case addrmode_forced_eval: 
 				case addrmode_pointer: 
-				{
-					char *buff = alloc(tempAlloc, limits->functions_namesize);
-					result = resolve_forced_eval(buff, limits->functions_namesize, &instr->SecondOperand.Data, vars, tempAlloc, tempAlloc, limits);
-					break;
-				}
-
 				case addrmode_indirect: 
 				{
 					char *buff = alloc(tempAlloc, limits->functions_namesize);
@@ -552,11 +530,6 @@ unsigned long interpret
 				}
 
 				case addrmode_bare: 
-				{
-					result = instr->SecondOperand.Data;
-					break;
-				}
-
 				case addrmode_true_literal: 
 				{
 					result = instr->SecondOperand.Data;
@@ -601,13 +574,6 @@ unsigned long interpret
 				}
 
 				case addrmode_pointer: 
-				{
-					char *buff = alloc(tempAlloc, limits->functions_namesize);
-					Value v = resolve_pointer(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
-					valuetostr(funcname, limits->functions_namesize, v, limits);
-					break;
-				}
-
 				case addrmode_indirect: 
 				{
 					char *buff = alloc(tempAlloc, limits->functions_namesize);
@@ -669,13 +635,6 @@ unsigned long interpret
 				}
 
 				case addrmode_pointer: 
-				{
-					char *buff = alloc(tempAlloc, limits->instructions_varnamesize);
-					Value v = resolve_pointer(buff, limits->instructions_varnamesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
-					valuetostr(name, limits->escapes_namesize, v, limits);
-					break;
-				}
-
 				case addrmode_indirect: 
 				{
 					char *buff = alloc(tempAlloc, limits->instructions_varnamesize);
@@ -873,8 +832,7 @@ unsigned long interpret
 			valuetostr(buf, limits->instructions_varnamesize, instr->FirstOperand.Data, limits);
 			Value *stored = getVar(vars, buf);
 
-			if (stored == NULL) error(errfatal, errcodemalformedinput, 
-				"The specified variable does not exist!");
+			if (stored == NULL) error(errfatal, errcodemalformedinput, "The specified variable does not exist!");
 
 			Value data = *stored;
 
@@ -1000,6 +958,7 @@ unsigned long interpret
 			print("_GETSEED (INTERNAL INSTRUCTION): ");
 			print(buff);
 			print("\n");
+			break;
 		}
 #endif /* #ifdef debug */
 
