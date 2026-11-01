@@ -10,3 +10,8 @@ _PRINT2 data
 Escape std.fs.file.write
 
 _PRINT2 __Escape_std.fs.file.write_RET0
+
+New __Escape_std.fs.file.read_ARG0 <file>
+Escape std.fs.file.read
+
+_PRINT2 __Escape_std.fs.file.read_RET0
