@@ -14,7 +14,7 @@ struct Arena *initAlloc
 	if (size < sizeof(struct Arena)) error(errfatal, errcodeallocatorerror, "Backing allocation is too small!");
 
 	/* create the arena */
-	arena->size = size - sizeof(Arena);	    /* set the size */
+	arena->size = size; 	    /* set the size */
 	arena->curr_ptr = srt_ptr;  /* set the current pointer */
 	arena->arena_ptr = srt_ptr; /* set the start of the arena */
 
@@ -33,7 +33,7 @@ void *alloc
 	unsigned long misalign = used % ARENA_ALIGNMENT;
 	unsigned long padding = misalign ? (ARENA_ALIGNMENT - misalign) : 0;
 
-	if (used + padding + size > arena->size - sizeof(Arena)) error(errfatal, errcodeallocationerror, "Out of memory!");
+	if (used + padding + size > arena->size) error(errfatal, errcodeallocationerror, "Out of memory!");
 
 	arena->curr_ptr += padding;
 	void *result = arena->curr_ptr;
