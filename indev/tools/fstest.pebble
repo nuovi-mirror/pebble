@@ -6,9 +6,10 @@ End
 New file 'test.txt'
 New data '\tWelcome,\nTo The World of Tomorrow!\n'
 
+New data "data se data"
+
 New __Escape_std.fs.file.write_ARG0 <file>
 New __Escape_std.fs.file.write_ARG1 <data>
-
 
 New msg file
 Call print

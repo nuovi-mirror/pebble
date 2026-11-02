@@ -2,7 +2,6 @@
 #include "limits.h"
 #include "files.h"
 #include "getstrlen.h"
-#include "unescape.h"
 
 void escape_std_fs_file_read 
 (FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc, FFIArena *tempAlloc, FFIArena *persistAlloc, struct Limits *limits)
@@ -20,9 +19,7 @@ void escape_std_fs_file_read
 	char *fdata = FFIallocateMemory(tempAlloc, fsize);
 
 	if (readfile(path, fdata, fsize) == 0) goto err;
-	unescape(fdata, data, (fsize + limits->file_escapelen_add));
-
-	FFIsetVariable(vars, "__Escape_std.fs.file.read_RET0", (FFIValue){ .Type = type_str, .as.str = data }, persistAlloc);
+	FFIsetVariable(vars, "__Escape_std.fs.file.read_RET0", (FFIValue){ .Type = type_str, .as.str = fdata }, persistAlloc);
 	return;
 
 err:
