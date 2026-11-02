@@ -26,6 +26,8 @@ typedef enum {
 	ExprOp_StringFind,
 	ExprOp_StringSplitRight,
 	ExprOp_StringSplitLeft,
+	ExprOp_StringEscape,
+	ExprOp_StringUnEscape,
 } ExprOperation;
 
 typedef enum {

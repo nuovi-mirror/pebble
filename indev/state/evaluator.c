@@ -10,10 +10,14 @@
 #include "main.h"
 #include "values.h"
 #include "variables.h"
+#include "escape.h"
+#include "unescape.h"
 
 #include <limits.h>
 #include <math.h>
 #include <float.h>
+
+#include "print.h" /* XXX debug */
 
 Value resolveleaf 
 (Value v, VarMap *vars)
@@ -398,7 +402,7 @@ Value evalexprnode
 {
 	Value l = evalexprdata(node->left, vars, persistAlloc, limits);
 	Value r = evalexprdata(node->right, vars, persistAlloc, limits);
-	char lb[64], rb[64];
+	char lb[128], rb[128];
 	int cmp;
 
 	switch (node->Op) 
@@ -507,6 +511,24 @@ Value evalexprnode
 
 			if (pos > len) return mkstr(str, len, persistAlloc);
 			return mkstr(str + pos, len - pos, persistAlloc);
+		}
+
+		case ExprOp_StringEscape:
+		{
+			const char *str = asstr(l, lb, sizeof(lb), limits);
+			char pb[sizeof(lb)];
+			escape(str, pb, sizeof(pb));
+			unsigned long pblen = getstrlen(pb);
+			return mkstr(pb, pblen, persistAlloc);
+		}
+
+		case ExprOp_StringUnEscape:
+		{
+			const char *str = asstr(l, lb, sizeof(lb), limits);
+			char pb[sizeof(lb)];
+			unescape(str, pb, sizeof(pb));
+			unsigned long pblen = getstrlen(pb);
+			return mkstr(pb, pblen, persistAlloc);
 		}
 	}
 

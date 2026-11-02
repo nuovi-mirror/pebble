@@ -29,6 +29,8 @@ const ExprOperator ExprOperators[] = {
 	{"sf", ExprOp_StringFind, 4},
 	{"ssr", ExprOp_StringSplitRight, 4},
 	{"ssl", ExprOp_StringSplitLeft, 4},
+	{"se", ExprOp_StringEscape, 3},
+	{"sue", ExprOp_StringUnEscape, 3},
 };
 
 static int startsnumericliteral

@@ -1,0 +1,11 @@
+Func print
+New __Escape_std.io.print_ARG0 <msg>
+Escape std.io.print
+End
+
+New x 'hello\nhow are you?\n'
+New msg x
+Call print 
+New y "x sue x"
+New msg y
+Call print 
