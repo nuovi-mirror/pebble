@@ -2,7 +2,7 @@
 #include "limits.h"
 #include "files.h"
 #include "getstrlen.h"
-#include "unescape.h"
+#include "escape.h"
 
 void escape_std_fs_file_write 
 (FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc, FFIArena *tempAlloc, FFIArena *persistAlloc, struct Limits *limits)
@@ -16,7 +16,7 @@ void escape_std_fs_file_write
 	FFIconvertValueToString(arg0str, limits->misc_strlen, *arg0, limits);
 	FFIconvertValueToString(arg1str, limits->misc_strlen, *arg1, limits);
 
-	unsigned long datasize = unescape(arg1str, unescaped, limits->misc_strlen);
+	unsigned long datasize = escape(arg1str, unescaped, limits->misc_strlen);
 	long errcode;
 
 	unsigned long wsize = writefile(arg0str, unescaped, datasize);

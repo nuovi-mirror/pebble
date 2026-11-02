@@ -10,6 +10,7 @@
             | Advanced Numeric Extension, One (ANE1)                    |                                         |
             | Advanced Addressing Extension, Two (AAE2)                 |                                         |
             | Advanced String Sorting Extension (ASSE)                  |                                         |
+            | Advanced String Escaping Extension (ASEE)                 |                                         |
             |                                                           |                                         |
             | By vantheman                                              |                                         |
             | Product of The Nuovi Orizzonti Company                    |                                         |
@@ -360,6 +361,26 @@
 	of the virtual machine and FFI wish to allow. Again, the Pebble-facing sequences of the Pebble standard
 	library are stable, but the implementation of the FFI, it's interface and the FFI code itself is
 	specific to the implementation of the virtual machine itself. 
+
+
+
+                    _ Advanced String Escaping Extension -
+
+	The Advanced String Escaping Extension (ASEE) adds two new operation symbols, being se (String Escape),
+	and sue (String Un-Escape). These are used to parse and manage ASCII escape sequences inside of strings
+	to make formatting and text parsing easier. Both of the operations only use one operand, being the left.
+	A right operand must be present, but it is ignored.
+
+	The se operation will convert textual representations of ASCII escape sequences into the proper escape
+	sequence. The sue operation does the opposite.
+
+	The supported sequences include
+
+		"\n" -> '\n'
+		"\t" -> '\t'
+		"\\" -> '\'
+
+
 
 
 

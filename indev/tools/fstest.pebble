@@ -1,17 +1,27 @@
+Func print
+New __Escape_std.io.print_ARG0 <msg>
+Escape std.io.print
+End
+
 New file 'test.txt'
 New data '\tWelcome,\nTo The World of Tomorrow!\n'
 
 New __Escape_std.fs.file.write_ARG0 <file>
 New __Escape_std.fs.file.write_ARG1 <data>
 
-_PRINT2 file
-_PRINT2 data
+
+New msg file
+Call print
+New msg data
+Call print
 
 Escape std.fs.file.write
 
-_PRINT2 __Escape_std.fs.file.write_RET0
+New msg __Escape_std.fs.file.write_RET0
+Call print
 
 New __Escape_std.fs.file.read_ARG0 <file>
 Escape std.fs.file.read
 
-_PRINT2 __Escape_std.fs.file.read_RET0
+New msg __Escape_std.fs.file.read_RET0
+Call print

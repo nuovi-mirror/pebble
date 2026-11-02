@@ -10,26 +10,31 @@ unsigned long unescape
 
 	while (src[i] != '\0' && j < destsize - 1)
 	{
-		if (src[i] == '\\' && src[i + 1] != '\0')
+		switch(src[i])
 		{
-			i++;
-
-			switch(src[i])
-			{
-				case 'n': dest[j++] = '\n'; break;
-				case 't': dest[j++] = '\t'; break;
-				case 'r': dest[j++] = '\r'; break;
-				case '\\': dest[j++] = '\\'; break;
-				default:
-					dest[j++] = '\\';
-					if (j < destsize - 1) dest[j++] = src[i];
+			case '\n': 
+				dest[j++] = '\\';
+				dest[j++] = 'n';
 				break;
 
-			}
+			case '\t': 
+				dest[j++] = '\\';
+				dest[j++] = 't';
+				break;
 
-			i++;
+
+			case '\r': 
+
+				dest[j++] = '\\';
+				dest[j++] = 'r';
+				break;
+
+			default:
+				dest[j++] = src[i];
+				break;
 		}
-		else dest[j++] = src[i++];
+
+		i++;
 	}
 
 	dest[j] = '\0';

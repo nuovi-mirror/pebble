@@ -6,6 +6,6 @@ End
 New x 'hello\nhow are you?\n'
 New msg x
 Call print 
-New y "x sue x"
+New y "x se x"
 New msg y
 Call print 
