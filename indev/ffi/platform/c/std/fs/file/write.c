@@ -10,12 +10,17 @@ void escape_std_fs_file_write
 	FFIValue *arg1 = FFIresolvePointer(vars, "__Escape_std.fs.file.write_ARG1", tempAlloc, limits);
 
 	char *arg0str = FFIallocateMemory(tempAlloc, limits->misc_strlen);
+	char *arg1str = FFIallocateMemory(tempAlloc, limits->misc_strlen);
+	char *unescaped = FFIallocateMemory(tempAlloc, limits->misc_strlen);
 	FFIconvertValueToString(arg0str, limits->misc_strlen, *arg0, limits);
+	FFIconvertValueToString(arg1str, limits->misc_strlen, *arg1, limits);
 
-	unsigned long wsize = writefile(arg0str, arg1->as.str, limits->file_maxsize);
-	unsigned long errcode = 0;
+	unsigned long datasize = getstrlen(arg1str);
+	long errcode;
 
-	if (wsize == 0) errcode = 1;
+	unsigned long wsize = writefile(arg0str, arg1str, datasize);
+	if (wsize != datasize) errcode = 1;
+	else errcode = 0;
 
 	FFIsetVariable(vars, "__Escape_std.fs.file.write_RET0", (FFIValue){ .Type = type_word, .as.word = errcode }, persistAlloc);
 }

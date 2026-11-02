@@ -406,9 +406,9 @@
 	the initial function used to create said task returns, the scheduler is allowed to decide who gets to run
 	next. For the first operand, the addressing mode True Literal is treated as the literal name of the
 	function to initialize the task with. This is also true for the Bare addressing mode. The Literal addressing
-	mode is used to inline an expression whos result is the name of the initial function to use for the task.
-	The Forced Evaluation addressing mode is used as a pointer to an expression whos result will be used as
-	the initial function for the task. The Pointer addressing mode is used to represent a variable whos name
+	mode is used to inline an expression who's result is the name of the initial function to use for the task.
+	The Forced Evaluation addressing mode is used as a pointer to an expression who's result will be used as
+	the initial function for the task. The Pointer addressing mode is used to represent a variable who's name
 	contains the initial function for the task. The data in said variable will be used as the name of the
 	initial function for the task. The Indirect addressing mode is treated the same.
 
@@ -501,7 +501,7 @@
 	is generally only safe to pause on the instruction boundary.
 
 	The variable __task should be managed by the virtual machine and hold a numeric value representing
-	the current task in execution. Task 0 should always be the main task. The implimentation may define
+	the current task in execution. Task 0 should always be the main task. The implementation may define
 	how task numbers are allocated however it wishes, as long as task 0 is always the main task.
 
 
@@ -670,9 +670,6 @@
 
 	Escape sequence names of the standard library follow the naming convention of dot (.)-separated
 	groupings, with the first group being 'std' and the final entry being the function name. 
-	The standard library defines four groups into the standard library, being basic input and output, 
-	terminal manipulation, process management, file management, and miscellaneous. These groups may have
-	subgroups within them, but these are the four primary groups. 
 
 	Arguments passed to these escape sequences via Pebble variables. These variables are distinguished from
 	normal variables by the prefix of '__Escape_'. This is then followed by the escape sequence in reference,
@@ -687,29 +684,63 @@
 	pointer to another Pebble variable containing the data, which can be used via the Pointer addressing mode.
 	Return values should return the data in question, not a pointer to it.
 
-	The group associated with basic input and output, known as io, contains three functions, being print,
-	printLn, and input. Under the naming convention, these become std.io.print, std.io.printLn, and
-	std.io.input. Sequence print accepts one argument, being the data to print to standard output. The
-	print sequence will append a newline to the data requested to be printed. printLn does the same, but
-	it will not append a newline. input will read terminal input until a newline character is given and
-	return the data read. It does not take any arguments.
+	Libraries include:
 
-	The group associated with miscellaneous functions, known as misc, contains three functions, being
-	random, time, and sleep. Random takes no arguments and returns one value, being a random architecture-
-	dependent size number. Time takes no arguments and returns the current time of day. Sleep takes one
-	argument, being the approximate time to suspend in milliseconds. The time slept may be shorter or longer
-	than the requested time, but it should be relatively close. The actual time slept depends on the host
-	operating system, architecture, and implementation of the virtual machine and FFI code. One argument is
-	returned, being the real time slept in milliseconds.
+		group io - basic input/output facilities
+			escape print - print text
+				accepts one argument, being the data to print. A newline is appended.
+			escape printLn - print text
+				accepts one argument, being the data to print. A newline is NOT appended.
+			escape input - get input
+				gets input from stdin until a newline is hit and returns the data given excluding
+				the newline character
+		group misc - miscellaneous functions
+			escape random - generate a random number
+				generates a non-cryptographic psedorandom number and returns it
+			escape sleep - wait for a time period
+				accepts one argument, being the time in milliseconds to sleep. Returns the real
+				time slept in milliseconds
+		group proc
+			escape spawn - spawn a process
+				accepts one argument, being the command to run in the new process. This is to
+				be space-separated arguments, with the first being the file to execute. Returns
+				one value, being the platform-dependent representation of the process. Throws a
+				fatal error if the process cannot be spawned.
+			escape wait - wait on a spawned process
+				accepts one argument, being the platform-dependent representation of the process
+				to wait on. Returns two values, the first being 1 if the process was killed and 0
+				if it was not. If it was killed, the second value is the platform-dependent value
+				it was killed with (eg. a signal on UNIX). If it was not, returns the exit code 
+				the process returned. Waits until the process exits or is killed.
+		group fs
+			subgroup file
+				escape read - read a file
+					accepts one argument, being the path of the file to read. Returns the
+					data parsed as a string of the file read. R
+				escape write - write a file
+					accepts two arguments, being the path of the file to write to and the
+					data to write into the file. Writes the data into the file and creates
+					it if it does not exist. Does not append data to the file, overriding it
+					if it does already have data in it. Returns the size written to the file.
+					Returns 0 if it could not write to the file.
+		group term
+			subgroup cursor
+				escape moveAbsolute - move the cursor character
+					accepts two arguments, the x and y cells to move the cursor to, 1-indexed.
+			subgroup color
+				subgroup basic
+					escape fore - set the foreground color
+						accepts one argument, being the color (as text) to set the
+						terminal foreground to. Valid values are the ANSI basic
+						colors. Defaults to white if none specified.
+					escape back - set the background color
+						accepts one argument, being the color (as text) to set the
+						terminal background to. Valid values are the ANSI basic
+						colors. Defaults to black.
+					escape reset - reset the color
+						resets the terminal foreground and background color to the
+						default value.
 
-	The group associated with process manipulation, known as proc, includes two functions, being spawn and
-	wait. Spawn accepts one argument, being the the process to spawn with space-separated arguments in a
-	string, and returns one value, being the operating-specific identifier for the newly spawned process.
-	The spawned process runs in the background. The process identifier is designed to be passed around to
-	other functions in this group instead of being used by Pebble code directly. Wait accepts one argument,
-	being the operating system-specific identifier of the process to wait on. It returns two values, the
-	first being either the exit code the process spawned returned if the second return value is 1, or the
-	signal it was killed with if it was killed with a signal, in which case the second return will be 0.
 
 
 
@@ -723,12 +754,12 @@
 	Pebble code to be shorter, cleaner, faster, smaller, and overall better, or in some cases, able to
 	express a concept the 'standard' method may not.
 
-		It is possible to perform operations on data whos values cannot be reliably known until
+		It is possible to perform operations on data who's values cannot be reliably known until
 		runtime or cannot be defined cleanly at compile-time via the expressive operators. Thanks
 		to the Advanced Addressing Extension, addressing across instructions is mostly uniform and
 		most data can be supplied at runtime. The data supplied can be the result of things such
 		as a reference, and expression, and so on. Using the {} and "" addressing syntax, I can
-		define variables and functions whos names are not known until runtime or may be the result
+		define variables and functions who's names are not known until runtime or may be the result
 		of a template or expression. This is a form of metaprogramming, since the expression's result
 		is used to construct the name.
 
@@ -786,7 +817,7 @@
 		each generated function perform a different operation based on values given to the program
 		when the functions are generated.
 
-		Something similar can be done for variable names; we can define variables whos names are
+		Something similar can be done for variable names; we can define variables who's names are
 		the result of a template using AAE
 
 			New template 'base s++ mod'
@@ -807,6 +838,6 @@
 			New {template} [template2] / var0 = 1
 			New mod '1'
 
-		In this example, we generate both the name of the variable and the variable whos data we wish
+		In this example, we generate both the name of the variable and the variable who's data we wish
 		to copy into said variable from templates.
 
