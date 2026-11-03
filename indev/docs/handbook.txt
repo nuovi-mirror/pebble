@@ -380,6 +380,8 @@
 		"\t" -> '\t'
 		"\\" -> '\'
 
+	Both of these operators are to be in the same precedence class as String Concat.
+
 
 
 
