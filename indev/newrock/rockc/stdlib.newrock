@@ -117,6 +117,21 @@ fn std.task.await ( handle ) ret {
 	ret = '0'
 }
 
+/ files
+
+fn std.fs.file.write ( file data ) ret {
+. New __Escape_std.fs.file.write_ARG0 <__Func_std.fs.file.write_file>
+. New __Escape_std.fs.file.write_ARG1 <__Func_std.fs.file.write_data>
+. Escape std.fs.file.write
+. New __Func_std.fs.file.write_ret __Escape_std.fs.file.write_RET0
+}
+
+fn std.fs.file.read ( file ) data {
+. New __Escape_std.fs.file.read_ARG0 <__Func_std.fs.file.read_file>
+. Escape std.fs.file.read
+. New __Func_std.fs.file.read_data __Escape_std.fs.file.read_RET0
+}
+
 / argument handling
 
 fn std.arg.get ( n ) arg {
