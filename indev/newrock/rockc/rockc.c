@@ -5,8 +5,6 @@
 static char cur_results[MAX_LOCALS][MAX_NAME];
 static int cur_nresults = 0;
 
-/* Copy each result variable into its __Func_<fn>_RETn slot. Shared by
-	'return' and the end of the function body. */
 static void emit_ret_fill(const char *fn)
 {
 	for (int i = 0; i < cur_nresults; i++)
