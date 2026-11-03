@@ -2,6 +2,17 @@
 #include <string.h>
 #include "stuff.h"
 
+static char cur_results[MAX_LOCALS][MAX_NAME];
+static int cur_nresults = 0;
+
+/* Copy each result variable into its __Func_<fn>_RETn slot. Shared by
+	'return' and the end of the function body. */
+static void emit_ret_fill(const char *fn)
+{
+	for (int i = 0; i < cur_nresults; i++)
+		outf("New __Func_%s_RET%d __Func_%s_%s\n", fn, i, fn, cur_results[i]);
+}
+
 void compile_stmt(const char *fn);
 	
 void compile_value
@@ -347,6 +358,16 @@ void compile_stmt
 
 
 
+	if (try_keyword("return"))
+	{
+		if (current_helper)
+			fail("'return' is only allowed directly in a function body, not inside an if or while block");
+
+		emit_ret_fill(fn);
+		outf("Return\n");
+		return;
+	}
+
 	if (try_keyword("call"))
 	{
 		compile_call(fn, NULL, 0);
@@ -441,6 +462,10 @@ void compile_fn
 		if (peekch() == '{') break;
 	}
 
+	cur_nresults = nresults;
+	for (int i = 0; i < nresults; i++)
+		snprintf(cur_results[i], sizeof cur_results[i], "%s", results[i]);
+
 	expect_char('{');
 
 	Loc fn_loc = loc_at(pos);
@@ -475,13 +500,14 @@ void compile_fn
 			report_warning(msg, fn_loc);
 		}
 
-	for (int i = 0; i < nresults; i++) outf("New __Func_%s_RET%d __Func_%s_%s\n", fn, i, fn, results[i]);
+	emit_ret_fill(fn);
 
 	outf("End\n");
 	current_helper = old_helper;
 	emit_helpers_from(first_helper);
 
 	nlocals = 0;
+	cur_nresults = 0;
 	cur_fn[0] = '\0';
 }
 
