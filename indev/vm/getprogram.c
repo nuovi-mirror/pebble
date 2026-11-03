@@ -5,7 +5,7 @@
 char *getprogram
 (Arena *allocator, unsigned long maxsize, Args *cliargs)
 {
-	if (cliargs->count < 1) error(errfatal, errcodeplatformspecific, "No bytecode file specified!");
+	if (cliargs->count <= 1) error(errfatal, errcodeplatformspecific, "No bytecode file specified!");
 
 	unsigned long filesize = getfilesize(cliargs->values[1]);
 	if (filesize == 0) error(errfatal, errcodeplatformspecific, "Cannot open specified bytecode file!");
