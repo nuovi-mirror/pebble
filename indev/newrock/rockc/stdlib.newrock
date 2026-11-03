@@ -117,4 +117,11 @@ fn std.task.await ( handle ) ret {
 	ret = '0'
 }
 
+/ argument handling
+
+fn std.arg.get ( n ) arg {
+	name = "VMARG s++ n"
+	arg = [name]
+}
+
 . # end of New Rock Standard Library (stdlib)
