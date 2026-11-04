@@ -843,3 +843,72 @@
 		In this example, we generate both the name of the variable and the variable who's data we wish
 		to copy into said variable from templates.
 
+		A stack can also be simulated using AAE and AAE2, via something such as
+
+			Func __Stack_init_helper
+			New {__Stack_index} '0'
+			New __Stack_temp_83 "__Stack_temp_83 + 1"
+			If __Stack_init_helper "__Stack_temp_83 < __Stack_max"
+			End
+			Func __Stack_init
+			New __Stack_temp_83 '0'
+			New __Stack_index_base '__Stack_StackSlot_'
+			New __Stack_index '__Stack_index_base s++ __Stack_index_entry'
+			New __Stack_index_entry '0'
+			New __Stack_max '32'
+			Call __Stack_init_helper
+			End
+			Func __Stack_push
+			New {__Stack_index} __Stack_in
+			New __Stack_index_entry "__Stack_index_entry + 1"
+			End
+			Func __Stack_pop
+			New __Stack_index_entry "__Stack_index_entry - 1"
+			New __Stack_slot {__Stack_index}
+			New __Stack_out [__Stack_slot]
+			End
+			Call __Stack_init
+
+		which can then be used via, eg.
+
+			New __Stack_in '2' / set 2 to be pushed
+			Call __Stack_push  / push 2
+			New __Stack_in '3' / set 3 to be pushed
+			Call __Stack_push  / push 3
+			Call __Stack_pop   / pop 3 into __Stack_out
+			Call __Stack_pop   / pop 2 into __Stack_out
+
+		Memory (and an array, via the same principle) can be simulated via
+
+			Func __mem_init_loop
+			New {__mem_index} '0'
+			New __mem_init_temp "__mem_init_temp + 1"
+			New __mem_index_pos "__mem_index_pos + 1"
+			If __mem_init_loop "__mem_init_temp < __mem_max"
+			End
+			Func __mem_init
+			New __mem_max '128'
+			New __mem_index '__mem_index_prefix s++ __mem_index_pos'
+			New __mem_index_prefix '__mem_'
+			New __mem_index_pos '0'
+			New __mem_init_temp '0'
+			Call __mem_init_loop
+			New __mem_index_pos '0'
+			End
+			Call __mem_init
+
+		which can be used via
+
+			New __mem_index_pos 'n' # where n is the address
+			New temp {__mem_index}  # resolve the address
+			New value [temp]        # load the data in said address to var value
+			New __mem_index_pos 'n' # where n is the address
+			New {__mem_index} 'n'   # where n is the value to load to the address
+
+		These examples are what should be considered idiomatic compiler-safe Pebble. This means
+		it is safe to drop these into compiler-generated code where the user does not know the
+		names of the variables, hence why they are scoped.
+
+		Primitives such as these can be used to simulate another state machine inside of Pebble,
+		which can then be used as a runtime for another programming language which expects a more
+		traditional model of computing, eg. C.
