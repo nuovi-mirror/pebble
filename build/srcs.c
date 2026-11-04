@@ -21,7 +21,7 @@ void addsrcs
 {
 	for (unsigned int i = 0; srcs[i] != NULL; i++) 
 	{
-		all[*count] = srcs[i];
+		all[*count] = (char *)srcs[i];
 		(*count)++;
 	}
 }
@@ -105,6 +105,6 @@ unsigned int mksrclist
 		strcat(config->cflags, "-Dgraphics -Dgraphics_sdl2 ");
 	}
 
-	srcs[count++] = getmain(config);
+	srcs[count++] = (char *)getmain(config);
 	return count;
 }
