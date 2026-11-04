@@ -303,15 +303,8 @@ unsigned long interpret
 					break;
 				}
 
-				case addrmode_indirect: 
-				{
-					char *buff = alloc(tempAlloc, limits->instructions_varnamesize);
-					Value v = resolve_pointer(buff, limits->instructions_varnamesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
-					valuetostr(dest, limits->instructions_varnamesize, v, limits);
-					break;
-				}
-
 				case addrmode_pointer: 
+				case addrmode_indirect: 
 				{
 					char *buff = alloc(tempAlloc, limits->instructions_varnamesize);
 					Value v = resolve_pointer(buff, limits->instructions_varnamesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);

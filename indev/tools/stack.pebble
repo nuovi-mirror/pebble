@@ -1,0 +1,31 @@
+# begin stack helper code
+
+Func __Stack_init_helper
+New {__Stack_index} '0'
+New __Stack_temp_83 "__Stack_temp_83 + 1"
+If __Stack_init_helper "__Stack_temp_83 < __Stack_max"
+End
+
+Func __Stack_init
+New __Stack_temp_83 '0'
+New __Stack_index_base '__Stack_StackSlot_'
+New __Stack_index '__Stack_index_base s++ __Stack_index_entry'
+New __Stack_index_entry '0'
+New __Stack_max '32'
+Call __Stack_init_helper
+End
+
+Func __Stack_push
+New {__Stack_index} __Stack_in
+New __Stack_index_entry "__Stack_index_entry + 1"
+End
+
+Func __Stack_pop
+New __Stack_index_entry "__Stack_index_entry - 1"
+New __Stack_slot {__Stack_index}
+New __Stack_out [__Stack_slot]
+End
+
+Call __Stack_init
+
+# end stack helper code
