@@ -64,38 +64,50 @@ Call __mem_init
 
 # load the program into memory
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '3' # LI opcode
+New {__mem_index} '3' # LI opcode - []
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '2' # data
+New {__mem_index} '2' # data - [2]
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '3' # LI opcode
+New {__mem_index} '5' # DUP opcode - [2, 2]
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '2' # data
+New {__mem_index} '5' # DUP opcode - [2, 2, 2]
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '5' # DUP opcode
+New {__mem_index} '5' # DUP opcode - [2, 2, 2, 2]
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '5' # DUP opcode
+New {__mem_index} '2' # PRINT opcode - [2, 2, 2]
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '2' # PRINT opcode
+New {__mem_index} '2' # PRINT opcode - [2, 2]
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '2' # PRINT opcode
+New {__mem_index} '4' # ADD opcode - [4]
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '4' # ADD opcode
+New {__mem_index} '5' # DUP opcode - [4, 4]
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '2' # PRINT opcode
+New {__mem_index} '2' # PRINT opcode - [4]
+
+New __mem_index_pos "__mem_index_pos + 1" # --
+New {__mem_index} '3' # LI opcode - [4]
+
+New __mem_index_pos "__mem_index_pos + 1" # --
+New {__mem_index} '3' # data - [4, 3]
+
+New __mem_index_pos "__mem_index_pos + 1" # --
+New {__mem_index} '7' # SUB opcode - [1]
+
+New __mem_index_pos "__mem_index_pos + 1" # --
+New {__mem_index} '2' # PRINT opcode []
+
 
 New __mem_index_pos "__mem_index_pos + 1" # --
 New {__mem_index} '1' # HLT opcode
-
 # ---
 
 New __mem_index_pos '0'
@@ -144,6 +156,20 @@ New __Stack_in __Stack_out
 Call __Stack_push
 Call __Stack_push
 End
+
+Func Opcode_JMP
+Call __Stack_pop
+New pc __Stack_out
+End
+
+Func Opcode_SUB
+Call __Stack_pop
+New __Opcode_SUB_tmp1 __Stack_out
+Call __Stack_pop
+New __Opcode_SUB_tmp1 "__Stack_out - __Opcode_SUB_tmp1"
+New __Stack_in __Opcode_SUB_tmp1
+Call __Stack_push
+End
 # ---
 
 # helper routines
@@ -167,6 +193,8 @@ If Opcode_PRINT "instruction == 2" # pop; print
 If Opcode_LI "instruction == 3"    # push pc + 1
 If Opcode_ADD "instruction == 4"   # pop; pop; add; push
 If Opcode_DUP "instruction == 5"   # pop; push; push
+If Opcode_JMP "instruction == 6"   # pop; pc = popped
+If Opcode_SUB "instruction == 7"   # pop; pop; sub; push
 If exitcode "pc >= __mem_max"      # end of program
 New pc "pc + 1"
 New __mem_index_pos pc
