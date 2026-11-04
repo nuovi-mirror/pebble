@@ -1,0 +1,25 @@
+# memory / array simulator
+
+Func __mem_init_loop
+New {__mem_index} '0'
+New __mem_index_pos "__mem_index_pos + 1"
+If __mem_init_loop "__mem_init_pos > mem_max"
+End
+
+Func __mem_init
+New __mem_max '128'
+New __mem_index '__mem_index_prefix s++ __mem_index_pos'
+New __mem_index_prefix '__mem_'
+New __mem_index_pos '0'
+New __mem_init_temp '0'
+Call __mem_init_loop
+End
+
+# use via
+#  store value
+#   New __mem_index_pos 'n' # where n is the address
+#   New temp {__mem_index}  # resolve the address
+#   New value [temp]        # load the data in said address to var value
+# load value
+#  New __mem_index_pos 'n'  # where n is the address
+#  New {__mem_index} 'n'    # where n is the value to load to the address
