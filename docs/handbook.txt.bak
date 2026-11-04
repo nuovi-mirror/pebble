@@ -1,0 +1,914 @@
+
+            .- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -.                                         |
+            | The Pebble Virtual Machine Systems' Programmer's Handbook |                                         |
+            | Version 2, Revision 0 ! UNFINISHED !                      |                                         |
+            |                                                           |                                         |
+            | Bytecode Specification Version Two (B2)                   |                                         |
+            | Command Argument Extension (CAE)                          |                                         |
+            | Advanced Addressing Extension (AAE)                       |                                         |
+            | Recursive Function Definition Extension (RFDE)            |                                         |
+            | Advanced Numeric Extension, One (ANE1)                    |                                         |
+            | Advanced Addressing Extension, Two (AAE2)                 |                                         |
+            | Advanced String Sorting Extension (ASSE)                  |                                         |
+            | Advanced String Escaping Extension (ASEE)                 |                                         |
+            |                                                           |                                         |
+            | By vantheman                                              |                                         |
+            | Product of The Nuovi Orizzonti Company                    |                                         |
+            | http://thenuoviroizzonticompany.org                       |                                         |
+            | http://pebblevm.org                                       |                                         |
+            '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -'                                         |
+
+			If the above text appears malformed, please
+			increase the width of your terminal.
+
+
+
+
+
+
+
+
+
+
+                    - Introduction -
+
+	The Pebble Virtual Machine is the first attempt at an implementation of the Expressive Instruction
+	set Computing model (EISC). Pebble should be considered the canonical or reference implementation
+	of the EISC computing model and what a good demonstration of an ISA designed around the EISC
+	computing model should look like.
+
+	The EISC architecture is designed around one simple principle; an instruction should be able to be
+	both flexible while providing a meaningful quantity of work. What was deemed the best way to achieve
+	this was by creating incredibly generic and flexible instructions representing higher-level language
+	concepts which then use addressing mode modifier statements to determine sub-operations they are to
+	perform on the data given in the instruction operands, fused into one atomic operation. This model
+	of computing would have a few dozen or less instructions total, each able to perform one incredibly
+	rich operation, which can be fused with other operations keyword modifiers. This model of computing
+	offers many advantages from an implementation and language perspective, including but not limited to
+	vastly simpler compilers which do not have to break higher-level code into load/store or lower-level
+	concepts, the ability for Just In Time or Dynamic compilers to better reason about complex structures
+	like data and instruction relationships, and a major simplification for developers writing backed
+	infrastructure against an EISC model of computer.
+
+	A basic example of what an EISC instruction may look like could be the following
+
+		STORE 0, 0, 1, 8, 3, 1
+
+	This may look odd coming from more traditional load/store architectures. I mean come on, a six
+	operand store?? woah, crazy, I know!
+
+	In this example EISC ISA, the STORE instruction accepts four main operands. Operand one being the source
+	data and operand three being the destination address, while two and four represent the addressing
+	modifiers of operands one and three. In this example, say addressing mode 0 represents the concept
+	of a literal reference, and addressing mode 8 represents a fused addition statement plus another addressing
+	operand after it to fuse with the first, in this case being 1, which may represent an indirection
+	statement.
+
+	In this case, the operation would be the logical equivalent of 'store the literal zero to the logical
+	address 8 + 3'. Now, this is a lot of information to be carried by one instruction. The interesting
+	part, however, is that this is not a special store-literal-to-fused-addition-pointer instruction. It is
+	just a generic data storing primitive instruction using fused addressing modifier statements. This also
+	allows entire programs to be collapsed into single instructions. This same program in a one-operand
+	RISC-style ISA could look something more like
+
+		LOADI 8  /* load immediate 8 into the working register */
+		ADD 3    /* add 3 to the working register */
+		LOADADDR /* load the working register into the address register */
+		LOADI 0  /* load immediate 0 into the working register */
+		STORE    /* store the data in the working register (0) to the reference held in the address
+			  * register (11) */
+
+	five instructions that took, five very special purpose instructions, mind you. Something like this does
+	not preserve data relationships very well; the compiler cannot easily know that the 8 and 3 are related
+	immediately, or the fact that they will be used as an address later without complex look-ahead logic.
+
+	Pebble refers to both the Pebble Virtual Machine and the Pebble ISA. Pebble is the canonical reference
+	on what a proper EISC ISA would look like, and this is what this document shall describe; The Pebble ISA
+	and concepts used in the Pebble Virtual Machine. Please keep in mind Pebble was designed from a software
+	perspective, and in hence implemented as a language interpreter. (this language being the Pebble ISA)
+
+	Pebble was designed primarily to be implemented in software. Pebble does not inherent the constraints
+	most ISAs do, since it is not intended to be simple to execute in hardware directly. But this begs
+	the question; Most ISAs are not executed in hardware directly, so why do they accept the same
+	constraints that traditional ISAs do? Pebble explores a model where the freedoms software has are
+	available inside of the ISA in itself directly and to explore what a model where software flexibility
+	as a default may look like.
+
+
+
+                    - Pebble -
+
+	Pebble is not a stack machine, nor is it a register machine. Pebble acts internally on named values
+	which are dynamically typed and variable in size. In Pebble, there are only seven instructions. These
+	include New, Func, End, Return, Call, If, and Escape. Each of these instructions accept addressing mode
+	modifiers to modify how they may view their two operands, and each instruction can interpret each
+	addressing mode in whatever way they deem best fit. This is one of the major powers of Pebble; A very
+	simple ISA with incredibly expressive instructions.
+
+	The addressing modifiers that exist include the Literal (") modifier, the True Literal (') modifier,
+	the Forced Evaluation ({ / }) modifier, the Pointer (< / >), the Indirect ([ / ]), and the Bare ( ) 
+	modifier. These modifiers all represent instruction-dependent ways to modify a source operand before it 
+	is to be interpreted, and the meanings of them may vary per instruction. The general rule is that the 
+	Literal modifier represents an expression, the True Literal modifier represents a piece of data, the 
+	Forced Evaluation modifier represents a pointer to an expression, the Pointer modifier represents a 
+	generic pointer, the Indirect modifier represents a pointer which is to be read, and the Bare modifier 
+	being completely instruction-dependent.
+
+	The Pebble expression format follows the value, followed by a space, followed by the operator, followed
+	by another space, followed by another value. In these schematics, the operator is stated to 'own' each
+	space next to it, and one space is allowed to be shared by one or more operators. The valid operators
+	include the Numeric Addition (+) statement, the Numeric Subtraction (-) statement, the Numeric
+	Multiplication (*) statement, the Numeric Division (/) statement, the Numeric Modulo (%) statement, the 
+	Numeric Greater than (>) statement, the Numeric Less than (<) statement, the Numeric Equal to (==) 
+	statement, the Numeric Not Equal to (!=) statement, the Numeric Greater than or Equal to (>=) statement, 
+	the Numeric Less than or Equal to (<=) statement, the Sting Equal to (?=) statement, the String Contains 
+	(-?=) statement, the String Starts with (s?=) statement, the String Ends with (e?=) statement, and the 
+	String Concat (s++) statement. 
+
+	Values can be anything that is a valid English character. The special cases include a value starting 
+	with the negative (-) sign, marking that the value is to be negative, or the forced precedence (( / )) 
+	sign, marking to 'solve' the operation inside of that first and ignore the standard operator precedence. 
+
+	The standard operator precedence is ranked from tiers zero starting, with this tier being solved first. Tier 
+	zero include Numeric Division, Multiplication, and Modulo. Tier one includes Numeric Addition and Numeric
+	Subtraction. Tier two includes Numeric Less than, Numeric Greater than, Numeric Equal to, Numeric Not
+	Equal to, Numeric Less than or Equal to, and Numeric Greater than or Equal to. Tier three includes 
+	String Concat. Tier four includes String Starts with, String Ends with, String contains, and String
+	equals. This ordering is checked first, and if two operators in the same tier cannot be ordered, then
+	left to right associativity is to be assumed.
+
+	The Numeric Addition operation will add the two numeric values presented and return the result of the
+	addition. 
+	The Numeric Subtraction operation will subtract the right numeric value from the left numeric value and
+	return the result of the operation.
+	The Numeric Division operation will divide the right numeric value from the right numeric value and return
+	the result of the operation.
+	The Numeric Multiplication operation will multiply the left numeric value from the right numeric value and
+	return the result of the operation.
+	The Numeric Modulo operation will grab the remainder of the Numeric Division operator and return it.
+	The Numeric Equal to operation will check if the left numeric value is equal to the right numeric value 
+	and return zero (0) if true and one (1) if false.
+	The Numeric Not equal to operation will check if the left numeric value is not equal to the right numeric
+	value and return zero if true and one if false.
+	The Numeric Less than operator will compare the left numeric value to the right numeric value and return
+	zero if the left numeric value is less than the right numeric value and one if it is not.
+	The Numeric Greater than operator will compare the left numeric value to the right numeric value and
+	return zero if the left numeric value is greater than the right numeric value and one if it is not.
+	The Numeric Greater than or Equal to operator will compare the left numeric operator to the right numeric
+	operator and return zero if the left numeric operator is greater than or equal to the right numeric
+	operator and one if false.
+	The Numeric Less than or Equal to operator will compare the left numeric operator to the right numeric 
+	operator and return zero if the left numeric operator is less than or equal to the right numeric operator
+	and one if false.
+	The String Concat operator will take the two substrings specified and merge them into one string, returning
+	the new string resulting from the two merged strings
+	The String Contains operator will search the provided string specified by the second argument for the
+	substring specified by the first argument and return 0 if the substring is found and 1 if it is not found.
+	The String Equal to operator will compare two strings and return 0 if they match and 1 if they differ.
+	The String Starts with operator will see if the first N chars, N being the length of the substring
+	specified by the second argument, of the string specified by the first operator contains the substring
+	specified by the second argument, and return 0 if said substring was found and 1 if it was not.
+	The String Ends with operator will see if the last N chars, N being the length of the substring
+	specified by the second argument, of the string specified by the first operator contains the substring
+	specified by the second argument, and return 0 if said substring was found and 1 if it was not.
+
+	Division on two floating-point values will not return a floating-point value, and if the result of division
+	produces a remainder, the remainder will be excluded. The modulo operator is used in this case. In the
+	case of floating-point division, a floating-point division operator should be performed, but the final
+	returned result should not be a floating-point value. No rounding should be performed; the decimal place
+	should be 'chopped off' cleanly.
+
+	The Advanced String Manipulation Extension (ASSE) introduced three new operators, String Split Left, String
+	Split Right, and String Find. String Find takes one string value and a second substring and will find the
+	substring on the right in the substring on the left. String Split Left takes one string value and one unsigned
+	numeric value, on the left and right respectively, just as String Split Right. String Split Left will go to the
+	position specified by the right operand and return the string's data until that position, excluding it. String
+	Split Right will go to the position and return the data in the string until that position, excluding it. If
+	either position is out-of-bounds, it will return the given string. String Find will return the position of the
+	first character in the string where the first instance of the substring is found.
+
+	All three of these operators are allowed to implicitly be pointers. This means, if any value given to any
+	operand to them is a valid variable name, they will act on the data in said variable. If not, they will
+	simply act on the data given.
+
+	String Split Left can be used as operator 'ssl', String Split Right as operator 'ssr', and String Find as
+	operator 'sf'.
+
+
+
+
+	Pebble is dynamically and loosely typed. When a value is stored by an instruction, the type is defined
+	based on deterministic parsing rules. This is the type the value is to be associated with until another
+	instruction stores to that value. Operators are allowed to implicitly change the type, but the operator
+	itself does not store the changed type to the variable, only for the operation. The type they may change
+	it to is defined in the operation; numeric operators may change it to a numeric type and string operators
+	may change it to string types. The new result of the operation is not type guessed, but is the type of
+	the two operators. Both operands must be of the same time when performing the expression internally, but
+	one or more of the operands can be changed based on the operator. Eg. if I were to ask the virtual
+	machine to store '01' to a variable, this may be stored as a string to preserve the leading zero, but then
+	if I ask the virtual machine to perform the numeric addition operation with this value, it may be
+	implicitly converted to a numeric value, losing the leading zero, and returning a numeric result, but
+	the initial variable stored does not change type, and the variable itself is still a string. From the 
+	perspective of the programmer, no more information is needed on types besides this.
+
+	If the line starts with the hash (#) or forward slash (/) characters, then the line is not to be
+	interpreted as an instruction. If the instruction has more arguments than what is expected, they
+	should be silently ignored. This is done to allow comments at the end of a line. There may not be
+	a space or tab at the start of a line. A newline character at the start of a line is treated in the
+	same way as a comment.
+
+	The New opcode is a representation of a generic data manipulation primitive. This instruction accepts
+	two operands, first being the destination to store to, and the second being the data to store to the
+	destination. The destination operand uses the Literal modifier to represent the named variable to store
+	the data to, the pointer modifier as a reference, which will be followed, to the named variable to store
+	to, the Indirect modifier the same as the Pointer modifier, the True Literal modifier as an expression 
+	who's result is the name of the variable to store to, the Forced Evaluation modifier as representing a 
+	pointer to an expression, which will be followed, who's result is the name of the named variable to store 
+	to, and the Bare modifier in the same way as the True Literal modifier. The source operand treats the Bare 
+	modifier as marking the referenced variable name's data to be copied to the destination variable, the True 
+	Literal modifier as a piece of literal data to store to the destination, the Literal modifier to be an 
+	expression who's result is the data to store to the destination, the Forced Evaluation modifier as a pointer 
+	to an expression, which will be followed, and to store the result of said expression to the destination,
+	the Pointer modifier as to store a reference to the named variable to the destination, and the Indirect
+	modifier to store the data in the referenced variable by the pointer.
+
+	Unless explicitly stated, the Indirect modifier is treated in the same way as the New modifier.
+
+	A few examples of this opcode in practice include
+
+		New foo '1' / The variable foo is equal to the literal data 1
+		New bar foo / The variable bar is equal to a copy of the current data in the variable foo, aka 1
+		New baz <foo> / The variable baz contains a pointer to the variable foo
+		New qux "1 + 2" / The variable qux contains the result of the expression 1 + 2, aka 3
+		New quux '1 + 2' / The variable quux contains a representation of the expression 1 + 2
+		New corge {quux} / The variable corge contains the result of the expression held in quux, aka 3
+		New grault 'qux s++ corge' / The variable grault contains a representation of said expression
+		New {grault} foo / The variable defined as the result of the expression held in grault, which
+		/ resolves to '33', since qux contains the data 3 and corge contains the data 3 as well, resolved
+		/ from the prior expression, to contain a copy of the data in foo, which is 1
+		New grumpy [grault] / the variable grumpy is a copy of the data in the variable referenced by the
+		/ variable grault
+
+	The Func opcode is the opcode to begin recording to the function table until the End opcode is reached. The
+	Func opcode only takes one operand, being the name of the function to begin recording. This name can be a
+	piece of literal text using the bare or True Literal addressing modes, the result of an expression via the
+	Literal addressing mode, the result of an expression taken from a pointer with the Forced Evaluation
+	addressing mode, or a pointer to a piece of text via the pointer addressing mode. Every opcode specified
+	from the Func statement until the End statement will be recorded into the function entry under the defined]
+	name. Multiple functions of the same name are allowed to be declared, in which case the last definition in
+	terms of where it appears in the bytecode stream should be the one valid. However, functions should be
+	recorded as they are seen, not at compile-time. This means a function cannot be called before it is defined,
+	and if a function is re-defined but called before the re-definition, the old function value should be called.
+
+	Some examples include
+
+		Func a / start recording opcodes to function a
+		New x '1' / an opcode in function a
+		New y '2' / another opcode in function a
+		End / end function a
+
+		New x 'a s++ b' / create name template
+		New a '1' / fill first value
+		New b '2' / fill second value
+		Func {x} / create function '12'
+		New w '1' / an opcode in function 12
+		End / end function 12
+
+	Another opcode plays in hand with this, being the Call opcode, a call to a defined function. This opcode
+	will call the function by name using a literal name via the bare and True Literal addressing modes, by
+	the result of an expression from the Literal addressing mode, by the result of a pointer to an expression
+	from the Forced Evaluation addressing mode, or by a pointer to the name by the Pointer addressing mode. This
+	opcode only takes one operand, being the name of the function to call.
+
+	Some examples include
+
+		New template 'base s++ modifier' / create name template
+		New base 'func' / fill first value
+		New modifier '0' / fill second value
+		Call {template} / call the function func0
+
+		Func a / define function a
+		New x '1' / an opcode in function a
+		End / end function a
+		Call a / call function a; x now = 1
+		Func a / re-define function a
+		New x '2' / an opcode in the new function a
+		End / end the new function a
+		Call a / call the re-defined function; x now = 2
+
+	The Return opcode can be used to return from a function early. This opcode takes no arguments and simply
+	ends the function once it is hit inside of a function. This opcode is considered invalid when used outside
+	of a function.
+
+	Some examples include
+
+		Func foo / define function foo
+		Return / return from function foo
+		New x '2' / this should never be hit
+		End / end function foo
+		New x '1' / set x to 1
+		Call foo / x is still set to 1, since the code path changing it should never be hit
+
+	A Return statement is said to be implicitly at the end of an End statement, but generally implementations
+	do not literally inject that opcode in, but instead interpret them in a similar way. The End opcode ends
+	the function definition and returns to the caller when hit, while Return only returns to the caller when
+	hit, not ending the function yet.
+
+	The If opcode is used for conditional control flow. This opcode is used to call a function if the stated
+	expression resolves to zero. It accepts two arguments, the first being the name of the function to call,
+	and the second being the expression to use. The first argument uses the bare addressing mode and True
+	Literal to represent the function name directly, the Literal addressing mode to represent an expression
+	who's result contains the function name, the Pointer addressing mode as a pointer to the function name,
+	and the Forced Evaluation addressing mode as a pointer to an expression who's result should be the
+	function name. The second operand uses the bare and True Literal addressing modes to represent the
+	result, not of a expression, the Literal addressing mode to represent an expression to evaluate as the
+	conditional, the Forced Evaluation mode as a pointer to an expression to be evaluated, and the Pointer
+	addressing mode as a pointer to an expression to be evaluated, which is the same as the Forced Evaluation
+	addressing mode.
+
+	Some examples include
+
+		Func a / define function a
+		New x '1' / some instruction in function a
+		End / end function a
+		If a "1 > 0" / call function a if the expression == 0. This expression resolves to zero.
+		
+		New template 'base s++ modifier s++ modifier2' / define a template
+		New base 'func' / define the first entry
+		New modifier '0' / define the second entry
+		New modifier2 '1' / define the third entry
+		If {template} '0' / call function func01 if 0 == 0
+
+		New expression '1 > 0' / define the expression to use 
+		If a <expression> / evaluate the expression held in the variable and call the function a
+				  / if it's result == 0
+		If a {expression} / the same thing as above
+
+	And finally, the Escape opcode, which is used to call a function using the Foreign Function interface.
+	The FFI is used to implement the Pebble standard library, which will be described later. The FFI is
+	a small interface to allow one programming language to use the Pebble internal variable table, hence
+	allowing it to interface with Pebble code. The Pebble standard library uses an interface that is stable
+	on the Pebble-facing side, but the FFI itself is implementation-specific. 
+
+	The Escape opcode takes one argument, being the name of the FFI sequence to call. It accepts the
+	addressing modes bare and True Literal as the name of the sequence to call, Literal as an expression
+	who's result is the sequence to call, Pointer as a pointer to the name of the sequence to call, and Forced
+	Evaluation as a pointer to an expression who's name is the sequence to call.
+
+	FFI code is compiled into the virtual machine binary itself, not loaded at runtime, This means once a
+	copy of the virtual machine is compiled, sequences cannot be added or removed. Sequences have access
+	to only the internal variable table of the virtual machine, through whatever interface the implementation
+	of the virtual machine and FFI wish to allow. Again, the Pebble-facing sequences of the Pebble standard
+	library are stable, but the implementation of the FFI, it's interface and the FFI code itself is
+	specific to the implementation of the virtual machine itself. 
+
+
+
+                    _ Advanced String Escaping Extension -
+
+	The Advanced String Escaping Extension (ASEE) adds two new operation symbols, being se (String Escape),
+	and sue (String Un-Escape). These are used to parse and manage ASCII escape sequences inside of strings
+	to make formatting and text parsing easier. Both of the operations only use one operand, being the left.
+	A right operand must be present, but it is ignored.
+
+	The se operation will convert textual representations of ASCII escape sequences into the proper escape
+	sequence. The sue operation does the opposite.
+
+	The supported sequences include
+
+		"\n" -> '\n'
+		"\t" -> '\t'
+		"\\" -> '\'
+
+	Both of these operators are to be in the same precedence class as String Concat.
+
+
+
+
+
+                    - Task Management Extension -
+
+	The Task Management Extension (TME) is a vm-level extension that ties deep into how execution works.
+	This is the only current extension that added new opcodes to the Bytecode Two specification. The
+	extension defines what is known as a 'task', which is a Pebble function routine with it's own call
+	stack independent of the main program, which is in itself also a task, being task 0 or the 'main' task,
+	which can be scheduled by the vm scheduler. This allows for basic multitasking within the virtual machine.
+
+	Two new opcodes are added by this extension; Spawn and Yield. Spawn is used to create a new task and Yield
+	being used to request the scheduler determine which task to run. The scheduler is allowed to use whatever
+	algorithm it wishes to use to determine what task should run when, but it must respect the Yield
+	instruction and not choose to run the same task as the one requesting the yield.
+
+	The Spawn opcode accepts two operands, one of them being optional. The first operand is to be the name of
+	the function to create the new task in, and the second being the variable to modify when the created task
+	has finished. Spawn does not immediately run the task, but instead creates a task that is ready to be ran.
+	If the second operand is not present, no variable will be modified at the end of the task. The variable is
+	modified when the function representing the task returns for said task, not when the task calls a function
+	or itself requests a yield. A task is explicitly allowed to call a function and request a yield, but once
+	the initial function used to create said task returns, the scheduler is allowed to decide who gets to run
+	next. For the first operand, the addressing mode True Literal is treated as the literal name of the
+	function to initialize the task with. This is also true for the Bare addressing mode. The Literal addressing
+	mode is used to inline an expression who's result is the name of the initial function to use for the task.
+	The Forced Evaluation addressing mode is used as a pointer to an expression who's result will be used as
+	the initial function for the task. The Pointer addressing mode is used to represent a variable who's name
+	contains the initial function for the task. The data in said variable will be used as the name of the
+	initial function for the task. The Indirect addressing mode is treated the same.
+
+	The second operand accepts the same addressing modes as the first, but this operand is used to represent
+	the variable to modify when the task completes. Completion is defined as when the initial function of
+	the task returns. All addressing modes for this operand are the same as the previous, except for the
+	fact that the resulting data is used as the name of the variable to modify. When the opcode finishes, the
+	variable will be set to zero ('0'), and one ('1') when it finishes.
+
+	The Yield opcode is used to request the scheduler run a different task. This opcode accepts one operand,
+	but is allowed to have none. If the opcode has one operand, then the operand is used as the time to
+	yield for in milliseconds. Once the time is complete, the scheduler is to return to the task which
+	requested the yield. If no operands are given, then the scheduler may determine which task is to run
+	and for how long. The scheduler does not have to return to the task which requested the yield once
+	the task it started first finishes, as in this case, the scheduler is given full control over deciding
+	who to run and when.
+
+	An example of these opcodes in use could be 
+
+		Func print
+		New __Escape_std.io.print_ARG0 <msg>
+		Escape std.io.print
+		End
+
+		Func workerA
+		New msg 'A: 1'
+		Call print
+		Yield
+		New msg 'A: 2'
+		Call print
+		Yield
+		New msg 'A: 3'
+		Call print
+		Yield
+		End
+
+		Func workerB
+		New msg 'B: 1'
+		Call print
+		Yield
+		New msg 'B: 2'
+		Call print
+		End
+
+		Func awaitA
+		Yield 1
+		If awaitA <doneA>
+		End
+
+		Func awaitB
+		Yield 1
+		If awaitB <doneB>
+		End
+
+		New msg 'main: spawning'
+		Call print
+
+		Spawn workerA doneA
+		Spawn workerB doneB
+
+		New msg 'main: spawned; awaiting'
+		Call print
+
+		Call awaitA
+		New msg 'main: A finished'
+		Call print
+
+		Call awaitB
+		New msg 'main: B finished'
+		Call print
+
+	In this program, we create two tasks, making a total of three. Task one, Task two, and the
+	Main task. Here, we spawn tasks one and two, then repeatedly request to yield for one
+	millisecond until the task is done, waiting on task one and two, in that order. The
+	expected output of this program is
+
+		main: spawning
+		main: spawned; awaiting
+		A: 1
+		B: 1
+		A: 2
+		B: 2
+		A: 3
+		main: A finished
+		main: B finished
+
+	However, we may not wait exactly one millisecond, a task must remain on the instruction boundary.
+	So, instead we wait for as long as possible while remaining on the instruction boundary. This is
+	done to enforce ordering rules and make sure the global state does not become corrupted, since it
+	is generally only safe to pause on the instruction boundary.
+
+	The variable __task should be managed by the virtual machine and hold a numeric value representing
+	the current task in execution. Task 0 should always be the main task. The implementation may define
+	how task numbers are allocated however it wishes, as long as task 0 is always the main task.
+
+
+
+                    - New Rock -
+
+	New Rock is a modern dialect of the Rock language (which is actually older than CPebble itself, since it
+	was first described for the Zig version of the virtual machine that is now deprecated) designed to express
+	the capabilities introduced by the Advanced Addressing Extension more explicitly, as well as to be a more
+	modern and readable variant. Someone who knows Rock could read New Rock, and someone who knows New Rock
+	could probably read New Rock. The Rock language is beyond the scope of this document and only New Rock
+	will be described. It is worthy to note Rock and New Rock have different syntax in a lot of places, so
+	do not assume they are cross-compatible in any way.
+
+	New Rock is designed around mapping Pebble code to higher-level concepts, so that a programmer may gain
+	all the benefits of using the Pebble Virtual Machine without needing to write Pebble bytecode by hand.
+
+	New Rock functions are defined using the 'fn' keyword. This keyword should be followed immediately by a
+	space and the '(' character. This should be followed by space-separated ordered arguments the function
+	should accept as variable names, ended by a space and the ')' character. The variables the function is
+	to return should come after this, also space-separated and ordered. The '{' character with a space
+	immediately before it and a newline immediately after it marks the end of the function definition statement
+	and the start of the function body. The function body should continue until the '}' character is seen
+	Indentation does not matter in this case, as the functions are scoped by the '{' and '}' characters.
+	The function is to be defined as a re-usable piece of code that can be called later using the 'call'
+	statement, followed immediately by a space and the name of the function to call, followed by another
+	space and the '(' character, the space-separated ordered arguments
+	to pass to the function, which will be copied into the argument variables defined by the function
+	definition statement in the order they are given in the call statement, followed by a space and the ')'
+	character to end the call statement. This statement is used to begin executing the function name and
+	to return to the line of code immediately after the call statement once the function has ended.
+
+	Variable assignment is done by stating the names of the variables you wish to assign separated by spaces,
+	followed by a space and the '=' character, then the Pebble value you wish to assign to them. The Pebble
+	value is allowed to be any Pebble statement defined as valid above, using any of the addressing modes
+	defined above. For this keyword, the addressing modes map to the addressing modes of the Pebble New opcode.
+
+	During the assignment of variables, the call keyword is allowed to be used. If the call keyword used, then
+	the variables defined are to be assigned as the ordered returns of the function being called.
+
+	The 'main' function is defined as the entry point, or where the program will begin executing. Please note
+	this is not literally the first statement executed. Depending on context or code, invisible initialization
+	code may be executed before the main function, such as Pebble statements to register defined functions, but
+	the main function is the program entry point.
+
+	Functions are to be callable as soon as the body of the function ends. This means you are unable to call
+	a function that is defined later in the application code.
+
+	The 'include' statement is used to include a piece of code not defined in the application from another
+	file containing valid New Rock source code. The keyword should be followed by a space, which should then
+	be followed by a path to the file containing said source code. This path is operating-system dependent
+	and should be adjusted to the operating system. If the system permits it, the path may be relative to the
+	current directory that the source code or user is in. The inclusion system is not a module system, but is
+	a text preprocessor and substitution system, meaning it is more comparable to something like C, relative
+	to something like Java. However, since functions are allowed to be defined more than once in New Rock, this
+	means that including the same file more than once is permitted. In the case where a function is defined
+	more than once, the last defined instance of it is to be permitted. However, if the function is called
+	in between re-definition, the current definition of the function is to be used, just in the same way as
+	Pebble. The special include path 'stdlib' is to be the compiler-provided standard library for New Rock.
+	If the file named to be imported matches this keyword, the filesystem is not searched, and the
+	compiler-provided standard library is included instead. The functions and routines defined by this library
+	are to be declared later in this document.
+
+	New Rock does not have the concept of runtime code importing, so all include statements are handled
+	purely at compile-time.
+
+	Spaces are allowed within valid Pebble statements if they are inside of the addressing mode markers.
+
+	A short example of a valid New Rock program would be
+
+		include stdlib
+
+		fn add ( a b ) result {
+			result = "a + b"
+		}
+
+		fn main ( ) return {
+			return = call add ( '1' '2' )
+			call std.io.print ( return )
+		}
+
+	This program will first include the standard library code into the source code for later use. It then
+	defines a function named add, which takes two arguments, a and b, and returns the variable result at
+	the end of the function's execution. The function sets the variable result to the result of the Pebble
+	statement "a + b", adding the two arguments passed together. Then, at the end of the function, the
+	result is returned, which is in the variable result, which is defined to be the return variable of
+	this function. It then defines the program entry point, main, to take no arguments and return one
+	variable, return. Main is never called by another function, so the return value of it is meaningless,
+	but still required. It is common to simply initialize it to zero at the start of the function. This
+	function calls the function add using two Pebble statements as arguments, '1' and '2'. These are passed
+	to the add function, which then adds the two together and returns the result. The main function then
+	stores the result into the variable return. It then calls the function std.io.print from the standard
+	library with one argument, being the variable return. This function is used to print data onto standard
+	output, as described later.
+
+	The conceptual execution of this order is
+
+		main 
+		  | --- return = call add ( '1' '2' )
+			  | --- add '1' '2'
+				  | --- variable result = "1 + 2"
+				  | --- return current value of variable result (3)
+			  | --- variable return = returned variable of add
+		  | --- call std.io.print ( return )
+			  | --- printing of the variable result's data (3)
+		  | --- return current value of variable result (3)
+
+	Now, this might not be the exact ordering, since things such as compiler-generated startup routines
+	exist, but this is how the program will execute from the user's perspective.
+
+	Every item defined as a body by the '{' and '}' characters is defined to have it's own explicit scope.
+	The code in this region cannot see global variables and code outside of it cannot see variables defined
+	by it. The keywords 'import' and 'export' are defined to allow the sharing of variables between scopes.
+	The import keyword is used to copy a variable from the global scope into the local scope, and export is
+	used to copy a variable from the local scope into the global scope. It is important to note that these
+	are copies, not references. This means if I change a variable after I export it, the variable inside of
+	the global scope does not change. Both of these keywords should be followed by a space, then the variable
+	to perform the operation on.
+
+	Extra control flow statements include the 'if', 'else if', 'else', and 'while' statements. The if
+	statement should be followed by a space, the '(' character, a Pebble expression to evaluate, then the
+	')' character, followed by a space and the character '{'. The data is to be executed only if the Pebble
+	expression evaluates to 0, which is the true value in Pebble. else if and while all follow the
+	same syntax, but with different meanings. Else if may come after an if statement on the same line as
+	the if or another else if statement, on the same line as the '}' character, with the statement followed
+	by a space. The else statement may come in the same place. The else if statement is used to chain
+	conditional statements together, to be evaluated in the order they appear in. Else is used to define
+	what is to happen last if none of the if or else statements evaluate to true. Else does not use  the
+	same syntax, only needing the else keyword, followed by a space and the '{' character, with the body
+	being ended by the '}' character. The while statement is used to execute the defined block while the
+	condition defined evaluates to true. The statement is checked once pre loop, and the body is ran if
+	the statement evaluates to true.
+
+	An example would be
+
+		fn main ( ) return {
+			return = '0'
+			x = '0'
+
+			if ( "x < 3" ) {
+				x = "x + 1"
+			} else {
+				x = '4'
+			}
+
+			while ( "x != 0" ) {
+				x = "x - 1"
+			}
+		}
+
+	It is important to note the statements if, else if, else, and while are an exception to the scoping rule,
+	as they are allowed to view the variables of the function they are defined in by default. The values are 
+	not copied around in this case; the if statement mutating x is mutating the same variable x that main
+	sees. But x is also not a global in this case; it is still local to main.
+
+
+
+
+
+                    - The Pebble Standard Library (stdpbl) - 
+
+	The Pebble standard library is a set of functions registered as Escape sequences in the Pebble Virtual
+	Machine used for providing common host access functions and routines. These routines are implementation-
+	dependent, just as the FFI itself, but the interface exposed to Pebble code is stable across
+	implementations. This document describes Version 2 of the standard library, currently used by CPebble.
+
+	Escape sequence names of the standard library follow the naming convention of dot (.)-separated
+	groupings, with the first group being 'std' and the final entry being the function name. 
+
+	Arguments passed to these escape sequences via Pebble variables. These variables are distinguished from
+	normal variables by the prefix of '__Escape_'. This is then followed by the escape sequence in reference,
+	and the string '_ARG', followed by the argument number. Returning variables from an escape sequence to 
+	Pebble code and storing a variable internally as an escape sequence follows the same convention, but with 
+	the ending string "_RET", followed by the return number, or simply replacing the ending suffix with the 
+	internal variable name, respectively. Hence, if a piece of FFI code wishes to store the variable 'foo', 
+	and the escape sequence associated is named 'bar.baz', it would store the variable as 
+	'__Escape_bar.baz_foo'. If a piece of Pebble code wishes to give this same escape sequence one argument,
+	it would define it as '__Escape_bar.baz_ARG0', and if it wanted to return one value to a Pebble program,
+	it would return it as '__Escape_bar.baz_RET0'. Arguments given to escape sequences should contain a
+	pointer to another Pebble variable containing the data, which can be used via the Pointer addressing mode.
+	Return values should return the data in question, not a pointer to it.
+
+	Libraries include:
+
+		group io - basic input/output facilities
+			escape print - print text
+				accepts one argument, being the data to print. A newline is appended.
+			escape printLn - print text
+				accepts one argument, being the data to print. A newline is NOT appended.
+			escape input - get input
+				gets input from stdin until a newline is hit and returns the data given excluding
+				the newline character
+		group misc - miscellaneous functions
+			escape random - generate a random number
+				generates a non-cryptographic psedorandom number and returns it
+			escape sleep - wait for a time period
+				accepts one argument, being the time in milliseconds to sleep. Returns the real
+				time slept in milliseconds
+		group proc
+			escape spawn - spawn a process
+				accepts one argument, being the command to run in the new process. This is to
+				be space-separated arguments, with the first being the file to execute. Returns
+				one value, being the platform-dependent representation of the process. Throws a
+				fatal error if the process cannot be spawned.
+			escape wait - wait on a spawned process
+				accepts one argument, being the platform-dependent representation of the process
+				to wait on. Returns two values, the first being 1 if the process was killed and 0
+				if it was not. If it was killed, the second value is the platform-dependent value
+				it was killed with (eg. a signal on UNIX). If it was not, returns the exit code 
+				the process returned. Waits until the process exits or is killed.
+		group fs
+			subgroup file
+				escape read - read a file
+					accepts one argument, being the path of the file to read. Returns the
+					data parsed as a string of the file read. R
+				escape write - write a file
+					accepts two arguments, being the path of the file to write to and the
+					data to write into the file. Writes the data into the file and creates
+					it if it does not exist. Does not append data to the file, overriding it
+					if it does already have data in it. Returns the size written to the file.
+					Returns 0 if it could not write to the file.
+		group term
+			subgroup cursor
+				escape moveAbsolute - move the cursor character
+					accepts two arguments, the x and y cells to move the cursor to, 1-indexed.
+			subgroup color
+				subgroup basic
+					escape fore - set the foreground color
+						accepts one argument, being the color (as text) to set the
+						terminal foreground to. Valid values are the ANSI basic
+						colors. Defaults to white if none specified.
+					escape back - set the background color
+						accepts one argument, being the color (as text) to set the
+						terminal background to. Valid values are the ANSI basic
+						colors. Defaults to black.
+					escape reset - reset the color
+						resets the terminal foreground and background color to the
+						default value.
+
+
+
+
+
+                    - Advanced Programming Techniques -
+
+	Pebble offers many advanced programming techniques that may not be immediately obvious from the language
+	itself. These can be odd or non-intuitive properties of addressing combinations, ordering behaviors,
+	uncommon operations, unusual operator interactions, some combination, or something even less intuitive.
+	Tricks such as these can be incredibly powerful for programmers to know, since they allow the written
+	Pebble code to be shorter, cleaner, faster, smaller, and overall better, or in some cases, able to
+	express a concept the 'standard' method may not.
+
+		It is possible to perform operations on data who's values cannot be reliably known until
+		runtime or cannot be defined cleanly at compile-time via the expressive operators. Thanks
+		to the Advanced Addressing Extension, addressing across instructions is mostly uniform and
+		most data can be supplied at runtime. The data supplied can be the result of things such
+		as a reference, and expression, and so on. Using the {} and "" addressing syntax, I can
+		define variables and functions who's names are not known until runtime or may be the result
+		of a template or expression. This is a form of metaprogramming, since the expression's result
+		is used to construct the name.
+
+			New template 'base s++ modifier1 s++ modifier2'
+			New base 'func'
+			New modifier1 '0'
+			New modifier2 '1'
+			Call {template}
+
+		The template itself is known at compile-time, but the substituted values are not. This
+		allows the name of the function being called to be dynamic, potentially not known at
+		compile-time. The fact that said addressing modes only evaluate once the marker symbols
+		are found in the opcode, this means the values can change at runtime after I use them
+		without modification of the template. I could do something like this
+
+			Func func0
+			New modifier '1'
+			End
+			Func func1
+			New result '2'
+			End
+			New template 'base s++ modifier'
+			New base 'func'
+			New modifier '0'
+			Call {template}
+			Call {template}
+
+		Although the two source-code lines using the template are the same, they are not calling
+		the same function. Since the function func0 modifies one of the variables used to create
+		the template, the second Call opcode sees a new value in the variable referenced by the
+		template when it attempts to resolve it, causing the second function, func1, to be called
+		instead. If we pair this with the RFDE, Recursive Function Definition Extension, which
+		allows one function to define another, then we can create something truly cursed.
+
+			Func define
+			Func {template}
+			_PRINT called
+			End
+			New modifier "modifier + 1"
+			New count "count + 1"
+			_PRINT2 count
+			If define "count < max"
+			End
+			New count '0'
+			New max '3'
+			New template 'func s++ modifier'
+			New modifier '0'
+			Call define
+			Call func2
+
+		This example defines a function, which defines several more functions based on a template.
+		If we wanted to get really fancy, we could create something similar to this, where each
+		function then calls a series of dynamically generated If opcodes based on the value of
+		another variable given to them, with said functions being called by the If opcodes, to have
+		each generated function perform a different operation based on values given to the program
+		when the functions are generated.
+
+		Something similar can be done for variable names; we can define variables who's names are
+		the result of a template using AAE
+
+			New template 'base s++ mod'
+			New base 'var'
+			New mod '0'
+			New {template} '0' / var0 = 0
+
+		We can also do something similar to this with the name of the variable used as a pointer to
+		get the data to place in the generated variable using the [] addressing mode added by the
+		AAE2, Advanced Addressing Extension Two
+
+			New template 'base s++ mod'
+			New template2 'base2 s++ mod'
+			New base 'var'
+			New base2 'val'
+			New mod '0'
+			New {template2} '1' / val0 = 1
+			New {template} [template2] / var0 = 1
+			New mod '1'
+
+		In this example, we generate both the name of the variable and the variable who's data we wish
+		to copy into said variable from templates.
+
+		A stack can also be simulated using AAE and AAE2, via something such as
+
+			Func __Stack_init_helper
+			New {__Stack_index} '0'
+			New __Stack_temp_83 "__Stack_temp_83 + 1"
+			If __Stack_init_helper "__Stack_temp_83 < __Stack_max"
+			End
+			Func __Stack_init
+			New __Stack_temp_83 '0'
+			New __Stack_index_base '__Stack_StackSlot_'
+			New __Stack_index '__Stack_index_base s++ __Stack_index_entry'
+			New __Stack_index_entry '0'
+			New __Stack_max '32'
+			Call __Stack_init_helper
+			End
+			Func __Stack_push
+			New {__Stack_index} __Stack_in
+			New __Stack_index_entry "__Stack_index_entry + 1"
+			End
+			Func __Stack_pop
+			New __Stack_index_entry "__Stack_index_entry - 1"
+			New __Stack_slot {__Stack_index}
+			New __Stack_out [__Stack_slot]
+			End
+			Call __Stack_init
+
+		which can then be used via, eg.
+
+			New __Stack_in '2' / set 2 to be pushed
+			Call __Stack_push  / push 2
+			New __Stack_in '3' / set 3 to be pushed
+			Call __Stack_push  / push 3
+			Call __Stack_pop   / pop 3 into __Stack_out
+			Call __Stack_pop   / pop 2 into __Stack_out
+
+		Memory (and an array, via the same principle) can be simulated via
+
+			Func __mem_init_loop
+			New {__mem_index} '0'
+			New __mem_init_temp "__mem_init_temp + 1"
+			New __mem_index_pos "__mem_index_pos + 1"
+			If __mem_init_loop "__mem_init_temp < __mem_max"
+			End
+			Func __mem_init
+			New __mem_max '128'
+			New __mem_index '__mem_index_prefix s++ __mem_index_pos'
+			New __mem_index_prefix '__mem_'
+			New __mem_index_pos '0'
+			New __mem_init_temp '0'
+			Call __mem_init_loop
+			New __mem_index_pos '0'
+			End
+			Call __mem_init
+
+		which can be used via
+
+			New __mem_index_pos 'n' # where n is the address
+			New temp {__mem_index}  # resolve the address
+			New value [temp]        # load the data in said address to var value
+			New __mem_index_pos 'n' # where n is the address
+			New {__mem_index} 'n'   # where n is the value to load to the address
+
+		These examples are what should be consitored idiomatic compiler-safe Pebble. This means
+		it is safe to drop these into compiler-generated code where the user does not know the
+		names of the variables, hence why they are scoped.
+
+		Primitives such as these can be used to simulate another state machine inside of Pebble,
+		which can then be used as a runtime for another programming language which expects a more
+		traditional model of computing, eg. C.
