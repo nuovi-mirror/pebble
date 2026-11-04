@@ -848,6 +848,7 @@
 			Func __Stack_init_helper
 			New {__Stack_index} '0'
 			New __Stack_temp_83 "__Stack_temp_83 + 1"
+			New __Stack_index_entry "__Stack_index_entry + 1"
 			If __Stack_init_helper "__Stack_temp_83 < __Stack_max"
 			End
 			Func __Stack_init

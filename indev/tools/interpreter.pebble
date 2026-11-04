@@ -1,0 +1,176 @@
+# simple bytecode interpreter
+# array of opcodes + working data stack
+
+# state stack; just copied from the handbook
+Func __Stack_init_helper
+New {__Stack_index} '0'
+New __Stack_temp_83 "__Stack_temp_83 + 1"
+New __Stack_index_entry "__Stack_index_entry + 1"
+If __Stack_init_helper "__Stack_temp_83 < __Stack_max"
+End
+Func __Stack_init
+New __Stack_temp_83 '0'
+New __Stack_index_base '__Stack_StackSlot_'
+New __Stack_index '__Stack_index_base s++ __Stack_index_entry'
+New __Stack_index_entry '0'
+New __Stack_max '32'
+Call __Stack_init_helper
+End
+Func __Stack_push
+New {__Stack_index} __Stack_in
+New __Stack_index_entry "__Stack_index_entry + 1"
+End
+Func __Stack_pop
+New __Stack_index_entry "__Stack_index_entry - 1"
+New __Stack_slot {__Stack_index}
+New __Stack_out [__Stack_slot]
+End
+#New __Stack_in '2' / set 2 to be pushed
+#Call __Stack_push  / push 2
+#New __Stack_in '3' / set 3 to be pushed
+#Call __Stack_push  / push 3
+#Call __Stack_pop   / pop 3 into __Stack_out
+#Call __Stack_pop   / pop 2 into __Stack_out
+# ----
+
+# opcode array; the memory bit copied from the handbook
+Func __mem_init_loop
+New {__mem_index} '0'
+New __mem_init_temp "__mem_init_temp + 1"
+New __mem_index_pos "__mem_index_pos + 1"
+If __mem_init_loop "__mem_init_temp < __mem_max"
+End
+Func __mem_init
+New __mem_max '128'
+New __mem_index '__mem_index_prefix s++ __mem_index_pos'
+New __mem_index_prefix '__mem_'
+New __mem_index_pos '0'
+New __mem_init_temp '0'
+Call __mem_init_loop
+New __mem_index_pos '0'
+End
+#New __mem_index_pos 'n' # where n is the address
+#New temp {__mem_index}  # resolve the address
+#New value [temp]        # load the data in said address to var value
+#New __mem_index_pos 'n' # where n is the address
+#New {__mem_index} 'n'   # where n is the value to load to the address
+# ----
+
+Func init
+New pc '0'
+New working '0'
+Call __Stack_init
+Call __mem_init
+
+# load the program into memory
+New __mem_index_pos "__mem_index_pos + 1" # --
+New {__mem_index} '3' # LI opcode
+
+New __mem_index_pos "__mem_index_pos + 1" # --
+New {__mem_index} '2' # data
+
+New __mem_index_pos "__mem_index_pos + 1" # --
+New {__mem_index} '3' # LI opcode
+
+New __mem_index_pos "__mem_index_pos + 1" # --
+New {__mem_index} '2' # data
+
+New __mem_index_pos "__mem_index_pos + 1" # --
+New {__mem_index} '5' # DUP opcode
+
+New __mem_index_pos "__mem_index_pos + 1" # --
+New {__mem_index} '5' # DUP opcode
+
+New __mem_index_pos "__mem_index_pos + 1" # --
+New {__mem_index} '2' # PRINT opcode
+
+New __mem_index_pos "__mem_index_pos + 1" # --
+New {__mem_index} '2' # PRINT opcode
+
+New __mem_index_pos "__mem_index_pos + 1" # --
+New {__mem_index} '4' # ADD opcode
+
+New __mem_index_pos "__mem_index_pos + 1" # --
+New {__mem_index} '2' # PRINT opcode
+
+New __mem_index_pos "__mem_index_pos + 1" # --
+New {__mem_index} '1' # HLT opcode
+
+# ---
+
+New __mem_index_pos '0'
+New HALTED '0'
+Call loop
+End
+
+# opcodes
+Func Opcode_NOP
+# do nothing
+End
+
+Func Opcode_HLT
+New msg 'HALTED'
+Call print
+Call exitcode
+End
+
+Func Opcode_PRINT
+Call __Stack_pop
+New msg __Stack_out
+Call print
+End
+
+Func Opcode_LI
+New pc "pc + 1"
+New __mem_index_pos pc
+New __Opcode_LI_temp {__mem_index}
+New __Opcode_LI_data [__Opcode_LI_temp]
+New __Stack_in __Opcode_LI_data
+Call __Stack_push
+End
+
+Func Opcode_ADD
+Call __Stack_pop
+New __Opcode_ADD_tmp1 __Stack_out
+Call __Stack_pop
+New __Opcode_ADD_tmp1 "__Stack_out + __Opcode_ADD_tmp1"
+New __Stack_in __Opcode_ADD_tmp1
+Call __Stack_push
+End
+
+Func Opcode_DUP
+Call __Stack_pop
+New __Stack_in __Stack_out
+Call __Stack_push
+Call __Stack_push
+End
+# ---
+
+# helper routines
+Func print
+New __Escape_std.io.print_ARG0 <msg>
+Escape std.io.print
+End
+
+# exit routine
+Func exitcode
+New HALTED '1'
+End
+
+# main execution loop
+Func loop
+New temp {__mem_index}
+New instruction [temp]
+If Opcode_NOP "instruction == 0"   # default value
+If Opcode_HLT "instruction == 1"   # halt the system
+If Opcode_PRINT "instruction == 2" # pop; print
+If Opcode_LI "instruction == 3"    # push pc + 1
+If Opcode_ADD "instruction == 4"   # pop; pop; add; push
+If Opcode_DUP "instruction == 5"   # pop; push; push
+If exitcode "pc >= __mem_max"      # end of program
+New pc "pc + 1"
+New __mem_index_pos pc
+If loop "HALTED != 1"
+End
+
+Call init
