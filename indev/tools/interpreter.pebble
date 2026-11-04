@@ -64,50 +64,58 @@ Call __mem_init
 
 # load the program into memory
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '3' # LI opcode - []
+New {__mem_index} '3' # 1: LI opcode - []
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '2' # data - [2]
+New {__mem_index} '5' # 2: data - [5]
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '5' # DUP opcode - [2, 2]
+New {__mem_index} '5' # 3: DUP opcode (loop start) - [5, 5]
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '5' # DUP opcode - [2, 2, 2]
+New {__mem_index} '2' # 4: PRINT opcode - [5]
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '5' # DUP opcode - [2, 2, 2, 2]
+New {__mem_index} '3' # 5: LI opcode - [5]
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '2' # PRINT opcode - [2, 2, 2]
+New {__mem_index} '1' # 6: data - [5, 1]
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '2' # PRINT opcode - [2, 2]
+New {__mem_index} '7' # 7: SUB opcode - [4]
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '4' # ADD opcode - [4]
+New {__mem_index} '5' # 8: DUP opcode - [4, 4]
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '5' # DUP opcode - [4, 4]
+New {__mem_index} '3' # 9: LI opcode - [4, 4]
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '2' # PRINT opcode - [4]
+New {__mem_index} '1' # 10: data - [4, 4, 1]
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '3' # LI opcode - [4]
+New {__mem_index} '8' # 11: LT opcode (4 < 1 is false, so 1) - [4, 1]
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '3' # data - [4, 3]
+New {__mem_index} '3' # 12: LI opcode - [4, 1]
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '7' # SUB opcode - [1]
+New {__mem_index} '18' # 13: data (exit target) - [4, 1, 18]
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '2' # PRINT opcode []
-
+New {__mem_index} '9' # 14: JZ opcode (cond 1, no jump) - [4]
 
 New __mem_index_pos "__mem_index_pos + 1" # --
-New {__mem_index} '1' # HLT opcode
+New {__mem_index} '3' # 15: LI opcode - [4]
+
+New __mem_index_pos "__mem_index_pos + 1" # --
+New {__mem_index} '3' # 16: data (loop target) - [4, 3]
+
+New __mem_index_pos "__mem_index_pos + 1" # --
+New {__mem_index} '6' # 17: JMP opcode (pc = 3) - [4]
+
+New __mem_index_pos "__mem_index_pos + 1" # --
+New {__mem_index} '1' # 18: HLT opcode - [0]
 # ---
 
 New __mem_index_pos '0'
@@ -115,9 +123,26 @@ New HALTED '0'
 Call loop
 End
 
+
+# opcode helper routines
+Func __Opcode_JZ_goto
+New pc __Opcode_JZ_target
+End
+# ---
+
+# helper routines
+Func print
+New __Escape_std.io.print_ARG0 <msg>
+Escape std.io.print
+End
+
+# exit routine
+Func exitcode
+New HALTED '1'
+End
+
 # opcodes
 Func Opcode_NOP
-# do nothing
 End
 
 Func Opcode_HLT
@@ -159,7 +184,7 @@ End
 
 Func Opcode_JMP
 Call __Stack_pop
-New pc __Stack_out
+New pc "__Stack_out - 1"
 End
 
 Func Opcode_SUB
@@ -170,18 +195,24 @@ New __Opcode_SUB_tmp1 "__Stack_out - __Opcode_SUB_tmp1"
 New __Stack_in __Opcode_SUB_tmp1
 Call __Stack_push
 End
+
+Func Opcode_LT
+Call __Stack_pop
+New __Opcode_LT_tmp1 __Stack_out
+Call __Stack_pop
+New __Opcode_LT_tmp1 "__Stack_out < __Opcode_LT_tmp1"
+New __Stack_in __Opcode_LT_tmp1
+Call __Stack_push
+End
+
+Func Opcode_JZ
+Call __Stack_pop
+New __Opcode_JZ_target "__Stack_out - 1"
+Call __Stack_pop
+New __Opcode_JZ_cond __Stack_out
+If __Opcode_JZ_goto "__Opcode_JZ_cond == 0"
+End
 # ---
-
-# helper routines
-Func print
-New __Escape_std.io.print_ARG0 <msg>
-Escape std.io.print
-End
-
-# exit routine
-Func exitcode
-New HALTED '1'
-End
 
 # main execution loop
 Func loop
@@ -195,6 +226,8 @@ If Opcode_ADD "instruction == 4"   # pop; pop; add; push
 If Opcode_DUP "instruction == 5"   # pop; push; push
 If Opcode_JMP "instruction == 6"   # pop; pc = popped
 If Opcode_SUB "instruction == 7"   # pop; pop; sub; push
+If Opcode_LT "instruction == 8"    # pop; pop; lt; push
+If Opcode_JZ "instruction == 9"    # pop -> 1; pop -> 2; jmp 2 IF 1 == 0;
 If exitcode "pc >= __mem_max"      # end of program
 New pc "pc + 1"
 New __mem_index_pos pc
