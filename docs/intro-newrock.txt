@@ -8,10 +8,10 @@ http://pebblevm.org/download.html.
 
 New Rock and Pebble are products of The Nuovi Orizzonti Company. The
 license for these items and this documentation can be viewed at
-http://thenuoviorizzonticompany.org/license/openlicense/latest.txt.
+https://thenuoviorizzonticompany.org/license/openlicense/latest.txt.
 
-http://thenuoviorizzonticompany.org
-http://pebblevm.org
+https://thenuoviorizzonticompany.org
+https://pebblevm.org
 
 
 
