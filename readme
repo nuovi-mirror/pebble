@@ -67,6 +67,15 @@ Building from source
 	The rockpkg package manager can be built simply by compiling the source code.
 	It should be noted this tool requires the libcurl library to be included.
 
+	The New Rock package manager expects utility rockc to point to a New Rock
+	compiler.
+
+	The New Rock compiler expects the utility pblvm to point to a Pebble interpreter,
+	such as CPebble. It addresses it by /usr/bin/env pblvm
+
+	Please make sure both of these are present in your $PATH.
+
+
 	An example building the full thing from source, assuming a BSD system:
 
 		mkdir bin
