@@ -9,7 +9,7 @@
             | Recursive Function Definition Extension (RFDE)            |                                         |
             | Advanced Numeric Extension, One (ANE1)                    |                                         |
             | Advanced Addressing Extension, Two (AAE2)                 |                                         |
-            | Advanced String Sorting Extension (ASSE)                  |                                         |
+            | Advanced String Manipulation Extension (ASME)             |                                         |
             | Advanced String Escaping Extension (ASEE)                 |                                         |
             |                                                           |                                         |
             | By vantheman                                              |                                         |
@@ -178,24 +178,24 @@
 	returned result should not be a floating-point value. No rounding should be performed; the decimal place
 	should be 'chopped off' cleanly.
 
-	The Advanced String Manipulation Extension (ASSE) introduced three new operators, String Split Left, String
+	The Advanced String Manipulation Extension (ASME) introduced four new operators, String Split Left, String
 	Split Right, and String Find. String Find takes one string value and a second substring and will find the
 	substring on the right in the substring on the left. String Split Left takes one string value and one unsigned
-	numeric value, on the left and right respectively, just as String Split Right. String Split Left will go to the
-	position specified by the right operand and return the string's data until that position, excluding it. String
-	Split Right will go to the position and return the data in the string until that position, excluding it. If
-	either position is out-of-bounds, it will return the given string. String Find will return the position of the
-	first character in the string where the first instance of the substring is found.
+	numeric value, on the left and right respectively, just as String Split Right. 
+
+	String Split Left will go to the position specified by the right operand and return the string's data until that 
+	position, excluding it. String Split Right will go to the position and return the data in the string until that 
+	position, excluding it. If either position is out-of-bounds, it will return the given string. String Find will 
+	return the position of the first character in the string where the first instance of the substring is found.
+	String Length implicitly only takes one operator; the right operator is ignored. This will return the length
+	of the string specified by the left operator.
 
 	All three of these operators are allowed to implicitly be pointers. This means, if any value given to any
 	operand to them is a valid variable name, they will act on the data in said variable. If not, they will
 	simply act on the data given.
 
 	String Split Left can be used as operator 'ssl', String Split Right as operator 'ssr', and String Find as
-	operator 'sf'.
-
-
-
+	operator 'sf'. String Length can be used as operator 'sl'.
 
 	Pebble is dynamically and loosely typed. When a value is stored by an instruction, the type is defined
 	based on deterministic parsing rules. This is the type the value is to be associated with until another

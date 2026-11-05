@@ -3,9 +3,6 @@
 #include "allocator.h"
 #include "values.h"
 
-/* typedef struct ExprNode ExprNode; */
-/* we get this from values.h */
-
 typedef enum {
 	ExprOp_NumericAdd,
 	ExprOp_NumericSub,
@@ -28,6 +25,7 @@ typedef enum {
 	ExprOp_StringSplitLeft,
 	ExprOp_StringEscape,
 	ExprOp_StringUnEscape,
+	ExprOp_StringLength,
 } ExprOperation;
 
 typedef enum {

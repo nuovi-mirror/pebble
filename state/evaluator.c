@@ -513,6 +513,12 @@ Value evalexprnode
 			return mkstr(str + pos, len - pos, persistAlloc);
 		}
 
+		case ExprOp_StringLength:
+		{
+			const char *str = asstr(l, lb, sizeof(lb), limits);
+			return (Value){ .Type = type_word, .as.word = getstrlen(str) };
+		}
+
 		case ExprOp_StringEscape:
 		{
 			const char *str = asstr(l, lb, sizeof(lb), limits);

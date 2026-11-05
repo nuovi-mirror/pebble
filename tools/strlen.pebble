@@ -1,0 +1,4 @@
+New str 'hi lala'
+New len "str sl e"
+New __Escape_std.io.print_ARG0 <len>
+Escape std.io.print
