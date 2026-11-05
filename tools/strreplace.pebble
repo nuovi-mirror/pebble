@@ -3,17 +3,29 @@ New __Escape_std.io.print_ARG0 <msg>
 Escape std.io.print
 End
 
-New text 'Hello from Pebble!'
-New replacement 'to'
-New toreplace 'from'
-
+Func replace
 New pos "text sf toreplace"
 New left "text ssl pos"
 New tright "text ssr (pos - 1)"
-
 New trlen "toreplace sl magical"
-
 New right "tright ssr trlen"
+New ret "left s++ replacement s++ right"
+End
 
-New msg "left s++ replacement s++ right"
+New text 'Hello from Pebble!'
+New replacement 'to'
+New toreplace 'from'
+Call replace
+New msg text
+Call print
+New msg ret 
+Call print
+
+New text 'Hello World!'
+New replacement 'Pebble!'
+New toreplace 'World!'
+Call replace
+New msg text
+Call print
+New msg ret
 Call print
