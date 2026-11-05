@@ -660,6 +660,10 @@
 	sees. But x is also not a global in this case; it is still local to main.
 
 
+	A function can be returned from early using the return keyword, which will perform the required formatting
+	of return variables and return to the caller via the Pebble Return opcode.
+
+
 
 
 
@@ -742,6 +746,123 @@
 					escape reset - reset the color
 						resets the terminal foreground and background color to the
 						default value.
+
+
+
+
+
+
+
+                    - The New Rock Standard Library (stdnrock) -
+
+	The New Rock Standard Library is mostly a bunch of New Rock and Pebble code designed to implement
+	common routines and provide bindings for the Pebble standard library. This document will describe
+	them in the same way as the Pebble standard library. All specified groups being in the namespace
+	std, just as the Pebble standard library.
+
+		group io
+			routine print - Print text to the terminal
+				accepts one argument, being the text to print. Expressions are evaluated
+				automatically via the {} addressing mode. A newline is appended.
+
+			routine printLn - Print text to the terminal with no newline
+				accepts one argument, being the text to print. Expressions are resolved
+				in the same way as std.io.print, but a newline is NOT appended.
+
+			routine printRaw - Print text without formatting
+				accepts one argument, being the data to print. No formatting is done and
+				no newline is appended.
+
+			routine input - Get terminal input
+				returns one argument, being the terminal input, cut off after a newline.
+				A wrapper for std.io.input.
+
+		group misc
+			routine sleep - Pause the interpreter
+				accepts one argument, being the time in milliseconds to sleep. Will
+				either call std.misc.sleep use the Yield opcode depending on the
+				implementation.
+
+			routine random - Generate a random number
+				returns one variable, being the random NON-CRYPTOGRAPHIC number
+				generated. 
+
+		group proc
+			routine spawn - Spawn a process
+				accepts one argument, being the space-separated string of
+				arguments. The first argument is the file to execute.
+				Returns the platform-dependent representation of the process.
+
+			routine wait - Wait on a process
+				wrapper for std.proc.wait, except the returns are flipped; the
+				type is returned first, then the status.
+
+		group term
+			subgroup screen
+				routine clear - Clear the screen
+					pretty self-explanatory.
+
+			subgroup color
+				subgroup basic
+					routine fore - Set the terminal foreground color
+						wrapper of std.term.color.basic.fore.
+
+					routine back - Set the terminal background color
+						wrapper of std.term.color.basic.back.
+
+					routine reset - Reset the terminal color to the default
+						pretty self-explanatory.
+
+				subgroup cursor
+					routine moveAbsolute - Move the cursor
+						wrapper of std.term.cursor.moveAbsolute.
+
+			group task
+				routine spawn - Spawn a Pebble task
+					accepts one argument, being the name of the function to
+					associate with the task. Returns one value, which is a
+					handle to the variable which will be changed from 0 to 1
+					when the task finishes. The handle is the name of the
+					variable.
+
+				routine spawn1 - Spawn a Pebble task
+					like std.task.spawn, but accepts one extra argument, being
+					the first argument to pass to the function when calling.
+
+				routine yield - Yield for a time period
+					accepts one argument, being the time in milliseconds to
+					yield for. Unlike std.misc.sleep, which may or may not use
+					the Yield opcode, this always uses the Yield opcode.
+
+				routine await - Wait on a task
+					accepts one argument, being the data returned by std.task.spawn.
+					Used to wait on a task, returns once the task is completed. May
+					use the Yield opcode for waiting.
+
+			group fs
+				subgroup file
+					routine write - Write to a file
+						wrapper of std.fs.file.write
+
+					routine read - Read from a file
+						wrapper of std.fs.file.read
+
+			group arg
+				routine get - Get command-line arguments
+					accepts one argument, being the command-line argument to
+					grab, 0 being the program name and 1 being the bytecode
+					file name. Returns the argument or -1 if the argument
+					was not given on the command-line.
+				
+
+                    - Command Argument Extension (CAE) -
+
+	The Command Argument Extension (CAE) allows Pebble programs to know what command-line arguments
+	were given to the program. The variable VMARGC holds the number of arguments given on the command-line.
+	The index variables VMARGn represent the command-line arguments themselves, staring at 0. The first
+	argument is the name of the program and the second is the name of the bytecode file. If these are not
+	present, then the first two should be empty, eg. in an embedded environment. The embedder may also
+	choose to simply fake these values, including the first and second.
 
 
 
