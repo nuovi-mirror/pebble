@@ -1,0 +1,7 @@
+include stdlib
+
+fn main ( ) ret {
+	ret = '0'
+	arg = call std.arg.get ( '0' )
+	call std.io.print ( arg )
+}

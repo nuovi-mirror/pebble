@@ -135,8 +135,13 @@ fn std.fs.file.read ( file ) data {
 / argument handling
 
 fn std.arg.get ( n ) arg {
-	name = "VMARG s++ n"
-	arg = [name]
+	import VMARGC
+	if ( "VMARGC < n" ) {
+		arg = '-1'
+	} else {
+		name = "VMARG s++ n"
+		arg = [name]
+	}
 }
 
 . # end of New Rock Standard Library (stdlib)
