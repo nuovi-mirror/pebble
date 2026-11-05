@@ -605,12 +605,26 @@ void subst_expr
 
 		word[wi] = '\0';
 
+		unsigned long lead = 0;
+		unsigned long end = wi;
+
+		while (word[lead] == '(') lead++;
+		while (end > lead && word[end - 1] == ')') end--;
+
+		char core[MAX_NAME];
+		unsigned long ci = end - lead;
+
+		memcpy(core, word + lead, ci);
+		core[ci] = '\0';
+
 		char mangled[MAX_NAME];
 
-		if (is_local(word)) snprintf(mangled, sizeof mangled, "__Func_%s_%s", fn, word);
-		else snprintf(mangled, sizeof mangled, "%s", word);
+		if (is_local(core)) snprintf(mangled, sizeof mangled, "__Func_%s_%s", fn, core);
+		else snprintf(mangled, sizeof mangled, "%s", core);
 
+		for (unsigned long k = 0; k < lead && oi + 1 < cap; k++) out[oi++] = '(';
 		for (unsigned long k = 0; mangled[k] && oi + 1 < cap; k++) out[oi++] = mangled[k];
+		for (unsigned long k = end; k < wi && oi + 1 < cap; k++) out[oi++] = ')';
 	}
 
 	out[oi] = '\0';

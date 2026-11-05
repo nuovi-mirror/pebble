@@ -22,7 +22,7 @@ New msg ret
 Call print
 
 New text 'Hello World!'
-New replacement 'Pebble!'
+New replacement 'cool Pebble!'
 New toreplace 'World!'
 Call replace
 New msg text
