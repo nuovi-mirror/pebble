@@ -144,4 +144,15 @@ fn std.arg.get ( n ) arg {
 	}
 }
 
+/ string
+
+fn std.str.replace ( text toreplace replacement ) ret {
+	pos = "text sf toreplace"
+	left = "text ssl pos"
+	tright = "text ssr (pos - 1)"
+	trlen = "toreplace sl pos"
+	right = "tright ssr trlen"
+	ret = "left s++ replacement s++ right"
+}
+
 . # end of New Rock Standard Library (stdlib)

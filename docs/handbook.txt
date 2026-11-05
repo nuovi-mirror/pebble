@@ -853,7 +853,13 @@
 					grab, 0 being the program name and 1 being the bytecode
 					file name. Returns the argument or -1 if the argument
 					was not given on the command-line.
-				
+
+			group str
+				routine replace - Replace a string
+					accepts three arguments, being the string, the substring
+					to replace in the string, and the substring to replace it
+					with. Returns the new string.
+
 
                     - Command Argument Extension (CAE) -
 
