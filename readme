@@ -72,8 +72,8 @@ Building from source
 		mkdir bin
 		cc -o bin/make build/*.c
 		./bin/make fs=yes proc=yes
-		./bin/embed newrock/rockc/stdlib.newrock stdlib >newrock/rockc/stdlib.h
 		cc -o bin/embed newrock/embed.c
+		./bin/embed newrock/rockc/stdlib.newrock stdlib >newrock/rockc/stdlib.h
 		cc -o bin/rockc newrock/rockc/*.c
 		cc -o bin/rockpkg newrock/rockpkg/*.c -I/usr/local/include \
 			-L/usr/local/lib -lcurl
