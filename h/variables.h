@@ -3,13 +3,7 @@
 #include "allocator.h"
 #include "hashmap.h"
 
-typedef struct VarMap {
-	SHashMap *map;
-	unsigned long max;
-	unsigned long arrcount;
-	unsigned long mapcount;
-	void **arr;
-} VarMap;
+typedef SHashMap VarMap;
 
 /* XXX unused
 static unsigned long hashVar
