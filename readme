@@ -108,3 +108,10 @@ Usage
 	the operation described. Supported operations include install to install a
 	package and delete to remove a package. Make sure to add $HOME/.rock/bin to
 	your $PATH.
+
+Binaries
+
+	Some releases do provide pre-made binaries. If this release does,
+	you will be able to find them inside of the bin/ directory
+	relative to this file. eg. for an OpenBSD Intel 64 system, I
+	should pick bin/openbsd/amd64/. It is grouped by OS then ISA.
