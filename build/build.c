@@ -38,6 +38,7 @@ const char *platform_freestand_srcs[] = {
 	"platform/freestand/strsplit.c",
 	"platform/freestand/inputl.c",
 	"platform/freestand/ffillmem.c",
+	"platform/freestand/setmem.c",
 	"platform/freestand/clockms.c",
 	"platform/freestand/inputn.c",
 	"platform/freestand/snooze.c",
@@ -49,7 +50,6 @@ const char *platform_freestand_srcs[] = {
 const char *platform_c_srcs[] = {
 	"platform/c/entry.c",
 	"platform/c/exitproc.c",
-	"platform/c/setmem.c",
 	"platform/c/print.c",
 	"platform/c/readfile.c", /* XXX depreciated file I/O interface */
 	"platform/c/str2ul.c",
