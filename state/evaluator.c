@@ -215,10 +215,10 @@ static Value h_NumericMul
 			if (ls > 0)
 			{
 				if (rs > 0 && ls > LONG_MAX / rs) error(errfatal, errcodenumericoverflow, "Signed multiplcation overflow!");
-				if (rs < 0 && rs < LONG_MIN / rs) error(errfatal, errcodenumericunderflow, "Signed multiplcation underflow!");
+				if (rs < 0 && rs < LONG_MIN / ls) error(errfatal, errcodenumericunderflow, "Signed multiplcation underflow!");
 			} else if (ls < 0)
 			{
-				if (rs > 0 && ls < LONG_MAX / rs) error(errfatal, errcodenumericunderflow, "Signed multiplcation underflow!");
+				if (rs > 0 && ls < LONG_MIN / rs) error(errfatal, errcodenumericunderflow, "Signed multiplcation underflow!");
 				else if (rs < 0 && ls < LONG_MAX / rs) error(errfatal, errcodenumericoverflow, "Signed multiplcation overflow!");
 			}
 
