@@ -176,7 +176,7 @@ ExprNodeData parseprimary (ExprParser *p, Arena *tempAlloc, Arena *persistAlloc)
 
 	if (p->lookahead.Type == Token_Value) {
 		data.Type = ExprDataVal;
-		data.value = p->lookahead.Value;
+		data.data.value = p->lookahead.Value;
 		parseradvance(p, tempAlloc, persistAlloc);
 		return data;
 	}
@@ -184,8 +184,8 @@ ExprNodeData parseprimary (ExprParser *p, Arena *tempAlloc, Arena *persistAlloc)
 	/* malformed input */
 	p->error = 1;
 	data.Type = ExprDataVal;
-	data.value.Type = type_word;
-	data.value.as.word = 0;
+	data.data.value.Type = type_word;
+	data.data.value.as.word = 0;
 	return data;
 }
 
@@ -207,7 +207,7 @@ ExprNodeData parseexpr (ExprParser *p, int maxPrec, Arena *tempAlloc, Arena *per
 
 		ExprNodeData wrapped;
 		wrapped.Type = ExprDataNode;
-		wrapped.Node = node;
+		wrapped.data.Node = node;
 		left = wrapped;
 	}
 
@@ -236,7 +236,7 @@ ExprNodeData str2expr (const char *str, int *ok, Arena *tempAlloc, Arena *persis
 		unsigned long len = getstrlen(str);
 		char *copy = alloc(tempAlloc, len + 1);
 		copymem(str, copy, len + 1);
-		result.Node->Source = copy;
+		result.data.Node->Source = copy;
 	}
 
 	if (ok != NULL)
@@ -298,10 +298,10 @@ Value guessvaluetypeorexpr
 		int ok;
 		ExprNodeData tree = str2expr(data, &ok, persistAlloc, persistAlloc);
 
-		if (ok && tree.Type == ExprDataNode && tree.Node != NULL) {
+		if (ok && tree.Type == ExprDataNode && tree.data.Node != NULL) {
 			Value v;
 			v.Type = type_expr;
-			v.as.expr = tree.Node;
+			v.as.expr = tree.data.Node;
 			return v;
 		}
 		/* isexpression is heuristic and may parse a string as an expression */

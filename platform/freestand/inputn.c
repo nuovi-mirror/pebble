@@ -12,3 +12,5 @@ unsigned long inputn
 }
 
 #endif
+
+typedef int cpebble_dummy834_; /* dummy typedef */

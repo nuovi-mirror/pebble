@@ -10,3 +10,5 @@ unsigned long snooze
 }
 
 #endif
+
+typedef int cpebble_dummy302_; /* dummy typedef */

@@ -11,13 +11,11 @@ static unsigned int internal_detectplatform
 (void)
 {
 
-	/* if OpenBSD */
-#if defined(__OpenBSD__)
+#if defined(__OpenBSD__) /* if OpenBSD */
 	return platform_openbsd;
 #endif
 
-	/* if POSIX */
-#if defined(_POSIX_VERSION) && _POSIX_VERSION >= 200809L
+#ifdef _POSIX_VERSION /* if POSIX */
 	return platform_posix;
 #endif
 

@@ -9,3 +9,5 @@ unsigned long clockms
 }
 
 #endif
+
+typedef int cpebble_dummy213_; /* dummy typedef */

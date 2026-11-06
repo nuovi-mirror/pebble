@@ -3,7 +3,7 @@
 #include "allocator.h"
 #include "values.h"
 
-typedef enum {
+typedef enum ExprOps {
 	ExprOp_NumericAdd,
 	ExprOp_NumericSub,
 	ExprOp_NumericMul,
@@ -38,7 +38,7 @@ typedef struct ExprNodeData {
 	union {
 		Value value;
 		ExprNode *Node;
-	};
+	} data;
 } ExprNodeData;
 
 struct ExprNode {

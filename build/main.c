@@ -42,7 +42,7 @@ int main (int argc, char **argv) {
 	strcpy(config.precompiler, "");
 	strcpy(config.graphics, "");
 	strcpy(config.terminal, "ansi");
-	strcpy(config.cflags, "-iquote h -Iffi -std=c99 ");
+	strcpy(config.cflags, "-iquote h -Iffi -std=c99 -pedantic-errors -Wall -Werror ");
 
 	/* XXX not supported by all compilers 
 	 * strcpy(config.ldflags, "-Wl,--gc-sections ");

@@ -7,6 +7,7 @@
 #include "getstrlen.h"
 #include "str2d.h"
 #include "str2ul.h"
+#include "str2l.h"
 #include "main.h"
 #include "values.h"
 #include "variables.h"
@@ -48,7 +49,7 @@ static long numsword
 /*			if (v.as.word < (unsigned long)LONG_MIN) error(errfatal, errcodenumericunderflow, "Underflow converting word to signed word!"); */
 			return (long)v.as.word; break;
 		case type_flt: 
-			if (v.as.flt > LONG_MAX) error(errfatal, errcodenumericoverflow, "Overflow converting float to signed word!");
+			if (v.as.flt > (double)LONG_MAX) error(errfatal, errcodenumericoverflow, "Overflow converting float to signed word!");
 			if (v.as.flt < LONG_MIN) error(errfatal, errcodenumericunderflow, "Underflow converting float to signed word!");
 			return (long)v.as.flt; break;
 		case type_str: return str2l(v.as.str, &end, 10); break;
@@ -70,7 +71,7 @@ static unsigned long numword
 			if (v.as.sword < 0) error(errfatal, errcodenumericunderflow, "Underflow converting signed word to word!");
 			return (unsigned long)v.as.word; break;
 		case type_flt: 
-			if (v.as.flt > ULONG_MAX) error(errfatal, errcodenumericoverflow, "Overflow converting float to word!");
+			if (v.as.flt > (double)ULONG_MAX) error(errfatal, errcodenumericoverflow, "Overflow converting float to word!");
 			if (v.as.flt < 0) error(errfatal, errcodenumericunderflow, "Underflow converting float to word!");
 			return (unsigned long)v.as.flt; break;
 		case type_str: return str2ul(v.as.str, &end, 10); break;
@@ -573,8 +574,8 @@ Value evalexprnode
 Value evalexprdata 
 (ExprNodeData data, VarMap *vars, Arena *persistAlloc, struct Limits *limits)
 {
-	if (data.Type == ExprDataVal) return resolveleaf(data.value, vars);
-	return evalexprnode(data.Node, vars, persistAlloc, limits);
+	if (data.Type == ExprDataVal) return resolveleaf(data.data.value, vars);
+	return evalexprnode(data.data.Node, vars, persistAlloc, limits);
 }
 
 Value evalstr 

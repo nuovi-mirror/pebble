@@ -11,7 +11,6 @@ void escape_std_fs_file_write
 
 	char *arg0str = FFIallocateMemory(tempAlloc, limits->misc_strlen);
 	char *arg1str = FFIallocateMemory(tempAlloc, limits->misc_strlen);
-	char *unescaped = FFIallocateMemory(tempAlloc, limits->misc_strlen);
 	FFIconvertValueToString(arg0str, limits->misc_strlen, *arg0, limits);
 	FFIconvertValueToString(arg1str, limits->misc_strlen, *arg1, limits);
 

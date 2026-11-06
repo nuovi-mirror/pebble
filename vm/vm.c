@@ -221,7 +221,7 @@ Value resolve_literal
 		int ok;
 		ExprNodeData tree = str2expr(text, &ok, tempAlloc, persistAlloc);
 
-		if (ok && tree.Type == ExprDataNode && tree.Node != NULL) 
+		if (ok && tree.Type == ExprDataNode && tree.data.Node != NULL) 
 			return evalexprdata(tree, vars, persistAlloc, limits);
 	}
 

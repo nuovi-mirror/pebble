@@ -2,4 +2,4 @@
 
 void *setmem 
 (void *b, int c, unsigned long len)
-{ return ffillmem(b, c, len); }
+{ return ffillmem(c, b, len); }
