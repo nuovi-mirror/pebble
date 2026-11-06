@@ -2,7 +2,12 @@
 #define h_main_
 
 #undef NULL
+#undef TRUE
+#undef FALSE
+
 #define NULL ((void *)0)
+#define TRUE 1
+#define FALSE 0
 
 #define errfatal 0
 #define errsevere 1

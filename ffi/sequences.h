@@ -46,10 +46,10 @@
 /* filesystem libraries */
 #include "libs/std/fs/file/write.h"
 #include "libs/std/fs/file/read.h"
+#include "libs/std/fs/dir/get.h"
 /* XXX not implimented
 #include "libs/std/fs/file/writeBinary.h"
 #include "libs/std/fs/dir/list.h"
-#include "libs/std/fs/dir/get.h"
 #include "libs/std/fs/dir/change.h"
 */
 #endif /* #ifdef fs */
