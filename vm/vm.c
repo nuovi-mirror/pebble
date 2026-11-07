@@ -124,8 +124,7 @@ Instruction makeIR
 	Instruction *instrFromMap = getInstruction(instructionMap, line);
 
 	if (instrFromMap != NULL) return *instrFromMap;
-	/* this is safe since it should have already been placed on
-	 * the persistent allocator */
+	/* this is safe since it should have already been placed on the persistent allocator */
 
 	char *cachekey = NULL;
 
@@ -275,21 +274,24 @@ unsigned long interpret
 	{
 		case Opcode_New: 
 		{
-			char *dest = alloc(tempAlloc, limits->instructions_varnamesize);
+			char *dest;
 			Value val;
 
 			switch (instr->FirstOperand.Addressing) 
 			{
 				case addrmode_bare:
-					valuetostr(dest, limits->instructions_varnamesize, instr->FirstOperand.Data, limits);
-					break;
-
 				case addrmode_true_literal:
-					valuetostr(dest, limits->instructions_varnamesize, instr->FirstOperand.Data, limits);
+					if (instr->FirstOperand.Data.Type == type_str) {
+						dest = instr->FirstOperand.Data.as.str;
+					} else {
+						dest = alloc(tempAlloc, limits->instructions_varnamesize);
+						valuetostr(dest, limits->instructions_varnamesize, instr->FirstOperand.Data, limits);
+					}
 					break;
 
 				case addrmode_literal: 
 				{
+					dest = alloc(tempAlloc, limits->instructions_varnamesize);
 					char *buf = alloc(tempAlloc, limits->instructions_varnamesize);
 					val = resolve_literal(buf, limits->instructions_varnamesize, &instr->FirstOperand.Data, vars, tempAlloc, tempAlloc, limits);
 					valuetostr(dest, limits->instructions_varnamesize, val, limits);
@@ -297,6 +299,7 @@ unsigned long interpret
 				}
 				case addrmode_forced_eval: 
 				{
+					dest = alloc(tempAlloc, limits->instructions_varnamesize);
 					char *buf = alloc(tempAlloc, limits->instructions_varnamesize);
 					val = resolve_forced_eval(buf, limits->instructions_varnamesize, &instr->FirstOperand.Data, vars, tempAlloc, tempAlloc, limits);
 					valuetostr(dest, limits->instructions_varnamesize, val, limits);
@@ -306,6 +309,7 @@ unsigned long interpret
 				case addrmode_pointer: 
 				case addrmode_indirect: 
 				{
+					dest = alloc(tempAlloc, limits->instructions_varnamesize);
 					char *buff = alloc(tempAlloc, limits->instructions_varnamesize);
 					Value v = resolve_pointer(buff, limits->instructions_varnamesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
 					valuetostr(dest, limits->instructions_varnamesize, v, limits);
@@ -313,6 +317,7 @@ unsigned long interpret
 				}
 
 				default: 
+					dest = NULL;
 					error(errfatal, errcodemalformedinput, "Unknown addressing mode!"); 
 					break;
 			}
@@ -454,18 +459,24 @@ unsigned long interpret
 
 		case Opcode_If: 
 		{
-			char *funcname = alloc(scratchAlloc, limits->functions_namesize);
+			char *funcname;
 			Value result;
 
 			switch (instr->FirstOperand.Addressing) 
 			{
 				case addrmode_bare:
 				case addrmode_true_literal:
-					valuetostr(funcname, limits->functions_namesize, instr->FirstOperand.Data, limits);
+					if (instr->FirstOperand.Data.Type == type_str) {
+						funcname = instr->FirstOperand.Data.as.str;
+					} else {
+						funcname = alloc(scratchAlloc, limits->functions_namesize);
+						valuetostr(funcname, limits->functions_namesize, instr->FirstOperand.Data, limits);
+					}
 					break;
 
 				case addrmode_literal: 
 				{
+					funcname = alloc(scratchAlloc, limits->functions_namesize);
 					char *buff = alloc(scratchAlloc, limits->functions_namesize);
 					Value vptr = resolve_literal(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, tempAlloc, limits);
 					valuetostr(funcname, limits->functions_namesize, vptr, limits);
@@ -474,6 +485,7 @@ unsigned long interpret
 
 				case addrmode_forced_eval: 
 				{
+					funcname = alloc(scratchAlloc, limits->functions_namesize);
 					char *buff = alloc(scratchAlloc, limits->functions_namesize);
 					Value vptr = resolve_forced_eval(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, tempAlloc, limits);
 					valuetostr(funcname, limits->functions_namesize, vptr, limits);
@@ -482,6 +494,7 @@ unsigned long interpret
 
 				case addrmode_pointer: 
 				{
+					funcname = alloc(scratchAlloc, limits->functions_namesize);
 					char *buff = alloc(tempAlloc, limits->functions_namesize);
 					Value v = resolve_pointer(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
 					valuetostr(funcname, limits->functions_namesize, v, limits);
@@ -490,6 +503,7 @@ unsigned long interpret
 
 				case addrmode_indirect: 
 				{
+					funcname = alloc(scratchAlloc, limits->functions_namesize);
 					char *buff = alloc(tempAlloc, limits->functions_namesize);
 					Value v = resolve_pointer(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
 					valuetostr(funcname, limits->functions_namesize, v, limits);
@@ -497,6 +511,7 @@ unsigned long interpret
 				}
 
 				default:
+					funcname = NULL;
 					error(errfatal, errcodemalformedinput, "The specified addressing mode is invalid!");
 					break;
 			}
@@ -541,17 +556,23 @@ unsigned long interpret
 
 		case Opcode_Call: 
 		{
-			char *funcname = alloc(scratchAlloc, limits->functions_namesize);
+			char *funcname;
 
 			switch (instr->FirstOperand.Addressing) 
 			{
 				case addrmode_bare:
 				case addrmode_true_literal:
-					valuetostr(funcname, limits->functions_namesize, instr->FirstOperand.Data, limits);
+					if (instr->FirstOperand.Data.Type == type_str) {
+						funcname = instr->FirstOperand.Data.as.str;
+					} else {
+						funcname = alloc(scratchAlloc, limits->functions_namesize);
+						valuetostr(funcname, limits->functions_namesize, instr->FirstOperand.Data, limits);
+					}
 					break;
 
 				case addrmode_literal: 
 				{
+					funcname = alloc(scratchAlloc, limits->functions_namesize);
 					char *buff = alloc(scratchAlloc, limits->functions_namesize);
 					Value val = resolve_literal(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, tempAlloc, limits);
 					valuetostr(funcname, limits->functions_namesize, val, limits);
@@ -560,6 +581,7 @@ unsigned long interpret
 
 				case addrmode_forced_eval: 
 				{
+					funcname = alloc(scratchAlloc, limits->functions_namesize);
 					char *buff = alloc(tempAlloc, limits->functions_namesize);
 					Value val = resolve_forced_eval(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, tempAlloc, limits);
 					valuetostr(funcname, limits->functions_namesize, val, limits);
@@ -569,6 +591,7 @@ unsigned long interpret
 				case addrmode_pointer: 
 				case addrmode_indirect: 
 				{
+					funcname = alloc(scratchAlloc, limits->functions_namesize);
 					char *buff = alloc(tempAlloc, limits->functions_namesize);
 					Value v = resolve_pointer(buff, limits->functions_namesize, &instr->FirstOperand.Data, vars, tempAlloc, persistAlloc, limits);
 					valuetostr(funcname, limits->functions_namesize, v, limits);
@@ -576,6 +599,7 @@ unsigned long interpret
 				}
 
 				default:
+					funcname = NULL;
 					error(errfatal, errcodemalformedinput, "The specified addressing mode is invalid!");
 					break;
 			}
