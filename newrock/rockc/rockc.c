@@ -26,7 +26,7 @@ void compile_value
 
 		char text[MAX_VALUE];
 
-		read_delimited('\'', text, sizeof text);
+		read_delimited('\'', text, sizeof(text));
 
 		snprintf(out, cap, "'%s'", text);
 		return;
@@ -39,8 +39,8 @@ void compile_value
 		char text[MAX_VALUE];
 		char subst[MAX_VALUE];
 
-		read_delimited('"', text, sizeof text);
-		subst_expr(fn, text, subst, sizeof subst);
+		read_delimited('"', text, sizeof(text));
+		subst_expr(fn, text, subst, sizeof(subst));
 
 		snprintf(out, cap, "\"%s\"", subst);
 
@@ -54,9 +54,9 @@ void compile_value
 		char text[MAX_VALUE];
 		char subst[MAX_VALUE];
 
-		read_delimited('}', text, sizeof text);
+		read_delimited('}', text, sizeof(text));
 		use_text_var(text, pos);
-		subst_expr(fn, text, subst, sizeof subst);
+		subst_expr(fn, text, subst, sizeof(subst));
 
 		snprintf(out, cap, "{%s}", subst);
 
@@ -70,9 +70,9 @@ void compile_value
 		char text[MAX_VALUE];
 		char subst[MAX_VALUE];
 
-		read_delimited(']', text, sizeof text);
+		read_delimited(']', text, sizeof(text));
 		use_text_var(text, pos);
-		subst_expr(fn, text, subst, sizeof subst);
+		subst_expr(fn, text, subst, sizeof(subst));
 
 		snprintf(out, cap, "[%s]", subst);
 
@@ -87,9 +87,9 @@ void compile_value
 		char text[MAX_VALUE];
 		char subst[MAX_VALUE];
 
-		read_delimited('>', text, sizeof text);
+		read_delimited('>', text, sizeof(text));
 		use_text_var(text, pos);
-		subst_expr(fn, text, subst, sizeof subst);
+		subst_expr(fn, text, subst, sizeof(subst));
 
 		snprintf(out, cap, "<%s>", subst);
 
@@ -101,7 +101,7 @@ void compile_value
 		char name[MAX_NAME];
 		long at = pos;
 
-		read_ident(name, sizeof name);
+		read_ident(name, sizeof(name));
 		use_var(name, at);
 		mangle(fn, name, out, cap);
 
@@ -117,7 +117,7 @@ void compile_call
 	char callee[MAX_NAME];
 	skipws();
 	long at = pos;
-	read_ident(callee, sizeof callee);
+	read_ident(callee, sizeof(callee));
 	expect_char('(');
 	skipws();
 	int argc = 0;
@@ -126,7 +126,7 @@ void compile_call
 	{
 		char val[MAX_VALUE];
 
-		compile_value(fn, val, sizeof val);
+		compile_value(fn, val, sizeof(val));
 		emitf("New __Func_%s_ARG%d %s\n", callee, argc, val);
 
 		argc++;
@@ -141,7 +141,7 @@ void compile_call
 	{
 		char mangled[MAX_NAME];
 
-		mangle(fn, dests[i], mangled, sizeof mangled);
+		mangle(fn, dests[i], mangled, sizeof(mangled));
 		emitf("New %s __Func_%s_RET%d\n", mangled, callee, i);
 	}
 }
@@ -185,12 +185,12 @@ void compile_if
 	{
 		if (nbranches >= MAX_IF_BRANCHES) fail("too many if branches");
 		expect_char('(');
-		compile_value(fn, conditions[nbranches], sizeof conditions[nbranches]);
+		compile_value(fn, conditions[nbranches], sizeof(conditions[nbranches]));
 
 		expect_char(')');
 		expect_char('{');
 
-		snprintf(body_fns[nbranches], sizeof body_fns[nbranches], "__RockIf_%u", next_control_id++);
+		snprintf(body_fns[nbranches], sizeof(body_fns[nbranches]), "__RockIf_%u", next_control_id++);
 		Helper *branch = new_helper(body_fns[nbranches]);
 
 		compile_if_branch(fn, branch);
@@ -204,7 +204,7 @@ void compile_if
 		if (try_keyword("if")) continue;
 		expect_char('{');
 
-		snprintf(else_fn, sizeof else_fn, "__RockElse_%u", next_control_id++);
+		snprintf(else_fn, sizeof(else_fn), "__RockElse_%u", next_control_id++);
 		Helper *else_body = new_helper(else_fn);
 		compile_if_branch(fn, else_body);
 
@@ -213,7 +213,7 @@ void compile_if
 	}
 
 	char dispatch_fns[MAX_IF_BRANCHES][MAX_NAME];
-	for (int i = 0; i < nbranches; i++) snprintf(dispatch_fns[i], sizeof dispatch_fns[i], "__RockDispatch_%u", next_control_id++);
+	for (int i = 0; i < nbranches; i++) snprintf(dispatch_fns[i], sizeof(dispatch_fns[i]), "__RockDispatch_%u", next_control_id++);
 
 	for (int i = 0; i < nbranches; i++)
 	{
@@ -229,8 +229,8 @@ void compile_if
 			char inverse[MAX_VALUE];
 			unsigned long n = strlen(conditions[i]);
 
-			if (n >= 2 && conditions[i][0] == '"' && conditions[i][n - 1] == '"') snprintf(inverse, sizeof inverse, "\"(%.*s) != 0\"", (int)(n - 2), conditions[i] + 1);
-			else snprintf(inverse, sizeof inverse, "(%s) != 0", conditions[i]);
+			if (n >= 2 && conditions[i][0] == '"' && conditions[i][n - 1] == '"') snprintf(inverse, sizeof(inverse), "\"(%.*s) != 0\"", (int)(n - 2), conditions[i] + 1);
+			else snprintf(inverse, sizeof(inverse), "(%s) != 0", conditions[i]);
 
 			emitf("If %s %s\n", dispatch_fns[i + 1], inverse);
 		}
@@ -239,8 +239,8 @@ void compile_if
 			char inverse[MAX_VALUE];
 			unsigned long n = strlen(conditions[i]);
 
-			if (n >= 2 && conditions[i][0] == '"' && conditions[i][n - 1] == '"') snprintf(inverse, sizeof inverse, "\"(%.*s) != 0\"", (int)(n - 2), conditions[i] + 1);
-			else snprintf(inverse, sizeof inverse, "(%s) != 0", conditions[i]);
+			if (n >= 2 && conditions[i][0] == '"' && conditions[i][n - 1] == '"') snprintf(inverse, sizeof(inverse)), "\"(%.*s) != 0\"", (int)(n - 2), conditions[i] + 1);
+			else snprintf(inverse, sizeof(inverse), "(%s) != 0", conditions[i]);
 
 			emitf("If %s %s\n", else_fn, inverse);
 		}
@@ -261,12 +261,12 @@ void compile_while
 	char while_fn[MAX_NAME];
 
 	expect_char('(');
-	compile_value(fn, condition, sizeof condition);
+	compile_value(fn, condition, sizeof(condition));
 
 	expect_char(')');
 	expect_char('{');
 
-	snprintf(while_fn, sizeof while_fn, "__RockWhile_%u", next_control_id++);
+	snprintf(while_fn, sizeof(while_fn), "__RockWhile_%u", next_control_id++);
 
 	Helper *old_helper = current_helper;
 	Helper *loop = new_helper(while_fn);
@@ -296,7 +296,7 @@ void compile_stmt
 	{
 		char name[MAX_PATH];
 
-		read_ident(name, sizeof name);
+		read_ident(name, sizeof(name));
 		include_file(name);
 
 		return;
@@ -318,13 +318,13 @@ void compile_stmt
 	{
 		char name[MAX_NAME];
 
-		read_ident(name, sizeof name);
+		read_ident(name, sizeof(name));
 
 		if (is_local(name))
 		{
 			char msg[MAX_NAME + 64];
 
-			snprintf(msg, sizeof msg, "cannot import '%s': already a variable of this function", name);
+			snprintf(msg, sizeof(msg), "cannot import '%s': already a variable of this function", name);
 			fail(msg);
 		}
 
@@ -338,13 +338,13 @@ void compile_stmt
 	{
 		char name[MAX_NAME];
 
-		read_ident(name, sizeof name);
+		read_ident(name, sizeof(name));
 
 		if (!is_local(name))
 		{
 			char msg[MAX_NAME + 64];
 
-			snprintf(msg, sizeof msg, "cannot export '%s': not a variable of this function", name);
+			snprintf(msg, sizeof(msg), "cannot export '%s': not a variable of this function", name);
 			fail(msg);
 		}
 
@@ -383,7 +383,7 @@ void compile_stmt
 
 		if (!is_ident_start(peekch())) fail(nnames == 0 ? "expected a statement" : "expected '=' after assignment target(s) (unknown statement?)");
 
-		read_ident(names[nnames], sizeof names[nnames]);
+		read_ident(names[nnames], sizeof(names[nnames]));
 		add_local(names[nnames]);
 		nnames++;
 
@@ -397,19 +397,18 @@ void compile_stmt
 	if (try_keyword("call"))
 	{
 		compile_call(fn, names, nnames);
-		for (int i = 0; i < nnames; i++) mark_assigned(names[i]);
-
+		for (int i = 0; i < nnames; i++) mark_assigned(names[i];
 		return;
 	}
 
 	char val[MAX_VALUE];
-	compile_value(fn, val, sizeof val);
+	compile_value(fn, val, sizeof(val));
 
 	for (int i = 0; i < nnames; i++)
 	{
 		char mangled[MAX_NAME];
 
-		mangle(fn, names[i], mangled, sizeof mangled);
+		mangle(fn, names[i], mangled, sizeof(mangled));
 		emitf("New %s %s\n", mangled, val);
 	}
 
@@ -420,7 +419,7 @@ void compile_fn
 (void)
 {
 	char fn[MAX_NAME];
-	read_ident(fn, sizeof fn);
+	read_ident(fn, sizeof(fn));
 	if (strcmp(fn, "main") == 0) has_main = 1;
 	nlocals = 0;
 
@@ -433,7 +432,7 @@ void compile_fn
 	while (peekch() != ')')
 	{
 		if (nparams >= MAX_LOCALS) fail("too many parameters");
-		read_ident(params[nparams], sizeof params[nparams]);
+		read_ident(params[nparams], sizeof(params[nparams]));
 		if (is_local(params[nparams])) fail("duplicate parameter name");
 		add_local(params[nparams]);
 		mark_assigned(params[nparams]);
@@ -450,7 +449,7 @@ void compile_fn
 	for (;;)
 	{
 		if (nresults >= MAX_LOCALS) fail("too many results");
-		read_ident(results[nresults], sizeof results[nresults]);
+		read_ident(results[nresults], sizeof(results[nresults]));
 
 		for (int i = 0; i < nresults; i++) if (strcmp(results[i], results[nresults]) == 0) fail("duplicate result name");
 		add_local(results[nresults]);
@@ -462,14 +461,14 @@ void compile_fn
 
 	cur_nresults = nresults;
 	for (int i = 0; i < nresults; i++)
-		snprintf(cur_results[i], sizeof cur_results[i], "%s", results[i]);
+		snprintf(cur_results[i], sizeof(cur_results[i]), "%s", results[i]);
 
 	expect_char('{');
 
 	Loc fn_loc = loc_at(pos);
 
 	define_func(fn, nparams, nresults);
-	snprintf(cur_fn, sizeof cur_fn, "%s", fn);
+	snprintf(cur_fn, sizeof(cur_fn), "%s", fn);
 
 	int first_helper = nhelpers;
 
@@ -494,7 +493,7 @@ void compile_fn
 		{
 			char msg[3 * MAX_NAME + 64];
 
-			snprintf(msg, sizeof msg, "result '%s' of function '%s' is never assigned", results[i], fn);
+			snprintf(msg, sizeof(msg), "result '%s' of function '%s' is never assigned", results[i], fn);
 			report_warning(msg, fn_loc);
 		}
 
@@ -518,7 +517,7 @@ void compile_top_stmt
 	{
 		char name[MAX_PATH];
 
-		read_ident(name, sizeof name);
+		read_ident(name, sizeof(name));
 		include_file(name);
 
 		return;
@@ -542,7 +541,7 @@ void compile_top_stmt
 
 			if (!is_ident_start(peekch())) fail(nnames == 0 ? "expected a statement" : "expected '=' after assignment target(s) (unknown statement?)");
 
-			read_ident(names[nnames], sizeof names[nnames]);
+			read_ident(names[nnames], sizeof(names[nnames]));
 			define_global(names[nnames]);
 			nnames++;
 
@@ -560,7 +559,7 @@ void compile_top_stmt
 		}
 
 		char val[MAX_VALUE];
-		compile_value("", val, sizeof val);
+		compile_value("", val, sizeof(val));
 
 		for (int i = 0; i < nnames; i++) emitf("New %s %s\n", names[i], val);
 
@@ -579,7 +578,7 @@ int main
 		return 1;
 	}
 
-	if (strlen(argv[2]) >= sizeof include_path) fail("include search path is too long");
+	if (strlen(argv[2]) >= sizeof(include_path)) fail("include search path is too long");
 	strcpy(include_path, argv[2]);
 
 	FILE *file = fopen(argv[1], "r");
@@ -589,7 +588,7 @@ int main
 		return 1;
 	}
 
-	unsigned long input_len = fread(src, 1, sizeof src - 1, file);
+	unsigned long input_len = fread(src, 1, sizeof(src) - 1, file);
 
 	if (ferror(file))
 	{

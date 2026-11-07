@@ -255,7 +255,7 @@ Helper *new_helper
 
 	Helper *h = &helpers[nhelpers++];
 
-	memset(h, 0, sizeof *h);
+	memset(h, 0, sizeof(*h));
 	strncpy(h->name, name, MAX_NAME - 1);
 	h->name[MAX_NAME - 1] = '\0';
 
@@ -300,7 +300,7 @@ static void scan_raw_line
 		char prefix[MAX_NAME + 16];
 		size_t plen;
 
-		snprintf(prefix, sizeof prefix, "__Func_%s_", cur_fn);
+		snprintf(prefix, sizeof(prefix), "__Func_%s_", cur_fn);
 		plen = strlen(prefix);
 
 		if (strncmp(arg, prefix, plen) == 0)
@@ -329,7 +329,7 @@ int try_raw_line
 
 	while (pos < len && src[pos] != '\n')
 	{
-		if (nline + 1 < sizeof line) line[nline++] = src[pos];
+		if (nline + 1 < sizeof(line)) line[nline++] = src[pos];
 		emitf("%c", src[pos++]);
 	}
 
@@ -404,7 +404,7 @@ int try_keyword
 
 	while (pos < len && is_ident_char((unsigned char)src[pos]))
 	{
-		if (n + 1 < sizeof buf) buf[n++] = src[pos];
+		if (n + 1 < sizeof(buf)) buf[n++] = src[pos];
 		pos++;
 	}
 
@@ -477,8 +477,8 @@ static void shift_source
 	size_t count = (size_t)(len - at) + 1;
 
 	memmove(src + at + n, src + at, count);
-	memmove(src_file + at + n, src_file + at, count * sizeof *src_file);
-	memmove(src_line + at + n, src_line + at, count * sizeof *src_line);
+	memmove(src_file + at + n, src_file + at, count * sizeof(*src_file));
+	memmove(src_line + at + n, src_line + at, count * sizeof(*src_line));
 }
 
 void include_file
@@ -509,10 +509,10 @@ void include_file
 		return;
 	}
 
-	if (path_len + 1 + name_len + 1 > sizeof path) fail_at("include path is too long", at);
+	if (path_len + 1 + name_len + 1 > sizeof(path)) fail_at("include path is too long", at);
 
-	if (path_len > 0 && include_path[path_len - 1] == '/') snprintf(path, sizeof path, "%s%s", include_path, name);
-	else snprintf(path, sizeof path, "%s/%s", include_path, name);
+	if (path_len > 0 && include_path[path_len - 1] == '/') snprintf(path, sizeof(path)), "%s%s", include_path, name);
+	else snprintf(path, sizeof(path), "%s/%s", include_path, name);
 
 	for (int u = site.file; u >= 0; u = units[u].parent)
 	{
@@ -520,7 +520,7 @@ void include_file
 		{
 			char msg[MAX_PATH + 48];
 
-			snprintf(msg, sizeof msg, "'%s' is included recursively", path);
+			snprintf(msg, sizeof(msg), "'%s' is included recursively", path);
 			fail_at(msg, at);
 		}
 	}
@@ -531,7 +531,7 @@ void include_file
 	{
 		char msg[MAX_PATH + 32];
 
-		snprintf(msg, sizeof msg, "could not open include file '%s'", path);
+		snprintf(msg, sizeof(msg), "could not open include file '%s'", path);
 		fail_at(msg, at);
 	}
 
@@ -599,7 +599,7 @@ void subst_expr
 
 		while (*p && *p != ' ')
 		{
-			if (wi + 1 < sizeof word) word[wi++] = *p;
+			if (wi + 1 < sizeof(word)) word[wi++] = *p;
 			p++;
 		}
 
@@ -619,8 +619,8 @@ void subst_expr
 
 		char mangled[MAX_NAME];
 
-		if (is_local(core)) snprintf(mangled, sizeof mangled, "__Func_%s_%s", fn, core);
-		else snprintf(mangled, sizeof mangled, "%s", core);
+		if (is_local(core)) snprintf(mangled, sizeof(mangled), "__Func_%s_%s", fn, core);
+		else snprintf(mangled, sizeof(mangled), "%s", core);
 
 		for (unsigned long k = 0; k < lead && oi + 1 < cap; k++) out[oi++] = '(';
 		for (unsigned long k = 0; mangled[k] && oi + 1 < cap; k++) out[oi++] = mangled[k];
@@ -658,7 +658,7 @@ void define_func
 	{
 		char msg[MAX_NAME + 48];
 
-		snprintf(msg, sizeof msg, "function '%s' is defined more than once", name);
+		snprintf(msg, sizeof(msg), "function '%s' is defined more than once", name);
 		fail(msg);
 	}
 	*/
@@ -715,7 +715,7 @@ void use_var
 		{
 			char msg[MAX_NAME + 64];
 
-			snprintf(msg, sizeof msg, "variable '%s' is used before it is assigned", name);
+			snprintf(msg, sizeof(msg), "variable '%s' is used before it is assigned", name);
 			report_error(msg, loc_at(at));
 		}
 
@@ -743,7 +743,7 @@ void use_text_var
 
 	while (*text && is_ident_char((unsigned char)*text))
 	{
-		if (n + 1 >= sizeof name) return;
+		if (n + 1 >= sizeof(name)) return;
 		name[n++] = *text++;
 	}
 
@@ -766,20 +766,20 @@ int finish_checks
 
 		if (!f)
 		{
-			snprintf(msg, sizeof msg, "call to undefined function '%s'", r->name);
+			snprintf(msg, sizeof(msg), "call to undefined function '%s'", r->name);
 			report_error(msg, r->at);
 			continue;
 		}
 
 		if (f->nparams >= 0 && r->argc != f->nparams)
 		{
-			snprintf(msg, sizeof msg, "function '%s' takes %d argument(s) but %d given", r->name, f->nparams, r->argc);
+			snprintf(msg, sizeof(msg), "function '%s' takes %d argument(s) but %d given", r->name, f->nparams, r->argc);
 			report_error(msg, r->at);
 		}
 
 		if (f->nresults >= 0 && r->nbound > f->nresults)
 		{
-			snprintf(msg, sizeof msg, "function '%s' returns %d value(s) but %d are being assigned", r->name, f->nresults, r->nbound);
+			snprintf(msg, sizeof(msg), "function '%s' returns %d value(s) but %d are being assigned", r->name, f->nresults, r->nbound);
 			report_error(msg, r->at);
 		}
 	}
@@ -788,7 +788,7 @@ int finish_checks
 	{
 		if (has_global(vrefs[i].name)) continue;
 
-		snprintf(msg, sizeof msg, "undeclared variable '%s' (not a local, an export, or a raw New)", vrefs[i].name);
+		snprintf(msg, sizeof(msg), "undeclared variable '%s' (not a local, an export, or a raw New)", vrefs[i].name);
 		report_error(msg, vrefs[i].at);
 	}
 
