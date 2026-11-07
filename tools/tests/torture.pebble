@@ -1,0 +1,87 @@
+# depends on:
+#  escape sequence std.io.print from stdpbl versio 1 or greater
+
+# helpers
+Func print
+New __Escape_std.io.print_ARG0 <msg>
+Escape std.io.print
+End
+
+# bytecode 2
+
+# expressions
+New 0 "1 + 01"
+New msg 0
+Call print # 2
+
+New 1 "18 + 0003"
+New msg 1
+Call print # 21
+
+New 2 '3'
+New 3 "2 s++ 08"
+New msg 3
+Call print # 208
+
+New 4 '6'
+New 000001 "4 s++ 32" 
+New msg 000001
+Call print # 632
+
+New 5 "3 / 2"
+New msg 5
+Call print # 1
+
+New 6 "3 % 2"
+New msg 6
+Call print # 1
+
+New 7 "13 + -1"
+New msg 7
+Call print # 12
+
+New 8 "1 + -3"
+New msg 8
+Call print # -2
+
+New 9 "1 - 18"
+New msg 9
+Call print # -17
+
+New 10 "1 * 32"
+New msg 10
+Call print # 32
+
+New 11 "1 * -12"
+New msg 11
+Call print # -12
+
+New 12 "0 * 3"
+New msg 12
+Call print # 0
+
+New 13 "0 / 2"
+New msg 13
+Call print # 0
+
+New 14 "1 == 4"
+New msg 14
+Call print # 1
+
+New 15 "1 == 1"
+New msg 15
+Call print # 0
+
+New 16 "1 > 0"
+New msg 16
+Call print # 0
+
+New 17 "1 < 0"
+New msg 17
+Call print # 1
+
+New 18 "1 > 1"
+New msg 18
+Call print # 1
+
+# XXX finish me
