@@ -13,13 +13,16 @@
 #include "instructions.h"
 #include "limits.h"
 #include "main.h"
-#include "print.h"
-#include "setmem.h"
 #include "skipspace.h"
-#include "snprint.h"
 #include "values.h"
 #include "variables.h"
 #include "tasks.h"
+
+#ifdef debug
+#include "print.h"
+#include "setmem.h"
+#include "snprint.h"
+#endif
 
 /* used to parse an instruction operand - guesses the type and addressing mode */
 int parseoperand 
@@ -899,8 +902,7 @@ unsigned long interpret
 			print("_GETMEM (INTERNAL INSTRUCTION)\n");
 
 			print("  PERMALLOC: USED: ");
-			snprint(buf, sizeof(buf), "%lu",
-				getAllocatorSizeUsed(persistAlloc));
+			snprint(buf, sizeof(buf), "%lu", getAllocatorSizeUsed(persistAlloc));
 			print(buf);
 			setmem(buf, 0, sizeof(buf));
 

@@ -1,0 +1,24 @@
+# depends on:
+#  escape sequence std.io.print from stdpbl versio 1 or greater
+
+# helpers
+Func print
+New __Escape_std.io.print_ARG0 <msg>
+Escape std.io.print
+End
+
+# bytecode 2
+New 0 "1 + 01"
+New msg 0
+Call print 
+
+New 1 "18 + 0003"
+New msg 1
+Call print 
+
+New 2 '3'
+New 3 "2 s++ 08"
+New msg 3
+Call print 
+
+# XXX finish me
