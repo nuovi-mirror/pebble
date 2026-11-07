@@ -7,16 +7,17 @@ understands several concepts related to Pebble and general advanced
 computing. For an introduction to Pebble, please read The Pebble 
 Systems' Programmer's Handbook.
 
+This document does not cover extensions to the Pebble bytecode specification.
 
 Pebble is a product of The Nuovi Orizzonti Company, available under The 
 Nuovi Orizzonti Company Open License Version 3 or Greater. You may view said
 license at 
 
-http://thenuoviorizzonticompany.org/license/openlicense/latest.txt
+https://thenuoviorizzonticompany.org/license/openlicense/latest.txt
 This license also applies to this document here.
 
-http://thenuoviorizzonticompany.org
-http://pebblevm.org
+https://thenuoviorizzonticompany.org
+https://pebblevm.org
 
 
 Expressions

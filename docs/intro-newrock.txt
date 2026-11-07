@@ -10,6 +10,14 @@ as those are out of the scope of this document. For more info on said
 operations, please refer The Pebble Virtual Machine Systems' Programmer's
 Handbook and The Pebble Bytecode Specification.
 
+New Rock is a product of The Nuovi Orizzonti Company. It, as well as
+this document, may be distributed under the terms described in The
+Nuovi Orizzonti Company Open License Version 3 or Greater.
+
+https://thenuoviorizzonticompany.org
+https://thenuoviorizzonticompany.org/license/openlicense/latest.txt
+https://pebblevm.org
+
 Let's start with a basic program, such as requesting some text to be 
 printed to the operating system's standard output buffer.
 
