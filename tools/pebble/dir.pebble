@@ -1,0 +1,10 @@
+New dir 'bin/'
+Escape std.fs.dir.get
+New curr __Escape_std.fs.dir.get_RET0
+New __Escape_std.io.print_ARG0 <curr>
+New __Escape_std.fs.dir.change_ARG0 <dir>
+Escape std.io.print
+Escape std.fs.dir.change
+Escape std.fs.dir.get
+New __Escape_std.io.print_ARG0 <__Escape_std.fs.dir.get_RET0>
+Escape std.io.print

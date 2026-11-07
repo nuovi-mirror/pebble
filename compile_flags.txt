@@ -1,6 +1,1 @@
--std=c99
--Ih
--Iffi
--pedantic-errors 
--Wall 
--Werror
+-Ih -Iffi -std=c99 -pedantic-errors -Wall -Werror

@@ -122,6 +122,7 @@ const char *ffi_posix_srcs[] = {
 	"ffi/platform/posix/std/proc/spawn.c",
 	"ffi/platform/posix/std/proc/wait.c",
 	"ffi/platform/posix/std/fs/dir/get.c",
+	"ffi/platform/posix/std/fs/dir/change.c",
 
 	NULL
 };
