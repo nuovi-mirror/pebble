@@ -132,6 +132,11 @@ fn std.fs.file.read ( file ) data {
 . New __Func_std.fs.file.read_data __Escape_std.fs.file.read_RET0
 }
 
+fn std.fs.dir.get ( ) dir {
+. Escape std.fs.dir.get
+. New __Func_std.fs.dir.get_dir __Escape_std.fs.dir.get
+}
+
 / argument handling
 
 fn std.arg.get ( n ) arg {

@@ -729,6 +729,12 @@
 					it if it does not exist. Does not append data to the file, overriding it
 					if it does already have data in it. Returns the size written to the file.
 					Returns 0 if it could not write to the file.
+
+			subgroup dir
+				escape get - get the current working directory
+					returns one value, being the current working directory.
+
+
 		group term
 			subgroup cursor
 				escape moveAbsolute - move the cursor character
@@ -846,6 +852,10 @@
 
 					routine read - Read from a file
 						wrapper of std.fs.file.read
+
+				subgroup dir
+					routine get - get the current working dir
+						Wrapper of std.fs.dir.get
 
 			group arg
 				routine get - Get command-line arguments
