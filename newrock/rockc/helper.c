@@ -511,7 +511,7 @@ void include_file
 
 	if (path_len + 1 + name_len + 1 > sizeof(path)) fail_at("include path is too long", at);
 
-	if (path_len > 0 && include_path[path_len - 1] == '/') snprintf(path, sizeof(path)), "%s%s", include_path, name);
+	if (path_len > 0 && include_path[path_len - 1] == '/') snprintf(path, sizeof(path), "%s%s", include_path, name);
 	else snprintf(path, sizeof(path), "%s/%s", include_path, name);
 
 	for (int u = site.file; u >= 0; u = units[u].parent)

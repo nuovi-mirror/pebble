@@ -239,7 +239,7 @@ void compile_if
 			char inverse[MAX_VALUE];
 			unsigned long n = strlen(conditions[i]);
 
-			if (n >= 2 && conditions[i][0] == '"' && conditions[i][n - 1] == '"') snprintf(inverse, sizeof(inverse)), "\"(%.*s) != 0\"", (int)(n - 2), conditions[i] + 1);
+			if (n >= 2 && conditions[i][0] == '"' && conditions[i][n - 1] == '"') snprintf(inverse, sizeof(inverse), "\"(%.*s) != 0\"", (int)(n - 2), conditions[i] + 1);
 			else snprintf(inverse, sizeof(inverse), "(%s) != 0", conditions[i]);
 
 			emitf("If %s %s\n", else_fn, inverse);
@@ -397,7 +397,7 @@ void compile_stmt
 	if (try_keyword("call"))
 	{
 		compile_call(fn, names, nnames);
-		for (int i = 0; i < nnames; i++) mark_assigned(names[i];
+		for (int i = 0; i < nnames; i++) mark_assigned(names[i]);
 		return;
 	}
 
