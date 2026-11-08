@@ -21,7 +21,6 @@
 long numsword 
 (Value v)
 {
-	char *end;
 	switch (v.Type)
 	{
 		case type_sword: return v.as.sword; break;
@@ -32,7 +31,7 @@ long numsword
 			if (v.as.flt > (double)LONG_MAX) error(errfatal, errcodenumericoverflow, "Overflow converting float to signed word!");
 			if (v.as.flt < LONG_MIN) error(errfatal, errcodenumericunderflow, "Underflow converting float to signed word!");
 			return (long)v.as.flt; break;
-		case type_str: return str2l(v.as.str, &end, 10); break; /* XXX legacy compat */
+		case type_str: return str2l(v.as.str); break; /* XXX legacy compat */
 		case type_expr: return 0; break; /* XXX should never be hit */
 		case type_pointer: return 0; break; /* XXX should never be hit */
 		case type_null: return 0; break; /* XXX should never be hit */
@@ -43,7 +42,6 @@ long numsword
 unsigned long numword 
 (Value v)
 {
-	char *end;
 	switch (v.Type)
 	{
 		case type_word: return v.as.word; break;
@@ -54,7 +52,7 @@ unsigned long numword
 			if (v.as.flt > (double)ULONG_MAX) error(errfatal, errcodenumericoverflow, "Overflow converting float to word!");
 			if (v.as.flt < 0) error(errfatal, errcodenumericunderflow, "Underflow converting float to word!");
 			return (unsigned long)v.as.flt; break;
-		case type_str: return str2ul(v.as.str, &end, 10); break; /* XXX legacy compat */
+		case type_str: return str2ul(v.as.str); break; /* XXX legacy compat */
 		case type_expr: return 0; break; /* XXX should never be hit */
 		case type_pointer: return 0; break; /* XXX should never be hit */
 		case type_null: return 0; break; /* XXX should never be hit */
@@ -117,12 +115,11 @@ int valuetostr
 Value valuetoword 
 (Value v, VarMap *vars, Arena *persistAlloc, struct Limits *limits)
 {
-	char *end;
 	switch (v.Type) {
 		case type_sword: /* XXX shared */
 		case type_word: /* XXX shared */
 		case type_flt: return (Value){ .Type = type_word, .as.word = numword(v) };
-		case type_str: return (Value){ .Type = type_word, .as.word = str2ul(v.as.str, &end, 10) };
+		case type_str: return (Value){ .Type = type_word, .as.word = str2ul(v.as.str) };
 		case type_expr: return evalexprnode(v.as.expr, vars, persistAlloc, limits);
 		default: return (Value){ .Type = type_word, .as.word = 0 };
 	}
@@ -131,12 +128,11 @@ Value valuetoword
 Value valuetosword 
 (Value v, VarMap *vars, Arena *persistAlloc, struct Limits *limits)
 {
-	char *end;
 	switch (v.Type) {
 		case type_sword: /* XXX shared */
 		case type_word: /* XXX shared */
 		case type_flt: return (Value){ .Type = type_sword, .as.sword = numsword(v) };
-		case type_str: return (Value){ .Type = type_sword, .as.sword = str2l(v.as.str, &end, 10) };
+		case type_str: return (Value){ .Type = type_sword, .as.sword = str2l(v.as.str) };
 		case type_expr: return evalexprnode(v.as.expr, vars, persistAlloc, limits);
 		default: return (Value){ .Type = type_sword, .as.sword = 0 };
 	}

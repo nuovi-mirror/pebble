@@ -43,6 +43,7 @@ const char *platform_freestand_srcs[] = {
 	"platform/freestand/inputn.c",
 	"platform/freestand/snooze.c",
 	"platform/freestand/trimflt.c",
+	"platform/freestand/str2n.c",
 
 	NULL
 };
@@ -53,8 +54,6 @@ const char *platform_c_srcs[] = {
 	"platform/c/exitproc.c",
 	"platform/c/print.c",
 	"platform/c/readfile.c", /* XXX depreciated file I/O interface */
-	"platform/c/str2ul.c",
-	"platform/c/str2l.c",
 	"platform/c/str2d.c",
 	"platform/c/snprint.c",
 	"platform/c/findchar.c",
