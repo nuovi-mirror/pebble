@@ -96,4 +96,12 @@ New 21 '19.1200900'
 New msg 21
 Call print # 19.12009
 
+New 22 '0123456789'
+New msg 22
+Call print # 0123456789
+
+New 23 '9876543210'
+New msg 23
+Call print # 9876543210
+
 # XXX finish me
