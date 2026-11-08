@@ -43,6 +43,10 @@ struct Limits {
 	unsigned long file_escapelen_add; /* size to add to a file len when escaping data */
 	unsigned long file_maxsize; /* max file size */
 
+	/* expression related */
+	unsigned long expr_maxdepth; /* max recursion for expressions */
+	unsigned long expr_currdepth; /* current expresssion depth */
+
 	/* misc */
 	unsigned long misc_maxfilebuffersize; /* max buffer size for the bytecode file */
 	unsigned long misc_vmargmaxdigits; /* max number of arg digits, eg '2' for up to '99' args */

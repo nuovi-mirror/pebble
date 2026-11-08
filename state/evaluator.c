@@ -90,12 +90,12 @@ static double numflt
 	{
 		case type_flt: return v.as.flt; break;
 		case type_sword: 
-			if (v.as.sword > DBL_MAX) error(errfatal, errcodenumericoverflow, "Overflow converting signed word to float!");
+/*			if (v.as.sword > DBL_MAX) error(errfatal, errcodenumericoverflow, "Overflow converting signed word to float!"); */
 /*			if (v.as.sword < -DBL_MIN) error(errfatal, errcodenumericunderflow, "Underflow converting signed word to float!"); */
 			return (double)v.as.sword; break;
 		case type_word: 
-			if (v.as.word > DBL_MAX) error(errfatal, errcodenumericoverflow, "Overflow converting word to float!");
-			if (v.as.word < DBL_MIN) error(errfatal, errcodenumericunderflow, "Underflow converting word to float!");
+/*			if (v.as.word > DBL_MAX) error(errfatal, errcodenumericoverflow, "Overflow converting word to float!"); */
+/*			if (v.as.word < DBL_MIN) error(errfatal, errcodenumericunderflow, "Underflow converting word to float!"); */
 			return (double)v.as.word; break;
 		case type_str: return str2d(v.as.str, &end); break;
 		case type_null: return 0; break; /* XXX should never be hit */
@@ -282,18 +282,25 @@ static Value h_NumericDiv
 			double lf = numflt(l);
 			double rf = numflt(r);
 
-			if (lf > 0.0)
-			{
-				if (rf > 0.0 && lf > DBL_MAX * rf) error(errfatal, errcodenumericoverflow, "Floating division overflow!");
-				else if (rf < 0.0 && lf < -DBL_MAX * rf) error(errfatal, errcodenumericunderflow, "Floating division underflow!");
-			} else if (lf < 0.0)
-			{
-				if (rf > 0.0 && lf < -DBL_MAX * rf) error(errfatal, errcodenumericunderflow, "Floating division underflow!");
-				else if (rf < 0.0 && lf < DBL_MAX * rf) error(errfatal, errcodenumericoverflow, "Floating division overflow!");
-			}
-
 			if (rf == 0.0 || lf == 0.0) v = (Value){ .Type = type_word, .as.word = 0 };
-			else v = (Value){ .Type = type_sword, .as.sword = (long)(lf / rf) };
+			else
+			{
+				double alf = lf < 0.0 ? -lf : lf;
+				double arf = rf < 0.0 ? -rf : rf;
+
+				if (arf < 1.0 && alf > DBL_MAX * arf)
+				{
+					if ((lf < 0.0) == (rf < 0.0)) error(errfatal, errcodenumericoverflow, "Floating dividion overflow!");
+					else error(errfatal, errcodenumericunderflow, "Floating division underflow!");
+				}
+
+				double q = lf / rf;
+
+				if (!(q >= (double)LONG_MIN)) error(errfatal, errcodenumericunderflow, "Floating division underflow!");
+				if (!(q < -(double)LONG_MIN)) error(errfatal, errcodenumericoverflow, "Floating division overflow!");
+
+				v = (Value){ .Type = type_sword, .as.sword = (long)q };
+			}
 
 			break;
 		}
@@ -303,10 +310,12 @@ static Value h_NumericDiv
 			long ls = numsword(l);
 			long rs = numsword(r);
 
-			if (ls == LONG_MIN && rs == -1) error(errfatal, errcodenumericoverflow, "Signed division overflow!");
-
 			if (rs == 0 || ls == 0) v = (Value){ .Type = type_word, .as.word = 0 };
-			else v = (Value){ .Type = type_sword, .as.sword = ls / rs };
+			else
+			{
+				if (ls == LONG_MIN && rs == -1) error(errfatal, errcodenumericoverflow, "Signed division overflow!");
+				v = (Value){ .Type = type_sword, .as.sword = ls / rs };
+			}
 
 			break;
 		}
@@ -339,7 +348,30 @@ static Value h_NumericMod
 			double rf = numflt(r);
 
 			if (rf == 0.0 || lf == 0.0) v = (Value){ .Type = type_word, .as.word = 0 };
-			else v = (Value){ .Type = type_sword, .as.sword = (long)(lf / rf) };
+			else 
+			{
+				double m = lf < 0.0 ? -lf : lf;
+				double d = rf < 0.0 ? -rf : rf;
+
+				if (m >= d)
+				{
+					double t = d;
+					while (t <= DBL_MAX / 2 && t + t <= m && t + t > t) t += t;
+					for (;;)
+					{
+						if (m >= t) m -= t;
+						if (t <= d) break;
+						t *= 0.5;
+					}
+				}
+
+				if (lf < 0.0) m = -m;
+
+				if (!(m >= (double)LONG_MIN)) error(errfatal, errcodenumericunderflow, "Floating modulo underflow!");
+				if (!(m < -(double)LONG_MIN)) error(errfatal, errcodenumericoverflow, "Floating modulo overflow!");
+
+				v = (Value){ .Type = type_sword, .as.sword = (long)m };
+			}
 
 			break;
 		}
@@ -350,7 +382,11 @@ static Value h_NumericMod
 			long rs = numsword(r);
 
 			if (rs == 0 || ls == 0) v = (Value){ .Type = type_word, .as.word = 0 };
-			else v = (Value){ .Type = type_sword, .as.sword = ls % rs };
+			else
+			{
+				if (ls == LONG_MIN && rs == -1) error(errfatal, errcodenumericoverflow, "Signed modulo overflow!");
+				v = (Value){ .Type = type_sword, .as.sword = ls % rs };
+			}
 
 			break;
 		}
@@ -369,8 +405,6 @@ static Value h_NumericMod
 
 	return v;
 }
-
-
 
 static int h_NumericCmp 
 (Value l, Value r)

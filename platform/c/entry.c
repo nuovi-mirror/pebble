@@ -194,6 +194,9 @@ struct PackedLimits setlimits
 	limits.instruction_new_destsize = 32;
 	limits.instruction_new_datasize = 32;
 
+	limits.expr_maxdepth = 32;
+	limits.expr_currdepth = 0;
+
 	limits.allocator_temp_maxmem = (limits.misc_maxfilebuffersize + (limits.instructions_max * costs->temp_per_instruction) + costs->temp_slack);
 
 	limits.allocator_persist_maxmem = (costs->persist_fixed 
