@@ -9,6 +9,7 @@
 #include "str2ul.h"
 #include "str2l.h"
 #include "str2d.h"
+#include "trimflt.h"
 #include "variables.h"
 #include "limits.h"
 
@@ -87,7 +88,9 @@ int valuetostr
 	{
 		case type_word: return snprint(buff, buffsize, "%lu", v.as.word);
 		case type_sword: return snprint(buff, buffsize, "%ld", v.as.sword);
-		case type_flt: return snprint(buff, buffsize, "%lf", v.as.flt);
+		case type_flt: 
+			snprint(buff, buffsize, "%lf", v.as.flt);
+			return trimflt(buff, buffsize);
 		case type_str: return snprint(buff, buffsize, "%s", v.as.str);
 		case type_null: if (buffsize) copystr(buff, "NULL"); return 0;
 		case type_pointer: if (buffsize) copystr(buff, "NULL"); return 0;

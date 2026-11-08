@@ -84,4 +84,16 @@ New 18 "1 > 1"
 New msg 18
 Call print # 1
 
+New 19 "1.2 + 3.3"
+New msg 19
+Call print
+
+New 20 '12.890000'
+New msg 20
+Call print
+
+New 21 '19.1200900'
+New msg 21
+Call print
+
 # XXX finish me
