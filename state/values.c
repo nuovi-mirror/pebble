@@ -14,9 +14,6 @@
 #include "limits.h"
 
 #include <stdlib.h>
-#include <limits.h>
-#include <math.h>
-#include <float.h>
 
 long numsword 
 (Value v)

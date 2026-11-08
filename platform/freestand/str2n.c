@@ -20,8 +20,10 @@ long str2l
 
 	while (ptr[c] != '\0')
 	{
-		if (ptr[c] <= 48 || ptr[c] >= 57) return 0;
-		res = (res * 10 + (ptr[c] - '0'));
+		if (ptr[c] < 48 || ptr[c] > 57) return 0;
+		unsigned long temp = ptr[c] - '0';
+		if (res > (ULONG_MAX - temp) / 10) return 0;
+		res = res * 10 + temp;
 		c++;
 	}
 
@@ -42,8 +44,10 @@ unsigned long str2ul
 
 	while (ptr[c] != '\0')
 	{
-		if (ptr[c] <= 48 || ptr[c] >= 57) return 0;
-		res = (res * 10 + (ptr[c] - '0'));
+		if (ptr[c] < 48 || ptr[c] > 57) return 0;
+		unsigned long temp = ptr[c] - '0';
+		if (res > (ULONG_MAX - temp) / 10) return 0;
+		res = res * 10 + temp;
 		c++;
 	}
 

@@ -1,6 +1,9 @@
 #ifndef h_main_
 #define h_main_
 
+#include <limits.h>
+#include <float.h>
+
 #undef NULL
 #undef TRUE
 #undef FALSE
