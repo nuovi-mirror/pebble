@@ -89,8 +89,14 @@ int valuetostr
 		case type_word: return snprint(buff, buffsize, "%lu", v.as.word);
 		case type_sword: return snprint(buff, buffsize, "%ld", v.as.sword);
 		case type_flt: 
-			snprint(buff, buffsize, "%lf", v.as.flt);
-			return trimflt(buff, buffsize);
+		{
+			int n = snprint(buff, buffsize, "%lf", v.as.flt);
+
+			if (n <= 0 || buffsize == 0) return n;
+			if ((unsigned long)n >= buffsize) n = (int)(buffsize - 1); /* output was truncated */
+
+			return (int)trimflt(buff, (unsigned long)n);
+		}
 		case type_str: return snprint(buff, buffsize, "%s", v.as.str);
 		case type_null: if (buffsize) copystr(buff, "NULL"); return 0;
 		case type_pointer: if (buffsize) copystr(buff, "NULL"); return 0;

@@ -3,18 +3,17 @@
 unsigned long trimflt
 (char *buff, unsigned long len)
 {
-	if (len <= 0) return len;
-	if (buff[len - 1] != 0) return len;
-
 	unsigned long i = len;
 	unsigned long j;
 
-	while (i > 0 && buff[i - 1] == '0') i--;
+	if (len < 2 || buff[len - 1] != '0') return len; /* nothing to trim */
 
-	for (j = i; j > 0 && buff[j - 1] >= '0' && buff[j - 1 <= '9']; j--) ;
+	while (i > 0 && buff[i - 1] == '0') i--; /* i: just past the last non-zero char */
+
+	for (j = i; j > 0 && buff[j - 1] >= '0' && buff[j - 1] <= '9'; j--) ;
 	if (j == 0 || buff[j - 1] != '.') return len;
 
-	if (buff[i - 1] == '.') i++;
+	if (buff[i - 1] == '.') i++; /* keep one digit */
 
 	buff[i] = '\0';
 	return i;

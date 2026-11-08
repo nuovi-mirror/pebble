@@ -86,14 +86,14 @@ Call print # 1
 
 New 19 "1.2 + 3.3"
 New msg 19
-Call print
+Call print # 4.5
 
 New 20 '12.890000'
 New msg 20
-Call print
+Call print # 12.89
 
 New 21 '19.1200900'
 New msg 21
-Call print
+Call print # 19.12009
 
 # XXX finish me
