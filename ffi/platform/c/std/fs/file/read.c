@@ -8,7 +8,7 @@ void escape_std_fs_file_read
 (FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc, FFIArena *tempAlloc, FFIArena *persistAlloc, struct Limits *limits)
 {
 	char *arg0str = FFIallocateMemory(tempAlloc, limits->misc_strlen);
-	FFIValue *arg0 = FFIresolvePointer(vars, "__Escape_std.fs.file.write_ARG0", tempAlloc, limits);
+	FFIValue *arg0 = FFIresolvePointer(vars, "__Escape_std.fs.file.read_ARG0", tempAlloc, limits);
 	FFIconvertValueToString(arg0str, limits->misc_strlen, *arg0, limits);
 
 	char *path = arg0str;
