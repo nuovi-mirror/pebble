@@ -127,7 +127,7 @@ Value valuetosword
 		case type_sword: /* XXX shared */
 		case type_word: /* XXX shared */
 		case type_flt: return (Value){ .Type = type_sword, .as.sword = numsword(v) };
-		case type_str: return (Value){ .Type = type_sword, .as.sword = str2ul(v.as.str, &end, 10) };
+		case type_str: return (Value){ .Type = type_sword, .as.sword = str2l(v.as.str, &end, 10) };
 		case type_expr: return evalexprnode(v.as.expr, vars, persistAlloc, limits);
 		default: return (Value){ .Type = type_sword, .as.sword = 0 };
 	}
@@ -158,7 +158,7 @@ Value guessvaluetype
 		i++;
 
 		if (data[i] == '\0') goto string; /* '-' by itself */
-		if (data[1] == '0') goto string; /* -0 */
+		if (data[1] == '0' && data[2] != '.') goto string; /* -0 */
 	}
 
 	/* validate the numeric form */
