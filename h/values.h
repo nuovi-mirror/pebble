@@ -35,4 +35,8 @@ Value valuetoword (Value v, VarMap *vars, Arena *persistAlloc, struct Limits *li
 Value valuetosword (Value v, VarMap *vars, Arena *persistAlloc, struct Limits *limits);
 Value guessvaluetype (char *data, Arena *persistAlloc);
 
+long numsword (Value v);
+unsigned long numword (Value v);
+double numflt (Value v);
+
 #endif

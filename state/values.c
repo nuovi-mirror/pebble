@@ -1,7 +1,4 @@
 #include "values.h"
-
-#include <stdlib.h>
-
 #include "allocator.h"
 #include "copymem.h"
 #include "copystr.h"
@@ -11,8 +8,75 @@
 #include "snprint.h"
 #include "str2ul.h"
 #include "str2l.h"
+#include "str2d.h"
 #include "variables.h"
 #include "limits.h"
+
+#include <stdlib.h>
+#include <limits.h>
+#include <math.h>
+#include <float.h>
+
+long numsword 
+(Value v)
+{
+	char *end;
+	switch (v.Type)
+	{
+		case type_sword: return v.as.sword; break;
+		case type_word: 
+			if (v.as.word > (unsigned long)LONG_MAX) error(errfatal, errcodenumericoverflow, "Overflow converting word to signed word!");
+			return (long)v.as.word; break;
+		case type_flt: 
+			if (v.as.flt > (double)LONG_MAX) error(errfatal, errcodenumericoverflow, "Overflow converting float to signed word!");
+			if (v.as.flt < LONG_MIN) error(errfatal, errcodenumericunderflow, "Underflow converting float to signed word!");
+			return (long)v.as.flt; break;
+		case type_str: return str2l(v.as.str, &end, 10); break; /* XXX legacy compat */
+		case type_expr: return 0; break; /* XXX should never be hit */
+		case type_pointer: return 0; break; /* XXX should never be hit */
+		case type_null: return 0; break; /* XXX should never be hit */
+		default: return 0; break; /* XXX should never be hit */
+	}
+}
+
+unsigned long numword 
+(Value v)
+{
+	char *end;
+	switch (v.Type)
+	{
+		case type_word: return v.as.word; break;
+		case type_sword: 
+			if (v.as.sword < 0) error(errfatal, errcodenumericunderflow, "Underflow converting signed word to word!");
+			return (unsigned long)v.as.word; break;
+		case type_flt: 
+			if (v.as.flt > (double)ULONG_MAX) error(errfatal, errcodenumericoverflow, "Overflow converting float to word!");
+			if (v.as.flt < 0) error(errfatal, errcodenumericunderflow, "Underflow converting float to word!");
+			return (unsigned long)v.as.flt; break;
+		case type_str: return str2ul(v.as.str, &end, 10); break; /* XXX legacy compat */
+		case type_expr: return 0; break; /* XXX should never be hit */
+		case type_pointer: return 0; break; /* XXX should never be hit */
+		case type_null: return 0; break; /* XXX should never be hit */
+		default: return 0; break; /* XXX should never be hit */
+	}
+}
+
+double numflt 
+(Value v)
+{
+	char *end;
+	switch (v.Type) 
+	{
+		case type_flt: return v.as.flt; break;
+		case type_sword: return (double)v.as.sword; break;
+		case type_word: return (double)v.as.word; break;
+		case type_str: return str2d(v.as.str, &end); break; /* XXX legacy compat */
+		case type_null: return 0; break; /* XXX should never be hit */
+		case type_pointer: return 0; break; /* XXX should never be hit */
+		case type_expr: return 0; break; /* XXX should never be hit */
+		default: return 0.0; /* XXX error case */
+	}
+}
 
 int valuetostr 
 (char *buff, unsigned long buffsize, Value v, struct Limits *limits)
@@ -44,34 +108,33 @@ int valuetostr
 Value valuetoword 
 (Value v, VarMap *vars, Arena *persistAlloc, struct Limits *limits)
 {
+	char *end;
 	switch (v.Type) {
-		case type_word: return v;
-		case type_sword: return (struct Value){ .Type = type_word, .as.word = (unsigned long)v.as.sword };
-		case type_flt: return (struct Value){ .Type = type_word, .as.word = (unsigned long)v.as.flt };
-		case type_str: return (struct Value){ .Type = type_word, .as.word = str2ul(v.as.str, NULL, 10) };
-		case type_null: return (struct Value){ .Type = type_word, .as.word = 0 };
-		case type_pointer: return (struct Value){ .Type = type_word, .as.word = 0 };
+		case type_sword: /* XXX shared */
+		case type_word: /* XXX shared */
+		case type_flt: return (Value){ .Type = type_word, .as.word = numword(v) };
+		case type_str: return (Value){ .Type = type_word, .as.word = str2ul(v.as.str, &end, 10) };
 		case type_expr: return evalexprnode(v.as.expr, vars, persistAlloc, limits);
-		default: return (struct Value){ .Type = type_word, .as.word = 0 }; /* should never be hit */
+		default: return (Value){ .Type = type_word, .as.word = 0 };
 	}
 }
 
 Value valuetosword 
 (Value v, VarMap *vars, Arena *persistAlloc, struct Limits *limits)
 {
+	char *end;
 	switch (v.Type) {
-		case type_sword: return v;
-		case type_word: return (struct Value){ .Type = type_sword, .as.sword = (long)v.as.sword };
-		case type_flt: return (struct Value){ .Type = type_sword, .as.sword = (long)v.as.flt };
-		case type_str: return (struct Value){ .Type = type_sword, .as.sword = str2l(v.as.str, NULL, 10) };
-		case type_null: return (struct Value){ .Type = type_sword, .as.sword = 0 };
-		case type_pointer: return (struct Value){ .Type = type_sword, .as.sword = 0 };
+		case type_sword: /* XXX shared */
+		case type_word: /* XXX shared */
+		case type_flt: return (Value){ .Type = type_sword, .as.sword = numsword(v) };
+		case type_str: return (Value){ .Type = type_sword, .as.sword = str2ul(v.as.str, &end, 10) };
 		case type_expr: return evalexprnode(v.as.expr, vars, persistAlloc, limits);
-		default: return (struct Value){ .Type = type_sword, .as.sword = 0 }; /* should never be hit */
+		default: return (Value){ .Type = type_sword, .as.sword = 0 };
 	}
 }
 
-Value guessvaluetype (char *data, Arena *persistAlloc)
+Value guessvaluetype 
+(char *data, Arena *persistAlloc)
 {
 	Value out = {0};
 	unsigned long i = 0;
@@ -141,3 +204,4 @@ string:
 	copymem(data, out.as.str, len + 1);
 	return out;
 }
+
