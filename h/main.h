@@ -30,6 +30,40 @@
 #define errcodeundefined 9
 #define errcodeescapesequencenotfound 10
 
+#if defined(build_default)
+#define buildstr "default"
+#elif defined(build_debug)
+#define buildstr "debug"
+#elif defined(build_small)
+#define buildstr "small"
+#elif defined(build_fast)
+#define buildstr "fast"
+#else 
+#define buildstr "UNKNOWN"
+#endif
+
+#if defined(platform_c)
+#define platformstr "c"
+#elif defined(platform_posix)
+#define platformstr "posix"
+#elif defined(platform_openbsd)
+#define platformstr "openbsd"
+#elif defined(platform_puredarwin)
+#define platformstr "puredarwin"
+#else
+#define platformstr "UNKNOWN"
+#endif
+
+#if defined(__x86_64__) || defined(__amd64__) || defined(_X_X64) || defined(_M_AMD64)
+#define isastr "amd64"
+#elif defined(__i386__) || defined(__i386) || defined(_M_IX86)
+#define isastr "i386"
+#elif defined(__aarch64__) || defined(_M_ARM64) || defined(__arm64__)
+#define isastr "arm64"
+#else
+#define isastr "UNKNOWN"
+#endif
+
 struct Memory;
 
 typedef struct Args {

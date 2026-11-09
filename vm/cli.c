@@ -14,7 +14,7 @@ void pnexit
 void cli
 (Args *args)
 {
-	if (args->count > 2) return;
+	if (args->count != 2) return;
 	if (cmpstr(args->values[1], "logo") == 0) pnexit(logo);
 	else if (cmpstr(args->values[1], "help") == 0) pnexit(help);
 	else if (cmpstr(args->values[1], "version") == 0) pnexit(version);
@@ -37,9 +37,12 @@ const char help[] =
 "  --version   - alias of version\n"
 "\0";
 
-/* const char version[] = "Pebble (CPebble) Indev; build " build "; platform " platform "; \n"; */
-/* const char version[] = "dummy\n"; */
-const char version[] = "Pebble (CPebble) Indev; build " build;
+const char version[] = 
+"Pebble (CPebble) Indev; "
+"build " buildstr "; "
+"platform " platformstr "; "
+"isa " isastr
+"\n";
 
 const char logo[] = 
 "............................................................\n"
