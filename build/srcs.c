@@ -12,7 +12,10 @@ const char *getmain
 	if (strcmp(config->platform, "openbsd") == 0) return "platform/openbsd/main.c";
 	if (strcmp(config->platform, "puredarwin") == 0) return "platform/puredarwin/main.c";
 
-	error("unknown platform");
+	char buff[512];
+	strcpy(buff, "unknown platform: ");
+	strcat(buff, config->platform);
+	error(buff);
 	return NULL; /* XXX never hit */
 }
 
