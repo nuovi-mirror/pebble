@@ -7,28 +7,28 @@
 #define platform_openbsd 2
 #define platform_puredarwin 3
 
-static volatile void setplatform_c
+static void setplatform_c
 (struct Config *config)
 {
 	strcpy(config->platform, "c"); 
 	strcat(config->cflags, "-Dplatform_c ");	
 }
 
-static volatile void setplatform_posix
+static void setplatform_posix
 (struct Config *config)
 {
 	strcpy(config->platform, "posix"); 
 	strcat(config->cflags, "-Dplatform_posix ");
 }
 
-static volatile void setplatform_openbsd
+static void setplatform_openbsd
 (struct Config *config)
 {			
 	strcpy(config->platform, "openbsd"); 
 	strcat(config->cflags, "-Dplatform_openbsd ");
 }
 
-static volatile void setplatform_puredarwin
+static void setplatform_puredarwin
 (struct Config *config)
 {
 	strcpy(config->platform, "puredarwin"); 
