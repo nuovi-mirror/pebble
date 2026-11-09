@@ -4,29 +4,44 @@
 #include "cmpstr.h"
 #include "cli.h"
 
+void pnexit
+(const char *msg)
+{
+	print(msg);
+	exitproc(0);
+}
+
 void cli
 (Args *args)
 {
-	if (args->count >= 1) return;
-	if (cmpstr(args->values[1], "logo") == 0) {
-		print(logo);
-		exitproc(0);
-	} else if (cmpstr(args->values[1], "help") == 0) {
-		print(help);
-		exitproc(0);
-	}
+	if (args->count > 2) return;
+	if (cmpstr(args->values[1], "logo") == 0) pnexit(logo);
+	else if (cmpstr(args->values[1], "help") == 0) pnexit(help);
+	else if (cmpstr(args->values[1], "version") == 0) pnexit(version);
+
+	else if (cmpstr(args->values[1], "--help") == 0) pnexit(help);
+	else if (cmpstr(args->values[1], "--version") == 0) pnexit(version);
 }
 
-const char help[159] =
-"usage: cpebble { help | logo }\n"
-"       (path)\n"
+const char help[] =
+"usage: cpebble { help | version | logo }\n"
+"	        { --help | --version }\n"
+"               (path)\n"
 "\n"
-"  help     - print this message\n"
-"  logo     - print our great logo\n"
-"  (path)   - path to bytecode file to execute\n"
+"  help        - print this message\n"
+"  version     - print version info\n"
+"  logo        - print our great logo\n"
+"  (path)      - path to bytecode file to execute\n"
+"\n"
+"  --help      - alias of help\n"
+"  --version   - alias of version\n"
 "\0";
 
-const char logo[1832] = 
+/* const char version[] = "Pebble (CPebble) Indev; build " build "; platform " platform "; \n"; */
+/* const char version[] = "dummy\n"; */
+const char version[] = "Pebble (CPebble) Indev; build " build;
+
+const char logo[] = 
 "............................................................\n"
 ".................................000000.....................\n"
 "............................00.........00000................\n"

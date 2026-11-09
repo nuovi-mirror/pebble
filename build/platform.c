@@ -33,9 +33,21 @@ void detectplatform
 	if (config->platform[0] == '\0')
 		switch (internal_detectplatform())
 		{
-			case platform_c: strcpy(config->platform, "c"); break;
-			case platform_posix: strcpy(config->platform, "posix"); break;
-			case platform_openbsd: strcpy(config->platform, "openbsd"); break;
-			case platform_puredarwin: strcpy(config->platform, "puredarwin"); break;
+			case platform_c: 
+				strcpy(config->platform, "c"); 
+				strcat(config->cflags, "-Dplatform=\"c\" ");	
+				break;
+			case platform_posix: 
+				strcpy(config->platform, "posix"); 
+				strcat(config->cflags, "-Dplatform=\"posix\" ");
+				break;
+			case platform_openbsd: 
+				strcpy(config->platform, "openbsd"); 
+				strcat(config->cflags, "-Dplatform=\"openbsd\" ");
+				break;
+			case platform_puredarwin: 
+				strcpy(config->platform, "puredarwin"); 
+				strcat(config->cflags, "-Dplatform=\"puredarwin\"");
+				break;
 		}
 }

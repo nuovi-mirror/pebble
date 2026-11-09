@@ -71,11 +71,11 @@ int main (int argc, char **argv) {
 		return 0;
 	}
 
-	/* XXX removed
+	/* XXX removed */
 	printf("cflags   : %s %s\n", config.cflags, bufstr(&config.usercflags));
 	printf("ldflags  : %s %s\n", config.ldflags, bufstr(&config.userldflags));
 	printf("platform : %s\n", config.platform);
-	*/
+	/* */
 
 	compile(&config, src, srccount, objs);
 	linkprog(&config, objs, srccount);

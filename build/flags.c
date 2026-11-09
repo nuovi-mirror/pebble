@@ -8,6 +8,7 @@ void setflags (Config *config) {
 			"-O2 "
 			"-ffunction-sections "
 			"-fdata-sections "
+			"-Dbuild=\"default\" "
 		);
 
 		strcat(config->ldflags, "-flto ");
@@ -23,6 +24,7 @@ void setflags (Config *config) {
 			"-ffast-math "
 			"-march=native "
 			"-mtune=native "
+			"-Dbuild=\"fast\" "
 		);
 
 		strcat(config->ldflags, "-flto -Dnozeromem ");
@@ -35,6 +37,7 @@ void setflags (Config *config) {
 			"-fxray-instrument "
 			"-fxray-instruction-threshold=1 "
 			"-fxray-link-deps "
+			"-Dbuild=\"xray\" "
 		);
 
 		strcat(config->ldflags, "-fxray-instrument");
@@ -47,6 +50,7 @@ void setflags (Config *config) {
 			"-Oz "
 			"-ffunction-sections "
 			"-fdata-sections "
+			"-Dbuild=\"small\" "
 		);
 
 		strcat(config->ldflags, "-flto ");
@@ -57,7 +61,9 @@ void setflags (Config *config) {
 			"-O0 "
 			"-Wall "
 			"-Wextra "
-			"-Wuninitialized ");
+			"-Wuninitialized "
+			"-Dbuild=\"bad\" "
+		);
 
 	else if (strcmp(config->build, "debug") == 0)
 		strcat(config->cflags, 
@@ -81,6 +87,7 @@ void setflags (Config *config) {
 			"-Wdouble-promotion "
 			"-Wfloat-equal "
 			"-Ddebug "
+			"-Dbuild=\"debug\" "
 		);
 
 	else

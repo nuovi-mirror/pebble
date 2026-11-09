@@ -5,7 +5,8 @@
 
 void cli (Args *args);
 
-extern const char logo[1832]; 
-extern const char help[159];
+extern const char logo[]; 
+extern const char help[];
+extern const char version[];
 
 #endif
