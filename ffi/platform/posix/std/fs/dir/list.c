@@ -55,5 +55,6 @@ err:
 	if (dr != NULL) closedir(dr);
 err_noclean:
 	FFIsetVariable(vars, "__Escape_std.fs.dir.list_RET0", (FFIValue){ .Type = type_word, .as.word = 1 }, persistAlloc);
+	FFIsetVariable(vars, "__Escape_std.fs.dir.list_RET1", (FFIValue){ .Type = type_word, .as.word = 1 }, persistAlloc);
 	return;
 }

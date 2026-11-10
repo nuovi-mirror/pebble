@@ -19,10 +19,12 @@ void escape_std_fs_file_read
 	char *fdata = FFIallocateMemory(tempAlloc, fsize);
 	if (readfile(path, fdata, fsize) == 0) goto err;
 
-	FFIsetVariable(vars, "__Escape_std.fs.file.read_RET0", (FFIValue){ .Type = type_str, .as.str = fdata }, persistAlloc);
+	FFIsetVariable(vars, "__Escape_std.fs.file.read_RET0", (FFIValue){ .Type = type_word, .as.str = 0 }, persistAlloc);
+	FFIsetVariable(vars, "__Escape_std.fs.file.read_RET1", (FFIValue){ .Type = type_str, .as.str = fdata }, persistAlloc);
 	return;
 
 err:
-	FFIsetVariable(vars, "__Escape_std.fs.file.read_RET0", (FFIValue){ .Type = type_word, .as.word = 0 }, persistAlloc);
+	FFIsetVariable(vars, "__Escape_std.fs.file.read_RET0", (FFIValue){ .Type = type_word, .as.word = 1 }, persistAlloc);
+	FFIsetVariable(vars, "__Escape_std.fs.file.read_RET1", (FFIValue){ .Type = type_word, .as.word = 0 }, persistAlloc);
 	return;
 }

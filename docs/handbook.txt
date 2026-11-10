@@ -724,19 +724,24 @@
 		group fs
 			subgroup file
 				escape read - read a file
-					accepts one argument, being the path of the file to read. Returns the
-					data parsed as a string of the file read. R
+					accepts one argument, being the file to read from. Returns the first
+					value as 1 if the read failed and 0 if not and the second as the file
+					data, which will be garbage if the first return is 1.
+
 				escape write - write a file
-					accepts two arguments, being the path of the file to write to and the
-					data to write into the file. Writes the data into the file and creates
-					it if it does not exist. Does not append data to the file, overriding it
-					if it does already have data in it. Returns the size written to the file.
-					Returns 0 if it could not write to the file.
+					accepts two arguments, the first being the path to the file to write to
+					and the second being the data to write into the file. Returns 1 on 
+					failiure and 0 if not.
 
 			subgroup dir
 				escape get - get the current working directory
 					returns one value, being the current working directory.
 
+				escape list - list directory contents
+					accepts one value, being the directory to list and defaults to
+					'.' if unspecified. Returns two values, the first being 1 if the
+					read failed and 0 if not, and the second as the dir contents,
+					being a newline separated string of files in the directory.
 
 		group term
 			subgroup cursor
@@ -860,12 +865,15 @@
 					routine get - get the current working dir
 						Wrapper of std.fs.dir.get
 
+					routile list - list files in a directory
+						Wrapper of std.fs.dir.list
+
 			group arg
 				routine get - Get command-line arguments
-					accepts one argument, being the command-line argument to
-					grab, 0 being the program name and 1 being the bytecode
-					file name. Returns the argument or -1 if the argument
-					was not given on the command-line.
+					accepts one argument, being the command-line argument to fetch. Returns
+					two values, the first being 1 if the argument was not given and 0 if
+					so, and the second as the argument given on the command-line. The second
+					may be garbage if the first is 1.
 
 			group str
 				routine replace - Replace a string

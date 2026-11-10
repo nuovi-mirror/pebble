@@ -119,17 +119,18 @@ fn std.task.await ( handle ) ret {
 
 / files
 
-fn std.fs.file.write ( file data ) ret {
+fn std.fs.file.write ( file data ) code {
 . New __Escape_std.fs.file.write_ARG0 <__Func_std.fs.file.write_file>
 . New __Escape_std.fs.file.write_ARG1 <__Func_std.fs.file.write_data>
 . Escape std.fs.file.write
-. New __Func_std.fs.file.write_ret __Escape_std.fs.file.write_RET0
+. New __Func_std.fs.file.write_code __Escape_std.fs.file.write_RET0
 }
 
-fn std.fs.file.read ( file ) data {
+fn std.fs.file.read ( file ) code data {
 . New __Escape_std.fs.file.read_ARG0 <__Func_std.fs.file.read_file>
 . Escape std.fs.file.read
-. New __Func_std.fs.file.read_data __Escape_std.fs.file.read_RET0
+. New __Func_std.fs.file.read_code __Escape_std.fs.file.read_RET0
+. New __Func_std.fs.file.read_data __Escape_std.fs.file.read_RET1
 }
 
 fn std.fs.dir.get ( ) dir {
@@ -137,14 +138,23 @@ fn std.fs.dir.get ( ) dir {
 . New __Func_std.fs.dir.get_dir __Escape_std.fs.dir.get
 }
 
+fn std.fs.dir.list ( dir ) code files {
+. New __Escape_std.fs.dir.list_ARG0 <__Func_std.fs.dir.list_dir>
+. Escape std.fs.dir.list
+. New __Func_std.fs.dir.list_code __Escape_std.fs.dir.list_RET0
+. New __Func_std.fs.dir.list_files __Escape_std.fs.dir.list_RET1
+}
+	
 / argument handling
 
-fn std.arg.get ( n ) arg {
+fn std.arg.get ( n ) code arg {
 	import VMARGC
-	arg = '-1'
+	arg = '0'
+	code = '1'
 	if ( "((n < VMARGC) + (n >= 0)) == 0" ) {
 		name = "VMARG s++ n"
 		arg = [name]
+		code = '0'
 	}
 }
 
