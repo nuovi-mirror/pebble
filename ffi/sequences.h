@@ -48,8 +48,5 @@
 #include "libs/std/fs/file/read.h"
 #include "libs/std/fs/dir/get.h"
 #include "libs/std/fs/dir/change.h"
-/* XXX not implimented
-#include "libs/std/fs/file/writeBinary.h"
 #include "libs/std/fs/dir/list.h"
-*/
 #endif /* #ifdef fs */

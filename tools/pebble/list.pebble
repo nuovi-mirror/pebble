@@ -1,0 +1,5 @@
+Escape std.fs.dir.list
+New __Escape_std.io.print_ARG0 <__Escape_std.fs.dir.list_RET0>
+Escape std.io.print
+New __Escape_std.io.print_ARG0 <__Escape_std.fs.dir.list_RET1>
+Escape std.io.print

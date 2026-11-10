@@ -64,10 +64,7 @@ static const struct EscapeSequence escapes[] = {
 	{"std.fs.file.read", escape_std_fs_file_read},
 	{"std.fs.dir.get", escape_std_fs_dir_get},
 	{"std.fs.dir.change", escape_std_fs_dir_change},
-	/* XXX not implimented 
-	{"std.fs.file.writeBinary", escape_std_fs_file_writeBinary}.
 	{"std.fs.dir.list", escape_std_fs_dir_list},
-	*/
 #endif
 
 };
