@@ -663,6 +663,9 @@
 	A function can be returned from early using the return keyword, which will perform the required formatting
 	of return variables and return to the caller via the Pebble Return opcode.
 
+	A conditional or loop can be broken out of with the break keyword.
+
+	A conditional or loop can be skipped with the continue keyword.
 
 
 

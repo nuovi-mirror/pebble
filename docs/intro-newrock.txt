@@ -207,6 +207,36 @@ In this case, we define the global variable x, then the local variable x to
 main. We then copy the local variable x of main into the global namespace
 as x.
 
+The keywords return, break, and continue are used for control flow inside
+of functions, loops and conditionals.
+
+The return keyword is used to exit from a function early, even if the
+function has not ended.
+
+The break keyword is used to break out of a loop or conditional early
+without returning from he underlying function.
+
+The continue keyword is used to skip the rest of a conditional body.
+
+An example of these together
+
+	fn foo ( num max ) sum {
+		sum = '0'
+		while ( "num < max" ) {
+			num = "num + 1"
+			m = "num % 2"
+			if ( "m == 0" ) { continue }
+			if ( "num > 11" ) { break }
+			if ( "num > 15" ) { return }
+			sum = "sum + num"
+		}
+	}
+
+In this example, while num is less than max, we increment num, set m to
+num modulo 2, check if the result is 0 (which means num was even) and
+restart the loop if so, check if we have hit 11 and stop the condition
+if so, if num is greater than 15 we return from the function foo early,
+and set sum to the current sum plus num, and finally we return sum.
 
 You can place a comment in code using the '/' and '#' characters either
 at the start or end of a line. A comment cannot be placed in the middle
