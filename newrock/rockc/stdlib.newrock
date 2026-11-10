@@ -141,9 +141,8 @@ fn std.fs.dir.get ( ) dir {
 
 fn std.arg.get ( n ) arg {
 	import VMARGC
-	if ( "VMARGC < n" ) {
-		arg = '-1'
-	} else {
+	arg = '-1'
+	if ( "((n < VMARGC) + (n >= 0)) == 0" ) {
 		name = "VMARG s++ n"
 		arg = [name]
 	}

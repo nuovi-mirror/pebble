@@ -5,13 +5,30 @@
 static char cur_results[MAX_LOCALS][MAX_NAME];
 static int cur_nresults = 0;
 
-static void emit_ret_fill(const char *fn)
+static void emit_ret_fill
+(const char *fn)
 {
 	for (int i = 0; i < cur_nresults; i++)
-		outf("New __Func_%s_RET%d __Func_%s_%s\n", fn, i, fn, cur_results[i]);
+		emitf("New __Func_%s_RET%d __Func_%s_%s\n", fn, i, fn, cur_results[i]);
 }
 
-void compile_stmt(const char *fn);
+#define CTL_RETURN    "1"
+#define CTL_BREAK     "2"
+#define CTL_CONTINUE  "3"
+
+static unsigned ev_return, ev_break, ev_continue; /* escaping events seen so far */
+static int loop_depth;                            /* while loops around the statement */
+static int list_nested;                           /* 0: function level, 1: inside an if/else/while body */
+static int fn_uses_ctl;                           /* the control variable is in use in this function */
+
+static void ctl_name
+(const char *fn, char *out, unsigned long cap)
+{
+	snprintf(out, cap, "__Func_%s___RockCtl", fn);
+}
+
+void compile_stmt
+(const char *fn);
 	
 void compile_value
 (const char *fn, char *out, unsigned long cap)
@@ -147,21 +164,45 @@ void compile_call
 }
 
 
-void compile_if_branch
-(const char *fn, Helper *helper)
+static void compile_block
+(const char *fn, int nested, const char *unterminated)
 {
-	Helper *old_helper = current_helper;
-	current_helper = helper;
+	int saved_nested = list_nested;
+	list_nested = nested;
 	skipws();
 
 	while (peekch() != '}')
 	{
 		if (peekch() < 0)
-			fail("unterminated if block");
+			fail(unterminated);
+
+		unsigned before = ev_return + ev_break + ev_continue;
 
 		compile_stmt(fn);
 		skipws();
+
+		if (ev_return + ev_break + ev_continue != before && peekch() != '}')
+		{
+			char ctl[MAX_NAME], cont[MAX_NAME];
+
+			ctl_name(fn, ctl, sizeof(ctl));
+			snprintf(cont, sizeof(cont), "__RockCont_%u", next_control_id++);
+
+			emitf("If %s \"%s == 0\"\n", cont, ctl);
+			current_helper = new_helper(cont);
+		}
 	}
+
+	list_nested = saved_nested;
+}
+
+void compile_if_branch
+(const char *fn, Helper *helper)
+{
+	Helper *old_helper = current_helper;
+	current_helper = helper;
+
+	compile_block(fn, 1, "unterminated if block");
 
 	expect_char('}');
 	current_helper = old_helper;
@@ -222,28 +263,18 @@ void compile_if
 
 		current_helper = dispatch;
 
-		emitf("If %s %s\n", body_fns[i], conditions[i]);
-
-		if (i + 1 < nbranches)
+		if (i + 1 < nbranches || has_else)
 		{
-			char inverse[MAX_VALUE];
-			unsigned long n = strlen(conditions[i]);
+			char temp[MAX_NAME];
 
-			if (n >= 2 && conditions[i][0] == '"' && conditions[i][n - 1] == '"') snprintf(inverse, sizeof(inverse), "\"(%.*s) != 0\"", (int)(n - 2), conditions[i] + 1);
-			else snprintf(inverse, sizeof(inverse), "(%s) != 0", conditions[i]);
+			snprintf(temp, sizeof(temp), "__Func_%s___RockCond_%u", fn, next_control_id++);
 
-			emitf("If %s %s\n", dispatch_fns[i + 1], inverse);
+			emitf("New %s %s\n", temp, conditions[i]);
+			emitf("If %s %s\n", body_fns[i], temp);
+			emitf("If %s \"%s != 0\"\n", i + 1 < nbranches ? dispatch_fns[i + 1] : else_fn, temp);
 		}
-		else if (has_else)
-		{
-			char inverse[MAX_VALUE];
-			unsigned long n = strlen(conditions[i]);
-
-			if (n >= 2 && conditions[i][0] == '"' && conditions[i][n - 1] == '"') snprintf(inverse, sizeof(inverse), "\"(%.*s) != 0\"", (int)(n - 2), conditions[i] + 1);
-			else snprintf(inverse, sizeof(inverse), "(%s) != 0", conditions[i]);
-
-			emitf("If %s %s\n", else_fn, inverse);
-		}
+		else
+			emitf("If %s %s\n", body_fns[i], conditions[i]);
 
 		current_helper = old_helper;
 	}
@@ -266,26 +297,71 @@ void compile_while
 	expect_char(')');
 	expect_char('{');
 
-	snprintf(while_fn, sizeof(while_fn), "__RockWhile_%u", next_control_id++);
+	unsigned id = next_control_id++;
+	snprintf(while_fn, sizeof(while_fn), "__RockWhile_%u", id);
 
 	Helper *old_helper = current_helper;
 	Helper *loop = new_helper(while_fn);
 	current_helper = loop;
 
-	skipws();
+	unsigned ret0 = ev_return, brk0 = ev_break, cnt0 = ev_continue;
 
-	while (peekch() != '}')
-	{
-		if (peekch() < 0) fail("unterminated while block");
-		compile_stmt(fn);
-		skipws();
-	}
+	loop_depth++;
+	compile_block(fn, 1, "unterminated while block");
+	loop_depth--;
 
 	expect_char('}');
-	emitf("If %s %s\n", while_fn, condition);
+
+	int has_loopctl = ev_break != brk0 || ev_continue != cnt0;
+	int exits = ev_return != ret0 || has_loopctl;
+	char entry[MAX_NAME];
+
+	snprintf(entry, sizeof(entry), "%s", while_fn);
+
+	if (!exits)
+	{
+		emitf("If %s %s\n", while_fn, condition);
+	}
+	else
+	{
+		char ctl[MAX_NAME], temp[MAX_NAME];
+		Helper *driver;
+
+		ctl_name(fn, ctl, sizeof(ctl));
+		snprintf(entry, sizeof(entry), "__RockLoop_%u", id);
+		snprintf(temp, sizeof(temp), "__Func_%s___RockCond_%u", fn, next_control_id++);
+
+		driver = new_helper(entry);
+		current_helper = driver;
+
+		emitf("New %s '0'\n", ctl);                 /* a 'continue' ends here */
+		emitf("Call %s\n", while_fn);
+		emitf("New %s %s\n", temp, condition);
+		/* go round again if (ctl is 0 or 3) and the condition holds */
+		emitf("If %s \"(((%s == 0) * (%s == 3)) == 0) + (%s == 0) == 0\"\n", entry, ctl, ctl, temp);
+
+		fn_uses_ctl = 1;
+	}
 
 	current_helper = old_helper;
-	emitf("If %s %s\n", while_fn, condition);
+	emitf("If %s %s\n", entry, condition);
+
+	if (has_loopctl)
+	{
+		char ctl[MAX_NAME], clr[MAX_NAME];
+
+		ctl_name(fn, ctl, sizeof(ctl));
+		snprintf(clr, sizeof(clr), "__RockClr_%u", id);
+
+		Helper *c = new_helper(clr);
+		emitf("If %s \"%s > 1\"\n", clr, ctl);
+		snprintf(c->body, HELPER_BUFSZ, "New %s '0'\n", ctl);
+		c->body_len = strlen(c->body);
+	}
+
+	/* break and continue are used up by this loop; only a return gets past it */
+	ev_break = brk0;
+	ev_continue = cnt0;
 }
 
 void compile_stmt
@@ -358,11 +434,46 @@ void compile_stmt
 
 	if (try_keyword("return"))
 	{
-		if (current_helper)
-			fail("'return' is only allowed directly in a function body, not inside an if or while block");
-
 		emit_ret_fill(fn);
-		outf("Return\n");
+
+		if (list_nested)
+		{
+			char ctl[MAX_NAME];
+
+			ctl_name(fn, ctl, sizeof(ctl));
+			emitf("New %s '" CTL_RETURN "'\n", ctl);
+			ev_return++;
+			fn_uses_ctl = 1;
+		}
+
+		emitf("Return\n");
+		return;
+	}
+
+	int is_break = try_keyword("break");
+
+	if (is_break || try_keyword("continue"))
+	{
+		char ctl[MAX_NAME];
+
+		if (loop_depth == 0)
+			fail(is_break ? "'break' is only allowed inside a while loop" : "'continue' is only allowed inside a while loop");
+
+		ctl_name(fn, ctl, sizeof(ctl));
+
+		if (is_break)
+		{
+			emitf("New %s '" CTL_BREAK "'\n", ctl);
+			ev_break++;
+		}
+		else
+		{
+			emitf("New %s '" CTL_CONTINUE "'\n", ctl);
+			ev_continue++;
+		}
+
+		fn_uses_ctl = 1;
+		emitf("Return\n");
 		return;
 	}
 
@@ -474,17 +585,14 @@ void compile_fn
 
 	Helper *old_helper = current_helper;
 	current_helper = NULL;
+	loop_depth = 0;
+	fn_uses_ctl = 0;
 
 	outf("Func %s\n", fn);
 	for (int i = 0; i < nparams; i++) outf("New __Func_%s_%s __Func_%s_ARG%d\n", fn, params[i], fn, i);
 	skipws();
 
-	while (peekch() != '}')
-	{
-		if (peekch() < 0) fail("unterminated function");
-		compile_stmt(fn);
-		skipws();
-	}
+	compile_block(fn, 0, "unterminated function");
 
 	expect_char('}');
 
@@ -497,11 +605,29 @@ void compile_fn
 			report_warning(msg, fn_loc);
 		}
 
-	emit_ret_fill(fn);
+	emit_ret_fill(fn);   /* lands in the last continuation, if there is one */
+
+	current_helper = NULL;
+
+	if (fn_uses_ctl)
+	{
+		char ctl[MAX_NAME];
+
+		ctl_name(fn, ctl, sizeof(ctl));
+		outf("New %s '0'\n", ctl);   /* every exit path ends up here: leave it clear */
+	}
 
 	outf("End\n");
 	current_helper = old_helper;
 	emit_helpers_from(first_helper);
+
+	if (fn_uses_ctl)
+	{
+		char ctl[MAX_NAME];
+
+		ctl_name(fn, ctl, sizeof(ctl));
+		outf("New %s '0'\n", ctl);   /* defined before anything can read it */
+	}
 
 	nlocals = 0;
 	cur_nresults = 0;
