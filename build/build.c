@@ -19,6 +19,7 @@ const char *vm_srcs[] = {
 	"state/values.c",
 	"state/variables.c",
 	"state/tasks.c",
+	"state/clock.c",
 
 	NULL
 };

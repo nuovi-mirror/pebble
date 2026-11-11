@@ -184,6 +184,8 @@ struct PackedLimits setlimits
 
 	limits.escapes_namesize = 32;
 
+	limits.time_max = 4096;
+
 	limits.misc_maxfilebuffersize = (limits.instructions_max * costs->bytes_per_line);
 	limits.misc_vmargmaxdigits = 2;
 	limits.misc_strlen = limits.cmd_args * limits.cmd_chars;

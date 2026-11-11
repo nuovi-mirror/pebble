@@ -47,6 +47,9 @@ struct Limits {
 	unsigned long expr_maxdepth; /* max recursion for expressions */
 	unsigned long expr_currdepth; /* current expresssion depth */
 
+	/* timer-related */
+	unsigned long time_max; /* max execution time (ms) */
+
 	/* misc */
 	unsigned long misc_maxfilebuffersize; /* max buffer size for the bytecode file */
 	unsigned long misc_vmargmaxdigits; /* max number of arg digits, eg '2' for up to '99' args */

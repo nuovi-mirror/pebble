@@ -14,6 +14,7 @@
 #include "mem.h"
 #include "limits.h"
 #include "cli.h"
+#include "clock.h"
 
 /* Args and Stack should be defined by the platform entry code
  * which will include this file */
@@ -87,6 +88,11 @@ int vmmain
 	*argcount = (Value){ .Type = type_word, .as.word = cliargs.count };
 	putVar(&vars, "VMARGC", argcount, persistAlloc);
 
+	/* initialize the clock */
+	Clock clock;
+	timer_init(&clock);
+	timer_start(&clock);
+
 	/* execution */
 	while (scheduler_next(&scheduler, limits))
 	{
@@ -106,8 +112,14 @@ int vmmain
 		while(!scheduler.yield && task->pc < current_instruction_count)
 		{
 			task->pc = interpret(&program[task->pc], program, seed, current_instruction_count, limits, &vars, ffivars, task->stack, &funcs, task->pc, persistAlloc, scratchAlloc, tempAlloc, &scheduler);
+
 			resetAllocator(scratchAlloc);
 			resetAllocator(tempAlloc);
+
+			timer_pause(&clock);
+			if (limits->time_max != 0) /* dont check if time is unlimted */
+				if (clock.time > limits->time_max) error(errfatal, errcodelimitreached, "Time is up!");
+			timer_unpause(&clock);
 		}
 
 		if (task->pc >= current_instruction_count && task->state != task_sleeping) scheduler_finish(&scheduler, &vars);
