@@ -52,21 +52,18 @@ End
 # bytecode 2
 
 # expressions
-New 0 "1 + 01"
-New record 0
+New record "1 + 01"
 Call record
 New expect '2'
 Call expect
 
-New 1 "18 + 0003"
-New record 1
+New record "18 + 0003"
 Call record
 New expect '21'
 Call expect
 
-New 2 '3'
-New 3 "2 s++ 08"
-New record 3
+New 2 '5'
+New record "2 s++ 08"
 Call record
 New expect '208'
 Call expect
@@ -78,118 +75,140 @@ Call record
 New expect '432'
 Call expect
 
-New 5 "3 / 2"
-New record 5
+New 10000 "4 s++ 32" 
+New record 10000
+Call record
+New expect '432'
+Call expect
+
+New record "3 / 2"
 Call record
 New expect '1'
 Call expect
 
-New 6 "3 % 2"
-New record 6
+New record "3 % 2"
 Call record
 New expect '1'
 Call expect
 
-New 7 "13 + -1"
-New record 7
+New record "13 + -1"
 Call record
 New expect '12'
 Call expect
 
-New 8 "1 + -3"
-New record 8
+New record "1 + -3"
 Call record
 New expect '-2'
 Call expect
 
-New 9 "1 - 18"
-New record 9
+New record "1 - 18"
 Call record
 New expect '-17'
 Call expect
 
-New 10 "1 * 32"
-New record 10
+New record "1 * 32"
 Call record
 New expect '32'
 Call expect
 
-New 11 "1 * -12"
-New record 11
+New record "1 * -12"
 Call record
 New expect '-12'
 Call expect
 
-New 12 "0 * 3"
-New record 12
+New record "0 * 3"
 Call record
 New expect '0'
 Call expect
 
-New 13 "0 / 2"
-New record 13
+New record "0 / 2"
 Call record
 New expect '0'
 Call expect
 
-New 14 "1 == 4"
-New record 14
+New record "1 == 4"
 Call record
 New expect '1'
 Call expect
 
-New 15 "1 == 1"
-New record 15
+New record "1 == 1"
 Call record
 New expect '0'
 Call expect
 
-New 16 "1 > 0"
-New record 16
+New record "1 > 0"
 Call record
 New expect '0'
 Call expect
 
-New 17 "1 < 0"
-New record 17
+New record "1 < 0"
 Call record
 New expect '1'
 Call expect
 
-New 18 "1 > 1"
-New record 18
+New record "1 > 1"
 Call record
 New expect '1'
 Call expect
 
-New 19 "1.2 + 3.3"
-New record 19
+New record "1.2 + 3.3"
 Call record
 New expect '4.5'
 Call expect
 
-New 20 '12.890000'
-New record 20
+New record '12.890000'
 Call record
 New expect '12.89'
 Call expect
 
-New 21 '19.1200900'
-New record 21
+New record '19.1200900'
 Call record
 New expect '19.12009'
 Call expect
 
-New 22 '0123456789'
-New record 22
+New record '0123456789'
 Call record
 New expect '0123456789'
 Call expect
 
-New 23 '9876543210'
-New record 23
+New record '9876543210'
 Call record
 New expect '9876543210'
+Call expect
+
+New record "a s++ b"
+Call record
+New expect 'ab'
+Call expect
+
+New record "abc s?= ab"
+Call record
+New expect '0'
+Call expect
+
+New record "abc s?= w"
+Call record
+New expect '1'
+Call expect
+
+New record "abc e?= bc"
+Call record
+New expect '0'
+Call expect
+
+New record "abc e?= q"
+Call record
+New expect '1'
+Call expect
+
+New record "(1 + 2) * 3"
+Call record
+New expect '9'
+Call expect
+
+New record "(1 == 1) + 1"
+Call record
+New expect '1'
 Call expect
 
 # compare
