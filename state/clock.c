@@ -50,7 +50,7 @@ void timer_update
 (Clock *clock)
 {
 	if (clock == NULL) return;
-	clock->time = clockms();
+	clock->time = clockms() - clock->start;
 	if (clock->waspaused == 0) clock->diff = clock->pausedtime - clock->curr;
 	else clock->diff = clock->start - clock->curr;
 }	
