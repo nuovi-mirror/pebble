@@ -1,13 +1,17 @@
 # depends on:
-#  escape sequence std.io.print from stdpbl versio 1 or greater
+#  escape sequence std.io.print from stdpbl version 1 or greater
+#  excape sequence std.io.printLn from stdpbl version 1 or greater
 
 New result ''
-New expected '2212084321112-2-1732-1200100114.512.8919.1200901234567899876543210'
-New check 'result ?= expected'
+New expected ''
 
 # helpers
 Func record
 New result "result s++ record"
+End
+
+Func expect
+New expected "expected s++ expect"
 End
 
 Func print
@@ -50,100 +54,146 @@ End
 # expressions
 New 0 "1 + 01"
 New record 0
-Call record # 2
+Call record
+New expect '2'
+Call expect
 
 New 1 "18 + 0003"
 New record 1
-Call record # 21
+Call record
+New expect '21'
+Call expect
 
 New 2 '3'
 New 3 "2 s++ 08"
 New record 3
-Call record # 208
+Call record
+New expect '208'
+Call expect
 
 New 4 '6'
 New 000001 "4 s++ 32" 
 New record 000001
-Call record # 432
+Call record
+New expect '432'
+Call expect
 
 New 5 "3 / 2"
 New record 5
-Call record # 1
+Call record
+New expect '1'
+Call expect
 
 New 6 "3 % 2"
 New record 6
-Call record # 1
+Call record
+New expect '1'
+Call expect
 
 New 7 "13 + -1"
 New record 7
-Call record # 12
+Call record
+New expect '12'
+Call expect
 
 New 8 "1 + -3"
 New record 8
-Call record # -2
+Call record
+New expect '-2'
+Call expect
 
 New 9 "1 - 18"
 New record 9
-Call record # -17
+Call record
+New expect '-17'
+Call expect
 
 New 10 "1 * 32"
 New record 10
-Call record # 32
+Call record
+New expect '32'
+Call expect
 
 New 11 "1 * -12"
 New record 11
-Call record # -12
+Call record
+New expect '-12'
+Call expect
 
 New 12 "0 * 3"
 New record 12
-Call record # 0
+Call record
+New expect '0'
+Call expect
 
 New 13 "0 / 2"
 New record 13
-Call record # 0
+Call record
+New expect '0'
+Call expect
 
 New 14 "1 == 4"
 New record 14
-Call record # 1
+Call record
+New expect '1'
+Call expect
 
 New 15 "1 == 1"
 New record 15
-Call record # 0
+Call record
+New expect '0'
+Call expect
 
 New 16 "1 > 0"
 New record 16
-Call record # 0
+Call record
+New expect '0'
+Call expect
 
 New 17 "1 < 0"
 New record 17
-Call record # 1
+Call record
+New expect '1'
+Call expect
 
 New 18 "1 > 1"
 New record 18
-Call record # 1
+Call record
+New expect '1'
+Call expect
 
 New 19 "1.2 + 3.3"
 New record 19
-Call record # 4.5
+Call record
+New expect '4.5'
+Call expect
 
 New 20 '12.890000'
 New record 20
-Call record # 12.89
+Call record
+New expect '12.89'
+Call expect
 
 New 21 '19.1200900'
 New record 21
-Call record # 19.12009
+Call record
+New expect '19.12009'
+Call expect
 
 New 22 '0123456789'
 New record 22
-Call record # 0123456789
+Call record
+New expect '0123456789'
+Call expect
 
 New 23 '9876543210'
 New record 23
-Call record # 9876543210
+Call record
+New expect '9876543210'
+Call expect
 
 # compare
-New res {check}
+New res "expected ?= result"
 If PASS "res == 0"
 If FAIL "res != 0"
 
