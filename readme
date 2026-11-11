@@ -92,6 +92,14 @@ Building from source
 	compiler at bin/rockc, and the New Rock package manager at
 	bin/rockpkg.
 
+	Please make sure to run the torture test suite against your build
+	of CPebble after compiling with
+
+		./bin/cpebble tools/tests/torture.pebble
+
+	This will simply print 'PASS' if the test passed, or 'FAIL' with
+	the expected and the given results if the test failed.
+
 Usage
 
 	The interpreter accepts one argument, being the path to the file
