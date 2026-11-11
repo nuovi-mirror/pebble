@@ -101,6 +101,10 @@ Conversion
 	conversion which will not error must be safe; It must not overflow,
 	underflow, or generate any other related hardware exception.
 
+	When converting a floating-point value to a stringly value, the
+	trailing zeros in the floating-point value must be removed, unless
+	the last character before the decimal character is a zero.
+
 Operation symbols
 
 	Operator symbols are character markers which represent an operation
