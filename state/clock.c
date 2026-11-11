@@ -21,7 +21,6 @@ void timer_start
 {
 	if (clock == NULL) return;
 	clock->start = clockms();
-	clock->curr = clock->start;
 }
 
 void timer_pause
@@ -31,24 +30,27 @@ void timer_pause
 	clock->paused = 0;
 	clock->waspaused = 0;
 	clock->pausedtime = clockms();
-
-	clock->curr = clockms();
 }
 
 void timer_stop
 (Clock *clock)
 {
 	/* does nothing since the caller gives the clock struct */
-	clock->curr = clockms();
 	return;
 }
 
 void timer_unpause
 (Clock *clock)
 {
+	if (clock == NULL) return;
 	clock->paused = 1;
-	clock->curr = clockms();
-	clock->time = clock->curr;
+}
+
+void timer_update
+(Clock *clock)
+{
+	if (clock == NULL) return;
+	clock->time = clockms();
 	if (clock->waspaused == 0) clock->diff = clock->pausedtime - clock->curr;
 	else clock->diff = clock->start - clock->curr;
-}
+}	

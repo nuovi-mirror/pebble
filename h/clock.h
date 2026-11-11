@@ -18,5 +18,6 @@ void timer_start (Clock *clock);
 void timer_pause (Clock *clock);
 void timer_stop (Clock *clock);
 void timer_unpause (Clock *clock);
+void timer_update (Clock *clock);
 
 #endif
