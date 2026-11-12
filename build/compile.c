@@ -15,13 +15,15 @@ void compiledeps
 	bufadd(&cmd, " ");
 	bufadd(&cmd, config->cflags);
 	bufadd(&cmd, " ");
+	bufadd(&cmd, config->ldflags);
+	bufadd(&cmd, " ");
 	bufadd(&cmd, bufstr(&config->usercflags)); /* last, so the user wins */
 	bufadd(&cmd, " -c -o ");
 	bufadd(&cmd, objs);
 	bufadd(&cmd, " ");
 	bufadd(&cmd, srcs);
 
-	printf("CC %s\n", srcs);
+	printf("cc %s\n", srcs);
 
 	result = system(bufstr(&cmd));
 	buffree(&cmd);
@@ -55,6 +57,8 @@ void linkprog
 	if (config->precompiler[0] != '\0') { bufadd(&cmd, config->precompiler); bufadd(&cmd, " "); }
 	bufadd(&cmd, config->compiler);
 	bufadd(&cmd, " ");
+	bufadd(&cmd, config->cflags);
+	bufadd(&cmd, " ");
 	bufadd(&cmd, config->ldflags);
 	bufadd(&cmd, " ");
 	bufadd(&cmd, bufstr(&config->userldflags));
@@ -67,7 +71,7 @@ void linkprog
 		bufadd(&cmd, objs[i]);
 	}
 
-	printf("LD %s\n", config->program);
+	printf("ld %s\n", config->program);
 
 	result = system(bufstr(&cmd));
 	buffree(&cmd);
@@ -89,10 +93,10 @@ Config *config, char **srcs, unsigned int count)
 		sprintf(deps, "%s", objs);
 		deps[strlen(deps) - 1] = 'd'; /* same logic as before */
 
-		printf("RM %s\n", objs);
+		printf("rm %s\n", objs);
 		remove(objs);
 		
-		printf("RM %s\n", deps);
+		printf("rm %s\n", deps);
 		remove(deps);
 	}
 }
