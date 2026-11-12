@@ -714,7 +714,7 @@ unsigned long interpret
 			if (!(instr->SecondOperand.Addressing == addrmode_literal && instr->SecondOperand.Data.Type == type_word && instr->SecondOperand.Data.as.word == 0))
 			{
 				char *fbuff = alloc(tempAlloc, limits->instructions_varnamesize);
-				Value temp;
+				Value temp2;
 
 				switch(instr->SecondOperand.Addressing)
 				{
@@ -724,19 +724,19 @@ unsigned long interpret
 						break;
 
 					case addrmode_literal:
-						temp = resolve_literal(fbuff, limits->instructions_varnamesize, &instr->SecondOperand.Data, vars, tempAlloc, tempAlloc, limits);
-						valuetostr(task->flag, limits->instructions_varnamesize, temp, limits);
+						temp2 = resolve_literal(fbuff, limits->instructions_varnamesize, &instr->SecondOperand.Data, vars, tempAlloc, tempAlloc, limits);
+						valuetostr(task->flag, limits->instructions_varnamesize, temp2, limits);
 						break;
 
 					case addrmode_forced_eval:
-						temp = resolve_forced_eval(fbuff, limits->instructions_varnamesize, &instr->SecondOperand.Data, vars, tempAlloc, tempAlloc, limits);
-						valuetostr(task->flag, limits->instructions_varnamesize, temp, limits);
+						temp2 = resolve_forced_eval(fbuff, limits->instructions_varnamesize, &instr->SecondOperand.Data, vars, tempAlloc, tempAlloc, limits);
+						valuetostr(task->flag, limits->instructions_varnamesize, temp2, limits);
 						break;
 
 					case addrmode_pointer:
 					case addrmode_indirect:
-						temp = resolve_pointer(fbuff, limits->instructions_varnamesize, &instr->SecondOperand.Data, vars, tempAlloc, persistAlloc, limits);
-						valuetostr(task->flag, limits->instructions_varnamesize, temp, limits);
+						temp2 = resolve_pointer(fbuff, limits->instructions_varnamesize, &instr->SecondOperand.Data, vars, tempAlloc, persistAlloc, limits);
+						valuetostr(task->flag, limits->instructions_varnamesize, temp2, limits);
 						break;
 
 					default:

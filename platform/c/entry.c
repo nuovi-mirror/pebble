@@ -184,7 +184,7 @@ struct PackedLimits setlimits
 
 	limits.escapes_namesize = 32;
 
-	limits.time_max = 0; /* infinite */
+	limits.time_max = 1; /* infinite */
 
 	limits.misc_maxfilebuffersize = (limits.instructions_max * costs->bytes_per_line);
 	limits.misc_vmargmaxdigits = 2;

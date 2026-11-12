@@ -7,13 +7,10 @@ void timer_init
 {
 	if (clock == NULL) return;
 
+	*clock = (Clock){0};
+
 	clock->paused = 1;
 	clock->waspaused = 1;
-	clock->pausedtime = 0;
-	clock->start = 0;
-	clock->time = 0;
-	clock->end = 0;
-	clock->diff = 0;
 }
 
 void timer_start
@@ -35,8 +32,16 @@ void timer_pause
 void timer_stop
 (Clock *clock)
 {
-	/* does nothing since the caller gives the clock struct */
-	return;
+	if (clock == NULL) return;
+	*clock = (Clock){0};
+}
+
+void timer_restart
+(Clock *clock)
+{
+	if (clock == NULL) return;
+	timer_stop(clock);
+	timer_init(clock);
 }
 
 void timer_unpause
@@ -44,13 +49,18 @@ void timer_unpause
 {
 	if (clock == NULL) return;
 	clock->paused = 1;
+	timer_update(clock);
 }
 
 void timer_update
 (Clock *clock)
 {
 	if (clock == NULL) return;
+	unsigned long start;
 	clock->time = clockms() - clock->start;
-	if (clock->waspaused == 0) clock->diff = clock->pausedtime - clock->curr;
-	else clock->diff = clock->start - clock->curr;
+
+	if (clock->waspaused == 0) start = clock->pausedtime;
+	else start = clock->start;
+
+	clock->diff = start - clock->time;
 }	
