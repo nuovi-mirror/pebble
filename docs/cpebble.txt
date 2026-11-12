@@ -207,6 +207,16 @@ This structure can be used to map to the one used to represent values
 inside of CPebble directly. When storing or reading a variable that must
 interface with Pebble code, it should be wrapped by this structure.
 
+The virtual machine will guess the types of values at compile-time when
+generating the representation and format them according to the bytecode 2
+specification. CPebble does not act on only stringly values.
+
+The representation of the types shown is much like the internal vm's
+representation, just without a few extra types used for debugging.
+Types are also converted temporarily for an operation requiring them
+to be converted, eg. performing a numeric addition operation on the
+string '01' and the word 1.
+
 The Limits structure is used to hold defined limits to be used by the
 virtual machine. This includes just about anything an embedder may wish
 to control inside of the virtual machine. These are not enforced for
@@ -259,6 +269,35 @@ We do not need to free buff, as it will be freed after the FFI sequence
 ends. We should not use scratchAlloc here, since the pointer may no longer
 be valid after a C function call. 
 
+The return convention is much like the argument convention. Eg. If I wish
+to return a numeric zero,
+
+	FFIsetVariable(vars, "__Escape_std.io.print_RET0", 
+		(FFIValue){ .Type = type_word, .as.word = 0 }, 
+		persistAlloc);
+
+In this case, the variable __Escape_std.io.print_RET0 is set to the word
+value 0. In such a case, you would want to use FFIsetVariable, since the
+value may already exist, and it is a good idea to override it in-place to
+save memory. There is generally no case to not override the value in-place.
+
+The unsafe variants of calls are used to determine information that is
+usually not needed. The most practical example is if a piece of code may
+use one variable optionally. In a case if it is not provided and the
+safe variant of FFIreadVariable is called, then an error will be thrown.
+However, if I use FFIreadVariableUnsafe, then I will be able to know if
+it did not exist since no error will be thrown and a NULL value will be
+returned instead of the variable.
+
+Since multiple return variables is a first-class concept, it is very
+common for code using the FFI to return multiple or many variables,
+usually the first being a status code and set to 1 if there was an
+error, and a second return variable to return the actual data. This
+convention was used sparingly by stdpbl until the New Rock language
+made this a first-class concept for general-purpose functions and
+routines, where it became used more fruitfully, since it was realized
+to just be better overall than a packed return or -1 if false.
+
 The FFI header also includes typedefs along the lines of
 
 
@@ -289,6 +328,10 @@ The FFI header also includes typedefs along the lines of
 	#define errcodeescapesequencenotfound 10
 
 as well as several others, but these are the most useful.
+
+It is important to note the true and false values are defined as standard
+C true and false, not Pebble booleans. Pebble booleans are inverted from
+this, where 0 is true and 1 is false.
 
 The error-related definitions, err* and errcode*, are used for the FFIerror
 function. An err* should be passed, as well as an errcode* and a string
