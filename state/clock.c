@@ -9,8 +9,8 @@ void timer_init
 
 	*clock = (Clock){0};
 
-	clock->paused = 1;
-	clock->waspaused = 1;
+	clock->paused = false;
+	clock->waspaused = false;
 }
 
 void timer_start
@@ -18,15 +18,6 @@ void timer_start
 {
 	if (clock == NULL) return;
 	clock->start = clockms();
-}
-
-void timer_pause
-(Clock *clock)
-{
-	if (clock == NULL) return;
-	clock->paused = 0;
-	clock->waspaused = 0;
-	clock->pausedtime = clockms();
 }
 
 void timer_stop
@@ -42,13 +33,23 @@ void timer_restart
 	if (clock == NULL) return;
 	timer_stop(clock);
 	timer_init(clock);
+	timer_start(clock);
+}
+
+void timer_pause
+(Clock *clock)
+{
+	if (clock == NULL) return;
+	clock->paused = true;
+	clock->waspaused = true;
+	clock->pausedtime = clockms();
 }
 
 void timer_unpause
 (Clock *clock)
 {
 	if (clock == NULL) return;
-	clock->paused = 1;
+	clock->paused = false;
 	timer_update(clock);
 }
 
@@ -56,11 +57,12 @@ void timer_update
 (Clock *clock)
 {
 	if (clock == NULL) return;
-	unsigned long start;
-	clock->time = clockms() - clock->start;
+	unsigned long start, now;
+	now = clockms();
+	clock->time = now - clock->start;
 
-	if (clock->waspaused == 0) start = clock->pausedtime;
+	if (clock->waspaused == true) start = clock->pausedtime;
 	else start = clock->start;
 
-	clock->diff = start - clock->time;
+	clock->diff = now - start;
 }	

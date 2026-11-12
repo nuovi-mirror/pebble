@@ -7,10 +7,16 @@
 #undef NULL
 #undef TRUE
 #undef FALSE
+#undef true
+#undef false
 
 #define NULL ((void *)0)
+
 #define TRUE 1
 #define FALSE 0
+
+#define true TRUE
+#define false FALSE
 
 #define errfatal 0
 #define errsevere 1

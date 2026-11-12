@@ -7,8 +7,8 @@ typedef struct Clock
 	unsigned long end;		/* ended ms time */
 	unsigned long diff;		/* start - end */
 	unsigned long time;		/* time it has ran */
+	unsigned long pausedtime;	/* ms time timer was paused */
 	unsigned int paused;		/* 0 = paused */
-	unsigned int pausedtime;	/* ms time timer was paused */
 	unsigned int waspaused;		/* was paused before */
 } Clock;
 
