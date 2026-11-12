@@ -1,0 +1,21 @@
+include stdlib
+
+fn main ( ) ret {
+	ret = '0'
+	msg = 'Cannot read from '
+
+	code arg = call std.arg.get ( '2' )
+	if ( "code != 0" ) { 
+		call std.io.print ( 'File unspecified!' )
+		return
+	} 
+
+	code data = call std.fs.file.read ( arg )
+	if ( "code == 1" ) {
+		call std.io.print ( "msg s++ ' s++ arg s++ ' s++ !" )
+		return
+	}
+
+	call std.io.printRaw ( data )
+	call std.io.print ( '' )
+}
