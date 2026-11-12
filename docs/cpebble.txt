@@ -1,0 +1,305 @@
+Working With CPebble
+
+CPebble is the reference implementation of The Pebble Virtual
+Machine, written entirely in readable C99 code, made to be as
+simple as possible while conforming to the bytecode 2 standard,
+as well as the many extensions to it that it supports.
+
+CPebble is both an interpreter and compiler; it first compiles the
+Pebble textual bytecode given to it into a recursive tree-structure
+IR format. This format maps 1:1 to the existing Pebble bytecode format,
+but is simply easier to represent information useful to interpreting.
+This representation is fully typed, able to represent four major types,
+as well as several minor ones used for debugging. The major types it
+can represent are flt, word, sword, and expr. flt maps to the C double
+and the Pebble floating-point numeric type, word maps to the C unsigned
+long and the Pebble word numeric type, sword maps to the C long and the
+Pebble signed word numeric type, and expr is a pointer into a recursive
+CPebble expression tree.
+
+Anything that appears to be a valid expression according to the bytecode
+2 specification is automatically compiled into one, no matter the appearing
+type or addressing mode. This is done to make expression evaluation easier
+at runtime. CPebble has a built-in embedded evaluator designed to execute
+these tree structures efficiently, so the interpreter itself is not what
+is performing arithmetic operations.
+
+The conversion from Pebble textual bytecode into CPebble IR would create
+a structure something like this, say for the opcode
+
+	New x '1 + y'
+
+into the structure
+
+	Instruction (
+		Opcode: New
+		First Operand (
+			Type: string
+			Data: x
+		)
+		Second Operand (
+			Type: expr
+			Data (
+				Left (
+					Type: word
+					Data: 1
+				)
+				Right (
+					Type: string
+					Data: x
+				)
+				Operation: Numeric Addition
+				As String: 1 + x
+			)
+		)
+	)
+
+This structure maps very cleanly to the Pebble bytecode and preserves
+just as much information as it does, but it adds other useful information,
+such as precompiled expressions and types, before runtime. The tree still
+holds the original representation of the expression as a string of text
+in the rare case it was wrong and the user does not intend to use the
+data as an expression, so it can quickly use that representation and
+show that representation instead. This tree is ordered based on operator
+precedence; the compiler orders the tree so that precedence does not need
+to be resolved at runtime, but the tree nodes are ordered in a way so
+walking it linearly produces the correct evaluation order. This is another
+simplification.
+
+An expression tree is capable of holding another expression tree in itself,
+such as
+
+	Left (
+		Type: word
+		Data: 1
+	)
+	Right (
+		Type: expr
+		Data (
+			Left (
+				Type: word
+				Data: 2
+			)
+			Right (
+				Type: word
+				Data: 3
+			)
+			Operation: Numeric Addition
+		)
+	)
+	Operation: Numeric Addition
+	As String: 1 + 2 + 3
+
+In this case, the operation is compiled into a recursive tree. This can be
+used to represent longer or nested expressions. However, the tree format
+cannot be used to represent function calls or return values, as that is
+the job of the function-related opcodes. This was done as a security
+choice, as well as to make the intermediate representation represent
+the bytecode 2 format easier, since expressions cannot represent function
+calls in the specification.
+
+CPebble uses one uniform internal allocator, a simpler checked bump
+allocator. Three of these are used throughout the virtual machine,
+one being allowed to clear in-between C language function calls, one
+being allowed to clear in-between Pebble instructions, and one being
+allowed to clear at the end of the virtual machine. Several other
+memory regions are used, such as the calling and task stack, the IR buffer,
+and so on, but these three main structures are used for all general-purpose
+data allocation inside of the virtual machine, as well as being exposed
+indirectly to the foreign function interface for C code to use as well.
+
+The Foreign Function Interface of CPebble is the implementation API
+designed to allow code written in the C language to interface with code
+written in or compiled to Pebble. This is used to implement the Pebble
+standard library Version 2, stdpbl, a series of routines for native
+functions not considered part of the core virtual machine.
+
+Functions using the FFI are defined by their escape sequence name, the
+name used to call them from Pebble, except the period characters are
+replaced with the underscore character, and they begin with 'escape_',
+meaning the escape sequence 'std.io.print' would be defined as the C
+function 'escape_std_io_print'.
+
+Functions using the FFI should be defined as
+		
+void escape_std_io_print 
+(FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc,
+	FFIArena *tempAlloc, FFIArena *persistAlloc, struct Limits *limits);
+
+and include the headers "limits.h" and "ffi.h".
+
+The FFI exposes several useful functions and routines for code using it, 
+as well as the virtual machine itself exposing several primitives that
+may be used.
+
+The function FFIallocateMemory, used to request a vm-managed memory
+object, is exposed as
+	
+	void *FFIallocateMemory (FFIArena *arena, unsigned long size);
+
+This function accepts the allocator to allocate it on as well as the
+size of the allocation, and returns a void pointer to the allocated
+region. The allocation pointers passed, tempAlloc, scratchAlloc, and
+persistAlloc, map to the concepts described earlier, scratchAlloc being
+freed between C function calls, tempAlloc being freed between Pebble
+instructions, and persistAlloc being freed at VM shutdown. scratchAlloc
+should be used for data not needing to be passed around by or used by
+function calls, or needed to be used after a function call in C,
+tempAlloc should be used for allocation that needs to survive only the
+lifetime of the instruction, and since one FFI call is treated as one
+instruction inside of the virtual machine, the FFI call which is
+allocating the memory, while persistAlloc should be used for data that
+needs to be passed to Pebble code or be used long-term. If the language
+the FFI sequence is implemented in is not C, but instead using a C
+ABI, then scratchAlloc should be avoided, since the boundary of it's
+lifetime may be unclear in such a case.
+
+Code using the FFI is able to manipulate variables inside of Pebble using
+the functions
+
+	void FFIallocateVariable (FFIvars *vars, const char *varname, 
+		void *value, FFIArena *persistAlloc);
+	void *FFIreadVariableUnsafe (FFIvars *vars, const char *varname);
+	FFIValue *FFIreadVariable (FFIvars *vars, const char *varname);
+	void FFIsetVariable (FFIvars *vars, const char *varname, 
+		FFIValue value, FFIArena *persistAlloc);
+	void *FFIresolvePointerUnsafe (FFIvars *vars, const char *varname, 
+		FFIArena *tempAlloc, struct Limits *limits);
+	FFIValue *FFIresolvePointer (FFIvars *vars, const char *varname, 
+		FFIArena *tempAlloc, struct Limits *limits);
+
+The function FFIallocateVariable is used to create a new Pebble variable.
+The function FFIreadVariable is used to retrieve a variable from the
+variable map.
+The function FFIsetVariable is used to set a variable in-place. This
+should be favored over FFIallocateVariable unless specified otherwise.
+The function FFIreadVariableUnsafe may return a NULL pointer when the
+variable does not exist, instead of going through the normal vm-level
+error handling code.
+The function FFIresolvePointer will resolve a Pebble pointer variable
+and return the value referenced by the pointer.
+The function FFIresolvePointerUnsafe works in the same way as
+FFIresolveVariableUnsafe, but for pointers.
+
+The FFIValue structure shall be defined as something along the lines of
+
+	typedef enum {
+		type_word,
+		type_sword,
+		type_flt,
+		type_str,
+		type_expr,
+	} ValueTypes;
+
+	typedef struct FFIValue {
+		ValueTypes Type;
+		union {
+			unsigned long word;
+			long sword;
+			double flt;
+			char *str;
+			ExprNode *expr;
+		} as;
+	} FFIValue;
+
+Other values may be defined, but they are not relevant to the FFI code.
+This structure can be used to map to the one used to represent values
+inside of CPebble directly. When storing or reading a variable that must
+interface with Pebble code, it should be wrapped by this structure.
+
+The Limits structure is used to hold defined limits to be used by the
+virtual machine. This includes just about anything an embedder may wish
+to control inside of the virtual machine. These are not enforced for
+FFI code. Please use them. Any function not using them when they logically
+should shall be considered malicious or bugged.
+
+Other useful routines exist inside of the FFI, including
+
+	int FFIconvertValueToString (char *buff, unsigned long buffsize, 
+		FFIValue v, struct Limits *limits);
+	FFIValue FFIconvertValueToWord (FFIValue v, FFIvars *vars, 
+		FFIArena *persistAlloc, struct Limits *limits);
+	FFIValue FFIconvertValueToSword (FFIValue v, FFIvars *vars, 
+		FFIArena *persistAlloc, struct Limits *limits);
+
+	void FFIstdoutPrint (const char *msg);
+	void FFIstdoutPrintValue (FFIValue *var, FFIArena *tempAlloc, 
+		struct Limits *limits);
+
+	void FFIerror (unsigned int severity, unsigned int status, const char *msg);
+
+A sample FFI sequence
+
+	#include "ffi.h"
+	#include "limits.h"
+
+	void escape_std_io_print 
+	(FFIvars *vars, unsigned long long seed, FFIArena *scratchAlloc, 
+		FFIArena *tempAlloc, FFIArena *persistAlloc, 
+		struct Limits *limits)
+	{
+		FFIValue *arg0 = FFIresolvePointer(vars, 
+			"__Escape_std.io.print_ARG0", tempAlloc, limits);
+		FFIstdoutPrintValue(arg0, tempAlloc, limits);
+		FFIstdoutPrint("\n");
+	}
+
+Arguments and returns are passed around as Pebble variables, as described
+in the bytecode 2 specification and the programmer's handbook, and as
+shown here. Arguments should be resolved as pointers, while returns
+should simply be stored under the representation the FFI chooses.
+
+We could replace FFIstdoutPrintValue with something like
+
+	char *buff = FFIallocateMemory(tempAlloc, limits->misc_strlen);
+	FFIconvertValueToString(buff, limits->misc_strlen, *arg0, limits);
+	FFIstdoutPrint(buff);
+
+We do not need to free buff, as it will be freed after the FFI sequence
+ends. We should not use scratchAlloc here, since the pointer may no longer
+be valid after a C function call. 
+
+The FFI header also includes typedefs along the lines of
+
+
+	#define NULL ((void *)0)
+
+	#define TRUE 1
+	#define FALSE 0
+
+	#define true TRUE
+	#define false FALSE
+
+	#define errfatal 0
+	#define errsevere 1
+	#define errmajor 2
+	#define errnonfatal 3
+	#define errwarning 4
+
+	#define errcodegeneric 0
+	#define errcodelimitreached 1
+	#define errcodemalformedinput 2
+	#define errcodeplatformspecific 3
+	#define errcodeallocatorerror 4
+	#define errcodeallocationerror 5
+	#define errcodenumericoverflow 6
+	#define errcodenumericunderflow 7
+	#define errcodestackerror 8
+	#define errcodeundefined 9
+	#define errcodeescapesequencenotfound 10
+
+as well as several others, but these are the most useful.
+
+The error-related definitions, err* and errcode*, are used for the FFIerror
+function. An err* should be passed, as well as an errcode* and a string
+message describing the error. If the error code is errfatal, the virtual
+machine will stop immediately. All other error classes are not guaranteed to
+stop the virtual machine.
+
+It is also very important to note that a standard C library cannot be
+assumed available when using the FFI. Several substitutes have been
+implemented by the virtual machine itself as replacements or wrappers.
+For a full list, please view the implementation source code. The most
+useful ones will be described here
+
+[ XXX - finish me ]
