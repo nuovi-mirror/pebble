@@ -243,6 +243,39 @@ at the start or end of a line. A comment cannot be placed in the middle
 of a line. Everything after the character is considered the comment until
 a newline is placed.
 
+New Rock supports arrays via brackets as well as operations on them. An
+array is defined as a normal variable, but to use it, you place brackets
+after the variable name, with an index number inside of the brackets,
+such as
+
+	include stdlib
+
+	fn main ( ) dummy {
+		dummy = '0'
+		array = '0'
+		counter = '0'
+		total = '5'
+
+		while ( "counter < total" ) {
+			array[counter] = '0'
+			counter = "count + 1"
+		}
+
+		counter = '0'
+		while ( "counter < total" ) {
+			call std.io.print ( array[counter] )
+			counter = "counter + 1"
+		}
+	}
+
+in this code, we define the variable array and set entries 0 to 5 in
+the array to 0. We do this because if you attempt to read from a variable
+entry that has not been written to, it may cause undefined behavior or a
+runtime error. We define array[] with entries 0 to 5, set them all to 0,
+then we loop back through each entry and print the value in the entry.
+
+Using this system, an array can grow arbitrarily, as long as the programmer
+keeps track of the current size of the array.
 
 The New Rock standard library includes several useful functions. These are
 mainly used to perform host-system interactions, such as printing, waiting,

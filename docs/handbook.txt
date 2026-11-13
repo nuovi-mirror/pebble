@@ -667,7 +667,38 @@
 
 	A conditional or loop can be skipped with the continue keyword.
 
+	Array operations are supported through brackets, as in a variable which has two brackets following it,
+	with an index position inside of it. Arrays are defined in the same way as regular variables and can
+	grow arbitrarily, but their entries are not pre-defined and must be set manually.
 
+		include stdlib
+
+		fn main ( ) r {
+			r c a = '0'
+
+			while ( "c < m" ) {
+				a[c]
+				c = "c + 1"
+				r = c
+			}
+
+			c = '0'
+			while ( "c < m" ) {
+				call std.io.print ( a[c] )
+				c = "c + 1"
+			}
+
+			m = "m + 6"
+			while ( "c < m" ) {
+				a[c]
+				c = "c + 1"
+				r = c
+			}
+		} 
+
+
+	In this example, we initialize an array with 6 elements, print each element in the array defined,
+	then we grow the array by 7 more elements.
 
 
                     - The Pebble Standard Library (stdpbl) - 
@@ -731,7 +762,7 @@
 				escape write - write a file
 					accepts two arguments, the first being the path to the file to write to
 					and the second being the data to write into the file. Returns 1 on 
-					failiure and 0 if not.
+					failure and 0 if not.
 
 			subgroup dir
 				escape get - get the current working directory
@@ -865,7 +896,7 @@
 					routine get - get the current working dir
 						Wrapper of std.fs.dir.get
 
-					routile list - list files in a directory
+					routine list - list files in a directory
 						Wrapper of std.fs.dir.list
 
 			group arg
