@@ -251,33 +251,48 @@ such as
 	include stdlib
 
 	fn main ( ) dummy {
-		dummy = '0'
-		array = '0'
-		counter = '0'
-		total = '5'
+		array count count2 dummy = '0'
+		max = '3'
 
-		while ( "counter < total" ) {
-			array[counter] = '0'
-			counter = "count + 1"
+		while ( "count < max" ) {
+			array[count] = '0'
+			count = "count + 1"
 		}
 
-		counter = '0'
-		while ( "counter < total" ) {
-			call std.io.print ( array[counter] )
-			counter = "counter + 1"
+		call std.io.print ( 'First round' )
+		while ( "count2 < max" ) {
+			call std.io.print ( array[count2] )
+			count2 = "count2 + 1"
+		}
+		count2 = '0'
+	
+		max = "max + 2" 
+		while ( "count < max" ) {
+			array[count] = '0'
+			count = "count + 1"
+		}
+
+		call std.io.print ( 'Second round' )
+		while ( "count2 < max" ) {
+			call std.io.print ( array[count2] )
+			count2 = "count2 + 1"
 		}
 	}
 
-in this code, we define the variable array and set entries 0 to 5 in
-the array to 0. We do this because if you attempt to read from a variable
-entry that has not been written to, it may cause undefined behavior or a
-runtime error. We define array[] with entries 0 to 5, set them all to 0,
-then we loop back through each entry and print the value in the entry.
+In this case, we define an array with 3 entries, zero each one, print
+each entry, then grow it to 5 entries, zero the 2 new entries, then
+print each entry again.
 
-Using this system, an array can grow arbitrarily, as long as the programmer
-keeps track of the current size of the array.
+Arrays are not managed by New Rock. This means the programmer must be
+very careful as to make sure not to read from an entry that has not
+been set yet, as that can cause a runtime error. Arrays can be expanded
+arbitrarily simply by adding new entries. When a new entry is added, it
+is not guaranteed all entries before it exists. It is up to the programmer
+to initialize the values in an array and keep track of it's length.
 
 The New Rock standard library includes several useful functions. These are
 mainly used to perform host-system interactions, such as printing, waiting,
 multitasking, file and process operations, and so on. For a full list of
 them, please view The Pebble Systems' Programmer's Handbook.
+include stdlib
+

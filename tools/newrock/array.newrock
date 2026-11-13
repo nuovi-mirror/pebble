@@ -1,0 +1,30 @@
+include stdlib
+
+fn main ( ) dummy {
+	array count count2 dummy = '0'
+	max = '3'
+
+	while ( "count < max" ) {
+		array[count] = '0'
+		count = "count + 1"
+	}
+
+	call std.io.print ( 'First round' )
+	while ( "count2 < max" ) {
+		call std.io.print ( array[count2] )
+		count2 = "count2 + 1"
+	}
+	count2 = '0'
+
+	max = "max + 2" 
+	while ( "count < max" ) {
+		array[count] = '0'
+		count = "count + 1"
+	}
+
+	call std.io.print ( 'Second round' )
+	while ( "count2 < max" ) {
+		call std.io.print ( array[count2] )
+		count2 = "count2 + 1"
+	}
+}

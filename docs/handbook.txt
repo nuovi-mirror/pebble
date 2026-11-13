@@ -673,32 +673,40 @@
 
 		include stdlib
 
-		fn main ( ) r {
-			r c a = '0'
+		fn main ( ) dummy {
+			array count count2 dummy = '0'
+			max = '3'
 
-			while ( "c < m" ) {
-				a[c]
-				c = "c + 1"
-				r = c
+			while ( "count < max" ) {
+				array[count] = '0'
+				count = "count + 1"
 			}
 
-			c = '0'
-			while ( "c < m" ) {
-				call std.io.print ( a[c] )
-				c = "c + 1"
+			call std.io.print ( 'First round' )
+			while ( "count2 < max" ) {
+				call std.io.print ( array[count2] )
+				count2 = "count2 + 1"
+			}
+			count2 = '0'
+
+			max = "max + 2" 
+			while ( "count < max" ) {
+				array[count] = '0'
+				count = "count + 1"
 			}
 
-			m = "m + 6"
-			while ( "c < m" ) {
-				a[c]
-				c = "c + 1"
-				r = c
+			call std.io.print ( 'Second round' )
+			while ( "count2 < max" ) {
+				call std.io.print ( array[count2] )
+				count2 = "count2 + 1"
 			}
-		} 
+		}
+
+	In this example, we define an array with 3 entries, set each to zero, print each entry, grow it by
+	2 more entries, set the new 2 entries to zero, then print all of the entries again.
 
 
-	In this example, we initialize an array with 6 elements, print each element in the array defined,
-	then we grow the array by 7 more elements.
+
 
 
                     - The Pebble Standard Library (stdpbl) - 
@@ -1296,3 +1304,4 @@
 
 		In this example, we make a small stack-based bytecode interpreter, then run a small countdown
 		loop in the interpreter. This proves Pebble can be used to emulate other programming languages.
+
