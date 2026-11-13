@@ -17,7 +17,7 @@ void escape_std_proc_spawn
 	unsigned long argc = 0;
 
 	/* parse the arguments */
-	while (current != NULL && argc < limits->cmd_args)
+	while ((current != NULL) && (argc < (limits->cmd_args - 1)))
 	{
 		while (*current == ' ') current++;
 		if (*current == '\0') break;
@@ -34,20 +34,18 @@ void escape_std_proc_spawn
 
 
 	pid_t rproc = fork();
-	int ret = -1; /* err by default */
-
 	if (rproc < 0) FFIerror(errfatal, errcodeplatformspecific, "Cannot fork(2)!");
 
 	/* child process */
-	else if (rproc == 0)
+	if (rproc == 0)
 	{
 		execvp(args[0], args);
 
 		/* only reached if execvp(3) failed */
 		FFIerror(errfatal, errcodeplatformspecific, "Cannot run execvp(3)!");
-	} else ret = rproc; /* also parent process */
+	} else rproc = -1;
 
 	/* parent process */
 
-	FFIsetVariable(vars, "__Escape_std.proc.spawn_RET0", (FFIValue){ .Type = type_sword, .as.sword = ret }, persistAlloc);
+	FFIsetVariable(vars, "__Escape_std.proc.spawn_RET0", (FFIValue){ .Type = type_sword, .as.sword = (long)rproc }, persistAlloc);
 }
