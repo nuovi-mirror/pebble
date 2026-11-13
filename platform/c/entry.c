@@ -12,10 +12,6 @@
 #include "lalloc.h"
 #include "indrng.h" /* imported random number generator code */
 
-/* temporary NULL definition we can use */
-#undef NULL
-#define NULL ((void *)0)
-
 /* error helper */
 void error
 (unsigned int severity, unsigned int code, const char *msg)
