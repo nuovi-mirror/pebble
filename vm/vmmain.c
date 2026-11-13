@@ -15,6 +15,12 @@
 #include "limits.h"
 #include "cli.h"
 #include "clock.h"
+#include "getprogram.h"
+
+#ifdef debug
+#include "lalloc.h" /* XXX debug */
+#include "print.h" /* XXX debug */
+#endif
 
 /* Args and Stack should be defined by the platform entry code
  * which will include this file */
@@ -49,7 +55,8 @@ int vmmain
 	ffivars->namesize = limits->instructions_varnamesize;
 
 	cli(&cliargs);
-	char *filedata = getprogram(tempAlloc, limits->misc_maxfilebuffersize, &cliargs);
+	Program fprogram = getprogram(limits->misc_maxfilebuffersize, &cliargs);
+	char *filedata = fprogram.data;
 
 	char *line;
 	unsigned long current_instruction_count = 0;
@@ -133,6 +140,13 @@ int vmmain
 	freeVars(&vars);
 	freeInstructionMap(&instructionMap);
 	freeFuncs(&funcs);
+
+#ifdef debug
+	char buff[512];
+	unsigned long allocated = lallocTracker / 1024;
+	snprint(buff, 512, "%lu%s\n", allocated, "K allocated");
+	print(buff);
+#endif
 
 	return 0;
 }

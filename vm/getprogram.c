@@ -1,9 +1,10 @@
 #include "readfile.h"
+#include "lalloc.h"
 #include "main.h"
-#include "allocator.h"
+#include "getprogram.h"
 
-char *getprogram
-(Arena *allocator, unsigned long maxsize, Args *cliargs)
+Program getprogram
+(unsigned long maxsize, Args *cliargs)
 {
 	if (cliargs->count <= 1) error(errfatal, errcodeplatformspecific, "No bytecode file specified!");
 
@@ -12,10 +13,14 @@ char *getprogram
 
 	if (filesize + 1 > maxsize) error(errfatal, errcodelimitreached, "Bytecode file is too large!");
 
-	char *file = alloc(allocator, filesize + 1);
+	char *file = lalloc(filesize + 1, 3);
 	char *filedata = readfile(cliargs->values[1], file, filesize + 1);
 
 	if (filedata == NULL) error(errfatal, errcodeplatformspecific, "Cannot open specified bytecode file!");
 
-	return file;
+	Program program;
+	program.data = file;
+	program.size = filesize;
+
+	return program;
 }

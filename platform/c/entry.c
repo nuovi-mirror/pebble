@@ -157,26 +157,26 @@ struct PackedLimits setlimits
 	struct PackedLimits packed = {0};
 	const struct SizingCosts *costs = &default_costs; /* an embedder could take this as a parameter */
 
-	limits.instructions_max = 200000;
-	limits.tasks_max = 32;
-	limits.tasks_depth = 256;
+	limits.instructions_max = 20000;
+	limits.tasks_max = 12;
+	limits.tasks_depth = 32;
 
 	limits.instructions_maxbuffersize = (limits.instructions_max * sizeof(Instruction));
 	limits.instructions_initbuffersize = (512 * sizeof(Instruction));
 	limits.instructions_maxcache = 512;
-	limits.instructions_varnamesize = 64;
+	limits.instructions_varnamesize = 48;
 
-	limits.stack_callStack_cap = 512;
+	limits.stack_callStack_cap = 128;
 	limits.stack_callStack_frameSize = (sizeof(StackFrame));
 	limits.stack_callStack_size = (limits.stack_callStack_cap * limits.stack_callStack_frameSize);
 
-	limits.functions_max = 5000;
+	limits.functions_max = 1024;
 	limits.functions_namesize = 32;
 
-	limits.variables_max = 512;
+	limits.variables_max = 256;
 
-	limits.cmd_args = 8;
-	limits.cmd_chars = 64;
+	limits.cmd_args = 6;
+	limits.cmd_chars = 24;
 
 	limits.escapes_namesize = 32;
 
@@ -196,7 +196,7 @@ struct PackedLimits setlimits
 	limits.expr_maxdepth = 32;
 	limits.expr_currdepth = 0;
 
-	limits.allocator_temp_maxmem = (limits.misc_maxfilebuffersize + (limits.instructions_max * costs->temp_per_instruction) + costs->temp_slack);
+	limits.allocator_temp_maxmem = (limits.instructions_max * costs->temp_per_instruction + costs->temp_slack);
 
 	limits.allocator_persist_maxmem = (costs->persist_fixed 
 		+ (limits.instructions_max * costs->persist_per_instruction)
@@ -211,7 +211,6 @@ struct PackedLimits setlimits
 	limits.allocator_scratch_maxmem = arenaBackingSize(limits.allocator_scratch_maxmem);
 	limits.allocator_IRAlloc_maxmem = arenaBackingSize(limits.allocator_IRAlloc_maxmem);
 	limits.allocator_lalloc_maxretries = 3;
-
 
 	char *mem_arena_tempAlloc_backing = lalloc(limits.allocator_temp_maxmem, limits.allocator_lalloc_maxretries);
 	char *mem_arena_scratchAlloc_backing = lalloc(limits.allocator_scratch_maxmem, limits.allocator_lalloc_maxretries);

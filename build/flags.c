@@ -74,46 +74,33 @@ void setflags (Config *config) {
 			"-Wpedantic "
 			"-Wshadow "
 			"-Wconversion "
-			"-Wsign-conversion "
 			"-fno-omit-frame-pointer "
 			"-fno-optimize-sibling-calls "
 			"-Wformat=2 "
 			"-Wundef "
-			"-Wcast-qual "
-			"-Wcast-align "
 			"-Wold-style-definition "
 			"-Wvla "
 			"-Wdouble-promotion "
 			"-Wfloat-equal "
+
 			"-Ddebug "
 			"-Dbuild_debug "
+
+/*
+			"-Wcast-qual "
+			"-Wcast-align "
+			"-Wsign-conversion "
+*/
+
+			"-Wno-error=sign-compare "
+			"-Wno-error=sign-conversion "
+			"-Wno-error=implicit-int-conversion "
 
 			"-Wno-error=missing-field-initializers "
 			"-Wno-error=missing-format-attribute "
 			"-Wno-error=switch "
 			"-Wno-error=unused-parameter "
 		);
-/*
-	else if (strcmp(config->build, "debug") == 0)
-		strcat(config->cflags, 
-			"-g "
-			"-O0 "
-			"-Wall "
-			"-Wextra "
-			"-Wshadow "
-			"-fno-omit-frame-pointer "
-			"-fno-optimize-sibling-calls "
-			"-Wformat=2 "
-			"-Wold-style-definition "
-			"-Wvla "
-			"-Wdouble-promotion "
-			"-Wfloat-equal "
-			"-Ddebug "
-			"-Dbuild_debug "
-			"-Wno-error=sign-compare "
-		);
-*/
-
 	else
 		error("unknown build type");
 }

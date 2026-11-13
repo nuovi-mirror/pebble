@@ -2,6 +2,10 @@
 #include "main.h" /* error() */
 #include <stdlib.h> /* malloc() */
 
+#ifdef debug
+unsigned long lallocTracker;
+#endif
+
 void *lalloc
 (unsigned long size, unsigned int max)
 {
@@ -14,6 +18,9 @@ void *lalloc
 		ptr = malloc(size);
 		i++;
 	}
+#ifdef debug
+	lallocTracker += size;
+#endif
 
 	/* XXX cannot return null; error() with errfatal does not return */
 	return ptr;
