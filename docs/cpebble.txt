@@ -35,19 +35,24 @@ into the structure
 		Opcode: New
 		First Operand (
 			Type: string
+			Addressing Mode: Bare
 			Data: x
 		)
+
 		Second Operand (
 			Type: expr
+			Addressing Mode: Literal
 			Data (
 				Left (
 					Type: word
 					Data: 1
 				)
+
 				Right (
 					Type: string
 					Data: x
 				)
+
 				Operation: Numeric Addition
 				As String: 1 + x
 			)
@@ -65,6 +70,9 @@ precedence; the compiler orders the tree so that precedence does not need
 to be resolved at runtime, but the tree nodes are ordered in a way so
 walking it linearly produces the correct evaluation order. This is another
 simplification.
+
+The structure shown above is a real mapping of the structure used
+internally in the implementation, not just a representation of it.
 
 An expression tree is capable of holding another expression tree in itself,
 such as
@@ -344,5 +352,87 @@ assumed available when using the FFI. Several substitutes have been
 implemented by the virtual machine itself as replacements or wrappers.
 For a full list, please view the implementation source code. The most
 useful ones will be described here
+
+The header snooze.h includes the function snooze, defined as
+
+	void snooze (unsigned long ms);
+
+The snooze function will sleep for ms milliseconds and return once the
+time period has passed. This is blocking.
+
+The header clock.h includes functions and structures for managing
+time and timers. It includes functions
+
+	typedef struct Clock {
+		unsigned long start;
+		unsigned long end;
+		unsigned long diff;
+		unsigned long time;
+		unsigned long pausedtime;
+		unsigned int paused;
+		unsigned int waspaused;
+	} Clock;
+
+	void timer_init (Clock *clock);
+	void timer_start (Clock *clock);
+	void timer_pause (Clock *clock);
+	void timer_restart (Clock *clock);
+	void timer_stop (Clock *clock);
+	void timer_unpause (Clock *clock);
+	void timer_update (Clock *clock);
+
+Function timer_init will validate a Clock structure for usage with other
+functions, and timer_stop will deinitialize it so it can be unallocated.
+
+Function timer_start will have a timer begin recording time. timer_pause
+will mark that it was paused and pause the timer, along with timer_unpause,
+which will continue the counting of the timer.
+
+Function timer_restart will deinitialize a timer and start it again. It
+is the equivalent of calling timer_stop, timer_init and timer_start in
+series.
+
+The function timer_update will validate the entries in the Clock structure
+for reading. It cannot be assumed the data is valid until the function is
+called.
+
+start represents the absolute time the clock was started first.
+end represents the absolute time the timer was ended. This will be zero if
+the timer was not stopped.
+diff represents the time in milliseconds between the last pause of the
+clock and the current time.
+time represents the time in milliseconds the clock has been counting.
+pausedtime will be set to the time the timer was last paused.
+waspaused is set to true if the timer was ever paused.
+paused will be set to true if the timer is currently paused.
+
+Examples being,
+
+	#include "clock.h"
+	#include "snooze.h"
+	#include <stdio.h>
+
+	int main
+	(void)
+	{
+		Clock clock;
+		clock_init(&clock);
+		clock_start(&clock);
+
+		snooze(2000);
+
+		clock_update(&clock);
+		printf("%lu\n", clock->time);
+
+		clock_pause(&clock);
+		snooze(2000);
+
+		clock_update(&clock);
+		printf("%lu\n", clock->diff);
+
+		clock_stop(&clock);
+		return 0;
+	}
+
 
 [ XXX - finish me ]
