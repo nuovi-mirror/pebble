@@ -3,4 +3,7 @@
 
 void print 
 (const char *msg) 
-{ fputs(msg, stdout); }
+{ 
+	setbuf(stdout, NULL);
+	fputs(msg, stdout); 
+}
