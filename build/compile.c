@@ -3,6 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef __unix__
+#include <unistd.h>
+#include <pthread.h>
+#endif
+
 void compiledeps 
 (Config *config, char *srcs, char *objs) 
 {
@@ -24,16 +29,27 @@ void compiledeps
 	bufadd(&cmd, srcs);
 
 	printf("cc %s\n", srcs);
-
 	result = system(bufstr(&cmd));
 	buffree(&cmd);
 	if (result != 0) error("compiler failed");
+}
+
+void *compiledeps_packed
+(void *arg)
+{
+	PackedDeps *deps = (PackedDeps *)arg;
+	compiledeps(deps->config, deps->srcs, deps->objs);
+	free(deps);
+	return NULL;
 }
 
 void compile 
 (Config *config, char **srcs, unsigned int count, char **objs) 
 {
 	char obj[1024];
+#ifdef __unix__
+	pthread_t threads[count];
+#endif
 
 	for (unsigned int i = 0; i < count; i++) {
 		sprintf(obj, "%s", srcs[i]);
@@ -43,8 +59,32 @@ void compile
 		if (objs[i] == NULL) error("out of memory");
 
 		strcpy(objs[i], obj);
+
+#ifdef __unix__
+		PackedDeps *deps = malloc(sizeof(PackedDeps));
+		if (deps == NULL) error("Out Of Memory!");
+
+		deps->config = config;
+		deps->srcs = srcs[i];
+		deps->objs = objs[i];
+
+		int err = pthread_create(&threads[i], NULL, compiledeps_packed, (void *)deps);
+		if (err != 0) {
+			free(deps);
+			error("Cannot create thread!");
+		}
+#else
 		compiledeps(config, srcs[i], objs[i]);
+#endif
 	}
+
+#ifdef __unix__
+	for (unsigned int i = 0; i < count; i++) {
+		int err =pthread_join(threads[i], NULL);
+		if (err != 0) error("Failed to join threads!");
+	}
+#endif
+
 }
 
 void linkprog 

@@ -57,6 +57,11 @@ Building from source
 	These can be selected by setting (name)=(value) or (name)='(value)' as any
 	of the command arguments.
 
+	The build system uses basic threading for source compiling. If you are on
+	a UNIX-like platform, please make sure to link in pthread when compiling
+	the build system. On non-UNIX systems, multithreading is not used in
+	compiling and this is not needed.
+
 	The New Rock compiler requires the helper utility found at newrock/embed.c.
 	This is used to generate the header file from the New Rock standard library
 	source code. This tool takes two arguments, the first being the path to the
@@ -79,7 +84,7 @@ Building from source
 	An example building the full thing from source, assuming a BSD system:
 
 		mkdir bin
-		cc -o bin/make build/*.c
+		cc -o bin/make build/*.c -pthread
 		./bin/make fs=yes proc=yes
 		cc -o bin/embed newrock/embed.c
 		./bin/embed newrock/rockc/stdlib.newrock stdlib \

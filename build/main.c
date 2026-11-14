@@ -44,8 +44,9 @@ int main (int argc, char **argv) {
 	strcpy(config.terminal, "ansi");
 	strcpy(config.cflags, "-iquote h -Iffi -std=c99 -pedantic-errors -Wall -Werror ");
 
-	/* XXX not supported by all compilers 
-	 * strcpy(config.ldflags, "-Wl,--gc-sections ");
+	/* XXX not supported by all compilers */
+	/*
+	strcpy(config.ldflags, "-Wl,--gc-sections ");
 	 */
 
 	strcpy(config.ldflags, "");

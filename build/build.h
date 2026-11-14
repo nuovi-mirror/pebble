@@ -25,6 +25,12 @@ typedef struct Config {
 	char *fs; /* yes for filesystem I/O support */
 } Config;
 
+typedef struct PackedDeps {
+	struct Config *config;
+	char *srcs;
+	char *objs;
+} PackedDeps;
+
 /* VM source code */
 extern const char *vm_srcs[];
 
