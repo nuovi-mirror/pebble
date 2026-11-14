@@ -3,9 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef nomulti
 #ifdef __unix__
 #include <unistd.h>
 #include <pthread.h>
+#endif
 #endif
 
 void compiledeps 
@@ -47,8 +49,10 @@ void compile
 (Config *config, char **srcs, unsigned int count, char **objs) 
 {
 	char obj[1024];
+#ifndef nomulti
 #ifdef __unix__
 	pthread_t threads[count];
+#endif
 #endif
 
 	for (unsigned int i = 0; i < count; i++) {
@@ -60,6 +64,7 @@ void compile
 
 		strcpy(objs[i], obj);
 
+#ifndef nomulti
 #ifdef __unix__
 		PackedDeps *deps = malloc(sizeof(PackedDeps));
 		if (deps == NULL) error("Out Of Memory!");
@@ -73,16 +78,19 @@ void compile
 			free(deps);
 			error("Cannot create thread!");
 		}
+#endif
 #else
 		compiledeps(config, srcs[i], objs[i]);
 #endif
 	}
 
+#ifndef nomulti
 #ifdef __unix__
 	for (unsigned int i = 0; i < count; i++) {
 		int err =pthread_join(threads[i], NULL);
 		if (err != 0) error("Failed to join threads!");
 	}
+#endif
 #endif
 
 }
