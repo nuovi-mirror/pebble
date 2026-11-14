@@ -13,7 +13,7 @@ void escape_std_fs_file_read
 
 	char *path = arg0str;
 
-	unsigned long fsize = getfilesize(path);
+	unsigned long fsize = getfilesize(path) + 1;
 	if (fsize == 0) goto err;
 
 	char *fdata = FFIallocateMemory(tempAlloc, fsize);
