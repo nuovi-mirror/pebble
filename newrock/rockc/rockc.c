@@ -22,6 +22,35 @@ static int  ncur_temps;
 static int  cur_needs_save;                    /* this function has a bracketed call */
 static int  rock_stack_ready;                  /* __RockSP / __RockStkP emitted */
 
+static char ryield[MAX_RFN][MAX_NAME];
+static int  nryield;
+static int  ryield_ready;
+static int  cur_calls_yield;
+
+static void ryield_add
+(const char *name)
+{
+	for (int i = 0; i < nryield; i++) if (strcmp(ryield[i], name) == 0) return;
+	if (nryield >= MAX_RFN) fail("too many functions");
+
+	snprintf(ryield[nryield++], MAX_NAME, "%s", name);
+}
+
+static int ryield_has
+(const char *name)
+{
+	if (!ryield_ready)
+	{
+		ryield_ready = 1;
+		ryield_add("std.task.yield");
+		ryield_add("std.task.await");
+		ryield_add("std.task.spawn1");
+	}
+
+	for (int i = 0; i < nryield; i++) if (strcmp(ryield[i], name) == 0) return 1;
+	return 0;
+}
+
 static int rfn_is_defined
 (const char *name)
 {
@@ -133,8 +162,7 @@ static void end_pre
 	pre_buf = NULL;
 }
 
-/* statements needed to compute array reads; either emitted now, or captured
- * so a condition can replay them right before each evaluation */
+/* statements needed to compute array reads */
 static void emit_pre
 (const char *fmt, ...)
 {
@@ -448,7 +476,10 @@ void compile_call
 	expect_char(')');
 	note_call(callee, argc, ndests, at);
 
-	int bracket = fn[0] && (strcmp(callee, fn) == 0 || !rfn_is_defined(callee) || redge_reaches(callee, fn));
+	int yields = ryield_has(callee);
+	int bracket = fn[0] && (strcmp(callee, fn) == 0 || !rfn_is_defined(callee) || redge_reaches(callee, fn) || yields);
+
+	if (yields) cur_calls_yield = 1;
 
 	if (fn[0]) redge_add(fn, callee);
 
@@ -909,29 +940,39 @@ static void emit_save_helpers
 	{
 		outf("New __RockSP '0'\n");
 		outf("New __RockStkP '__RockStk_'\n");
+		outf("New __RockSPP '__RockSP_'\n");
+		outf("New __RockUS '_'\n");
+		for (int t = 0; t < 64; t++) outf("New __RockSP_%d '0'\n", t);
 		rock_stack_ready = 1;
 	}
 
-	/* everything must exist before the first save reads it */
 	for (int i = 0; i < nv; i++) outf("New %s '0'\n", vars[i]);
 
 	outf("Func __RockSave_%s\n", fn);
+	outf("New __RockK '__RockSPP s++ __task'\n");
+	outf("New __RockPN {__RockK}\n");
+	outf("New __RockSP [__RockPN]\n");
 	for (int i = 0; i < nv; i++)
 	{
-		outf("New __RockT '__RockStkP s++ __RockSP'\n");
+		outf("New __RockT '__RockStkP s++ __task s++ __RockUS s++ __RockSP'\n");
 		outf("New {__RockT} %s\n", vars[i]);
 		outf("New __RockSP \"__RockSP + 1\"\n");
 	}
+	outf("New {__RockPN} __RockSP\n");
 	outf("End\n");
 
 	outf("Func __RockRestore_%s\n", fn);
+	outf("New __RockK '__RockSPP s++ __task'\n");
+	outf("New __RockPN {__RockK}\n");
+	outf("New __RockSP [__RockPN]\n");
 	for (int i = nv - 1; i >= 0; i--)
 	{
 		outf("New __RockSP \"__RockSP - 1\"\n");
-		outf("New __RockT '__RockStkP s++ __RockSP'\n");
+		outf("New __RockT '__RockStkP s++ __task s++ __RockUS s++ __RockSP'\n");
 		outf("New __RockN {__RockT}\n");
 		outf("New %s [__RockN]\n", vars[i]);
 	}
+	outf("New {__RockPN} __RockSP\n");
 	outf("End\n");
 }
 
@@ -943,6 +984,7 @@ void compile_fn
 	if (strcmp(fn, "main") == 0) has_main = 1;
 	nlocals = 0;
 	rfn_define(fn);
+	cur_calls_yield = 0;
 	cur_needs_save = 0;
 	ncur_temps = 0;
 
@@ -1041,6 +1083,7 @@ void compile_fn
 		outf("New %s '0'\n", ctl);   /* defined before anything can read it */
 	}
 
+	if (cur_calls_yield) ryield_add(fn);
 	if (cur_needs_save) emit_save_helpers(fn);
 
 	nlocals = 0;

@@ -91,6 +91,7 @@ fn std.task.spawn1 ( name arg ) handle {
 . New __std.task.count "__std.task.count + 1"
 . New __Func_std.task.spawn1_handle "__std.task.done s++ __std.task.count"
 . Spawn <__Func_std.task.spawn1_name> <__Func_std.task.spawn1_handle>
+. Yield 0
 }
 
 fn std.task.yield ( ms ) ret {
