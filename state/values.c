@@ -60,13 +60,12 @@ unsigned long numword
 double numflt 
 (Value v)
 {
-	char *end;
 	switch (v.Type) 
 	{
 		case type_flt: return v.as.flt; break;
 		case type_sword: return (double)v.as.sword; break;
 		case type_word: return (double)v.as.word; break;
-		case type_str: return str2d(v.as.str, &end); break; /* XXX legacy compat */
+		case type_str: return str2d(v.as.str); break; /* XXX legacy compat */
 		case type_null: return 0; break; /* XXX should never be hit */
 		case type_pointer: return 0; break; /* XXX should never be hit */
 		case type_expr: return 0; break; /* XXX should never be hit */
