@@ -123,9 +123,11 @@ int vmmain
 			resetAllocator(scratchAlloc);
 			resetAllocator(tempAlloc);
 
-			timer_update(&clock);
-			if (limits->time_max != 0) /* dont check if time is unlimted */
+			if (limits->time_max != 0) 
+			{ /* dont check if time is unlimted */
+				timer_update(&clock);
 				if (clock.time > limits->time_max) error(errfatal, errcodelimitreached, "Time is up!");
+			}
 		}
 
 		if (task->pc >= current_instruction_count && task->state != task_sleeping) scheduler_finish(&scheduler, &vars);
