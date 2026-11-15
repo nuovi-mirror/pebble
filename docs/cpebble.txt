@@ -406,33 +406,82 @@ pausedtime will be set to the time the timer was last paused.
 waspaused is set to true if the timer was ever paused.
 paused will be set to true if the timer is currently paused.
 
+String to number conversion helpers are provided by the virtual machine,
+being str2d, str2l, and str2ul. These are defined in str2n.h, eg.
+
+	long str2l (const char *str);
+	unsigned long str2ul (const char *str);
+	double str2d (const char *str);
+
+These will all return 0 if they could not parse a number out of the
+string. Only finite floating-point values are accepted.
+
+Functions for converting numbers to strings are also defined here, being
+
+	int l2str (char *buff, unsigned long buffsize, long n);
+	int ul2str (char *buff, unsigned long buffsize, unsigned long n);
+	int d2str (char *buff, unsigned long buffsize, double n);
+
+Number n will be converted into a string and written into buffer buff.
+The number of bytes written to buff are returned If buff is too small, 
+the string will be cut short. 
+
+It isadvised to allocate a buffer larger than needed temporarily for conversion
+and pass it to this value, then perform a string copy into a persistent
+buffer, since the size of the string cannot be known until the operation
+is performed.
+
+Or, one may allocate the size of the buffer to the string length limit
+defined as misc_strlen in the limits struct via limits.h.
+
+Header print.h includes the function print, used to write to stdout.
+This is much like functions FFIstdoutPrint and FFIstdoutPrintValue defined
+by ffi.h. print and FFIstdoutPrint accept a string being the data to print,
+while FFIstdoutPrintValue accepts an FFIValue structure and does string
+conversion automatically.
+
+The function error behaves the same as FFIerror, defined in header main.h.
+
 Examples being,
 
 	#include "clock.h"
 	#include "snooze.h"
-	#include <stdio.h>
+	#include "str2n.h"
+	#include "main.h"
+	#include "print.h"
 
 	int main
 	(void)
 	{
 		Clock clock;
-		clock_init(&clock);
-		clock_start(&clock);
+		char buff[32];
+		timer_init(&clock);
+		timer_start(&clock);
 
 		snooze(2000);
 
-		clock_update(&clock);
-		printf("%lu\n", clock->time);
+		timer_update(&clock);
+		if (ul2str(buff, 32, clock.time) == 0) error(errfatal,
+			errcodegeneric, 
+			"Failed to convert unsigned long to string!");
+		print(buff);
 
-		clock_pause(&clock);
+		timer_pause(&clock);
 		snooze(2000);
 
-		clock_update(&clock);
-		printf("%lu\n", clock->diff);
+		timer_update(&clock);
+		if (ul2str(buff, 32, clock.time) == 0) error(errfatal,
+			errcodegeneric, 
+			"Failed to convert unsigned long to string!");
+		print(buff);
 
-		clock_stop(&clock);
+		timer_stop(&clock);
 		return 0;
 	}
 
+This example shows how a program may be able to avoid using a standard C
+library by using the APIs provided by the virtual machine.
+
 
 [ XXX - finish me ]
+

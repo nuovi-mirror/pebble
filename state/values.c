@@ -6,9 +6,7 @@
 #include "getstrlen.h"
 #include "main.h"
 #include "snprint.h"
-#include "str2ul.h"
-#include "str2l.h"
-#include "str2d.h"
+#include "str2n.h"
 #include "trimflt.h"
 #include "variables.h"
 #include "limits.h"
@@ -80,8 +78,8 @@ int valuetostr
 
 	switch (v.Type) 
 	{
-		case type_word: return snprint(buff, buffsize, "%lu", v.as.word);
-		case type_sword: return snprint(buff, buffsize, "%ld", v.as.sword);
+		case type_word: return ul2str(buff, buffsize, v.as.word);
+		case type_sword: return l2str(buff, buffsize, v.as.sword);
 		case type_flt: 
 		{
 			int n = snprint(buff, buffsize, "%lf", v.as.flt);

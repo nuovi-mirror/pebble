@@ -1,6 +1,7 @@
-#include "str2l.h"
-#include "str2ul.h"
+#include "str2n.h"
 #include "main.h"
+
+/* string -> num */
 
 long str2l
 (const char *ptr)
@@ -52,4 +53,71 @@ unsigned long str2ul
 	}
 
 	return res;
+}
+
+/* num -> string */
+
+int l2str 
+(char *buff, unsigned long buffsize, long n)
+{
+	long i = 0;
+	long neg = (n < 0);
+	if (buffsize == 0) return 0;
+
+	do
+	{
+		if (i >= buffsize - 1)
+		{
+			buff[i++] = '\0';
+			return i;
+		}
+
+		long d = n % 10;
+		if (d < 0) d = -d;
+		buff[i++] = (char)(d + '0');
+		n /= 10;
+	} while (n != 0);
+
+	if (neg) buff[i++] = '-';
+	buff[i] = '\0';
+
+	for (long j = 0; j < i / 2; j++)
+	{
+		char tmp = buff[j];
+		buff[j] = buff[i - j - 1];
+		buff[i - j - 1] = tmp;
+	}
+
+	return i;
+}
+
+int ul2str 
+(char *buff, unsigned long buffsize, unsigned long n)
+{
+	unsigned long i = 0;
+	if (buffsize == 0) return 0;
+
+	do
+	{
+		if (i >= buffsize - 1)
+		{
+			buff[i++] = '\0';
+			return i;
+		}
+
+		unsigned long d = n % 10;
+		buff[i++] = (char)(d + '0');
+		n /= 10;
+	} while (n != 0);
+
+	buff[i] = '\0';
+
+	for (unsigned long j = 0; j < i / 2; j++)
+	{
+		char tmp = buff[j];
+		buff[j] = buff[i - j - 1];
+		buff[i - j - 1] = tmp;
+	}
+
+	return i;
 }

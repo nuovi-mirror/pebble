@@ -64,6 +64,7 @@ const char *platform_c_srcs[] = {
 	"platform/c/files.c", /* XXX new file I/O interface */
 	"platform/c/unescape.c",
 	"platform/c/escape.c",
+	"platform/c/d2str.c",
 
 	NULL
 };

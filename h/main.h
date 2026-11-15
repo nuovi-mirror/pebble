@@ -94,7 +94,7 @@ void pushframe (Stack *stack, StackFrame *frame);
 StackFrame popframe (Stack *stack);
 Args initargs (int argc, char **argv);
 
-int main (int argc, char **argv);
+/* int main (int argc, char **argv); */
 void error(unsigned int severity, unsigned int code, const char *msg);
 
 #endif
