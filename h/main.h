@@ -60,12 +60,30 @@
 #define platformstr "UNKNOWN"
 #endif
 
-#if defined(__x86_64__) || defined(__amd64__) || defined(_X_X64) || defined(_M_AMD64)
+#if defined(__x86_64__) || defined(__amd64__) || defined(_M_X64) || defined(_M_AMD64)
 #define isastr "amd64"
 #elif defined(__i386__) || defined(__i386) || defined(_M_IX86)
 #define isastr "i386"
 #elif defined(__aarch64__) || defined(_M_ARM64) || defined(__arm64__)
 #define isastr "arm64"
+#elif defined(__arm__) || defined(_M_ARM) || defined(__arm)
+#if defined(__thumb__)
+#define isastr "arm-thumb"
+#else 
+#define isastr "arm"
+#endif
+#elif defined(__riscv) && defined(__riscv_xlen) && __riscv_xlen == 64
+#define isastr "riscv64"
+#elif defined(__riscv) && defined(__riscv_xlen) && __riscv_xlen == 32
+#define isastr "riscv32"
+#elif (defined(__sparc__) || defined(__sparc)) && defined(__arch64__)
+#define isastr "sparc64"
+#elif defined(__sparc__) || defined(__sparc)
+#define isastr "sparc"
+#elif defined(__powerpc64__) || defined(__ppc64__) || defined(__PPC64__)
+#define isastr "powerpc64"
+#elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__)
+#define isastr "powerpc"
 #else
 #define isastr "UNKNOWN"
 #endif
