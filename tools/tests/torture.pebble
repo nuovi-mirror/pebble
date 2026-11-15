@@ -1,6 +1,15 @@
 # depends on:
-#  escape sequence std.io.print from stdpbl version 1 or greater
-#  excape sequence std.io.printLn from stdpbl version 1 or greater
+#  instructions
+#    Bytecode 2
+#      New, Func, End, Call, If, Return
+#  libraries
+#    stdpbl-1-complient
+#      std.io.print
+#      std.io.printLn
+#  Extensions
+#    AAE
+#      pointer addressing mode (<>)
+#        second operand of the New instruction
 
 New result ''
 New expected ''
@@ -210,6 +219,40 @@ New record "(1 == 1) + 1"
 Call record
 New expect '1'
 Call expect
+
+# functions (Func, If, Call, End, Return)
+
+Func thing
+New record '1'
+Call record
+End
+
+New expect '1'
+Call expect
+Call thing
+
+Func thing
+New record '2'
+Call record
+End
+
+New expect '2'
+Call expect
+Call thing
+
+New expect '2'
+Call expect
+If thing "1 == 1"
+
+If thing "1 != 1"
+
+Func thing
+Return
+New record '1'
+Call record
+End
+
+Call thing
 
 # compare
 New res "expected ?= result"
