@@ -200,7 +200,7 @@ struct PackedLimits setlimits
 
 	limits.functions_namesize = 32;
 
-	limits.cmd_args = 6;
+	limits.cmd_args = 12;
 	limits.cmd_chars = 24;
 
 	limits.escapes_namesize = 32;
