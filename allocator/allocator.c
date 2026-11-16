@@ -1,5 +1,7 @@
 #include "allocator.h"
 #include "ffillmem.h"
+#include "print.h"
+#include "str2n.h"
 #include "main.h"
 
 static unsigned long align_up
@@ -85,3 +87,24 @@ unsigned long getAllocatorSizeUsed
 unsigned long getAllocatorSizeRemaining 
 (struct Arena *arena) 
 { return arena->size - getAllocatorSizeUsed(arena); }
+
+void printmem
+(char *buff, unsigned long buffsize, Arena *allocator)
+{
+	print("Allocator dump (K): used: ");
+	ul2str(buff, buffsize, getAllocatorSizeUsed(allocator) / 1024);
+	print(buff);
+	ffillmem(0, (volatile void *)buff, buffsize);
+
+	print(", remaining: ");
+	ul2str(buff, buffsize, getAllocatorSizeRemaining(allocator) / 1024);
+	print(buff);
+	ffillmem(0, (volatile void *)buff, buffsize);
+
+	print(", max: ");
+	ul2str(buff, buffsize, allocator->size / 1024);
+	print(buff);
+	ffillmem(0, (volatile void *)buff, buffsize);
+
+	print("\n");
+}

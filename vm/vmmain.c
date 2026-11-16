@@ -133,6 +133,11 @@ int vmmain
 			}
 		}
 
+#ifdef debug
+		char buff[32];
+		printmem(buff, 32, persistAlloc);
+#endif
+
 		if (task->pc >= current_instruction_count && task->state != task_sleeping) scheduler_finish(&scheduler, &vars);
 	}
 

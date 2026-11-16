@@ -17,6 +17,7 @@
 #include "values.h"
 #include "variables.h"
 #include "tasks.h"
+#include "str2n.h"
 
 #ifdef debug
 #include "print.h"
@@ -252,8 +253,7 @@ Value resolve_pointer
 }
 
 unsigned long resolvefunction 
-(unsigned long pc, FuncMap *funcs, Stack *stack, Instruction *program, Arena *scratchAlloc, const char *funcname,
-	unsigned long instruction_count)
+(unsigned long pc, FuncMap *funcs, Stack *stack, Instruction *program, Arena *scratchAlloc, const char *funcname, unsigned long instruction_count)
 {
 	unsigned long *retpc = getFunc(funcs, funcname);
 	if (retpc == NULL) error(errfatal, errcodemalformedinput, "The specified function does not exist!");
@@ -895,63 +895,14 @@ unsigned long interpret
 
 			break;
 		}
+
 		case Opcode_Internal_GETMEM: 
 		{
-			char buf[64];
-
+			char buff[32];
 			print("_GETMEM (INTERNAL INSTRUCTION)\n");
-
-			print("  PERMALLOC: USED: ");
-			snprint(buf, sizeof(buf), "%lu", getAllocatorSizeUsed(persistAlloc));
-			print(buf);
-			setmem(buf, 0, sizeof(buf));
-
-			print(", REMAIN: ");
-			snprint(buf, sizeof(buf), "%lu", getAllocatorSizeRemaining(persistAlloc));
-			print(buf);
-			setmem(buf, 0, sizeof(buf));
-
-			print(", MAX: ");
-			snprint(buf, sizeof(buf), "%lu", persistAlloc->size);
-			print(buf);
-			setmem(buf, 0, sizeof(buf));
-
-			print("\n");
-
-			print("  TEMP: USED: ");
-			snprint(buf, sizeof(buf), "%lu", getAllocatorSizeUsed(tempAlloc));
-			print(buf);
-			setmem(buf, 0, sizeof(buf));
-
-			print(", REMAIN: ");
-			snprint(buf, sizeof(buf), "%lu", getAllocatorSizeRemaining(tempAlloc));
-			print(buf);
-			setmem(buf, 0, sizeof(buf));
-
-			print(", MAX: ");
-			snprint(buf, sizeof(buf), "%lu", tempAlloc->size);
-			print(buf);
-			setmem(buf, 0, sizeof(buf));
-
-			print("\n");
-
-			print("  SCRATCH: USED: ");
-			snprint(buf, sizeof(buf), "%lu", getAllocatorSizeUsed(scratchAlloc));
-			print(buf);
-			setmem(buf, 0, sizeof(buf));
-
-			print(", REMAIN: ");
-			snprint(buf, sizeof(buf), "%lu", getAllocatorSizeRemaining(scratchAlloc));
-			print(buf);
-			setmem(buf, 0, sizeof(buf));
-
-			print(", MAX: ");
-			snprint(buf, sizeof(buf), "%lu", scratchAlloc->size);
-			print(buf);
-			setmem(buf, 0, sizeof(buf));
-
-			print("\n");
-
+			printmem(buff, sizeof(buff), persistAlloc);
+			printmem(buff, sizeof(buff), tempAlloc);
+			printmem(buff, sizeof(buff), scratchAlloc);
 			break;
 		}
 
@@ -972,8 +923,7 @@ unsigned long interpret
 		case Opcode_Internal_GETSEED: 
 		{
 			char buff[32];
-
-			snprint(buff, sizeof(buff), "%llu", seed);
+			ul2str(buff, sizeof(buff), seed);
 			print("_GETSEED (INTERNAL INSTRUCTION): ");
 			print(buff);
 			print("\n");

@@ -8,11 +8,13 @@
 #include "functions.h"
 #include "instructionmapper.h"
 #include "mem.h"
+#include "allocator.h"
 #include "limits.h"
 #include "tasks.h"
 
 /* stuff for vmmain() */
 unsigned long interpret(Instruction *instr, Instruction *program, unsigned long long seed, unsigned long instruction_count, struct Limits *limits, VarMap *vars, FFIvars *ffivars, Stack *stack, FuncMap *funcs, unsigned long pc, Arena *persistAlloc, Arena *scratchAlloc, Arena *tempAlloc, Scheduler *scheduler);
+void printmem (char *buff, unsigned long buffsize, Arena *allocator);
 Instruction makeIR (char *line, struct Limits *limits, Arena *tempAlloc, Arena *persistAlloc, InstructionMap *instructionMap);
 Instruction *optimizeIR (Instruction *program, unsigned long *instruction_count, Arena *tempAlloc, Arena *persistAlloc);
 
