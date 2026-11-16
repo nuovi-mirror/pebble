@@ -26,7 +26,7 @@ Building from source
 		platform	Platform backend to se for the build; backends include
 				freestand for pure c (which has no entry code and WILL
 				NOT compile by itself), c, which assumes a standard C99
-				hosted Libc, posix, which assumes a POSIX-1.2008
+				hosted Libc, posix, which assumes a POSIX 1
 				compliant system, and openbsd, which assumes an OpenBSD
 				Libc and kernel. The puredarwin platform is depreciated.
 				Platform auto-detection is supported and this will
