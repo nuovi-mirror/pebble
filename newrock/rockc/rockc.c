@@ -143,6 +143,25 @@ static void compile_index
 	
 #define PRE_MAX 1024
 
+static void array_base
+(const char *fn, const char *name, char *out, unsigned long cap)
+{
+	snprintf(out, cap, "__Func_%s_%s:", fn, name);
+}
+
+static void require_array
+(const char *name)
+{
+	char msg[MAX_NAME + 128];
+
+	if (is_array(name)) return;
+
+	if (is_local(name)) snprintf(msg, sizeof(msg), "'%s' is a variable, not an array; define an array by assigning its first entry, %s[0]", name, name);
+	else snprintf(msg, sizeof(msg), "array '%s' is not defined; define it by assigning its first entry, %s[0]", name, name);
+
+	fail(msg);
+}
+
 static char *pre_buf = NULL;
 static unsigned long pre_cap = 0, pre_len = 0;
 static unsigned arr_tmp_id = 0;
@@ -295,8 +314,9 @@ void compile_value
 			skipws();
 			expect_char(']');
 
-			use_var(name, at);
-			mangle(fn, name, am, sizeof(am));
+			(void)at;
+			require_array(name);
+			array_base(fn, name, am, sizeof(am));
 
 			emit_pre("New __Func_%s___RockRI %s\n", fn, idx);
 			emit_pre("New __Func_%s___RockRT '%s s++ __Func_%s___RockRI'\n", fn, am, fn);
@@ -304,6 +324,14 @@ void compile_value
 
 			snprintf(out, cap, "[__Func_%s___RockRN]", fn);
 			return;
+		}
+
+		if (is_array(name))
+		{
+			char msg[MAX_NAME + 96];
+
+			snprintf(msg, sizeof(msg), "'%s' is an array; write %s[index] to use an entry", name, name);
+			fail(msg);
 		}
 
 		use_var(name, at);
@@ -390,8 +418,8 @@ static void expand_arrays
 					snprintf(idx, sizeof(idx), "\"%s\"", sx);
 				}
 
-				use_var(arr, pos);
-				mangle(fn, arr, am, sizeof(am));
+				require_array(arr);
+				array_base(fn, arr, am, sizeof(am));
 
 				unsigned id = arr_tmp_id++;
 
@@ -870,8 +898,23 @@ void compile_stmt
 				expect_char('=');
 				compile_value(fn, val, sizeof(val));
 
-				use_var(an, at);
-				mangle(fn, an, am, sizeof(am));
+				(void)at;
+
+				if (!is_array(an))
+				{
+					char msg[MAX_NAME + 128];
+
+					/* the first entry (0) defines the array */
+					if (strcmp(idx, "'0'") != 0)
+					{
+						snprintf(msg, sizeof(msg), "array '%s' must be defined by assigning its first entry, %s[0], before any other entry", an, an);
+						fail(msg);
+					}
+
+					define_array(an);
+				}
+
+				array_base(fn, an, am, sizeof(am));
 
 				emitf("New __Func_%s___RockST '%s s++ __Func_%s___RockSI'\n", fn, am, fn);
 				emitf("New {__Func_%s___RockST} %s\n", fn, val);
@@ -983,6 +1026,7 @@ void compile_fn
 	read_ident(fn, sizeof(fn));
 	if (strcmp(fn, "main") == 0) has_main = 1;
 	nlocals = 0;
+	reset_arrays();
 	rfn_define(fn);
 	cur_calls_yield = 0;
 	cur_needs_save = 0;
@@ -1087,6 +1131,7 @@ void compile_fn
 	if (cur_needs_save) emit_save_helpers(fn);
 
 	nlocals = 0;
+	reset_arrays();
 	cur_nresults = 0;
 	cur_fn[0] = '\0';
 }

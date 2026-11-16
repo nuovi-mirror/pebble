@@ -244,16 +244,16 @@ of a line. Everything after the character is considered the comment until
 a newline is placed.
 
 New Rock supports arrays via brackets as well as operations on them. An
-array is defined as a normal variable, but to use it, you place brackets
-after the variable name, with an index number inside of the brackets,
-such as
+array is defined by setting the first entry in the array.
 
 	include stdlib
 
 	fn main ( ) dummy {
-		array count count2 dummy = '0'
+		count count2 dummy = '0'
 		max = '3'
 
+		array[0] = '0'
+		count = '1'
 		while ( "count < max" ) {
 			array[count] = '0'
 			count = "count + 1"
@@ -265,7 +265,7 @@ such as
 			count2 = "count2 + 1"
 		}
 		count2 = '0'
-	
+
 		max = "max + 2" 
 		while ( "count < max" ) {
 			array[count] = '0'
@@ -290,9 +290,10 @@ arbitrarily simply by adding new entries. When a new entry is added, it
 is not guaranteed all entries before it exists. It is up to the programmer
 to initialize the values in an array and keep track of it's length.
 
+A variable cannot have the same name as an array.
+
 The New Rock standard library includes several useful functions. These are
 mainly used to perform host-system interactions, such as printing, waiting,
 multitasking, file and process operations, and so on. For a full list of
 them, please view The Pebble Systems' Programmer's Handbook.
-include stdlib
 

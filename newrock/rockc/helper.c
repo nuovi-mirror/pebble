@@ -440,9 +440,52 @@ int is_local
 	return 0;
 }
 
+static char arrays[MAX_LOCALS][MAX_NAME];
+static int narrays = 0;
+
+int is_array
+(const char *name)
+{
+	for (int i = 0; i < narrays; i++) if (strcmp(arrays[i], name) == 0) return 1;
+	return 0;
+}
+
+void reset_arrays
+(void)
+{
+	narrays = 0;
+}
+
+void define_array
+(const char *name)
+{
+	char msg[MAX_NAME + 96];
+
+	if (is_array(name)) return;
+
+	if (is_local(name))
+	{
+		snprintf(msg, sizeof(msg), "'%s' is already a variable; an array cannot have the same name as a variable", name);
+		fail(msg);
+	}
+
+	if (narrays >= MAX_LOCALS) fail("too many arrays in one function");
+
+	strncpy(arrays[narrays], name, MAX_NAME - 1);
+	arrays[narrays++][MAX_NAME - 1] = '\0';
+}
+
 void add_local
 (const char *name)
 {
+	if (is_array(name))
+	{
+		char msg[MAX_NAME + 96];
+
+		snprintf(msg, sizeof(msg), "'%s' is an array; a variable cannot have the same name as an array", name);
+		fail(msg);
+	}
+
 	if (is_local(name)) return;
 	if (nlocals >= MAX_LOCALS) fail("too many locals in one function");
 
