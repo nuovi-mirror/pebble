@@ -162,6 +162,51 @@ static void require_array
 	fail(msg);
 }
 
+/* trim spaces in place; true when what is left is exactly one identifier */
+static int single_ident
+(char *text)
+{
+	char *t = text;
+	unsigned long n;
+
+	while (*t == ' ') t++;
+	n = strlen(t);
+	while (n > 0 && t[n - 1] == ' ') t[--n] = '\0';
+
+	if (t != text) memmove(text, t, n + 1);
+
+	if (n == 0 || !is_ident_start((unsigned char)text[0])) return 0;
+
+	for (unsigned long k = 0; k < n; k++) if (!is_ident_char((unsigned char)text[k])) return 0;
+
+	return 1;
+}
+
+/* does the text start like name[ ... (an array entry rather than a name)? */
+static int starts_with_entry
+(const char *text)
+{
+	while (*text == ' ') text++;
+	if (!is_ident_start((unsigned char)*text)) return 0;
+	while (is_ident_char((unsigned char)*text)) text++;
+	return *text == '[';
+}
+
+static void pointer_base
+(const char *fn, const char *ptr, long at, char *out, unsigned long cap)
+{
+	if (is_array(ptr))
+	{
+		char msg[MAX_NAME + 96];
+
+		snprintf(msg, sizeof(msg), "'%s' is an array, not a pointer; write %s[index]", ptr, ptr);
+		fail(msg);
+	}
+
+	use_var(ptr, at);
+	mangle(fn, ptr, out, cap);
+}
+
 static char *pre_buf = NULL;
 static unsigned long pre_cap = 0, pre_len = 0;
 static unsigned arr_tmp_id = 0;
@@ -271,6 +316,31 @@ void compile_value
 		char subst[MAX_VALUE];
 
 		read_delimited(']', text, sizeof(text));
+
+		if (peekch() == '[')
+		{
+			/* [pointer][index]: an entry of the array the pointer points to */
+			char idx[MAX_VALUE];
+			char pm[MAX_NAME];
+			long at = pos;
+
+			if (!single_ident(text)) fail("expected a pointer variable name in [pointer][index]");
+
+			pointer_base(fn, text, at, pm, sizeof(pm));
+
+			pos++;
+			compile_index(fn, idx, sizeof(idx));
+			skipws();
+			expect_char(']');
+
+			emit_pre("New __Func_%s___RockRI %s\n", fn, idx);
+			emit_pre("New __Func_%s___RockRT '%s s++ __Func_%s___RockRI'\n", fn, pm, fn);
+			emit_pre("New __Func_%s___RockRN {__Func_%s___RockRT}\n", fn, fn);
+
+			snprintf(out, cap, "[__Func_%s___RockRN]", fn);
+			return;
+		}
+
 		use_text_var(text, pos);
 		subst_expr(fn, text, subst, sizeof(subst));
 
@@ -288,6 +358,25 @@ void compile_value
 		char subst[MAX_VALUE];
 
 		read_delimited('>', text, sizeof(text));
+
+		{
+			char probe[MAX_VALUE];
+
+			snprintf(probe, sizeof(probe), "%s", text);
+
+			if (starts_with_entry(probe)) fail("cannot take a pointer to an array entry; use <array> for the whole array");
+
+			if (single_ident(probe) && is_array(probe))
+			{
+				/* a pointer to an array is the text its slot names start with */
+				char base[MAX_NAME];
+
+				array_base(fn, probe, base, sizeof(base));
+				snprintf(out, cap, "'%s'", base);
+				return;
+			}
+		}
+
 		use_text_var(text, pos);
 		subst_expr(fn, text, subst, sizeof(subst));
 
@@ -343,6 +432,75 @@ void compile_value
 	fail("expected a value ('literal', \"expression\", <pointer>, [indirect], {forced evaluation}, or a bare name)");
 }
 
+/* r points just past an opening '['; returns the matching ']' */
+static const char *match_bracket
+(const char *r)
+{
+	int depth = 1;
+
+	while (*r)
+	{
+		if (*r == '[') depth++;
+		else if (*r == ']' && --depth == 0) return r;
+		r++;
+	}
+
+	fail("unterminated '[' in expression");
+	return r;
+}
+
+/* turn the text of an index into a Pebble operand: an integer literal, a variable, or an expression */
+static void index_operand
+(const char *fn, const char *inner, char *idx, unsigned long cap)
+{
+	char inner_x[MAX_VALUE];
+
+	/* nested reads inside the index come first */
+	expand_arrays(fn, inner, inner_x, sizeof(inner_x));
+
+	char *t = inner_x;
+	while (*t == ' ') t++;
+	unsigned long tl = strlen(t);
+	while (tl > 0 && t[tl - 1] == ' ') t[--tl] = '\0';
+
+	if (tl == 0) fail("empty array index");
+
+	int allnum = 1;
+	for (unsigned long k = 0; k < tl; k++)
+		if (!((t[k] >= '0' && t[k] <= '9') || (k == 0 && t[k] == '-' && tl > 1))) allnum = 0;
+
+	int isname = is_ident_start((unsigned char)t[0]);
+	for (unsigned long k = 0; k < tl; k++) if (!is_ident_char((unsigned char)t[k])) isname = 0;
+
+	if (allnum) snprintf(idx, cap, "'%s'", t);
+	else if (isname)
+	{
+		use_var(t, pos);
+		mangle(fn, t, idx, cap);
+	}
+	else
+	{
+		char sx[MAX_VALUE];
+
+		subst_expr(fn, t, sx, sizeof(sx));
+		snprintf(idx, cap, "\"%s\"", sx);
+	}
+}
+
+/* emit the loads for one array read inside an expression; tmpname receives the variable holding it */
+static void expr_array_read
+(const char *fn, const char *base, const char *idx, char *tmpname, unsigned long cap)
+{
+	unsigned id = arr_tmp_id++;
+
+	emit_pre("New __Func_%s___RockEI%u %s\n", fn, id, idx);
+	emit_pre("New __Func_%s___RockET%u '%s s++ __Func_%s___RockEI%u'\n", fn, id, base, fn, id);
+	emit_pre("New __Func_%s___RockEN%u {__Func_%s___RockET%u}\n", fn, id, fn, id);
+	emit_pre("New __Func_%s___RockEV%u [__Func_%s___RockEN%u]\n", fn, id, fn, id);
+
+	snprintf(tmpname, cap, "__Func_%s___RockEV%u", fn, id);
+}
+
 static void expand_arrays
 (const char *fn, const char *text, char *out, unsigned long cap)
 {
@@ -354,6 +512,40 @@ static void expand_arrays
 	{
 		if (*p == '\'') inquote = !inquote;
 
+		/* [pointer][index] */
+		if (!inquote && *p == '[' && is_ident_start((unsigned char)p[1]))
+		{
+			const char *q = p + 1;
+
+			while (is_ident_char((unsigned char)*q)) q++;
+
+			if (*q == ']' && q[1] == '[')
+			{
+				const char *r = match_bracket(q + 2);
+				char ptr[MAX_NAME], pm[MAX_NAME], inner[MAX_VALUE], idx[MAX_VALUE], tmpname[MAX_NAME];
+				unsigned long n = (unsigned long)(q - (p + 1));
+
+				if (n >= sizeof(ptr)) fail("pointer name too long");
+				memcpy(ptr, p + 1, n);
+				ptr[n] = '\0';
+
+				n = (unsigned long)(r - (q + 2));
+				if (n >= sizeof(inner)) fail("array index too long");
+				memcpy(inner, q + 2, n);
+				inner[n] = '\0';
+
+				pointer_base(fn, ptr, pos, pm, sizeof(pm));
+				index_operand(fn, inner, idx, sizeof(idx));
+				expr_array_read(fn, pm, idx, tmpname, sizeof(tmpname));
+
+				for (const char *c = tmpname; *c && oi + 1 < cap; c++) out[oi++] = *c;
+
+				p = r + 1;
+				continue;
+			}
+		}
+
+		/* name[index] */
 		if (!inquote && is_ident_start((unsigned char)*p) && (p == text || !is_ident_char((unsigned char)p[-1])))
 		{
 			const char *q = p;
@@ -362,19 +554,8 @@ static void expand_arrays
 
 			if (*q == '[')
 			{
-				const char *r = q + 1;
-				int depth = 1;
-
-				while (*r)
-				{
-					if (*r == '[') depth++;
-					else if (*r == ']' && --depth == 0) break;
-					r++;
-				}
-
-				if (*r != ']') fail("unterminated '[' in expression");
-
-				char arr[MAX_NAME], am[MAX_NAME], inner[MAX_VALUE], inner_x[MAX_VALUE], idx[MAX_VALUE];
+				const char *r = match_bracket(q + 1);
+				char arr[MAX_NAME], am[MAX_NAME], inner[MAX_VALUE], idx[MAX_VALUE], tmpname[MAX_NAME];
 				unsigned long n = (unsigned long)(q - p);
 
 				if (n >= sizeof(arr)) fail("array name too long");
@@ -386,51 +567,12 @@ static void expand_arrays
 				memcpy(inner, q + 1, n);
 				inner[n] = '\0';
 
-				/* nested reads inside the index come first */
-				expand_arrays(fn, inner, inner_x, sizeof(inner_x));
-
-				/* trim, then classify the index: integer, single name, or expression */
-				char *t = inner_x;
-				while (*t == ' ') t++;
-				unsigned long tl = strlen(t);
-				while (tl > 0 && t[tl - 1] == ' ') t[--tl] = '\0';
-
-				if (tl == 0) fail("empty array index");
-
-				int allnum = 1;
-				for (unsigned long k = 0; k < tl; k++)
-					if (!((t[k] >= '0' && t[k] <= '9') || (k == 0 && t[k] == '-' && tl > 1))) allnum = 0;
-
-				int isname = is_ident_start((unsigned char)t[0]);
-				for (unsigned long k = 0; k < tl; k++) if (!is_ident_char((unsigned char)t[k])) isname = 0;
-
-				if (allnum) snprintf(idx, sizeof(idx), "'%s'", t);
-				else if (isname)
-				{
-					use_var(t, pos);
-					mangle(fn, t, idx, sizeof(idx));
-				}
-				else
-				{
-					char sx[MAX_VALUE];
-
-					subst_expr(fn, t, sx, sizeof(sx));
-					snprintf(idx, sizeof(idx), "\"%s\"", sx);
-				}
+				index_operand(fn, inner, idx, sizeof(idx));
 
 				require_array(arr);
 				array_base(fn, arr, am, sizeof(am));
 
-				unsigned id = arr_tmp_id++;
-
-				emit_pre("New __Func_%s___RockEI%u %s\n", fn, id, idx);
-				emit_pre("New __Func_%s___RockET%u '%s s++ __Func_%s___RockEI%u'\n", fn, id, am, fn, id);
-				emit_pre("New __Func_%s___RockEN%u {__Func_%s___RockET%u}\n", fn, id, fn, id);
-				emit_pre("New __Func_%s___RockEV%u [__Func_%s___RockEN%u]\n", fn, id, fn, id);
-
-				char tmpname[MAX_NAME];
-
-				snprintf(tmpname, sizeof(tmpname), "__Func_%s___RockEV%u", fn, id);
+				expr_array_read(fn, am, idx, tmpname, sizeof(tmpname));
 
 				for (const char *c = tmpname; *c && oi + 1 < cap; c++) out[oi++] = *c;
 
@@ -451,7 +593,7 @@ static void expand_arrays
 	for (const char *c = out; *c; c++)
 	{
 		if (*c == '\'') q2 = !q2;
-		if (!q2 && (*c == '[' || *c == ']')) fail("unsupported '[' in expression: write name[index] with no space before '['");
+		if (!q2 && (*c == '[' || *c == ']')) fail("unsupported '[' in expression: write name[index] or [pointer][index] with no space before '['");
 	}
 }
 
@@ -874,6 +1016,38 @@ void compile_stmt
 		long save = pos;
 
 		skipws();
+
+		if (peekch() == '[')
+		{
+			/* store through a pointer: [pointer][index] = value */
+			char ptr[MAX_VALUE];
+			char idx[MAX_VALUE];
+			char val[MAX_VALUE];
+			char pm[MAX_NAME];
+			long at = pos;
+
+			pos++;
+			read_delimited(']', ptr, sizeof(ptr));
+
+			if (!single_ident(ptr)) fail("expected a pointer variable name in [pointer][index]");
+			if (peekch() != '[') fail("expected '[index]' after [pointer]");
+
+			pos++;
+			compile_index(fn, idx, sizeof(idx));
+			skipws();
+			expect_char(']');
+			emitf("New __Func_%s___RockSI %s\n", fn, idx);
+
+			skipws();
+			expect_char('=');
+			compile_value(fn, val, sizeof(val));
+
+			pointer_base(fn, ptr, at, pm, sizeof(pm));
+
+			emitf("New __Func_%s___RockST '%s s++ __Func_%s___RockSI'\n", fn, pm, fn);
+			emitf("New {__Func_%s___RockST} %s\n", fn, val);
+			return;
+		}
 
 		if (is_ident_start(peekch()))
 		{

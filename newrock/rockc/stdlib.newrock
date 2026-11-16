@@ -170,4 +170,11 @@ fn std.str.replace ( text toreplace replacement ) ret {
 	ret = "left s++ replacement s++ right"
 }
 
+/ array
+
+fn std.array.init ( arrayptr len ) ret {
+	ret = '0'
+/ XXX finish me
+}
+
 . # end of New Rock Standard Library (stdlib)
