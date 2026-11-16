@@ -138,15 +138,23 @@ struct SizingCosts {
 };
 
 static const struct SizingCosts default_costs = {
-	.bytes_per_line = 32,
-	.temp_per_instruction = 24,
+#ifdef build_small
+	.temp_slack = 2 * 1024,
+	.persist_fixed = 4 * 1024,
+	.persist_per_task = 24,
+	.persist_data = 24 * 1024,
+	.scratch_strings = 24,
+#else
 	.temp_slack = 64 * 1024,
 	.persist_fixed = 128 * 1024,
-	.persist_per_instruction = 40,
-	.persist_per_cached = 160,
 	.persist_per_task = 64,
 	.persist_data = 2 * 1024 * 1024,
 	.scratch_strings = 512,
+#endif
+	.bytes_per_line = 32,
+	.temp_per_instruction = 24,
+	.persist_per_instruction = 40,
+	.persist_per_cached = 160,
 };
 
 struct PackedLimits setlimits
@@ -157,23 +165,40 @@ struct PackedLimits setlimits
 	struct PackedLimits packed = {0};
 	const struct SizingCosts *costs = &default_costs; /* an embedder could take this as a parameter */
 
+#ifdef build_small
+	limits.instructions_max = 2000;
+	limits.tasks_max = 3;
+	limits.tasks_depth = 6;
+
+	limits.instructions_maxcache = 32;
+
+	limits.stack_callStack_cap = 12;
+
+	limits.functions_max = 128;
+
+	limits.variables_max = 256;
+#else
 	limits.instructions_max = 20000;
 	limits.tasks_max = 12;
 	limits.tasks_depth = 32;
 
-	limits.instructions_maxbuffersize = (limits.instructions_max * sizeof(Instruction));
-	limits.instructions_initbuffersize = (512 * sizeof(Instruction));
 	limits.instructions_maxcache = 512;
-	limits.instructions_varnamesize = 48;
 
 	limits.stack_callStack_cap = 128;
+
+	limits.functions_max = 1024;
+
+	limits.variables_max = 1024;
+#endif
+
+	limits.instructions_maxbuffersize = (limits.instructions_max * sizeof(Instruction));
+	limits.instructions_initbuffersize = (512 * sizeof(Instruction));
+	limits.instructions_varnamesize = 48;
+
 	limits.stack_callStack_frameSize = (sizeof(StackFrame));
 	limits.stack_callStack_size = (limits.stack_callStack_cap * limits.stack_callStack_frameSize);
 
-	limits.functions_max = 1024;
 	limits.functions_namesize = 32;
-
-	limits.variables_max = 256;
 
 	limits.cmd_args = 6;
 	limits.cmd_chars = 24;

@@ -17,6 +17,12 @@ Building from source
 				and bad, which omits compiler and linker optimization.
 				The default option is default.
 
+				Small builds are also much stricter in memory usage,
+				allocating in the range of ~330K instead of ~5800K.
+				However, this does mean some very large programs may
+				be unable to run or may run slower. This allocation 
+				is sutiable for 99% of programs.
+
 		platform	Platform backend to se for the build; backends include
 				freestand for pure c (which has no entry code and WILL
 				NOT compile by itself), c, which assumes a standard C99
@@ -56,6 +62,9 @@ Building from source
 
 	These can be selected by setting (name)=(value) or (name)='(value)' as any
 	of the command arguments.
+
+	Passing the cflag -Dmemlog will report memory usage reported in debug
+	builds without building a full debug release.
 
 	The build system uses basic threading for source compiling. If you are on
 	a UNIX-like platform, please make sure to link in pthread when compiling

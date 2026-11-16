@@ -2,7 +2,7 @@
 #include "main.h" /* error() */
 #include <stdlib.h> /* malloc() */
 
-#ifdef debug
+#if defined(debug) || defined(memlog)
 unsigned long lallocTracker;
 #endif
 
@@ -18,7 +18,7 @@ void *lalloc
 		ptr = malloc(size);
 		i++;
 	}
-#ifdef debug
+#if defined(debug) || defined(memlog)
 	lallocTracker += size;
 #endif
 

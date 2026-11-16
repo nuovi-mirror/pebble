@@ -17,10 +17,8 @@
 #include "clock.h"
 #include "getprogram.h"
 
-#ifdef debug
 #include "lalloc.h" /* XXX debug */
 #include "print.h" /* XXX debug */
-#endif
 
 /* Args and Stack should be defined by the platform entry code
  * which will include this file */
@@ -133,7 +131,7 @@ int vmmain
 			}
 		}
 
-#ifdef debug
+#if defined(debug) || defined(memlog)
 		char buff[32];
 		printmem(buff, 32, persistAlloc);
 #endif
@@ -151,7 +149,7 @@ int vmmain
 	freeInstructionMap(&instructionMap);
 	freeFuncs(&funcs);
 
-#ifdef debug
+#if defined(debug) || defined(memlog)
 	char buff[512];
 	unsigned long allocated = lallocTracker / 1024;
 	snprint(buff, 512, "%lu%s\n", allocated, "K allocated");
