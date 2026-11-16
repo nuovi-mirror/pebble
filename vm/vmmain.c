@@ -97,8 +97,11 @@ int vmmain
 
 	/* initialize the clock */
 	Clock clock;
-	timer_init(&clock);
-	timer_start(&clock);
+	if (limits->time_max != 0)
+	{
+		timer_init(&clock);
+		timer_start(&clock);
+	}
 
 	/* execution */
 	while (scheduler_next(&scheduler, limits))
