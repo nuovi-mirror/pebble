@@ -1,0 +1,36 @@
+include stdlib
+
+fn main ( ) i {
+	i = '0'
+
+	f0[0] = ' (**)/'
+	f0[1] = '<)  )'
+	f0[2] = ' /  \'
+
+	f1[0] = '\(**) '
+	f1[1] = ' (  (>'
+	f1[2] = ' /  \ '
+
+	while ( "1 == 1" ) { / forever
+		call std.term.screen.clear ( )
+		call std.term.cursor.moveAbsolute ( '1' '1' )
+
+		while ( "i < 3" ) {
+			call std.io.print ( f0[i] )
+			i = "i + 1"
+		}
+
+		i = '0'
+		call std.misc.sleep ( '500' )
+		call std.term.screen.clear ( )
+		call std.term.cursor.moveAbsolute ( '1' '1' )
+
+		while ( "i < 3" ) {
+			call std.io.print ( f1[i] )
+			i = "i + 1"
+		}
+
+		i = '0'
+		call std.misc.sleep ( '500' )
+	}
+}	
