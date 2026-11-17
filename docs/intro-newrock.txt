@@ -297,6 +297,17 @@ New Rock supports referencing a pointer via marking a variable name with the
 variable, which can be written to via the '[' and ']' characters enclosing
 it. An example of this being,
 
+fn main ( ) ret {
+	ret = '0'
+
+	var = '1'
+	ptr = <var> / pointer to var
+	var2 = [ptr] / read through pointer; var2 = '1'
+	[ptr] = '2' / write through pointer; var = '2'
+}
+
+Pointers can also be used on arrays
+
 The New Rock standard library includes several useful functions. These are
 mainly used to perform host-system interactions, such as printing, waiting,
 multitasking, file and process operations, and so on. For a full list of

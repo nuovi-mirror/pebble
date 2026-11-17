@@ -892,10 +892,37 @@ void compile_while
 	ev_continue = cnt0;
 }
 
+static int try_deref_store
+(const char *fn)
+{
+	skipws();
+
+	if (peekch() != '[') return 0;
+
+	pos++;
+
+	char text[MAX_VALUE];
+	char target[MAX_VALUE];
+	char val[MAX_VALUE];
+
+	read_delimited(']', text, sizeof(text));
+	use_text_var(text, pos);
+	subst_expr(fn, text, target, sizeof(target));
+
+	skipws();
+	expect_char('=');
+
+	compile_value(fn, val, sizeof(val));
+	emitf("New {%s} %s\n", target, val);
+
+	return 1;
+}
+
 void compile_stmt
 (const char *fn)
 {
 	if (try_raw_line()) return;
+	if (try_deref_store(fn)) return;
 	if (try_keyword("include"))
 	{
 		char name[MAX_PATH];
@@ -1314,6 +1341,7 @@ void compile_top_stmt
 (void)
 {
 	if (try_raw_line()) return;
+	if (try_deref_store("")) return;
 
 	if (try_keyword("include"))
 	{
