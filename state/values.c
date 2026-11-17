@@ -13,19 +13,19 @@
 
 #include <stdlib.h>
 
-long numsword 
+sword numsword 
 (Value v)
 {
 	switch (v.Type)
 	{
 		case type_sword: return v.as.sword; break;
 		case type_word: 
-			if (v.as.word > (unsigned long)LONG_MAX) error(errfatal, errcodenumericoverflow, "Overflow converting word to signed word!");
-			return (long)v.as.word; break;
+			if (v.as.word > (word)LONG_MAX) error(errfatal, errcodenumericoverflow, "Overflow converting word to signed word!");
+			return (sword)v.as.word; break;
 		case type_flt: 
-			if (v.as.flt > (double)LONG_MAX) error(errfatal, errcodenumericoverflow, "Overflow converting float to signed word!");
+			if (v.as.flt > (flt)LONG_MAX) error(errfatal, errcodenumericoverflow, "Overflow converting float to signed word!");
 			if (v.as.flt < LONG_MIN) error(errfatal, errcodenumericunderflow, "Underflow converting float to signed word!");
-			return (long)v.as.flt; break;
+			return (sword)v.as.flt; break;
 		case type_str: return str2l(v.as.str); break; /* XXX legacy compat */
 		case type_expr: return 0; break; /* XXX should never be hit */
 		case type_pointer: return 0; break; /* XXX should never be hit */
@@ -34,7 +34,7 @@ long numsword
 	}
 }
 
-unsigned long numword 
+word numword 
 (Value v)
 {
 	switch (v.Type)
@@ -42,11 +42,11 @@ unsigned long numword
 		case type_word: return v.as.word; break;
 		case type_sword: 
 			if (v.as.sword < 0) error(errfatal, errcodenumericunderflow, "Underflow converting signed word to word!");
-			return (unsigned long)v.as.word; break;
+			return (word)v.as.word; break;
 		case type_flt: 
-			if (v.as.flt > (double)ULONG_MAX) error(errfatal, errcodenumericoverflow, "Overflow converting float to word!");
+			if (v.as.flt > (flt)ULONG_MAX) error(errfatal, errcodenumericoverflow, "Overflow converting float to word!");
 			if (v.as.flt < 0) error(errfatal, errcodenumericunderflow, "Underflow converting float to word!");
-			return (unsigned long)v.as.flt; break;
+			return (word)v.as.flt; break;
 		case type_str: return str2ul(v.as.str); break; /* XXX legacy compat */
 		case type_expr: return 0; break; /* XXX should never be hit */
 		case type_pointer: return 0; break; /* XXX should never be hit */
@@ -55,14 +55,14 @@ unsigned long numword
 	}
 }
 
-double numflt 
+flt numflt 
 (Value v)
 {
 	switch (v.Type) 
 	{
 		case type_flt: return v.as.flt; break;
-		case type_sword: return (double)v.as.sword; break;
-		case type_word: return (double)v.as.word; break;
+		case type_sword: return (flt)v.as.sword; break;
+		case type_word: return (flt)v.as.word; break;
 		case type_str: return str2d(v.as.str); break; /* XXX legacy compat */
 		case type_null: return 0; break; /* XXX should never be hit */
 		case type_pointer: return 0; break; /* XXX should never be hit */
@@ -72,9 +72,9 @@ double numflt
 }
 
 int valuetostr 
-(char *buff, unsigned long buffsize, Value v, struct Limits *limits)
+(char *buff, word buffsize, Value v, struct Limits *limits)
 {
-	if (buffsize > limits->misc_strlen) error(errfatal, errcodelimitreached, "String is too long!");
+	if (buffsize > limits->misc_strlen) error(errfatal, errcodelimitreached, "String is too sword!");
 
 	switch (v.Type) 
 	{
@@ -85,9 +85,9 @@ int valuetostr
 			int n = snprint(buff, buffsize, "%lf", v.as.flt);
 
 			if (n <= 0 || buffsize == 0) return n;
-			if ((unsigned long)n >= buffsize) n = (int)(buffsize - 1); /* output was truncated */
+			if ((word)n >= buffsize) n = (int)(buffsize - 1); /* output was truncated */
 
-			return (int)trimflt(buff, (unsigned long)n);
+			return (int)trimflt(buff, (word)n);
 		}
 		case type_str: return snprint(buff, buffsize, "%s", v.as.str);
 		case type_null: if (buffsize) copystr(buff, "NULL"); return 0;
