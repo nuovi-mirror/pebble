@@ -117,7 +117,7 @@ static void emit_ret_fill
 (const char *fn)
 {
 	for (int i = 0; i < cur_nresults; i++)
-		emitf("New __Func_%s_RET%d __Func_%s_%s\n", fn, i, fn, cur_results[i]);
+		emitf("New _f%s__R%d _f%s_%s\n", fn, i, fn, cur_results[i]);
 }
 
 #define CTL_RETURN    "1"
@@ -132,7 +132,7 @@ static int fn_uses_ctl;                           /* the control variable is in 
 static void ctl_name
 (const char *fn, char *out, unsigned long cap)
 {
-	snprintf(out, cap, "__Func_%s___RockCtl", fn);
+	snprintf(out, cap, "_f%s_c", fn);
 }
 
 void compile_stmt
@@ -146,7 +146,7 @@ static void compile_index
 static void array_base
 (const char *fn, const char *name, char *out, unsigned long cap)
 {
-	snprintf(out, cap, "__Func_%s_%s:", fn, name);
+	snprintf(out, cap, "_f%s_%s:", fn, name);
 }
 
 static void require_array
@@ -333,11 +333,11 @@ void compile_value
 			skipws();
 			expect_char(']');
 
-			emit_pre("New __Func_%s___RockRI %s\n", fn, idx);
-			emit_pre("New __Func_%s___RockRT '%s s++ __Func_%s___RockRI'\n", fn, pm, fn);
-			emit_pre("New __Func_%s___RockRN {__Func_%s___RockRT}\n", fn, fn);
+			emit_pre("New _f%s__RI %s\n", fn, idx);
+			emit_pre("New _f%s__RT '%s s++ _f%s__RI'\n", fn, pm, fn);
+			emit_pre("New _f%s__RN {_f%s__RT}\n", fn, fn);
 
-			snprintf(out, cap, "[__Func_%s___RockRN]", fn);
+			snprintf(out, cap, "[_f%s__RN]", fn);
 			return;
 		}
 
@@ -407,11 +407,11 @@ void compile_value
 			require_array(name);
 			array_base(fn, name, am, sizeof(am));
 
-			emit_pre("New __Func_%s___RockRI %s\n", fn, idx);
-			emit_pre("New __Func_%s___RockRT '%s s++ __Func_%s___RockRI'\n", fn, am, fn);
-			emit_pre("New __Func_%s___RockRN {__Func_%s___RockRT}\n", fn, fn);
+			emit_pre("New _f%s__RI %s\n", fn, idx);
+			emit_pre("New _f%s__RT '%s s++ _f%s__RI'\n", fn, am, fn);
+			emit_pre("New _f%s__RN {_f%s__RT}\n", fn, fn);
 
-			snprintf(out, cap, "[__Func_%s___RockRN]", fn);
+			snprintf(out, cap, "[_f%s__RN]", fn);
 			return;
 		}
 
@@ -493,12 +493,12 @@ static void expr_array_read
 {
 	unsigned id = arr_tmp_id++;
 
-	emit_pre("New __Func_%s___RockEI%u %s\n", fn, id, idx);
-	emit_pre("New __Func_%s___RockET%u '%s s++ __Func_%s___RockEI%u'\n", fn, id, base, fn, id);
-	emit_pre("New __Func_%s___RockEN%u {__Func_%s___RockET%u}\n", fn, id, fn, id);
-	emit_pre("New __Func_%s___RockEV%u [__Func_%s___RockEN%u]\n", fn, id, fn, id);
+	emit_pre("New _f%s__EI%u %s\n", fn, id, idx);
+	emit_pre("New _f%s__ET%u '%s s++ _f%s__EI%u'\n", fn, id, base, fn, id);
+	emit_pre("New _f%s__EN%u {_f%s__ET%u}\n", fn, id, fn, id);
+	emit_pre("New _f%s__EV%u [_f%s__EN%u]\n", fn, id, fn, id);
 
-	snprintf(tmpname, cap, "__Func_%s___RockEV%u", fn, id);
+	snprintf(tmpname, cap, "_f%s__EV%u", fn, id);
 }
 
 static void expand_arrays
@@ -637,7 +637,7 @@ void compile_call
 		char val[MAX_VALUE];
 
 		compile_value(fn, val, sizeof(val));
-		emitf("New __Func_%s_ARG%d %s\n", callee, argc, val);
+		emitf("New _f%s__A%d %s\n", callee, argc, val);
 
 		argc++;
 		skipws();
@@ -656,19 +656,19 @@ void compile_call
 	if (bracket)
 	{
 		cur_needs_save = 1;
-		emitf("Call __RockSave_%s\n", fn);
+		emitf("Call _Sv_%s\n", fn);
 	}
 
 	emitf("Call %s\n", callee);
 
-	if (bracket) emitf("Call __RockRestore_%s\n", fn);
+	if (bracket) emitf("Call _Rs_%s\n", fn);
 
 	for (int i = 0; i < ndests; i++)
 	{
 		char mangled[MAX_NAME];
 
 		mangle(fn, dests[i], mangled, sizeof(mangled));
-		emitf("New %s __Func_%s_RET%d\n", mangled, callee, i);
+		emitf("New %s _f%s__R%d\n", mangled, callee, i);
 	}
 }
 
@@ -695,7 +695,7 @@ static void compile_block
 			char ctl[MAX_NAME], cont[MAX_NAME];
 
 			ctl_name(fn, ctl, sizeof(ctl));
-			snprintf(cont, sizeof(cont), "__RockCont_%u", next_control_id++);
+			snprintf(cont, sizeof(cont), "_C%u", next_control_id++);
 
 			emitf("If %s \"%s == 0\"\n", cont, ctl);
 			current_helper = new_helper(cont);
@@ -745,7 +745,7 @@ void compile_if
 		expect_char(')');
 		expect_char('{');
 
-		snprintf(body_fns[nbranches], sizeof(body_fns[nbranches]), "__RockIf_%u", next_control_id++);
+		snprintf(body_fns[nbranches], sizeof(body_fns[nbranches]), "_IF%u", next_control_id++);
 		Helper *branch = new_helper(body_fns[nbranches]);
 
 		compile_if_branch(fn, branch);
@@ -759,7 +759,7 @@ void compile_if
 		if (try_keyword("if")) continue;
 		expect_char('{');
 
-		snprintf(else_fn, sizeof(else_fn), "__RockElse_%u", next_control_id++);
+		snprintf(else_fn, sizeof(else_fn), "_ELSE%u", next_control_id++);
 		Helper *else_body = new_helper(else_fn);
 		compile_if_branch(fn, else_body);
 
@@ -781,7 +781,7 @@ void compile_if
 		{
 			char temp[MAX_NAME];
 
-			snprintf(temp, sizeof(temp), "__Func_%s___RockCond_%u", fn, next_control_id++);
+			snprintf(temp, sizeof(temp), "_f%s__C%u", fn, next_control_id++);
 
 			note_temp(temp);
 			emitf("%s", pres[i]);
@@ -822,7 +822,7 @@ void compile_while
 	expect_char('{');
 
 	unsigned id = next_control_id++;
-	snprintf(while_fn, sizeof(while_fn), "__RockWhile_%u", id);
+	snprintf(while_fn, sizeof(while_fn), "_W%u", id);
 
 	Helper *old_helper = current_helper;
 	Helper *loop = new_helper(while_fn);
@@ -853,8 +853,8 @@ void compile_while
 		Helper *driver;
 
 		ctl_name(fn, ctl, sizeof(ctl));
-		snprintf(entry, sizeof(entry), "__RockLoop_%u", id);
-		snprintf(temp, sizeof(temp), "__Func_%s___RockCond_%u", fn, next_control_id++);
+		snprintf(entry, sizeof(entry), "_L%u", id);
+		snprintf(temp, sizeof(temp), "_f%s__C%u", fn, next_control_id++);
 
 		note_temp(temp);
 		driver = new_helper(entry);
@@ -879,7 +879,7 @@ void compile_while
 		char ctl[MAX_NAME], clr[MAX_NAME];
 
 		ctl_name(fn, ctl, sizeof(ctl));
-		snprintf(clr, sizeof(clr), "__RockClr_%u", id);
+		snprintf(clr, sizeof(clr), "_Cl%u", id);
 
 		Helper *c = new_helper(clr);
 		emitf("If %s \"%s > 1\"\n", clr, ctl);
@@ -971,7 +971,7 @@ void compile_stmt
 
 		add_local(name);
 		mark_assigned(name);
-		emitf("New __Func_%s_%s %s\n", fn, name, name);
+		emitf("New _f%s_%s %s\n", fn, name, name);
 		return;
 	}
 
@@ -991,7 +991,7 @@ void compile_stmt
 
 		use_var(name, pos);
 		define_global(name);
-		emitf("New %s __Func_%s_%s\n", name, fn, name);
+		emitf("New %s _f%s_%s\n", name, fn, name);
 		return;
 	}
 
@@ -1073,7 +1073,7 @@ void compile_stmt
 			compile_index(fn, idx, sizeof(idx));
 			skipws();
 			expect_char(']');
-			emitf("New __Func_%s___RockSI %s\n", fn, idx);
+			emitf("New _f%s__SI %s\n", fn, idx);
 
 			skipws();
 			expect_char('=');
@@ -1081,8 +1081,8 @@ void compile_stmt
 
 			pointer_base(fn, ptr, at, pm, sizeof(pm));
 
-			emitf("New __Func_%s___RockST '%s s++ __Func_%s___RockSI'\n", fn, pm, fn);
-			emitf("New {__Func_%s___RockST} %s\n", fn, val);
+			emitf("New _f%s__ST '%s s++ _f%s__SI'\n", fn, pm, fn);
+			emitf("New {_f%s__ST} %s\n", fn, val);
 			return;
 		}
 
@@ -1103,7 +1103,7 @@ void compile_stmt
 				compile_index(fn, idx, sizeof(idx));
 				skipws();
 				expect_char(']');
-				emitf("New __Func_%s___RockSI %s\n", fn, idx);
+				emitf("New _f%s__SI %s\n", fn, idx);
 
 				skipws();
 				expect_char('=');
@@ -1127,8 +1127,8 @@ void compile_stmt
 
 				array_base(fn, an, am, sizeof(am));
 
-				emitf("New __Func_%s___RockST '%s s++ __Func_%s___RockSI'\n", fn, am, fn);
-				emitf("New {__Func_%s___RockST} %s\n", fn, val);
+				emitf("New _f%s__ST '%s s++ _f%s__SI'\n", fn, am, fn);
+				emitf("New {_f%s__ST} %s\n", fn, val);
 				return;
 			}
 		}
@@ -1186,47 +1186,47 @@ static void emit_save_helpers
 	static char vars[MAX_LOCALS + MAX_RTEMPS + 1][MAX_NAME];
 	int nv = 0;
 
-	for (int i = 0; i < nlocals; i++) snprintf(vars[nv++], MAX_NAME, "__Func_%s_%s", fn, locals[i]);
+	for (int i = 0; i < nlocals; i++) snprintf(vars[nv++], MAX_NAME, "_f%s_%s", fn, locals[i]);
 	for (int i = 0; i < ncur_temps; i++) snprintf(vars[nv++], MAX_NAME, "%s", cur_temps[i]);
 	if (fn_uses_ctl) ctl_name(fn, vars[nv++], MAX_NAME);
 
 	if (!rock_stack_ready)
 	{
-		outf("New __RockSP '0'\n");
-		outf("New __RockStkP '__RockStk_'\n");
-		outf("New __RockSPP '__RockSP_'\n");
-		outf("New __RockUS '_'\n");
-		for (int t = 0; t < 64; t++) outf("New __RockSP_%d '0'\n", t);
+		outf("New _SP '0'\n");
+		outf("New _StkP '_Stk_'\n");
+		outf("New _SPP '_SP_'\n");
+		outf("New _US '_'\n");
+		for (int t = 0; t < 64; t++) outf("New _SP_%d '0'\n", t);
 		rock_stack_ready = 1;
 	}
 
 	for (int i = 0; i < nv; i++) outf("New %s '0'\n", vars[i]);
 
-	outf("Func __RockSave_%s\n", fn);
-	outf("New __RockK '__RockSPP s++ __task'\n");
-	outf("New __RockPN {__RockK}\n");
-	outf("New __RockSP [__RockPN]\n");
+	outf("Func _Sv_%s\n", fn);
+	outf("New _K '_SPP s++ _T'\n");
+	outf("New _PN {_K}\n");
+	outf("New _SP [_PN]\n");
 	for (int i = 0; i < nv; i++)
 	{
-		outf("New __RockT '__RockStkP s++ __task s++ __RockUS s++ __RockSP'\n");
-		outf("New {__RockT} %s\n", vars[i]);
-		outf("New __RockSP \"__RockSP + 1\"\n");
+		outf("New _T '_StkP s++ _T s++ _US s++ _SP'\n");
+		outf("New {_T} %s\n", vars[i]);
+		outf("New _SP \"_SP + 1\"\n");
 	}
-	outf("New {__RockPN} __RockSP\n");
+	outf("New {_PN} _SP\n");
 	outf("End\n");
 
-	outf("Func __RockRestore_%s\n", fn);
-	outf("New __RockK '__RockSPP s++ __task'\n");
-	outf("New __RockPN {__RockK}\n");
-	outf("New __RockSP [__RockPN]\n");
+	outf("Func _Rst_%s\n", fn);
+	outf("New _K '_SPP s++ _T'\n");
+	outf("New _PN {_K}\n");
+	outf("New _SP [_PN]\n");
 	for (int i = nv - 1; i >= 0; i--)
 	{
-		outf("New __RockSP \"__RockSP - 1\"\n");
-		outf("New __RockT '__RockStkP s++ __task s++ __RockUS s++ __RockSP'\n");
-		outf("New __RockN {__RockT}\n");
-		outf("New %s [__RockN]\n", vars[i]);
+		outf("New _SP \"_SP - 1\"\n");
+		outf("New _T '_StkP s++ _T s++ _US s++ _SP'\n");
+		outf("New _N {_T}\n");
+		outf("New %s [_N]\n", vars[i]);
 	}
-	outf("New {__RockPN} __RockSP\n");
+	outf("New {_PN} _SP\n");
 	outf("End\n");
 }
 
@@ -1298,7 +1298,7 @@ void compile_fn
 	fn_uses_ctl = 0;
 
 	outf("Func %s\n", fn);
-	for (int i = 0; i < nparams; i++) outf("New __Func_%s_%s __Func_%s_ARG%d\n", fn, params[i], fn, i);
+	for (int i = 0; i < nparams; i++) outf("New _f%s_%s _f%s__A%d\n", fn, params[i], fn, i);
 	skipws();
 
 	compile_block(fn, 0, "unterminated function");

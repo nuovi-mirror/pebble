@@ -1,149 +1,149 @@
 . # New Rock Standard Library (stdlib)
 
 fn std.io.print ( value ) data {
-. New __Func_std.io.print_data {__Func_std.io.print_value}
-. New __Escape_std.io.print_ARG0 <__Func_std.io.print_data>
+. New _fstd.io.print_data {_fstd.io.print_value}
+. New __Escape_std.io.print_ARG0 <_fstd.io.print_data>
 . Escape std.io.print
 }
 
 fn std.io.printRaw ( value ) value {
-. New __Escape_std.io.printLn_ARG0 <__Func_std.io.printRaw_value>
+. New __Escape_std.io.printLn_ARG0 <_fstd.io.printRaw_value>
 . Escape std.io.printLn
 }
 
 fn std.io.printLn ( value ) data {
-. New __Func_std.io.printLn_data {__Func_std.io.printLn_value}
-. New __Escape_std.io.printLn_ARG0 <__Func_std.io.printLn_data>
+. New _fstd.io.printLn_data {_fstd.io.printLn_value}
+. New __Escape_std.io.printLn_ARG0 <_fstd.io.printLn_data>
 . Escape std.io.printLn
 }
 	
 fn std.io.input ( ) input {
 . Escape std.io.input
-. New __Func_std.io.input_input __Escape_std.io.input_RET0
+. New _fstd.io.input_input __Escape_std.io.input_RET0
 }
 
 / misc
 
 fn std.misc.random ( ) random {
 . Escape std.misc.random
-. New __Func_std.misc.random_random __Escape_std.misc.random_RET0
+. New _fstd.misc.random_random __Escape_std.misc.random_RET0
 }
 
 fn std.misc.sleep ( time ) time {
-. Yield <__Func_std.misc.sleep_time>
+. Yield <_fstd.misc.sleep_time>
 }
 
 / proc
 
 fn std.proc.spawn ( args ) ret {
-. New __Escape_std.proc.spawn_ARG0 <__Func_std.proc.spawn_args>
+. New __Escape_std.proc.spawn_ARG0 <_fstd.proc.spawn_args>
 . Escape std.proc.spawn
-. New __Func_std.proc.spawn_ret __Escape_std.proc.spawn_RET0
+. New _fstd.proc.spawn_ret __Escape_std.proc.spawn_RET0
 }
 
 fn std.proc.wait ( id ) type status {
-. New __Escape_std.proc.wait_ARG0 <__Func_std.proc.wait_id>
+. New __Escape_std.proc.wait_ARG0 <_fstd.proc.wait_id>
 . Escape std.proc.wait
-. New __Func_std.proc.wait_type __Escape_std.proc.wait_RET1
-. New __Func_std.proc.wait_status __Escape_std.proc.wait_RET0
+. New _fstd.proc.wait_type __Escape_std.proc.wait_RET1
+. New _fstd.proc.wait_status __Escape_std.proc.wait_RET0
 }
 
 / term
 
 fn std.term.screen.clear ( ) ret {
 . Escape std.term.screen.clear
-. New __Func_std.term.screen.clear_ret '0'
+. New _fstd.term.screen.clear_ret '0'
 }
 
 fn std.term.color.basic.fore ( color ) ret {
-. New __Escape_std.term.color.basic.fore_ARG0 <__Func_std.term.color.basic.fore_color>
+. New __Escape_std.term.color.basic.fore_ARG0 <_fstd.term.color.basic.fore_color>
 . Escape std.term.color.basic.fore
 	ret = color
 }
 
 fn std.term.color.basic.back ( color ) ret {
-. New __Escape_std.term.color.basic.back_ARG0 <__Func_std.term.color.basic.back_color>
+. New __Escape_std.term.color.basic.back_ARG0 <_fstd.term.color.basic.back_color>
 . Escape std.term.color.basic.back
 	ret = color
 }
 
 fn std.term.cursor.moveAbsolute ( x y ) ret {
-. New __Escape_std.term.cursor.moveAbsolute_ARG0 <__Func_std.term.cursor.moveAbsolute_x>
-. New __Escape_std.term.cursor.moveAbsolute_ARG1 <__Func_std.term.cursor.moveAbsolute_y>
+. New __Escape_std.term.cursor.moveAbsolute_ARG0 <_fstd.term.cursor.moveAbsolute_x>
+. New __Escape_std.term.cursor.moveAbsolute_ARG1 <_fstd.term.cursor.moveAbsolute_y>
 . Escape std.term.cursor.moveAbsolute
 	ret = '0'
 }
 
 / tasks
 
-. New __std.task.count '0'
-. New __std.task.slot '__await_ s++ __task'
+. New _std.task.count '0'
+. New _std.task.slot '_awt_ s++ _T'
 
 fn std.task.spawn ( name ) handle {
-. New __std.task.count "__std.task.count + 1"
-. New __Func_std.task.spawn_handle "__std.task.done s++ __std.task.count"
-. Spawn <__Func_std.task.spawn_name> <__Func_std.task.spawn_handle>
+. New _std.task.count "_std.task.count + 1"
+. New _fstd.task.spawn_handle "_std.task.done s++ _std.task.count"
+. Spawn <_fstd.task.spawn_name> <_fstd.task.spawn_handle>
 }
 
 fn std.task.spawn1 ( name arg ) handle {
-. New __Func_std.task.spawn1_t '__Func_ s++ __Func_std.task.spawn1_name s++ _ARG0'
-. New {__Func_std.task.spawn1_t} __Func_std.task.spawn1_arg
-. New __std.task.count "__std.task.count + 1"
-. New __Func_std.task.spawn1_handle "__std.task.done s++ __std.task.count"
-. Spawn <__Func_std.task.spawn1_name> <__Func_std.task.spawn1_handle>
+. New _fstd.task.spawn1_t '_f s++ _fstd.task.spawn1_name s++ __A0'
+. New {_fstd.task.spawn1_t} _fstd.task.spawn1_arg
+. New _std.task.count "_std.task.count + 1"
+. New _fstd.task.spawn1_handle "_std.task.done s++ _std.task.count"
+. Spawn <_fstd.task.spawn1_name> <_fstd.task.spawn1_handle>
 . Yield 0
 }
 
 fn std.task.yield ( ms ) ret {
-. Yield <__Func_std.task.yield_ms>
+. Yield <_fstd.task.yield_ms>
 	ret = '0'
 }
 
 fn std.task.done ( handle ) done {
-. New __Func_std.task.done_done [__Func_std.task.done_handle]
+. New _fstd.task.done_done [_fstd.task.done_handle]
 }
 
 . Func __std.task.await_loop
-. Yield 1
-. New __std.task.n {__std.task.slot}
-. New __std.task.v [__std.task.n]
-. New __std.task.w [__std.task.v]
-. If __std.task.await_loop <__std.task.w>
+. Yield 30
+. New __std.task.n {_std.task.slot}
+. New __std.task.v [_std.task.n]
+. New __std.task.w [_std.task.v]
+. If __std.task.await_loop <_std.task.w>
 . End
 
 fn std.task.await ( handle ) ret {
-. New __std.task.n {__std.task.slot}
-. New {__std.task.n} __Func_std.task.await_handle
-. Call __std.task.await_loop
+. New _std.task.n {_std.task.slot}
+. New {_std.task.n} _fstd.task.await_handle
+. Call _std.task.await_loop
 	ret = '0'
 }
 
 / files
 
 fn std.fs.file.write ( file data ) code {
-. New __Escape_std.fs.file.write_ARG0 <__Func_std.fs.file.write_file>
-. New __Escape_std.fs.file.write_ARG1 <__Func_std.fs.file.write_data>
+. New __Escape_std.fs.file.write_ARG0 <_fstd.fs.file.write_file>
+. New __Escape_std.fs.file.write_ARG1 <_fstd.fs.file.write_data>
 . Escape std.fs.file.write
-. New __Func_std.fs.file.write_code __Escape_std.fs.file.write_RET0
+. New _fstd.fs.file.write_code __Escape_std.fs.file.write_RET0
 }
 
 fn std.fs.file.read ( file ) code data {
-. New __Escape_std.fs.file.read_ARG0 <__Func_std.fs.file.read_file>
+. New __Escape_std.fs.file.read_ARG0 <_fstd.fs.file.read_file>
 . Escape std.fs.file.read
-. New __Func_std.fs.file.read_code __Escape_std.fs.file.read_RET0
-. New __Func_std.fs.file.read_data __Escape_std.fs.file.read_RET1
+. New _fstd.fs.file.read_code __Escape_std.fs.file.read_RET0
+. New _fstd.fs.file.read_data __Escape_std.fs.file.read_RET1
 }
 
 fn std.fs.dir.get ( ) dir {
 . Escape std.fs.dir.get
-. New __Func_std.fs.dir.get_dir __Escape_std.fs.dir.get
+. New _fstd.fs.dir.get_dir __Escape_std.fs.dir.get
 }
 
 fn std.fs.dir.list ( dir ) code files {
-. New __Escape_std.fs.dir.list_ARG0 <__Func_std.fs.dir.list_dir>
+. New __Escape_std.fs.dir.list_ARG0 <_fstd.fs.dir.list_dir>
 . Escape std.fs.dir.list
-. New __Func_std.fs.dir.list_code __Escape_std.fs.dir.list_RET0
-. New __Func_std.fs.dir.list_files __Escape_std.fs.dir.list_RET1
+. New _fstd.fs.dir.list_code __Escape_std.fs.dir.list_RET0
+. New _fstd.fs.dir.list_files __Escape_std.fs.dir.list_RET1
 }
 	
 / argument handling

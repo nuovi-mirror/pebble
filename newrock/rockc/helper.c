@@ -300,7 +300,7 @@ static void scan_raw_line
 		char prefix[MAX_NAME + 16];
 		size_t plen;
 
-		snprintf(prefix, sizeof(prefix), "__Func_%s_", cur_fn);
+		snprintf(prefix, sizeof(prefix), "_f%s_", cur_fn);
 		plen = strlen(prefix);
 
 		if (strncmp(arg, prefix, plen) == 0)
@@ -510,7 +510,7 @@ int is_assigned
 void mangle
 (const char *fn, const char *name, char *out, size_t cap)
 {
-	if (is_local(name)) snprintf(out, cap, "__Func_%s_%s", fn, name);
+	if (is_local(name)) snprintf(out, cap, "_f%s_%s", fn, name);
 	else snprintf(out, cap, "%s", name);
 }
 
@@ -662,7 +662,7 @@ void subst_expr
 
 		char mangled[MAX_NAME];
 
-		if (is_local(core)) snprintf(mangled, sizeof(mangled), "__Func_%s_%s", fn, core);
+		if (is_local(core)) snprintf(mangled, sizeof(mangled), "_f%s_%s", fn, core);
 		else snprintf(mangled, sizeof(mangled), "%s", core);
 
 		for (unsigned long k = 0; k < lead && oi + 1 < cap; k++) out[oi++] = '(';
