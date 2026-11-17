@@ -172,9 +172,13 @@ fn std.str.replace ( text toreplace replacement ) ret {
 
 / array
 
-fn std.array.init ( arrayptr len ) ret {
-	ret = '0'
-/ XXX finish me
+fn std.array.init ( arrptr len set ) len {
+	i = '0'
+
+	while ( "i < len" ) {
+		[arrptr][i] = set
+		i = "i + 1"
+	}
 }
 
 . # end of New Rock Standard Library (stdlib)

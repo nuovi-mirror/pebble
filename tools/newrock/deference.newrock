@@ -1,0 +1,15 @@
+include stdlib
+
+fn main ( ) ret {
+	ret = '0'
+
+	var = '0'
+	var2 = <var>
+	var3 = [var2]
+
+	call std.io.print ( var3 )
+
+	[var2] = '1'
+	call std.io.print ( var )
+
+}

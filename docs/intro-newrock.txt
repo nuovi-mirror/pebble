@@ -290,6 +290,23 @@ arbitrarily simply by adding new entries. When a new entry is added, it
 is not guaranteed all entries before it exists. It is up to the programmer
 to initialize the values in an array and keep track of it's length.
 
+The standard library function std.array.init can be used to initialize
+arrays easily, eg.
+
+	include stdlib
+
+	fn main ( ) ret {
+		ret = '0'
+
+		arr[0] = '0' / validate the array
+		call std.array.init ( <arr> '12' '0' )
+		/ create 12 entries into arr, all set to zero
+		call std.io.print ( arr[3] ) / valid
+	}
+
+The length of the array must still be managed manually, as well as
+growing the array.
+
 A variable cannot have the same name as an array.
 
 New Rock supports referencing a pointer via marking a variable name with the
@@ -297,16 +314,39 @@ New Rock supports referencing a pointer via marking a variable name with the
 variable, which can be written to via the '[' and ']' characters enclosing
 it. An example of this being,
 
-fn main ( ) ret {
-	ret = '0'
+	fn main ( ) ret {
+		ret = '0'
 
-	var = '1'
-	ptr = <var> / pointer to var
-	var2 = [ptr] / read through pointer; var2 = '1'
-	[ptr] = '2' / write through pointer; var = '2'
-}
+		var = '1'
+		ptr = <var> / pointer to var
+		var2 = [ptr] / read through pointer; var2 = '1'
+		[ptr] = '2' / write through pointer; var = '2'
+	}
 
-Pointers can also be used on arrays
+Pointers can also be used on arrays. To create a pointer to an array,
+reference the base name of the array with the '<' and '>' characters
+enclosing it. To write and read through an array, enclose the base of it
+with the '[' and ']' characters and then follow it with the index enclosed
+by those characters again, eg.
+
+	fn main ( ) ret {
+		ret = '0'
+
+		arr[0] = '0' / validate the array
+		arrptr = <arr> / pointer to arr
+		[arrptr][0] = '1' / write through pointer
+		var = [arrptr][0] / read through pointer
+	}
+
+It is very important to note the compiler does not manage or keep track
+of what is and what is not a pointer for you; using them incorrectly can
+cause undefined behavior and even possibly a compiler or runtime error.
+
+Functions can receive pointers as arguments implicitly. There is no special
+syntax for this. The same goes for returning pointers. When a pointer is
+given or returned, it is a pointer to the variable within the function's
+local scope. The pointer may be valid for longer than the function is, if
+deemed needed.
 
 The New Rock standard library includes several useful functions. These are
 mainly used to perform host-system interactions, such as printing, waiting,

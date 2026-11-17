@@ -899,6 +899,8 @@ static int try_deref_store
 
 	if (peekch() != '[') return 0;
 
+	long start = pos;
+
 	pos++;
 
 	char text[MAX_VALUE];
@@ -906,6 +908,14 @@ static int try_deref_store
 	char val[MAX_VALUE];
 
 	read_delimited(']', text, sizeof(text));
+
+	/* [pointer][index] = value is a store into an array; compile_stmt handles that form */
+	if (peekch() == '[')
+	{
+		pos = start;
+		return 0;
+	}
+
 	use_text_var(text, pos);
 	subst_expr(fn, text, target, sizeof(target));
 
