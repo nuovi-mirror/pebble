@@ -1,0 +1,15 @@
+include stdlib
+
+fn main ( ) ret {
+	ret i = '0'
+	arr[0] = '0'
+	len = '6'
+
+	call std.array.init ( <arr> len '0' )
+	nlen = call std.array.split ( <arr> len 'hello, world!' ' ' )
+
+	while ( "i < nlen" ) {
+		call std.io.print ( arr[i] )
+		i = "i + 1"
+	}
+}
