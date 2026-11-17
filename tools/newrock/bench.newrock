@@ -1,0 +1,7 @@
+fn main ( ) ret {
+	ret = '0'
+
+	while ( "ret < 9999999" ) {
+		ret = "ret + 1"
+	}
+}
