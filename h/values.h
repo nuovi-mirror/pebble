@@ -4,6 +4,7 @@
 #include "allocator.h"
 #include "variables.h"
 #include "limits.h"
+#include "main.h"
 
 typedef struct ExprNode ExprNode; /* from expressions.h */
 
@@ -20,9 +21,9 @@ typedef enum {
 typedef struct Value {
 	ValueTypes Type;
 	union {
-		unsigned long word;
-		long sword;
-		double flt;
+		word word;
+		sword sword;
+		flt flt;
 		char *str;
 		ExprNode *expr;
 		void *null;

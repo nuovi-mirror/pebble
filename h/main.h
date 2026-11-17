@@ -10,6 +10,13 @@
 #undef true
 #undef false
 
+#undef WORD_MAX
+#undef WORD_MIN
+#undef SWORD_MAX
+#undef SWORD_MIN
+#undef FLT_MAX
+#undef FLT_MIN
+
 #define NULL ((void *)0)
 
 #define TRUE 1
@@ -17,6 +24,19 @@
 
 #define true TRUE
 #define false FALSE
+
+typedef unsigned long word;
+typedef long sword;
+typedef double flt;
+
+#define WORD_MAX ULONG_MAX
+#define WORD_MIN 0
+#define SWORD_MAX LONG_MAX
+#define SWORD_MIN LONG_MIN
+#define FLT_MAX DBL_MAX
+#define FLT_MIN DBL_MIN
+
+/* XXX float type is NOT safe to use */
 
 #define errfatal 0
 #define errsevere 1
