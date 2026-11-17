@@ -1,0 +1,17 @@
+include stdlib
+
+fn main ( ) ret {
+	ret = '0'
+
+	arr[0] = 'h'
+	arr[1] = 'i'
+	arr[2] = '!'
+
+	len = '3'
+
+	str = call std.array.join ( <arr> len '' )
+	call std.io.print ( str )
+
+	str = call std.array.join ( <arr> len ' ' )
+	call std.io.print ( str )
+}

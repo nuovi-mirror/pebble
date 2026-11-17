@@ -173,10 +173,22 @@ fn std.str.replace ( text toreplace replacement ) ret {
 / array
 
 fn std.array.init ( arrptr len set ) len {
+/ <arrptr> 'len' 'set'
 	i = '0'
 
 	while ( "i < len" ) {
 		[arrptr][i] = set
+		i = "i + 1"
+	}
+}
+
+fn std.array.join ( arrptr len char ) str {
+/ <arrptr> 'len' 'char'
+	i = '1'
+	str = [arrptr][0]
+
+	while ( "i < len" ) {
+		str = "str s++ char s++ [arrptr][i]"
 		i = "i + 1"
 	}
 }

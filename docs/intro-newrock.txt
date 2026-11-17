@@ -352,4 +352,3 @@ The New Rock standard library includes several useful functions. These are
 mainly used to perform host-system interactions, such as printing, waiting,
 multitasking, file and process operations, and so on. For a full list of
 them, please view The Pebble Systems' Programmer's Handbook.
-

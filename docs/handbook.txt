@@ -929,6 +929,18 @@
 					to replace in the string, and the substring to replace it
 					with. Returns the new string.
 
+			group array
+				routine init - initialize an array
+					accepts three arguments, being a pointer to an array, the length of
+					the array, and the value to initialize the array to. Sets each entry
+					of the array to the set value until len.
+
+				routine join - convert an array to a string
+					accepts three arguments, being a pointer to an array, the length of
+					the array, and the character(s) to place into the midpieces. Returns
+					a string of text, being each array value merged together, with the
+					character(s) specified in-between each entry.
+
 
                     - Command Argument Extension (CAE) -
 
