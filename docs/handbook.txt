@@ -941,6 +941,13 @@
 					a string of text, being each array value merged together, with the
 					character(s) specified in-between each entry.
 
+				routine split - split a string into an array
+					accepts four arguments, being a pointer to an array, the length of
+					the array, the string to split, and the character(s) to split on.
+					Splits the string by the character and writes the new strings into
+					the array provided. If the array is to small, it stops short. Returns
+					the number of entries written.
+
 
                     - Command Argument Extension (CAE) -
 

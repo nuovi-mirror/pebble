@@ -193,4 +193,18 @@ fn std.array.join ( arrptr len char ) str {
 	}
 }
 
+fn std.array.split ( arrptr len str char ) i {
+/ <arrptr> 'len' 'str' 'char'
+	i = '0'
+
+	while ( "i < len" ) {
+		pos = "str sf char"
+		l = "str ssl pos"
+		str = "str ssr pos"
+		[arrptr][i] = l
+		i = "i + 1"
+		if ( "pos == 0" ) { return }
+	}
+}
+
 . # end of New Rock Standard Library (stdlib)
