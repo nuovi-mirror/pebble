@@ -343,9 +343,26 @@ static int h_NumericCmp
 {
 	switch (numtype(l, r)) 
 	{
-		case type_flt: return numflt(l) > numflt(r) ? 1 : numflt(l) < numflt(r) ? -1 : 0;
-		case type_sword: return numsword(l) > numsword(r) ? 1 : numsword(l) < numsword(r) ? -1 : 0;
-			default: return numword(l) > numword(r) ? 1 : numword(l) < numword(r) ? -1 : 0;
+		case type_flt: 
+		{
+			double lf = numflt(l);
+			double rf = numflt(r);
+			return (lf > rf) - (lf < rf);
+		}
+
+		case type_sword: 
+		{
+			long ls = numsword(l);
+			long rs = numsword(r);
+			return (ls > rs) - (ls < rs);
+		}
+
+		default:
+		{
+			unsigned long lw = numword(l);
+			unsigned long rw = numword(r);
+			return (lw > rw) - (lw < rw);
+		}
 	}
 }
 
