@@ -426,7 +426,7 @@ Number n will be converted into a string and written into buffer buff.
 The number of bytes written to buff are returned If buff is too small, 
 the string will be cut short. 
 
-It isadvised to allocate a buffer larger than needed temporarily for conversion
+It is advised to allocate a buffer larger than needed temporarily for conversion
 and pass it to this value, then perform a string copy into a persistent
 buffer, since the size of the string cannot be known until the operation
 is performed.
@@ -482,6 +482,108 @@ Examples being,
 This example shows how a program may be able to avoid using a standard C
 library by using the APIs provided by the virtual machine.
 
+CPebble was designed to be embedded rather easily, only needing to modify
+a few files within the source tree. The tree can be described simply as
+
+	/
+		vm/ - interpreter, startup
+		allocator/ - memory management
+		state/ - virtual machine helpers not tied to the
+			interpreter (eg. the expression evaluator)
+		h/ - header files
+		ffi/ - FFI implementation and escape sequences
+		platform/ - platform-specific code
+			freestand/ - truly portable code; no libc
+			c/ - C99 Libc
+			posix/ - POSIX 1 compliant
+
+A platform is represented by a directory with, at minimum, a main.c file.
+This file is the platform-specific entry code. The code is responsible for
+initializing memory, stack, VM limits, and calling vmmain(), which is the
+interpreter initialization code.
+
+A few files useful to am embedder are platform/c/entry.h, providing common
+initialization routines, limits, and error handling, platform/c/print.c
+and platform/posix/inputn.c, providing basic input and output,
+vm/getprogram.c, providing a bytecode file to execute, vm/cli.c, being the
+command-line interface of the interpreter, which should be replaced by a
+simple stub, and whatever your platform's entry code is providing main().
+
+These should really only be the files needing to be changed. Some notable
+ones including platform/c/exitproc.c should be replaced by a longjmp back
+into the application, platform/c/entry.c error() replaced by application
+error handling, platform/c/print.c and platform/posix/inputn.c replaced
+with application input and output handlers, platform/c/entry.c's memory
+allocation code in setlimits() replaced with application-provided buffers,
+platform/c/lalloc.c replaced with a platform-specific heap allocator OR
+vm/getprogram.c allocating a buffer from the application ahead-of-time,
+which is only possible if the size of the program is known before startup.
+The rest of the implementation should be easy to keep and not need to be
+modified.
+
+The current build system assumes a standalone application; this would
+need to be replaced for one suitable to build the VM as an object file
+to be linked against.
+
+Platform entry is rather simple, eg. platform/c/main.c
+
+That is all there really is to embedding. 
+
+	#include "main.h"
+	#include "entry.h"
+	#include "mem.h"
+	#include "limits.h"
+	#include "vm.h"
+
+	int main 
+	(int argc, char **argv)
+	{
+		struct PackedLimits packed = setlimits();
+		struct Limits limits = packed.limits;
+		struct Memory mem = packed.memory;
+
+		unsigned long long seed = getrandom();
+
+		Args cliargs = initargs(argc, argv);
+		Stack *stack = initstack((limits.stack_callStack_cap), &mem);
+
+		int ret = vmmain(cliargs, stack, seed, &mem, &limits);
+		freestack(stack);
+		return ret;
+	}
+
+cliargs is an Args struct containing the command-line arguments
+given, which if getprogram() and cli() are replaced with a
+function which returns an application-provided buffer and a
+simple stub respectively, this can be empty.
+
+stack is a language stack used for Pebble function calls inside
+of the virtual machine. This can be a static backing.
+
+seed is a 64-bit number with at least a reasonable bit of
+entropy, used for randomization inside of the virtual machine.
+This does not have to be cryptographic.
+
+mem is a pointer to a Memory structure, containing backings
+for the allocators described above, plus a few other items.
+This can be a static backing.
+
+limits being a pointer to a Limits structure. This tells the
+virtual machine what is allowed. It is VERY important to tune
+this to your application's needs.
+
+vmmain() is the main function which initializes the interpreter
+state and calls the interpreter. This is a pure instruction loop.
+It is safe to place a host callback inside of here at the instruction
+boundary. This is defined in vm/vmmain.c.
+
+Embedding is a bit hands-on, but simple and straightforward.
+As you can tell, CPebble is not a virtual machine as a
+library, but instead acting as it's own intermediate
+application, which is embedded. There is no real difference
+between an embedded instance and a standalone instance; a
+standalone instance is just a small embedded program that
+has routines expecting it to be the only application in the
+process.
 
 [ XXX - finish me ]
-
