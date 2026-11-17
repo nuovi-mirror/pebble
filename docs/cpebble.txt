@@ -202,9 +202,9 @@ The FFIValue structure shall be defined as something along the lines of
 	typedef struct FFIValue {
 		ValueTypes Type;
 		union {
-			unsigned long word;
-			long sword;
-			double flt;
+			word word;
+			sword sword;
+			flt flt;
 			char *str;
 			ExprNode *expr;
 		} as;
@@ -214,6 +214,22 @@ Other values may be defined, but they are not relevant to the FFI code.
 This structure can be used to map to the one used to represent values
 inside of CPebble directly. When storing or reading a variable that must
 interface with Pebble code, it should be wrapped by this structure.
+
+word should be the architecture-dependent general-sized value conforming
+to the bytecode specifcation Numeric Word.
+
+sword should be the architecture-dependent general-sized value conforming
+to the bytecode specifcation Numeric Signed Word.
+
+flt should be the architecture-dependent general-sized value conforming
+to the bytecode specifcation Floating.
+
+With default settings, word should be a typedef to unsigned long, sword
+should be a typedef to long, and flt should be a typedef to double, however
+it is not guaranteed these are the exact mappings. Values WORD_MIN, 
+WORD_MAX, SWORD_MIN, SWORD_MAX, FLT_MIN, and FLT_MAX are provided by main.h
+along with the typedefs to be used to get a sense of how large the values
+are.
 
 The virtual machine will guess the types of values at compile-time when
 generating the representation and format them according to the bytecode 2
@@ -407,7 +423,7 @@ waspaused is set to true if the timer was ever paused.
 paused will be set to true if the timer is currently paused.
 
 String to number conversion helpers are provided by the virtual machine,
-being str2d, str2l, and str2ul. These are defined in str2n.h, eg.
+being str2d, str2l, and str2ul. These are defined in nums.h, eg.
 
 	long str2l (const char *str);
 	unsigned long str2ul (const char *str);
@@ -434,6 +450,16 @@ is performed.
 Or, one may allocate the size of the buffer to the string length limit
 defined as misc_strlen in the limits struct via limits.h.
 
+Equivalents for word, sword, and flt are provided
+
+	sword strtosword (const char *str);
+	word strtoword (const char *str);
+	flt strtoflt (const char *str);
+
+	int flttostr (char *buff, unsigned long buffsize, flt n);
+	int wordtostr (char *buff, unsigned long buffsize, word n);
+	int swordtostr (char *buff, unsigned long buffsize, sword n);
+
 Header print.h includes the function print, used to write to stdout.
 This is much like functions FFIstdoutPrint and FFIstdoutPrintValue defined
 by ffi.h. print and FFIstdoutPrint accept a string being the data to print,
@@ -446,7 +472,7 @@ Examples being,
 
 	#include "clock.h"
 	#include "snooze.h"
-	#include "str2n.h"
+	#include "nums.h"
 	#include "main.h"
 	#include "print.h"
 
