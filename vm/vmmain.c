@@ -13,9 +13,7 @@
 #include "variables.h"
 #include "mem.h"
 #include "limits.h"
-#include "cli.h"
 #include "clock.h"
-#include "getprogram.h"
 
 #include "lalloc.h" /* XXX debug */
 #include "print.h" /* XXX debug */
@@ -52,7 +50,10 @@ int vmmain
 	ffivars->max = limits->variables_max;
 	ffivars->namesize = limits->instructions_varnamesize;
 
-	cli(&cliargs);
+	/* XXX handled by the platform code now
+	 * cli(&cliargs);
+	 * same for bytecode fetching 
+	 */
 	char *filedata = fprogram->data;
 
 	char *line;

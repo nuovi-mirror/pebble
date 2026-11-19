@@ -3,7 +3,8 @@
 #include "mem.h"
 #include "limits.h"
 #include "vm.h"
-#include "lalloc.h" /* initial backings */
+#include "getprogram.h"
+#include "cli.h"
 #include "print.h" /* XXX error handling */
 #include "appendstr.h" /* XXX for pledge(2) init */
 #include <unistd.h> /* XXX for pledge(2) and unveil(2) */
@@ -66,6 +67,7 @@ int main
 	if (pledge(buff, NULL) == -1) error(errfatal, errcodeplatformspecific, "Failed to run pledge(2)!");
 
 	Args cliargs = initargs(argc, argv);
+	cli(&cliargs);
 	Program program = getprogram(12 * 1024 * 1024, &cliargs);
 	/* XXX max program file size defined above */
 

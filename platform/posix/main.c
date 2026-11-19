@@ -2,6 +2,8 @@
 #include "entry.h"
 #include "mem.h"
 #include "limits.h"
+#include "getprogram.h"
+#include "cli.h"
 #include "vm.h"
 #include <stdlib.h> /* XXX for rand(3) */
 
@@ -9,6 +11,7 @@ int main
 (int argc, char **argv)
 {
 	Args cliargs = initargs(argc, argv);
+	cli(&cliargs);
 	Program program = getprogram(12 * 1024 * 1024, &cliargs);
 	/* XXX max program file size defined above */
 
