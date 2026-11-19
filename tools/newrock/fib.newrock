@@ -1,0 +1,27 @@
+include stdlib
+
+fn fib ( n ) n {
+	prev1 = '1'
+	i prev2 = '0'
+
+	while ( "i <= n" ) {
+		if ( "i > 2" ) {
+			curr = "prev1 + prev2"
+			prev2 = prev1
+			prev1 = curr
+			call std.io.print ( curr )
+		} else if ( "i == 1" ) {
+			call std.io.print ( prev2 )
+		} else {
+			call std.io.print ( prev1 )
+		}
+
+		i = "i + 1"
+	}
+}
+
+fn main ( ) ret {
+	code ret = call std.arg.get ( '2' )
+	if ( "code == 1" ) { return }
+	call fib ( ret )
+}

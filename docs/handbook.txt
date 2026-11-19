@@ -879,94 +879,93 @@
 					routine moveAbsolute - Move the cursor
 						wrapper of std.term.cursor.moveAbsolute.
 
-			group task
-				routine spawn - Spawn a Pebble task
-					accepts one argument, being the name of the function to
-					associate with the task. Returns one value, which is a
-					handle to the variable which will be changed from 0 to 1
-					when the task finishes. The handle is the name of the
-					variable.
+		group task
+			routine spawn - Spawn a Pebble task
+				accepts one argument, being the name of the function to
+				associate with the task. Returns one value, which is a
+				handle to the variable which will be changed from 0 to 1
+				when the task finishes. The handle is the name of the
+				variable.
 
-				routine spawn1 - Spawn a Pebble task
-					like std.task.spawn, but accepts one extra argument, being
-					the first argument to pass to the function when calling.
-
+			routine spawn1 - Spawn a Pebble task
+				like std.task.spawn, but accepts one extra argument, being
+				the first argument to pass to the function when calling.
 				routine yield - Yield for a time period
-					accepts one argument, being the time in milliseconds to
-					yield for. Unlike std.misc.sleep, which may or may not use
-					the Yield opcode, this always uses the Yield opcode.
+				accepts one argument, being the time in milliseconds to
+				yield for. Unlike std.misc.sleep, which may or may not use
+				the Yield opcode, this always uses the Yield opcode.
 
-				routine await - Wait on a task
-					accepts one argument, being the data returned by std.task.spawn.
-					Used to wait on a task, returns once the task is completed. May
-					use the Yield opcode for waiting.
+			routine await - Wait on a task
+				accepts one argument, being the data returned by std.task.spawn.
+				Used to wait on a task, returns once the task is completed. May
+				use the Yield opcode for waiting.
 
-			group fs
-				subgroup file
-					routine write - Write to a file
-						wrapper of std.fs.file.write
+		group fs
+			subgroup file
+				routine write - Write to a file
+				wrapper of std.fs.file.write
+				routine read - Read from a file
+				wrapper of std.fs.file.read
 
-					routine read - Read from a file
-						wrapper of std.fs.file.read
-
-				subgroup dir
-					routine get - get the current working dir
-						Wrapper of std.fs.dir.get
-
+			subgroup dir
+				routine get - get the current working dir
+					Wrapper of std.fs.dir.get
 					routine list - list files in a directory
-						Wrapper of std.fs.dir.list
+					Wrapper of std.fs.dir.list
 
-			group arg
-				routine get - Get command-line arguments
-					accepts one argument, being the command-line argument to fetch. Returns
-					two values, the first being 1 if the argument was not given and 0 if
-					so, and the second as the argument given on the command-line. The second
-					may be garbage if the first is 1.
+		group arg
+			routine get - Get command-line arguments
+				accepts one argument, being the command-line argument to fetch. Returns
+				two values, the first being 1 if the argument was not given and 0 if
+				so, and the second as the argument given on the command-line. The second
+				may be garbage if the first is 1.
 
-			group str
-				routine replace - Replace a string
-					accepts three arguments, being the string, the substring
-					to replace in the string, and the substring to replace it
-					with. Returns the new string.
+		group str
+			routine replace - Replace a string
+				accepts three arguments, being the string, the substring
+				to replace in the string, and the substring to replace it
+				with. Returns the new string.
 
-			group array
-				routine init - initialize an array
-					accepts three arguments, being a pointer to an array, the length of
-					the array, and the value to initialize the array to. Sets each entry
-					of the array to the set value until len.
-
+		group array
+			routine init - initialize an array
+				accepts three arguments, being a pointer to an array, the length of
+				the array, and the value to initialize the array to. Sets each entry
+				of the array to the set value until len.
 				routine join - convert an array to a string
-					accepts three arguments, being a pointer to an array, the length of
-					the array, and the character(s) to place into the midpieces. Returns
-					a string of text, being each array value merged together, with the
-					character(s) specified in-between each entry.
+				accepts three arguments, being a pointer to an array, the length of
+				the array, and the character(s) to place into the midpieces. Returns
+				a string of text, being each array value merged together, with the
+				character(s) specified in-between each entry.
 
-				routine split - split a string into an array
-					accepts four arguments, being a pointer to an array, the length of
-					the array, the string to split, and the character(s) to split on.
-					Splits the string by the character and writes the new strings into
-					the array provided. If the array is to small, it stops short. Returns
-					the number of entries written.
+			routine split - split a string into an array
+				accepts four arguments, being a pointer to an array, the length of
+				the array, the string to split, and the character(s) to split on.
+				Splits the string by the character and writes the new strings into
+				the array provided. If the array is to small, it stops short. Returns
+				the number of entries written.
 
-				routine append - append an entry to an array
-					accepts four arguments, being a pointer to the array, the length of
-					the array, a pointer to the array entry counter and the value to
-					append to the array. Will append the value to the array at the counter
-					then decrement the counter through the pointer, in that order.
-
+			routine append - append an entry to an array
+				accepts four arguments, being a pointer to the array, the length of
+				the array, a pointer to the array entry counter and the value to
+				append to the array. Will append the value to the array at the counter
+				then decrement the counter through the pointer, in that order.
 				routine truncate - truncate an entry off of an array
-					accepts three arguments, being a pointer to the array, the length of
-					the array and a pointer to the array counter. Zeros the array entry
-					at the counter and decrements the counter through the pointer, in that
-					order.
+				accepts three arguments, being a pointer to the array, the length of
+				the array and a pointer to the array counter. Zeros the array entry
+				at the counter and decrements the counter through the pointer, in that
+				order.
 
-				routine shift - shift an array
-					accepts five arguments, being a pointer to the array, a pointer to
-					the array length, a pointer to the array entry counter, either the
-					string 'right' to rotate right, or 'left' to rotate left, and the
-					number of positions to rotate. Rotates the array by the specified
-					number of positions in the specified direction and sets entries to
-					zero that are removed. Upates the length and count.
+			routine shift - shift an array
+				accepts five arguments, being a pointer to the array, a pointer to
+				the array length, a pointer to the array entry counter, either the
+				string 'right' to rotate right, or 'left' to rotate left, and the
+				number of positions to rotate. Rotates the array by the specified
+				number of positions in the specified direction and sets entries to
+				zero that are removed. Upates the length and count.
+
+
+
+
 
                     - Command Argument Extension (CAE) -
 
