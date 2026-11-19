@@ -19,7 +19,7 @@ int main
 	unsigned long long seed = rand();
 	Stack *stack = initstack((limits.stack_callStack_cap), &mem);
 
-	int ret = vmmain(cliargs, stack, seed, &mem, &limits);
+	int ret = vmmain(cliargs, stack, seed, &mem, &limits, &program);
 	freestack(stack);
 	return ret;
 }

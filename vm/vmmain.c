@@ -23,7 +23,7 @@
 /* Args and Stack should be defined by the platform entry code
  * which will include this file */
 int vmmain 
-(Args cliargs, Stack *stack, unsigned long long seed, struct Memory *mem, struct Limits *limits)
+(Args cliargs, Stack *stack, unsigned long long seed, struct Memory *mem, struct Limits *limits, Program *fprogram)
 {
 	/* init */
 	struct Arena *tempAlloc = initAlloc(mem->arena_tempAlloc_backing, limits->allocator_temp_maxmem);
@@ -53,8 +53,7 @@ int vmmain
 	ffivars->namesize = limits->instructions_varnamesize;
 
 	cli(&cliargs);
-	Program fprogram = getprogram(limits->misc_maxfilebuffersize, &cliargs);
-	char *filedata = fprogram.data;
+	char *filedata = fprogram->data;
 
 	char *line;
 	unsigned long current_instruction_count = 0;

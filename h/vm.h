@@ -11,6 +11,7 @@
 #include "allocator.h"
 #include "limits.h"
 #include "tasks.h"
+#include "getprogram.h"
 
 /* stuff for vmmain() */
 unsigned long interpret(Instruction *instr, Instruction *program, unsigned long long seed, unsigned long instruction_count, struct Limits *limits, VarMap *vars, FFIvars *ffivars, Stack *stack, FuncMap *funcs, unsigned long pc, Arena *persistAlloc, Arena *scratchAlloc, Arena *tempAlloc, Scheduler *scheduler);
@@ -19,6 +20,6 @@ Instruction makeIR (char *line, struct Limits *limits, Arena *tempAlloc, Arena *
 Instruction *optimizeIR (Instruction *program, unsigned long *instruction_count, Arena *tempAlloc, Arena *persistAlloc);
 
 /* call this to enter the VM code */
-int vmmain (Args cliargs, Stack *stack, unsigned long long seed, struct Memory *mem, struct Limits *limits);
+int vmmain (Args cliargs, Stack *stack, unsigned long long seed, struct Memory *mem, struct Limits *limits, Program *program);
 
 #endif

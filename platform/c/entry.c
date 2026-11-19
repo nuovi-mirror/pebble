@@ -142,7 +142,7 @@ static const struct SizingCosts default_costs = {
 	.temp_slack = 1 * 1024,
 	.persist_fixed = 4 * 1024,
 	.persist_per_task = 24,
-	.persist_data = 6 * 1024,
+	.persist_data = 48 * 1024,
 	.scratch_strings = 24,
 #else
 	.temp_slack = 64 * 1024,
@@ -169,25 +169,17 @@ struct PackedLimits setlimits
 	limits.instructions_max = 2000;
 	limits.tasks_max = 3;
 	limits.tasks_depth = 6;
-
 	limits.instructions_maxcache = 32;
-
 	limits.stack_callStack_cap = 32;
-
 	limits.functions_max = 32;
-
 	limits.variables_max = 128;
 #else
 	limits.instructions_max = 20000;
 	limits.tasks_max = 12;
 	limits.tasks_depth = 32;
-
 	limits.instructions_maxcache = 512;
-
 	limits.stack_callStack_cap = 128;
-
 	limits.functions_max = 1024;
-
 	limits.variables_max = 1024;
 #endif
 
