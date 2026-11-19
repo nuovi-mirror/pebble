@@ -151,7 +151,7 @@ int vmmain
 #if defined(debug) || defined(memlog)
 	char buff[512];
 	unsigned long allocated = lallocTracker / 1024;
-	snprint(buff, 512, "%lu%s\n", allocated, "K allocated");
+	snprint(buff, 512, "%lu%s\n", allocated, "K allocated from lalloc");
 	print(buff);
 #endif
 
