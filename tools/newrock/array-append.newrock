@@ -1,0 +1,29 @@
+include stdlib
+
+fn main ( ) ret {
+	ret init arrcount = '0'
+
+	arr[0] = '0'
+	arrlen = '12'  / size
+	data = 'lalalala'
+	data2 = 'falalala'
+
+	call std.array.init ( <arr> arrlen init )
+	call std.array.append ( <arr> arrlen <arrcount> data )
+	call std.array.append ( <arr> arrlen <arrcount> data2 )
+
+	call std.io.print ( arr[0] )
+	call std.io.print ( arr[1] )
+	call std.io.print ( arr[2] )
+
+	call std.io.print ( arrcount )
+
+	call std.array.truncate ( <arr> arrlen <arrcount> )
+	call std.array.truncate ( <arr> arrlen <arrcount> )
+
+	call std.io.print ( arr[0] )
+	call std.io.print ( arr[1] )
+	call std.io.print ( arr[2] )
+
+	call std.io.print ( arrcount )
+}

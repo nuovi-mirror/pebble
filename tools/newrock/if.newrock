@@ -1,0 +1,13 @@
+include stdlib
+
+fn main ( ) ret {
+	ret = '0'
+
+	if ( "ret > 1" ) {
+		call std.io.print ( '0' ) 
+	} else if ( "ret < 0" ) {
+		call std.io.print ( '1' )
+	} else {
+		call std.io.print ( '2' )
+	}
+}

@@ -72,7 +72,7 @@ flt numflt
 }
 
 int valuetostr 
-(char *buff, word buffsize, Value v, struct Limits *limits)
+(char *buff, unsigned long buffsize, Value v, struct Limits *limits)
 {
 	if (buffsize > limits->misc_strlen) error(errfatal, errcodelimitreached, "String is too sword!");
 

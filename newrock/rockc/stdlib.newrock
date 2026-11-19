@@ -207,4 +207,57 @@ fn std.array.split ( arrptr len str char ) i {
 	}
 }
 
+fn std.array.append ( arrptr len arrcountptr value ) countc {
+/ <arrptr> 'len' <arrcountptr> 'value'
+	countc = [arrcountptr]
+	[arrptr][countc] = value
+	[arrcountptr] = "countc + 1"
+}
+
+fn std.array.truncate ( arrptr len arrcountptr ) countc {
+/ <arrptr> 'len' <arrcountptr>
+	countc = [arrcountptr]
+	new = "countc - 1"
+	[arrptr][new] = '0'
+	[arrcountptr] = new
+}
+
+fn std.array.shift ( arrptr lenptr arrcountptr direction count ) count {
+/ <arrptr> [lenptr] [arrcountptr] 'drection [left/right]' count
+	clen = [lenptr]
+	carrcount = [arrcountptr]
+	if ( "direction ?= right" ) {
+		i = [lenptr]
+		while ( "i > 0" ) {
+			src = "i - 1"
+			dst = "src + count"
+			[arrptr][dst] = [arrptr][src]
+			i = "i - 1"
+		}
+
+		i = '0'
+		while ( "i < count" ) {
+			[arrptr][i] = '0'
+			i = "i + 1"
+		}
+
+		[lenptr] = "clen + count"
+		[arrcountptr] = "carrcount + count"
+	} else if ( "direction ?= left" ) {
+		i = count
+		while ( "i < clen" ) {
+			dst = "i - count"
+			[arrptr][dst] = [arrptr][i]
+			i = "i + 1"
+		}
+
+		i = "clen - count"
+		while ( "i < clen" ) {
+			[arrptr][i] = '0'
+			i = "i + 1"
+		}
+
+		[arrcountptr] = "carrcount - count"
+	}
+}
 . # end of New Rock Standard Library (stdlib)

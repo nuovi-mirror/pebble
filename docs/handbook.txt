@@ -948,6 +948,25 @@
 					the array provided. If the array is to small, it stops short. Returns
 					the number of entries written.
 
+				routine append - append an entry to an array
+					accepts four arguments, being a pointer to the array, the length of
+					the array, a pointer to the array entry counter and the value to
+					append to the array. Will append the value to the array at the counter
+					then decrement the counter through the pointer, in that order.
+
+				routine truncate - truncate an entry off of an array
+					accepts three arguments, being a pointer to the array, the length of
+					the array and a pointer to the array counter. Zeros the array entry
+					at the counter and decrements the counter through the pointer, in that
+					order.
+
+				routine shift - shift an array
+					accepts five arguments, being a pointer to the array, a pointer to
+					the array length, a pointer to the array entry counter, either the
+					string 'right' to rotate right, or 'left' to rotate left, and the
+					number of positions to rotate. Rotates the array by the specified
+					number of positions in the specified direction and sets entries to
+					zero that are removed. Upates the length and count.
 
                     - Command Argument Extension (CAE) -
 

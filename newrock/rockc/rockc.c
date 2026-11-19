@@ -768,7 +768,7 @@ void compile_if
 	}
 
 	char dispatch_fns[MAX_IF_BRANCHES][MAX_NAME];
-	for (int i = 0; i < nbranches; i++) snprintf(dispatch_fns[i], sizeof(dispatch_fns[i]), "__RockDispatch_%u", next_control_id++);
+	for (int i = 0; i < nbranches; i++) snprintf(dispatch_fns[i], sizeof(dispatch_fns[i]), "_D%u", next_control_id++);
 
 	for (int i = 0; i < nbranches; i++)
 	{
