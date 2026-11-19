@@ -211,6 +211,19 @@ void outs
 	obuf[olen] = '\0';
 }
 
+unsigned long eliminate_dead_functions
+(void)
+{
+	unsigned long removed = 0;
+
+	if (obuf == NULL || olen == 0) return 0;
+
+	olen = dce_functions(obuf, olen, &removed);
+	obuf[olen] = '\0';
+
+	return removed;
+}
+
 int flush_output
 (void)
 {

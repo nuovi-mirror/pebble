@@ -1215,7 +1215,7 @@ static void emit_save_helpers
 	outf("New {_PN} _SP\n");
 	outf("End\n");
 
-	outf("Func _Rst_%s\n", fn);
+	outf("Func _Rs_%s\n", fn);
 	outf("New _K '_SPP s++ _T'\n");
 	outf("New _PN {_K}\n");
 	outf("New _SP [_PN]\n");
@@ -1468,7 +1468,11 @@ int main
 		return 1;
 	}
 
-	if (has_main) outf("Call main\n");
+	if (has_main)
+	{
+		outf("Call main\n");
+		if (getenv("ROCKC_NO_DCE") == NULL) eliminate_dead_functions();
+	}
 
 	if (flush_output() != 0)
 	{

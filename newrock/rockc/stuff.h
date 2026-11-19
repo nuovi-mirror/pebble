@@ -66,6 +66,8 @@ Loc loc_at (long at);
 void outf (const char *fmt, ...);
 void outs (const char *s);
 int flush_output (void);
+unsigned long dce_functions (char *buf, unsigned long slen, unsigned long *removed);
+unsigned long eliminate_dead_functions (void);
 int peekch (void);
 void emitf (const char *fmt, ...);
 Helper *new_helper (const char *name);
