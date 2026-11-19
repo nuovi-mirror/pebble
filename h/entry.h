@@ -2,6 +2,7 @@
 #define h_entry_
 
 #include "limits.h"
+#include "getprogram.h"
 #include "mem.h"
 
 struct PackedLimits {
@@ -10,6 +11,6 @@ struct PackedLimits {
 };
 
 unsigned long long getrandom (void);
-struct PackedLimits setlimits (void);
+struct PackedLimits setlimits (Program *program);
 
 #endif

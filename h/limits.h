@@ -11,6 +11,7 @@ struct Limits {
 
 	/* instruction-related */
 	unsigned long instructions_max; /* max number of instructions that can be executed */
+	unsigned long instructions_count; /* instruction count in the program being ran */
 	unsigned long instructions_maxbuffersize; /* max size for the instruction buffer */
 	unsigned long instructions_initbuffersize; /* inital buffer size for instruction buffer */
 	unsigned long instructions_maxcache; /* max number of instructions in the instruction cache */

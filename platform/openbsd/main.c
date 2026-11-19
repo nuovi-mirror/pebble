@@ -65,15 +65,17 @@ int main
 
 	if (pledge(buff, NULL) == -1) error(errfatal, errcodeplatformspecific, "Failed to run pledge(2)!");
 
-	struct PackedLimits packed = setlimits();
+	Args cliargs = initargs(argc, argv);
+	Program program = getprogram(12 * 1024 * 1024, &cliargs);
+	/* XXX max program file size defined above */
+
+	struct PackedLimits packed = setlimits(&program);
 	struct Limits limits = packed.limits;
 	struct Memory mem = packed.memory;
 
-	/* XXX replaced rand(3) with arc4random(3) */
 	unsigned long long seed;
 	arc4random_buf(&seed, sizeof(seed));
 
-	Args cliargs = initargs(argc, argv);
 	Stack *stack = initstack((limits.stack_callStack_cap), &mem);
 
 	int ret = vmmain(cliargs, stack, seed, &mem, &limits);

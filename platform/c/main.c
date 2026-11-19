@@ -7,13 +7,15 @@
 int main 
 (int argc, char **argv)
 {
-	struct PackedLimits packed = setlimits();
+	Args cliargs = initargs(argc, argv);
+	Program program = getprogram(12 * 1024 * 1024, &cliargs);
+	/* XXX max program file size defined above */
+
+	struct PackedLimits packed = setlimits(&program);
 	struct Limits limits = packed.limits;
 	struct Memory mem = packed.memory;
 
 	unsigned long long seed = getrandom();
-
-	Args cliargs = initargs(argc, argv);
 	Stack *stack = initstack((limits.stack_callStack_cap), &mem);
 
 	int ret = vmmain(cliargs, stack, seed, &mem, &limits);

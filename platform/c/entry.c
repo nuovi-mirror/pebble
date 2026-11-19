@@ -139,10 +139,10 @@ struct SizingCosts {
 
 static const struct SizingCosts default_costs = {
 #ifdef build_small
-	.temp_slack = 2 * 1024,
+	.temp_slack = 1 * 1024,
 	.persist_fixed = 4 * 1024,
 	.persist_per_task = 24,
-	.persist_data = 24 * 1024,
+	.persist_data = 6 * 1024,
 	.scratch_strings = 24,
 #else
 	.temp_slack = 64 * 1024,
@@ -158,7 +158,7 @@ static const struct SizingCosts default_costs = {
 };
 
 struct PackedLimits setlimits
-(void)
+(Program *program)
 {
 	struct Limits limits = {0};
 	struct Memory mem = {0};
@@ -172,11 +172,11 @@ struct PackedLimits setlimits
 
 	limits.instructions_maxcache = 32;
 
-	limits.stack_callStack_cap = 12;
+	limits.stack_callStack_cap = 32;
 
-	limits.functions_max = 128;
+	limits.functions_max = 32;
 
-	limits.variables_max = 256;
+	limits.variables_max = 128;
 #else
 	limits.instructions_max = 20000;
 	limits.tasks_max = 12;
@@ -191,7 +191,10 @@ struct PackedLimits setlimits
 	limits.variables_max = 1024;
 #endif
 
-	limits.instructions_maxbuffersize = (limits.instructions_max * sizeof(Instruction));
+	limits.instructions_count = program->instructions;
+	if (limits.instructions_count > limits.instructions_max) error(errfatal, errcodelimitreached, "Program is too large!");
+
+	limits.instructions_maxbuffersize = (limits.instructions_count * sizeof(Instruction));
 	limits.instructions_initbuffersize = (512 * sizeof(Instruction));
 	limits.instructions_varnamesize = 48;
 
@@ -207,7 +210,7 @@ struct PackedLimits setlimits
 
 	limits.time_max = 0; /* infinite */
 
-	limits.misc_maxfilebuffersize = (limits.instructions_max * costs->bytes_per_line);
+	limits.misc_maxfilebuffersize = (limits.instructions_count * costs->bytes_per_line);
 	limits.misc_vmargmaxdigits = 2;
 	limits.misc_strlen = limits.cmd_args * limits.cmd_chars;
 	limits.misc_dirlist_maxsize = limits.misc_strlen * 12;
@@ -221,10 +224,10 @@ struct PackedLimits setlimits
 	limits.expr_maxdepth = 32;
 	limits.expr_currdepth = 0;
 
-	limits.allocator_temp_maxmem = (limits.instructions_max * costs->temp_per_instruction + costs->temp_slack);
+	limits.allocator_temp_maxmem = (limits.instructions_count * costs->temp_per_instruction + costs->temp_slack);
 
 	limits.allocator_persist_maxmem = (costs->persist_fixed 
-		+ (limits.instructions_max * costs->persist_per_instruction)
+		+ (limits.instructions_count * costs->persist_per_instruction)
 		+ (limits.instructions_maxcache * costs->persist_per_cached)
 		+ (limits.tasks_max * ((limits.tasks_depth * sizeof(StackFrame)) + costs->persist_per_task))
 		+ costs->persist_data);

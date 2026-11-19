@@ -18,9 +18,13 @@ Program getprogram
 
 	if (filedata == NULL) error(errfatal, errcodeplatformspecific, "Cannot open specified bytecode file!");
 
+	unsigned long instructions = 0;
+	for (unsigned long i = 0; i < filesize; i++) instructions += (filedata[i] == '\n');
+
 	Program program;
 	program.data = file;
 	program.size = filesize;
+	program.instructions = instructions;
 
 	return program;
 }
