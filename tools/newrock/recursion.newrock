@@ -1,0 +1,66 @@
+include stdlib
+
+/ recursion needs the compiler to save and restore each call's locals.
+/ expected output: 3628800 610 1 0 6
+
+fn fact ( n ) r {
+	r = '1'
+	if ( "n > 1" ) {
+		m = "n - 1"
+		t = call fact ( m )
+		r = "n * t"
+	}
+}
+
+fn fib ( n ) r {
+	r = n
+	if ( "n > 1" ) {
+		a = "n - 1"
+		b = "n - 2"
+		x = call fib ( a )
+		y = call fib ( b )
+		r = "x + y"
+	}
+}
+
+fn even ( n ) r {
+	r = '0'
+	if ( "n == 0" ) { r = '1' } else { m = "n - 1"  r = call odd ( m ) }
+}
+
+fn odd ( n ) r {
+	r = '0'
+	if ( "n == 0" ) { r = '0' } else { m = "n - 1"  r = call even ( m ) }
+}
+
+/ writes through a pointer handed down the call chain
+fn count ( n p ) r {
+	r = '0'
+	if ( "n > 0" ) {
+		v = [p]
+		[p] = "v + 1"
+		m = "n - 1"
+		t = call count ( m p )
+	}
+}
+
+fn main ( ) ret {
+	ret = '0'
+
+	v = call fact ( '10' )
+	call std.io.print ( v )
+
+	v = call fib ( '15' )
+	call std.io.print ( v )
+
+	v = call even ( '10' )
+	call std.io.print ( v )
+
+	v = call even ( '7' )
+	call std.io.print ( v )
+
+	c = '0'
+	cp = <c>
+	v = call count ( '6' cp )
+	call std.io.print ( c )
+}

@@ -1,0 +1,37 @@
+include stdlib
+
+/ two tasks recurse at once, yielding in the middle so they interleave.
+/ each task needs its own saved locals.
+/ expected output: 120 and 5040 (in either order), then done
+
+fn fact ( n ) r {
+	r = '1'
+	if ( "n > 1" ) {
+		call std.task.yield ( '1' )
+		m = "n - 1"
+		t = call fact ( m )
+		call std.task.yield ( '1' )
+		r = "n * t"
+	}
+}
+
+fn small ( ) r {
+	r = '0'
+	v = call fact ( '5' )
+	call std.io.print ( v )
+}
+
+fn big ( ) r {
+	r = '0'
+	v = call fact ( '7' )
+	call std.io.print ( v )
+}
+
+fn main ( ) ret {
+	ret = '0'
+	h1 = call std.task.spawn ( 'small' )
+	h2 = call std.task.spawn ( 'big' )
+	call std.task.await ( h1 )
+	call std.task.await ( h2 )
+	call std.io.print ( 'done' )
+}

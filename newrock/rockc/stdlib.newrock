@@ -77,7 +77,7 @@ fn std.term.cursor.moveAbsolute ( x y ) ret {
 / tasks
 
 . New _std.task.count '0'
-. New _std.task.slot '_awt_ s++ _T'
+. New _std.task.slot '_awt_ s++ __task'
 
 fn std.task.spawn ( name ) handle {
 . New _std.task.count "_std.task.count + 1"
@@ -103,12 +103,12 @@ fn std.task.done ( handle ) done {
 . New _fstd.task.done_done [_fstd.task.done_handle]
 }
 
-. Func __std.task.await_loop
+. Func _std.task.await_loop
 . Yield 30
-. New __std.task.n {_std.task.slot}
-. New __std.task.v [_std.task.n]
-. New __std.task.w [_std.task.v]
-. If __std.task.await_loop <_std.task.w>
+. New _std.task.n {_std.task.slot}
+. New _std.task.v [_std.task.n]
+. New _std.task.w [_std.task.v]
+. If _std.task.await_loop <_std.task.w>
 . End
 
 fn std.task.await ( handle ) ret {

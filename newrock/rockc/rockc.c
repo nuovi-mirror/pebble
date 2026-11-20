@@ -1203,12 +1203,12 @@ static void emit_save_helpers
 	for (int i = 0; i < nv; i++) outf("New %s '0'\n", vars[i]);
 
 	outf("Func _Sv_%s\n", fn);
-	outf("New _K '_SPP s++ _T'\n");
+	outf("New _K '_SPP s++ __task'\n");
 	outf("New _PN {_K}\n");
 	outf("New _SP [_PN]\n");
 	for (int i = 0; i < nv; i++)
 	{
-		outf("New _T '_StkP s++ _T s++ _US s++ _SP'\n");
+		outf("New _T '_StkP s++ __task s++ _US s++ _SP'\n");
 		outf("New {_T} %s\n", vars[i]);
 		outf("New _SP \"_SP + 1\"\n");
 	}
@@ -1216,13 +1216,13 @@ static void emit_save_helpers
 	outf("End\n");
 
 	outf("Func _Rs_%s\n", fn);
-	outf("New _K '_SPP s++ _T'\n");
+	outf("New _K '_SPP s++ __task'\n");
 	outf("New _PN {_K}\n");
 	outf("New _SP [_PN]\n");
 	for (int i = nv - 1; i >= 0; i--)
 	{
 		outf("New _SP \"_SP - 1\"\n");
-		outf("New _T '_StkP s++ _T s++ _US s++ _SP'\n");
+		outf("New _T '_StkP s++ __task s++ _US s++ _SP'\n");
 		outf("New _N {_T}\n");
 		outf("New %s [_N]\n", vars[i]);
 	}
